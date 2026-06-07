@@ -562,7 +562,7 @@ setInterval(() => {
   for (const [key, attempts] of ADMIN_FAILED) { if (now - attempts.firstAttempt > ADMIN_LOCK_DURATION_MS) ADMIN_FAILED.delete(key); }
 }, 60000);
 
-module.exports = async (req, res) => {
+ export default async function handler(req, res) {
   const requestId = crypto.randomBytes(8).toString('hex');
   req.requestId = requestId;
   const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://aliverbiopharm.com').split(',').map(o => o.trim());
