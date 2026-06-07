@@ -606,7 +606,7 @@ setInterval(() => {
   if (req.method === 'GET') return await handleGet(req, res);
   if (req.method === 'POST') return await handlePost(req, res);
   return res.status(405).json({ error: 'Method not allowed' });
-};
+}
 
 async function handleGet(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
