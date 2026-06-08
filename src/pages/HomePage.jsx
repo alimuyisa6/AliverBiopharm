@@ -70,20 +70,23 @@ function HomePage() {
     const yearEl = document.getElementById('current-year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
     // Theme toggle icon sync
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-      const updateIcon = () => {
-        const icon = themeToggle.querySelector('i');
-        if (icon) icon.className = `fa-solid ${document.body.classList.contains('dark-mode') ? 'fa-sun' : 'fa-moon'}`;
-      };
-      const observer = new MutationObserver(updateIcon);
-      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-      updateIcon();
-       return () => {
-  window.removeEventListener('scroll', onScroll);
-  observer?.disconnect();
-};
-    }
+const themeToggle = document.getElementById('theme-toggle');
+let observer;
+
+if (themeToggle) {
+  const updateIcon = () => {
+    const icon = themeToggle.querySelector('i');
+    if (icon) icon.className = `fa-solid ${document.body.classList.contains('dark-mode') ? 'fa-sun' : 'fa-moon'}`;
+  };
+
+  observer = new MutationObserver(updateIcon);
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['class']
+  });
+
+  updateIcon();
+}
 
     // Back-to-top
     const backToTop = document.getElementById('back-to-top');
@@ -256,11 +259,12 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     });
 
     // Carousel initial placeholder (if no dynamic data)
-    initCarousel(1);
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-    };
+initCarousel(1);
+   
+   return () => {
+  window.removeEventListener('scroll', onScroll);
+  observer?.disconnect();
+};
    }, []);
 
   // ========== GLOBAL UI HELPERS ==========
