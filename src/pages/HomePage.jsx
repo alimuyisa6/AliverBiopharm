@@ -67,8 +67,8 @@ function HomePage() {
 
   // ========== INITIALIZATION ==========
   useEffect(() => {
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-
+    const yearEl = document.getElementById('current-year');
+if (yearEl) yearEl.textContent = new Date().getFullYear();
     // Theme toggle icon sync
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
