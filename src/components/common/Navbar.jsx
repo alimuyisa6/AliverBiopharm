@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import useTheme from '../../hooks/useTheme';
@@ -34,11 +34,29 @@ function Navbar() {
       <header className="site-header" id="site-header">
         <div className="header-container">
           <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
-            {logoUrl ? (
-              <img src={logoUrl} fetchPriority="high" loading="eager" style={{ height: '70px', width: 'auto', maxWidth: '260px', objectFit: 'contain', display: 'block', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.15))' }} alt="AliverBiopharm" />
-            ) : (
-              <span className="font-display font-bold" style={{ fontSize: '1.25rem', color: 'var(--clr-white)' }}>AliverBiopharm</span>
-            )}
+            <div style={{ height: '60px', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  fetchPriority="high"
+                  loading="eager"
+                  style={{
+                    height: 'auto',
+                    maxHeight: '100px',
+                    width: 'auto',
+                    maxWidth: '260px',
+                    objectFit: 'contain',
+                    display: 'block',
+                    margin: '0',
+                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.15))',
+                  }}
+                  alt="AliverBiopharm"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              ) : (
+                <span className="font-display font-bold" style={{ fontSize: '1.25rem', color: 'var(--clr-white)' }}>AliverBiopharm</span>
+              )}
+            </div>
           </Link>
           <nav aria-label="Main navigation">
             <ul className="main-nav" id="main-nav">
