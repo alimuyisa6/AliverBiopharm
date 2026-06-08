@@ -259,7 +259,7 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     return () => {
       window.removeEventListener('scroll', onScroll);
     };
-  }, [isAuthenticated]);
+   }, []);
 
   // ========== GLOBAL UI HELPERS ==========
   window.closeResourceModal = closeResourceModal;
