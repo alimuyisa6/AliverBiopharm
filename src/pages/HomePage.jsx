@@ -200,7 +200,7 @@ function HomePage() {
     }
 
     // Load dynamic sections
-    //loadAllSections();
+    loadAllSections();
     lazyLoad('#resources', () => { loadFilters(); buildResources(); });
     lazyLoad('#flashcards', () => { loadFlashcards(); });
     lazyLoad('#pdf-library', () => { if (document.getElementById('pdf-main-container')) initPdfLibrary(); });
