@@ -47,5 +47,12 @@
 <body>
 <div id="root"></div>
  <script type="module" src="./src/main.jsx"></script>
+<script>
+setTimeout(() => {
+  const el = document.elementFromPoint(window.innerWidth/2, window.innerHeight/2);
+  console.log('Culprit at center:', el?.tagName, el?.className, el?.id);
+  if (el) el.style.outline = '5px solid red';
+}, 2000);
+</script>
 </body>
 </html>
