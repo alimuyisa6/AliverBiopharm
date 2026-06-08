@@ -213,7 +213,9 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     }
 
     // Load dynamic sections
-    loadAllSections();
+    setTimeout(() => {
+  loadAllSections();
+}, 500);
     lazyLoad('#resources', () => { loadFilters(); buildResources(); });
     lazyLoad('#flashcards', () => { loadFlashcards(); });
     lazyLoad('#pdf-library', () => { if (document.getElementById('pdf-main-container')) initPdfLibrary(); });
