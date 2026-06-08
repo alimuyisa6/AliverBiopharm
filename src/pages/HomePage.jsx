@@ -79,7 +79,10 @@ function HomePage() {
       const observer = new MutationObserver(updateIcon);
       observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
       updateIcon();
-      return () => observer.disconnect();
+       return () => {
+  window.removeEventListener('scroll', onScroll);
+  observer?.disconnect();
+};
     }
 
     // Back-to-top
