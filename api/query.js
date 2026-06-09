@@ -1912,7 +1912,23 @@ async function handlePost(req, res) {
         result = { block_number: bn, questions: (data || []).sort(() => Math.random() - 0.5), total_in_block: (data || []).length };
         break;
       }
-      case 'check_pdf_restriction': {
+      
+case 'get_pdfs_by_level': {
+  const pdfLevel = req.body.level;
+  if (!pdfLevel) return res.status(400).json({ error: 'Level required' });
+  const { data, error } = await supabase
+    .from('pdf_resources')
+    .select('id, title, author, level, topic, subtopic, file_url, file_size, download_count, preview_count')
+    .eq('level', pdfLevel)
+    .eq('is_active', true)
+    .order('topic', { ascending: true })
+    .order('title', { ascending: true });
+  if (error) throw error;
+  result = { pdfs: data || [] };
+  break;
+}
+      
+     case 'check_pdf_restriction': {
         const pdfId = req.body.pdf_id;
         const restrictionType = req.body.restriction_type;
         if (!pdfId || !restrictionType) {
