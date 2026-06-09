@@ -6,7 +6,12 @@ export default function PrivacyPolicy() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api?action=get_all_site_sections', { credentials: 'include' })
+    fetch('/api/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_all_site_sections' }),
+      credentials: 'include'
+    })
       .then(res => res.json())
       .then(json => {
         setData(json.data?.privacy);
