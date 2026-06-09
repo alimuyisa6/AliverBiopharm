@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
+import OLevelBiology from './pages/OLevelBiology';
 
 function App() {
   return (
@@ -12,6 +13,8 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/index.html" element={<Navigate to="/" replace />} />
+            <Route path="/notes/olevel" element={<OLevelBiology />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </AuthProvider>
