@@ -1230,9 +1230,9 @@ function HomePage() {
         <h3 style="font-family:'Poppins',sans-serif; font-size:1.3rem; font-weight:700; margin:12px 0 8px; color:var(--clr-white);">${esc(sub.name)}</h3>
         <p class="subtopic-preview" style="color:var(--clr-text-dim); font-size:0.85rem; line-height:1.6; margin-bottom:20px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;"></p>
         <div class="note-meta" style="display:flex; gap:16px; margin-bottom:20px; padding-top:12px; border-top:1px solid var(--clr-border-glow); font-size:0.75rem; color:var(--clr-text-muted);"><span><i class="fa-regular fa-clock"></i> 5-10 min read</span><span><i class="fa-regular fa-file-lines"></i> Comprehensive notes</span></div>
-        <button class="read-note-btn" data-level="${level}" data-subtopic-id="${sub.id}" data-subtopic-name="${esc(sub.name)}" style="width:100%; background:transparent; border:2px solid var(--clr-cyan); color:var(--clr-cyan); padding:12px 20px; border-radius:50px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <i class="fa-solid fa-book-open-reader"></i> Read Full Note
-        </button>
+      <button class="read-note-btn" onclick="window.location.href='/notes/${level === 'O-Level' ? 'olevel' : level === 'A-Level' ? 'alevel' : 'pharmacy'}?subtopic=${sub.id}&title=${encodeURIComponent(sub.name)}'" style="width:100%; background:transparent; border:2px solid var(--clr-cyan); color:var(--clr-cyan); padding:12px 20px; border-radius:50px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+  <i class="fa-solid fa-book-open-reader"></i> Read Full Note
+</button>
       </div>`;
     });
     html += '</div>';
