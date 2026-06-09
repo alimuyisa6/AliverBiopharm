@@ -1,7 +1,6 @@
  import React from 'react';
 import '../../pages/legal/legal.css';
 
-// Helper to turn email addresses in text into clickable mailto links
 function linkifyEmail(text) {
   const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
   const parts = text.split(emailRegex);
@@ -11,8 +10,6 @@ function linkifyEmail(text) {
 }
 
 export default function LegalLayout({ title, lastUpdated, children }) {
-  const currentYear = new Date().getFullYear();
-  
   return (
     <div className="legal-page">
       <h1>{title}</h1>
@@ -34,10 +31,6 @@ export default function LegalLayout({ title, lastUpdated, children }) {
           }
           return child;
         })}
-      </div>
-      <div className="footer-copyright">
-        © {currentYear} AliverBiopharm. All rights reserved.<br />
-        Registered in Uganda
       </div>
     </div>
   );
