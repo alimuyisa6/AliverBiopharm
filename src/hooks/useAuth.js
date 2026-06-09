@@ -1,9 +1,4 @@
-import { useAuthContext } from '../context/AuthContext';
-
-/**
- * Unified authentication hook
- * Returns consistent authentication state across the entire app
- */
+ import { useAuthContext } from '../context/AuthContext';
 export default function useAuth() {
   const authContext = useAuthContext();
   
