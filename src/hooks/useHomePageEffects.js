@@ -1526,6 +1526,25 @@ export function useHomePageEffects(siteData, isAuthenticated) {
       loadContinueLearning();
     });
 
+    useEffect(() => {
+  if (!siteData?.weekly_challenge) return;
+  
+  const refreshAuthSections = async () => {
+    const container = document.getElementById('daily-fact');
+    if (container) {
+      const weeklyChallenge = siteData.weekly_challenge;
+      if (weeklyChallenge.question) {
+        await initQuizCard(weeklyChallenge);
+      }
+    }
+    
+    if (isAuthenticated) {
+      await loadContinueLearning();
+    }
+  };
+  
+  refreshAuthSections();
+}, [isAuthenticated, siteData]);
     return () => {
       window.removeEventListener('scroll', onScroll);
       observer?.disconnect();
