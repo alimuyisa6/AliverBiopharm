@@ -3672,7 +3672,7 @@ body.dark-mode .pdf-section-subtitle {
 
 }
 
-/*.o-level-page { */
+/*.o-level-page { 
   --clr-deep-space: #eef7f7;
   --clr-cyan: #0a7e7e;
   --clr-magenta: #b8873a;
@@ -4237,4 +4237,4 @@ body.dark-mode .pdf-section-subtitle {
     grid-template-columns: 1fr;
     gap: 30px;
   }
-}
+}*/
