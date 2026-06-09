@@ -1,16 +1,17 @@
-import React from 'react';
+ import React from 'react';
+import '../../pages/legal/legal.css';
 
 export default function LegalLayout({ title, lastUpdated, children }) {
+  const currentYear = new Date().getFullYear();
+  
   return (
-    <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
-      <h1 style={{ fontSize: 'var(--text-h2)', marginBottom: '0.5rem', fontFamily: 'var(--font-display)' }}>
-        {title}
-      </h1>
-      <p style={{ color: 'var(--clr-text-dim)', marginBottom: '2.5rem', fontSize: 'var(--text-sm)' }}>
-        Last updated: {lastUpdated}
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {children}
+    <div className="legal-page">
+      <h1>{title}</h1>
+      <div className="last-updated">Last updated: {lastUpdated}</div>
+      <div>{children}</div>
+      <div className="footer-copyright">
+        © {currentYear} AliverBiopharm. All rights reserved.<br />
+        Registered in Uganda
       </div>
     </div>
   );
