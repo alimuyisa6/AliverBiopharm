@@ -1023,14 +1023,14 @@ let adminData = null;
   }
   
   const session = await createUserSession(data.user.id, data.user.email, ip, req.headers['user-agent']);
-  const cookieValue = `session=${session.access_token}; HttpOnly; Secure; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}; Path=/`;
+  const cookieValue = `session=${session.access_token}; HttpOnly; Secure; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}; Path=/`;
   res.setHeader('Set-Cookie', cookieValue);
   result = { user: { id: data.user.id, email: data.user.email } };
   break;
 }
       case 'signout': {
         if (token) { const ht = hashToken(token); await supabase.from('user_sessions').update({ is_active: false }).eq('session_token_hash', ht); }
-        res.setHeader('Set-Cookie', 'session=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/');
+        res.setHeader('Set-Cookie', 'session=; HttpOnly; Secure; SameSite=Lax; Max-Age=0; Path=/');
         result={success:true};
         break;
       }
