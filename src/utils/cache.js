@@ -1,1 +1,0 @@
-const c=new Map();export function getCached(k){const i=c.get(k);if(!i)return null;if(Date.now()>i.expiresAt){c.delete(k);return null}return i.data}export function setCached(k,d,t=36e5){c.set(k,{data:d,expiresAt:Date.now()+t})}
