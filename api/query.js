@@ -714,11 +714,16 @@ async function handlePost(req, res) {
   if (!action || !ACTION_WHITELIST.has(action)) return res.status(400).json({ error: 'Invalid action' });
   const validator = VALIDATORS[action];
   if (validator) { const ve = validator(req.body); if (ve) return res.status(400).json({error:ve}); }
-  const cookies = parseCookies(req);
-  const token = cookies.session || '';
-  let userId = null;
-  let userEmail = null;
-  let adminData = null;
+   const cookies = parseCookies(req);
+const token = cookies.session || '';
+
+console.log('Cookie header:', req.headers.cookie);
+console.log('Parsed cookies:', cookies);
+console.log('Session token:', token);
+
+let userId = null;
+let userEmail = null;
+let adminData = null;
   if (token) {
     try {
       const session = await refreshSessionIfNeeded(token);
