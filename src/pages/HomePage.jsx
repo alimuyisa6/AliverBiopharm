@@ -58,7 +58,8 @@ function renderFilteredResources() {
   renderResourcesHTML(container, groups);
 }
 
-function renderResourcesHTML(container, groups) {
+ 
+ function renderResourcesHTML(container, groups) {
   container.innerHTML = Object.entries(groups).map(([name, items]) => {
     return `<div style="margin-bottom:3rem;">
       <h2 style="font-family:'Poppins',sans-serif;font-size:1.6rem;color:var(--clr-cyan);margin-bottom:1.25rem;padding-left:1rem;border-left:4px solid var(--clr-magenta);">${esc(name)}</h2>
