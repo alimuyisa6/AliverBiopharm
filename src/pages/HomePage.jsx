@@ -59,35 +59,36 @@ function renderFilteredResources() {
 }
 
  
- function renderResourcesHTML(container, groups) {
-  container.innerHTML = Object.entries(groups).map(([name, items]) => {
-    return `<div style="margin-bottom:3rem;">
+  function renderResourcesHTML(container, groups) {
+  let html = '';
+  for (const [name, items] of Object.entries(groups)) {
+    html += `<div style="margin-bottom:3rem;">
       <h2 style="font-family:'Poppins',sans-serif;font-size:1.6rem;color:var(--clr-cyan);margin-bottom:1.25rem;padding-left:1rem;border-left:4px solid var(--clr-magenta);">${esc(name)}</h2>
-      <div class="resources-grid">
-        ${items.map(item => {
-          const fileIcon = (item.file_url || '').toLowerCase().endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file';
-          return `<div class="resource-card" data-id="${item.id}">
-            <div style="font-size:2.2rem;color:var(--clr-magenta);"><i class="fa-solid ${fileIcon}"></i></div>
-            <a href="#" class="resource-title-link" style="font-weight:700;font-size:1.05rem;color:var(--clr-white);text-decoration:none;">${esc(item.title || 'Untitled')}</a>
-            <p style="font-size:0.9rem;color:var(--clr-text-dim);flex-grow:1;">${esc(item.description || '')}</p>
-            <div style="display:flex;flex-wrap:wrap;gap:0.6rem;font-size:0.8rem;color:var(--clr-text-muted);">
-              <span><i class="fa-regular fa-user"></i> ${esc(item.author || 'Unknown')}</span>
-              <span><i class="fa-regular fa-calendar"></i> ${new Date(item.created_at).toLocaleDateString()}</span>
-              <span><i class="fa-regular fa-file"></i> ${esc(item.file_size || 'N/A')}</span>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding-top:1rem;border-top:1px solid var(--clr-border-glow);">
-              <a href="${esc(item.file_url || '#')}" class="btn-download" download target="_blank" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
-              <div style="display:flex;gap:0.4rem;">
-                <a href="#" class="share-btn" aria-label="Share on Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#" class="share-btn" aria-label="Share on X"><i class="fa-brands fa-x-twitter"></i></a>
-                <a href="#" class="share-btn" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-              </div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }).join('');
+      <div class="resources-grid">`;
+    for (const item of items) {
+      const fileIcon = (item.file_url || '').toLowerCase().endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file';
+      html += `<div class="resource-card" data-id="${item.id}">
+        <div style="font-size:2.2rem;color:var(--clr-magenta);"><i class="fa-solid ${fileIcon}"></i></div>
+        <a href="#" class="resource-title-link" style="font-weight:700;font-size:1.05rem;color:var(--clr-white);text-decoration:none;">${esc(item.title || 'Untitled')}</a>
+        <p style="font-size:0.9rem;color:var(--clr-text-dim);flex-grow:1;">${esc(item.description || '')}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:0.6rem;font-size:0.8rem;color:var(--clr-text-muted);">
+          <span><i class="fa-regular fa-user"></i> ${esc(item.author || 'Unknown')}</span>
+          <span><i class="fa-regular fa-calendar"></i> ${new Date(item.created_at).toLocaleDateString()}</span>
+          <span><i class="fa-regular fa-file"></i> ${esc(item.file_size || 'N/A')}</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-top:1rem;border-top:1px solid var(--clr-border-glow);">
+          <a href="${esc(item.file_url || '#')}" class="btn-download" download target="_blank" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
+          <div style="display:flex;gap:0.4rem;">
+            <a href="#" class="share-btn" aria-label="Share on Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="share-btn" aria-label="Share on X"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="share-btn" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+          </div>
+        </div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+  container.innerHTML = html;
   container.querySelectorAll('.resource-title-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
