@@ -1,4 +1,5 @@
-import { useState } from 'react';
+// updated
+ import { useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import { useSiteData } from '../context/SiteDataContext';
 import { useHomePageEffects } from '../hooks/useHomePageEffects';
