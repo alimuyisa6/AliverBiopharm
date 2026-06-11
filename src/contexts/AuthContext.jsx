@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getUser, signout } from '../api/client';
 
 const AuthContext = createContext();
@@ -27,7 +27,18 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  return React.createElement(AuthContext.Provider, { value: { user, loading, logout, refresh: checkAuth } }, children);
+  return React.createElement(
+    AuthContext.Provider,
+    {
+      value: {
+        user,
+        loading,
+        logout,
+        refresh: checkAuth,
+      },
+    },
+    children
+  );
 }
 
 export function useAuth() {
@@ -36,10 +47,19 @@ export function useAuth() {
 
 export function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return React.createElement('div', { className: 'loading' }, 'Loading...');
+
+  if (loading) {
+    return React.createElement(
+      'div',
+      { className: 'loading' },
+      'Loading...'
+    );
+  }
+
   if (!user) {
     window.location.href = '/login';
     return null;
   }
+
   return children;
 }
