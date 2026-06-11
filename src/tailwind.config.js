@@ -1,5 +1,4 @@
-/** @type {import('tailwindcss').Config} */
-export default {
+ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,10 +6,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'display': ['Poppins', 'sans-serif'],
-        'body': ['Inter', 'sans-serif'],
-        'mono': ['DM Mono', 'monospace'],
-      }
+        sans: ['Inter', 'sans-serif'],
+      },
     },
   },
   plugins: [],
