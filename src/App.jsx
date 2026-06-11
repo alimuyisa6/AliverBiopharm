@@ -11,8 +11,7 @@ function App() {
         React.createElement(Routes, null,
           React.createElement(Route, { path: "/login", element: React.createElement(Login, null) }),
           React.createElement(Route, { path: "/register", element: React.createElement(Register, null) }),
-          React.createElement(Route, { path: "*", element: React.createElement(ProtectedRoute, null, React.createElement(Home, null)) })
-        )
+            React.createElement(Route, { path: "*", element: React.createElement(Home, null) })
       )
     )
   );
