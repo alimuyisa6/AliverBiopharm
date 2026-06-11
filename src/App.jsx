@@ -1,4 +1,5 @@
- import { BrowserRouter, Routes, Route } from 'react-router-dom';
+ // App.jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
