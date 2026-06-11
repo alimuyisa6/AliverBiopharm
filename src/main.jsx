@@ -1,22 +1,12 @@
- import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Home from './pages/Home';
+ import React from 'react'
+import ReactDOM from 'react-dom/client'
+import './index.css'
+import App from './App'
 
-function App() {
-  return (
-    React.createElement(BrowserRouter, null,
-      React.createElement(AuthProvider, null,
-        React.createElement(Routes, null,
-          React.createElement(Route, { path: "/login", element: React.createElement(Login, null) }),
-          React.createElement(Route, { path: "/register", element: React.createElement(Register, null) }),
-          React.createElement(Route, { path: "*", element: React.createElement(Home, null) })
-        )
-      )
-    )
-  );
+window.onerror = function(msg, src, line) {
+  document.body.innerHTML = '<div style="color:red;padding:20px;font-size:18px">' + msg + ' (line ' + line + ')</div>';
 }
 
-export default App;
+ReactDOM.createRoot(document.getElementById('root')).render(
+  React.createElement(App)
+)
