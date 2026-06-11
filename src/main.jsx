@@ -1,27 +1,22 @@
- import React from 'react'
-import ReactDOM from 'react-dom/client'
-import './index.css'
+ import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { error: null }
-  }
-  componentDidCatch(error) {
-    this.setState({ error: error.message })
-  }
-  render() {
-    if (this.state.error) {
-      return React.createElement('div', { style: { color: 'red', padding: '20px', fontSize: '16px' } }, this.state.error)
-    }
-    return this.props.children
-  }
+function App() {
+  return (
+    React.createElement(BrowserRouter, null,
+      React.createElement(AuthProvider, null,
+        React.createElement(Routes, null,
+          React.createElement(Route, { path: "/login", element: React.createElement(Login, null) }),
+          React.createElement(Route, { path: "/register", element: React.createElement(Register, null) }),
+          React.createElement(Route, { path: "*", element: React.createElement(Home, null) })
+        )
+      )
+    )
+  );
 }
 
-import App from './App'
-
-ReactDOM.createRoot(document.getElementById('root')).render(
-  React.createElement(ErrorBoundary, null,
-    React.createElement(App)
-  )
-)
+export default App;
