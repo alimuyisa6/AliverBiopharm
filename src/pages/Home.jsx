@@ -130,7 +130,8 @@ export default function Home() {
   }, [chatRoomId, chatOpen]);
 
    
-  useEffect(() => {
+   useEffect(() => {
+  const timer = setTimeout(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
@@ -139,15 +140,24 @@ export default function Home() {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.05, rootMargin: '0px 0px -50px 0px' }
     );
 
-    const revealEls = document.querySelectorAll('.reveal');
-    revealEls.forEach(el => observer.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight) {
+        el.classList.add('in');
+      }
+    });
 
     return () => observer.disconnect();
-  }, [sections]);
+  }, 100);
 
+  return () => clearTimeout(timer);
+}, [sections, resources, flashcards]);
+     
   async function fetchAllData() {
     try {
       const siteSections = await getAllSiteSections();
