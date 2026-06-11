@@ -1,20 +1,31 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-function Home() { return <div>Home works</div>; }
-function Login() { return <div>Login</div>; }
-function Register() { return <div>Register</div>; }
-function NotePage() { return <div>Note</div>; }
+ import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
+import NotePage from './pages/NotePage';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/note/:id" element={<NotePage />} />
-        <Route path="*" element={<Home />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/note/:id" element={
+            <ProtectedRoute>
+              <NotePage />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
+
 export default App;
