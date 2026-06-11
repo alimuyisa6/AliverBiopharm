@@ -7,7 +7,7 @@ import Home from './pages/Home';
 function App() {
   return (
     React.createElement(BrowserRouter, null,
-      React.createElement(AuthProvider, null,
+       
         React.createElement(Routes, null,
           React.createElement(Route, { path: "/login", element: React.createElement(Login, null) }),
           React.createElement(Route, { path: "/register", element: React.createElement(Register, null) }),
