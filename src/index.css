@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --clr-cyan: #0a7e7e;
+  --clr-magenta: #b8873a;
+  --clr-deep-space: #eef7f7;
+}
+
+body {
+  background-color: var(--clr-deep-space);
+  font-family: 'Inter', sans-serif;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+}
+.animate-pulse-custom { animation: pulse 0.8s ease-in-out infinite; }
