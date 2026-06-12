@@ -1,12 +1,24 @@
- import React from 'react'
-import ReactDOM from 'react-dom/client'
-import './index.css'
-import App from './App'
+ import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
 
-window.onerror = function(msg, src, line) {
-  document.body.innerHTML = '<div style="color:red;padding:20px;font-size:18px">' + msg + ' (line ' + line + ')</div>';
-}
+window.addEventListener('error', function(event) {
+  const errorDiv = document.createElement('div');
+  errorDiv.style.cssText = 'position:fixed; top:0; left:0; right:0; background:#c00; color:white; padding:16px; z-index:10000; font-family:monospace; white-space:pre-wrap; word-break:break-word;';
+  errorDiv.innerHTML = '<strong>JS Error:</strong><br>' + (event.error?.stack || event.message);
+  document.body.prepend(errorDiv);
+});
+
+window.addEventListener('unhandledrejection', function(event) {
+  const errorDiv = document.createElement('div');
+  errorDiv.style.cssText = 'position:fixed; top:0; left:0; right:0; background:#c00; color:white; padding:16px; z-index:10000; font-family:monospace; white-space:pre-wrap; word-break:break-word;';
+  errorDiv.innerHTML = '<strong>Unhandled Promise Rejection:</strong><br>' + (event.reason?.stack || event.reason);
+  document.body.prepend(errorDiv);
+});
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  React.createElement(App)
-)
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
