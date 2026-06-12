@@ -1,3 +1,11 @@
+import eruda from 'eruda';
+
+if (!window.eruda) {
+  eruda.init();
+}
+
+eruda.show();
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
