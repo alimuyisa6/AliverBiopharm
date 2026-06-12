@@ -48,12 +48,27 @@ export default function Quiz() {
     const load = async () => {
       try {
         setLoading(true);
-        const siteData = await getAllSiteSections();
-        setSections(siteData);
-         const glossary = Array.isArray(siteData?.glossary) ? siteData.glossary
-        const map = {};
-        glossary.forEach(g => { if (g.term) map[g.term.toLowerCase()] = g.definition; });
-        setGlossaryMap(map);
+         const siteData = await getAllSiteSections();
+
+console.log("siteData =", siteData);
+console.log("glossary =", siteData?.glossary);
+console.log("isArray =", Array.isArray(siteData?.glossary));
+
+setSections(siteData);
+
+const glossary = Array.isArray(siteData?.glossary)
+  ? siteData.glossary
+  : [];
+
+const map = {};
+
+glossary.forEach(g => {
+  if (g?.term) {
+    map[g.term.toLowerCase()] = g.definition;
+  }
+});
+
+setGlossaryMap(map);
         const topics = await getQuizTopics({ level: currentLevel });
         setAllTopics(Array.isArray(topics) ? topics : []);
         if (user) {
