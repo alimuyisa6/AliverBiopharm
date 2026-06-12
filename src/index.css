@@ -3759,13 +3759,18 @@ keyframes fadeInOut {
   margin-top: 1.5rem;
 }
 
-.auth-footer {
+ .auth-footer {
   text-align: center;
   padding: 1.5rem;
   color: var(--clr-text-muted);
   font-size: 0.8rem;
   border-top: 1px solid var(--clr-border-glow);
-  margin-top: auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--clr-deep-space);
+  z-index: 10;
 }
 
 .error-message {
