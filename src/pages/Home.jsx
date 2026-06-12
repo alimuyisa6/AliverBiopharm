@@ -575,11 +575,11 @@ export default function Home() {
             )}
           </div>
         )}
-        {sections?.daily_facts && sections.daily_facts.length > 0 && (
-          <div className="daily-fact-card">
-            <div className="daily-fact-icon"><i className={`fa-solid ${sections.daily_facts[0].icon || 'fa-flask'}`}></i></div>
-            <div><p style={{ fontWeight: 700, color: 'var(--clr-cyan)' }}>SCIENCE FACT OF THE DAY</p><p>{sections.daily_facts[0].fact}</p></div>
-          </div>
+         sections?.daily_facts?.default?.[0] && (
+  <div className="daily-fact-card">
+    <div className="daily-fact-icon"><i className="fa-solid fa-flask"></i></div>
+    <div><p style={{ fontWeight: 700, color: 'var(--clr-cyan)' }}>SCIENCE FACT OF THE DAY</p><p>{sections.daily_facts.default[0].fact}</p></div>
+  </div>
         )}
       </section>
 
