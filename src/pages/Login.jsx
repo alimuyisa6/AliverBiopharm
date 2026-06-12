@@ -42,7 +42,11 @@ export default function Login() {
 
     React.createElement('div', { className: 'auth-wrapper' },
       React.createElement('div', { className: 'auth-container' },
-        React.createElement('div', { className: 'auth-logo' }, '🧬'),
+        React.createElement('div', { className: 'auth-logo' },
+          sections?.auth_branding?.logo_url
+            ? React.createElement('img', { src: sections.auth_branding.logo_url, alt: 'AliverBiopharm', style: { height: '80px', width: 'auto' } })
+            : null
+        ),
         React.createElement('h2', null, 'Welcome Back'),
         React.createElement('p', { className: 'auth-subtitle' }, 'Sign in to your AliverBiopharm account'),
 
