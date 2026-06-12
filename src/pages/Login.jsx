@@ -42,48 +42,52 @@ export default function Login() {
 
     React.createElement('div', { className: 'auth-wrapper' },
       React.createElement('div', { className: 'auth-container' },
+
         React.createElement('div', { className: 'auth-logo' },
           sections?.auth_branding?.logo_url
-            ? React.createElement('img', { src: sections.auth_branding.logo_url, alt: 'AliverBiopharm', style: { height: '80px', width: 'auto' } })
+            ? React.createElement('img', { src: sections.auth_branding.logo_url, alt: 'AliverBiopharm' })
             : null
         ),
-        React.createElement('h2', null, 'Welcome Back'),
-        React.createElement('p', { className: 'auth-subtitle' }, 'Sign in to your AliverBiopharm account'),
 
-        error && React.createElement('div', { className: 'error-message' }, error),
+        React.createElement('div', { className: 'auth-body' },
+          React.createElement('h2', null, 'Welcome Back'),
+          React.createElement('p', { className: 'auth-subtitle' }, 'Sign in to your AliverBiopharm account'),
 
-        React.createElement('form', { onSubmit: handleSubmit },
-          React.createElement('div', { className: 'form-group' },
-            React.createElement('label', { className: 'f-label' }, 'EMAIL ADDRESS'),
-            React.createElement('input', {
-              type: 'email',
-              className: 'f-input',
-              placeholder: 'Enter your email',
-              value: email,
-              onChange: e => setEmail(e.target.value),
-              required: true
-            })
+          error && React.createElement('div', { className: 'error-message' }, error),
+
+          React.createElement('form', { onSubmit: handleSubmit },
+            React.createElement('div', { className: 'form-group' },
+              React.createElement('label', { className: 'f-label' }, 'EMAIL ADDRESS'),
+              React.createElement('input', {
+                type: 'email',
+                className: 'f-input',
+                placeholder: 'Enter your email',
+                value: email,
+                onChange: e => setEmail(e.target.value),
+                required: true
+              })
+            ),
+            React.createElement('div', { className: 'form-group' },
+              React.createElement('label', { className: 'f-label' }, 'PASSWORD'),
+              React.createElement('input', {
+                type: 'password',
+                className: 'f-input',
+                placeholder: 'Enter your password',
+                value: password,
+                onChange: e => setPassword(e.target.value),
+                required: true
+              })
+            ),
+            React.createElement('button', { type: 'submit', className: 'auth-btn' },
+              React.createElement('i', { className: 'fa-solid fa-right-to-bracket' }),
+              ' Sign In'
+            )
           ),
-          React.createElement('div', { className: 'form-group' },
-            React.createElement('label', { className: 'f-label' }, 'PASSWORD'),
-            React.createElement('input', {
-              type: 'password',
-              className: 'f-input',
-              placeholder: 'Enter your password',
-              value: password,
-              onChange: e => setPassword(e.target.value),
-              required: true
-            })
-          ),
-          React.createElement('button', { type: 'submit', className: 'auth-btn' },
-            React.createElement('i', { className: 'fa-solid fa-right-to-bracket' }),
-            ' Sign In'
+
+          React.createElement('p', { className: 'auth-switch' },
+            "Don't have an account? ",
+            React.createElement(Link, { to: '/register', style: { color: 'var(--clr-cyan)', fontWeight: 600 } }, 'Create Account')
           )
-        ),
-
-        React.createElement('p', { className: 'auth-switch' },
-          "Don't have an account? ",
-          React.createElement(Link, { to: '/register', style: { color: 'var(--clr-cyan)', fontWeight: 600 } }, 'Create Account')
         )
       )
     ),
