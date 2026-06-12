@@ -44,55 +44,54 @@ export default function Quiz() {
 
   const SPINNER_WORDS = ['Reviewing your selection...','Checking your answer...','Analyzing...','Verifying...','Processing...','One moment...'];
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-         
-const siteData = await getAllSiteSections();
+   useEffect(() => {
+  const load = async () => {
+    try {
+      setLoading(true);
 
-setError(
-  JSON.stringify({
-    glossary: siteData?.glossary,
-    isArray: Array.isArray(siteData?.glossary)
-  }, null, 2)
-);
+      const siteData = await getAllSiteSections();
+      setSections(siteData);
 
-return;
+      const glossary = Array.isArray(siteData?.glossary?.data)
+        ? siteData.glossary.data
+        : [];
 
+      const map = {};
 
-setSections(siteData);
-
-const glossary = Array.isArray(siteData?.glossary)
-  ? siteData.glossary
-  : [];
-
-const map = {};
-
-glossary.forEach(g => {
-  if (g?.term) {
-    map[g.term.toLowerCase()] = g.definition;
-  }
-});
-
-setGlossaryMap(map);
-        const topics = await getQuizTopics({ level: currentLevel });
-        setAllTopics(Array.isArray(topics) ? topics : []);
-        if (user) {
-          await recordDailyVisit();
-          const streakData = await getUserStreak();
-          setStreak(streakData?.count || 0);
-          const badges = await getUserAchievements();
-          setEarnedBadges(Array.isArray(badges) ? badges.map(b => b.badge) : []);
+      glossary.forEach(g => {
+        if (g?.term) {
+          map[g.term.toLowerCase()] = g.definition;
         }
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
+      });
+
+      setGlossaryMap(map);
+
+      const topics = await getQuizTopics({ level: currentLevel });
+      setAllTopics(Array.isArray(topics) ? topics : []);
+
+      if (user) {
+        await recordDailyVisit();
+
+        const streakData = await getUserStreak();
+        setStreak(streakData?.count || 0);
+
+        const badges = await getUserAchievements();
+        setEarnedBadges(
+          Array.isArray(badges)
+            ? badges.map(b => b.badge)
+            : []
+        );
       }
-    };
-    load();
-  }, []);
+
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  load();
+}, []);
 
   async function loadTopics() {
     try {
