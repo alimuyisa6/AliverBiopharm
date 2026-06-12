@@ -1,4 +1,4 @@
-const API_BASE = '/api/query';
+ const API_BASE = '/api/query';
 
 async function apiCall(action, body = {}) {
   const res = await fetch(API_BASE, {
@@ -51,5 +51,13 @@ export async function getRecentViews(limit = 3) { return apiCall('get_recent_vie
 export async function getUserFavorites() { return apiCall('get_user_favorites'); }
 export async function getUserStreak() { return apiCall('get_user_streak'); }
 export async function getUserAchievements() { return apiCall('get_user_achievements'); }
+export async function saveAchievement(badge) { return apiCall('save_achievement', { badge }); }
+export async function recordDailyVisit() { return apiCall('record_daily_visit'); }
 export async function saveReadingProgress(noteId, scrollPercentage, scrollPosition, timeSpent, completed = false) { return apiCall('save_reading_progress', { note_id: noteId, scroll_percentage: scrollPercentage, scroll_position: scrollPosition, time_spent: timeSpent, completed }); }
 export async function getReadingProgress(noteId) { return apiCall('get_reading_progress', { note_id: noteId }); }
+
+export async function getQuizTopics({ level }) { return apiCall('get_quiz_topics', { level }); }
+export async function getQuizBlock({ level, topic, block_number }) { return apiCall('get_quiz_block', { level, topic, block_number }); }
+export async function checkDailyRetry({ level, topic, block_number }) { return apiCall('check_daily_retry', { level, topic, block_number }); }
+export async function checkQuizAnswer({ question_id, selected_option }) { return apiCall('check_quiz_answer', { question_id, selected_option }); }
+export async function submitQuizBlock({ level, topic, block_number, answers, time_taken }) { return apiCall('submit_quiz_block', { level, topic, block_number, answers, time_taken }); }
