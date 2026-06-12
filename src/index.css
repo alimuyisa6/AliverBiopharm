@@ -3672,7 +3672,7 @@ keyframes fadeInOut {
 
 }
 
-  .auth-page {
+ .auth-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -3684,9 +3684,8 @@ keyframes fadeInOut {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
-  margin-top: 60px;
-  min-height: calc(100vh - 120px);
+  padding: 100px 1rem 2rem 1rem;
+  min-height: calc(100vh - 60px);
 }
 
 .auth-container {
@@ -3766,6 +3765,7 @@ keyframes fadeInOut {
   color: var(--clr-text-muted);
   font-size: 0.8rem;
   border-top: 1px solid var(--clr-border-glow);
+  margin-top: auto;
 }
 
 .error-message {
@@ -3780,13 +3780,16 @@ keyframes fadeInOut {
 }
 
 @media (max-width: 768px) {
+  .auth-wrapper {
+    align-items: flex-start;
+    padding-top: 90px;
+    min-height: calc(100vh - 60px);
+  }
+
   .auth-container {
     border-radius: 16px;
     padding: 2rem 1.2rem;
-  }
-
-  .auth-wrapper {
-    align-items: flex-start;
-    padding-top: 2rem;
+    width: 100%;
   }
 }
+   
