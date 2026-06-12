@@ -757,37 +757,15 @@ let adminData = null;
     let result;
     const { section, filters, formData, email, password, payload, submissionId, prompt, mode, name, amount, txid, room_id, message, is_online, is_busy, feature_key, is_enabled, settings, level, topic, questions, batch_name, deck_id, title, description, category, cards, card_id, difficulty, resource_id, rating, comment, badge, week_start, selected_option, flashcard_id, user_answer, user_id, page, metadata, userId: targetUserId, restriction_type, duration_hours, reason } = req.body;
     switch (action) {
-      case 'get_all_site_sections': case 'get_all_sections': {
-        const { data, error } = await supabase.from('site_sections').select('section, data');
-        if (error) throw error;
-        result = {};
-        (data || []).forEach(row => { result[row.section] = row.data; });
-        
-        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-        if (!authError && authUsers?.users) {
-          const { data: restrictions } = await supabase.from('user_restrictions').select('user_id, restriction_type, expires_at');
-          const restrictionMap = new Map();
-          (restrictions || []).forEach(r => restrictionMap.set(r.user_id, { type: r.restriction_type, expires_at: r.expires_at }));
-          
-          result.users = {
-            list: authUsers.users.map(u => {
-              const restriction = restrictionMap.get(u.id);
-              return {
-                id: u.id,
-                email: u.email,
-                restriction_type: restriction?.type || null,
-                restriction_expires_at: restriction?.expires_at || null,
-                created_at: u.created_at,
-                last_active: u.last_sign_in_at || u.updated_at
-              };
-            })
-          };
-        } else {
-          result.users = { list: [] };
-        }
-        break;
-      }
-      case 'get_category_suggestions': {
+       
+         case 'get_all_site_sections': case 'get_all_sections': {
+  const { data, error } = await supabase.from('site_sections').select('section, data');
+  if (error) throw error;
+  result = {};
+  (data || []).forEach(row => { result[row.section] = row.data; });
+  break;
+}
+     case 'get_category_suggestions': {
         const [resources, flashcardDecks, quizTopics] = await Promise.all([
           supabase.from('biology_notes').select('category, level, section_type').limit(500),
           supabase.from('flashcard_decks').select('category, level').limit(500),
