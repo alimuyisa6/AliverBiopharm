@@ -3671,8 +3671,7 @@ keyframes fadeInOut {
   }
 
 }
-
- .auth-page {
+.auth-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -3692,16 +3691,27 @@ keyframes fadeInOut {
   background: var(--clr-navy-card);
   border: 1px solid var(--clr-border-glow);
   border-radius: 24px;
-  padding: 2.5rem 2rem;
+  padding: 0;
   width: 100%;
   max-width: 440px;
   box-shadow: var(--shadow-card);
+  overflow: hidden;
 }
 
 .auth-logo {
-  font-size: 3rem;
-  text-align: center;
-  margin-bottom: 1rem;
+  width: 100%;
+  line-height: 0;
+}
+
+.auth-logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.auth-body {
+  padding: 2.5rem 2rem;
 }
 
 .auth-container h2 {
@@ -3759,7 +3769,7 @@ keyframes fadeInOut {
   margin-top: 1.5rem;
 }
 
- .auth-footer {
+.auth-footer {
   text-align: center;
   padding: 1.5rem;
   color: var(--clr-text-muted);
@@ -3793,8 +3803,7 @@ keyframes fadeInOut {
 
   .auth-container {
     border-radius: 16px;
-    padding: 2rem 1.2rem;
     width: 100%;
   }
 }
-   
+ 
