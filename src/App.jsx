@@ -11,10 +11,12 @@ function App() {
     React.createElement(BrowserRouter, null,
       React.createElement(AuthProvider, null,
         React.createElement(Routes, null,
-          React.createElement(Route, { path: "/login", element: React.createElement(Login, null) }),
-          React.createElement(Route, { path: "/register", element: React.createElement(Register, null) }),
-          React.createElement(Route, { path: "/quiz", element: React.createElement(ProtectedRoute, null, React.createElement(Quiz, null)) }),
-          React.createElement(Route, { path: "*", element: React.createElement(ProtectedRoute, null, React.createElement(Home, null)) })
+           <Routes>
+  <Route path="/login" element={<Login />} />
+  <Route path="/register" element={<Register />} />
+  <Route path="/quiz" element={<div>Test route works!</div>} />   // add this line
+  <Route path="*" element={<Home />} />
+</Routes>
         )
       )
     )
