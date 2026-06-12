@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+ import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -25,7 +26,7 @@ function parseCookies(req) {
   }));
 }
 
-function hashToken(token) { return require('crypto').createHash('sha256').update(token).digest('hex'); }
+function hashToken(token) { return crypto.createHash('sha256').update(token).digest('hex'); }
 
 async function validateSession(token) {
   if (!token || token.length < 20) return null;
@@ -64,6 +65,8 @@ export default async function handler(req, res) {
       case 'like_resource': return likeResource(req, res, userId);
       case 'comment_resource': return commentResource(req, res, userId);
       case 'submit_mood': return submitMood(req, res, userId);
+      case 'save_achievement': return saveAchievement(req, res, userId);
+      case 'update_user_presence': return updateUserPresence(req, res, userId);
       default: return res.status(400).json({ error: 'Invalid action' });
     }
   }
@@ -150,6 +153,17 @@ async function submitMood(req, res, userId) {
   return res.status(200).json({ success: true });
 }
 
+async function saveAchievement(req, res, userId) {
+  const { badge } = req.body;
+  await supabase.from('user_interactions').insert({ user_id: userId, interaction_type: 'achievement', metadata: { badge: badge.id || badge, ...badge } });
+  return res.status(200).json({ success: true });
+}
+
+async function updateUserPresence(req, res, userId) {
+  await supabase.from('user_presence').upsert({ user_id: userId, last_seen: new Date().toISOString() }, { onConflict: 'user_id' });
+  return res.status(200).json({ success: true });
+}
+
 async function getResourceInteractions(req, res) {
   const { resource_id } = req.query;
   const { count: likeCount } = await supabase.from('user_interactions').select('id', { count: 'exact', head: true }).eq('resource_id', resource_id).eq('interaction_type', 'favorite');
@@ -157,8 +171,10 @@ async function getResourceInteractions(req, res) {
   const commentList = [];
   if (comments) {
     for (const c of comments) {
-      const { data: { user } } = await supabase.auth.admin.getUserById(c.user_id);
-      commentList.push({ comment: c.metadata?.comment || '', user_name: user?.email ? user.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, x => x.toUpperCase()) : 'User', created_at: c.created_at });
+      try {
+        const { data: { user } } = await supabase.auth.admin.getUserById(c.user_id);
+        commentList.push({ comment: c.metadata?.comment || '', user_name: user?.email ? user.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, x => x.toUpperCase()) : 'User', created_at: c.created_at });
+      } catch { commentList.push({ comment: c.metadata?.comment || '', user_name: 'User', created_at: c.created_at }); }
     }
   }
   return res.status(200).json({ like_count: likeCount || 0, comments: commentList });
@@ -225,25 +241,18 @@ async function getUserStreak(req, res, userId) {
 
 async function getPublicStats(req, res) {
   try {
-    const [resCount, downCount, quizCount, resourcesUsers, authUsers] = await Promise.all([
+    const [resCount, downCount, quizCount, authUsers] = await Promise.all([
       supabase.from('biology_notes').select('id', { count: 'exact', head: true }),
       supabase.from('user_interactions').select('id', { count: 'exact', head: true }).eq('interaction_type', 'download'),
       supabase.from('user_quiz_activity').select('id', { count: 'exact', head: true }),
-      supabase.from('user_interactions').select('user_id').eq('interaction_type', 'download'),
       supabase.auth.admin.listUsers()
     ]);
-    const uniqueUsers = new Set();
-    if (resourcesUsers.data) {
-      resourcesUsers.data.forEach(item => { if (item.user_id) uniqueUsers.add(item.user_id); });
-    }
-    const totalRegisteredUsers = authUsers.data?.users?.length || 0;
-    const result = {
+    return res.status(200).json({
       resources_count: resCount.count || 0,
       downloads_count: downCount.count || 0,
       quiz_attempts: quizCount.count || 0,
-      users_count: totalRegisteredUsers
-    };
-    return res.status(200).json(result);
+      users_count: authUsers.data?.users?.length || 0
+    });
   } catch (err) {
     return res.status(200).json({ resources_count: 0, downloads_count: 0, quiz_attempts: 0, users_count: 0 });
   }
