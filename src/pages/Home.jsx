@@ -465,8 +465,10 @@ export default function Home() {
 
   const currentYear = new Date().getFullYear();
 
-  return (
-    <div className="homepage">
+   if (!sections) return <div style={{ minHeight: '100vh', background: 'var(--clr-deep-space)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><p style={{ color: 'var(--clr-white)' }}>Loading...</p></div>;
+
+return (
+  <div className="homepage">
       <header className="site-header" id="site-header">
         <div className="header-container">
           <a href="/" className="logo-link" aria-label="AliverBiopharm Home">
