@@ -1,16 +1,24 @@
  import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
+import Quiz from './pages/Quiz';
 
-function Home() { return <h1>Home</h1>; }
-function Quiz() { return <h1>Quiz Works</h1>; }
-
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="*" element={<Home />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+          <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
+
+export default App;
