@@ -527,16 +527,27 @@ return (
       <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
 
       <section id="home" className="hero-carousel">
-        {(sections?.hero?.slides || [{ title: 'Welcome to AliverBiopharm', subtitle: 'Advanced Biology & Pharmacy Learning Platform', background_image: 'linear-gradient(135deg,#0a4f4f,#0e7070)', cta_text: 'Explore Resources', cta_link: '#courses' }]).map((slide, idx) => (
-          <div key={idx} className={`carousel-slide ${idx === 0 ? 'active' : ''}`} style={{ background: slide.background_image }}>
-            <div className="slide-overlay">
-              <h1 className="hero-title">{slide.title}</h1>
-              <p className="hero-subtitle">{slide.subtitle}</p>
-              <a href={slide.cta_link} className="btn-primary"><i className={`fa-solid ${slide.icon || 'fa-arrow-right'}`}></i> {slide.cta_text}</a>
-            </div>
-          </div>
-        ))}
-      </section>
+  {(sections?.hero?.slides || []).map((slide, idx) => (
+    <div
+      key={idx}
+      className={`carousel-slide ${idx === currentSlide ? 'active' : ''}`}
+      style={{
+        backgroundImage: `url(${slide.background_image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="slide-overlay">
+        <h1 className="hero-title">{slide.title}</h1>
+        <p className="hero-subtitle">{slide.subtitle}</p>
+        <a href={slide.cta_link} className="btn-primary">
+          <i className={`fa-solid ${slide.icon || 'fa-arrow-right'}`}></i> {slide.cta_text}
+        </a>
+      </div>
+    </div>
+  ))}
+</section>
 
       <section id="hero-title-section" className="section reveal" style={{ paddingTop: '20px', paddingBottom: '0' }}>
         <div className="dynamic-hero-container">
