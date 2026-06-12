@@ -50,7 +50,7 @@ export default function Quiz() {
         setLoading(true);
         const siteData = await getAllSiteSections();
         setSections(siteData);
-        const glossary = siteData?.glossary || [];
+         const glossary = Array.isArray(siteData?.glossary) ? siteData.glossary
         const map = {};
         glossary.forEach(g => { if (g.term) map[g.term.toLowerCase()] = g.definition; });
         setGlossaryMap(map);
