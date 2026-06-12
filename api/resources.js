@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+ import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { autoRefreshToken: false, persistSession: false } });
@@ -26,7 +27,7 @@ function parseCookies(req) {
   }));
 }
 
-function hashToken(token) { return require('crypto').createHash('sha256').update(token).digest('hex'); }
+function hashToken(token) { return crypto.createHash('sha256').update(token).digest('hex'); }
 
 async function validateSession(token) {
   if (!token || token.length < 20) return null;
@@ -106,12 +107,11 @@ async function getFilterOptions(req, res) {
     supabase.from('biology_notes').select('category').limit(500),
     supabase.from('biology_notes').select('tag').limit(500)
   ]);
-  const result = {
+  return res.status(200).json({
     levels: [...new Set((l.data||[]).map(x=>x.level).filter(Boolean))],
     categories: [...new Set((c.data||[]).map(x=>x.category).filter(Boolean))],
     tags: [...new Set((t.data||[]).map(x=>x.tag).filter(Boolean))]
-  };
-  return res.status(200).json(result);
+  });
 }
 
 async function getPdfsByLevel(req, res) {
@@ -166,7 +166,7 @@ async function getReadingProgress(req, res, userId) {
 
 async function getContinueReading(req, res, userId) {
   if (!userId) return res.status(200).json([]);
-  const { limit = 10 } = req.query;
+  const limit = parseInt(req.query.limit) || 10;
   const { data, error } = await supabase.from('user_interactions').select('resource_id, value, metadata, created_at').eq('user_id', userId).eq('interaction_type', 'reading_progress').neq('value', 100).gt('value', 5).order('created_at', { ascending: false }).limit(limit);
   if (error) return res.status(500).json({ error: error.message });
   const notes = [];
