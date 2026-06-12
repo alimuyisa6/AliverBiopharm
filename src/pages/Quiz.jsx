@@ -48,11 +48,18 @@ export default function Quiz() {
     const load = async () => {
       try {
         setLoading(true);
-         const siteData = await getAllSiteSections();
+         
+const siteData = await getAllSiteSections();
 
-console.log("siteData =", siteData);
-console.log("glossary =", siteData?.glossary);
-console.log("isArray =", Array.isArray(siteData?.glossary));
+setError(
+  JSON.stringify({
+    glossary: siteData?.glossary,
+    isArray: Array.isArray(siteData?.glossary)
+  }, null, 2)
+);
+
+return;
+
 
 setSections(siteData);
 
