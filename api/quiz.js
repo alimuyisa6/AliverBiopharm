@@ -24,9 +24,8 @@ function parseCookies(req) {
     const [k, ...v] = c.trim().split('=');
     return [k.trim(), decodeURIComponent(v.join('='))];
   }));
-}
-
-function hashToken(token) { return require('crypto').createHash('sha256').update(token).digest('hex'); }
+import crypto from 'crypto';
+function hashToken(token) { return crypto.createHash('sha256').update(token).digest('hex'); }
 
 async function validateSession(token) {
   if (!token || token.length < 20) return null;
