@@ -1,10 +1,11 @@
-import React from 'react';
+ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import Quiz from './pages/Quiz';
+import PastPapers from './pages/PastPapers';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+          <Route path="/past-papers" element={<PastPapers />} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
