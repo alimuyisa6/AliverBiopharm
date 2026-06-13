@@ -54,8 +54,11 @@ export default function NoteDetail() {
             setTimeout(() => window.scrollTo({ top: progress.scroll_position, behavior: 'smooth' }), 500);
           }
         }
-      } catch (err) { console.error(err); navigate('/notes'); }
-      setLoading(false);
+       } catch (err) { 
+  document.title = 'ERR: ' + err.message; 
+  setLoading(false);
+  return;
+      }
     };
     init();
     return () => { if (progressTimer.current) clearTimeout(progressTimer.current); };
