@@ -6,8 +6,7 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import Quiz from './pages/Quiz';
 import PastPapers from './pages/PastPapers';
-import Notes from './pages/Notes';
-import NoteDetail from './pages/NoteDetail';
+ import NoteDetail from './pages/NoteDetail';
 
 function App() {
   return (
@@ -18,7 +17,6 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
           <Route path="/past-papers" element={<PastPapers />} />
-          <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
           <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         </Routes>
