@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   getAllSiteSections,
@@ -349,19 +349,19 @@ export default function Quiz() {
         ) : resultData ? (
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <div className="question-card" style={{ textAlign: 'center' }}>
-              <i className={`fa-solid ${resultData.passed ? 'fa-trophy' : 'fa-book-open'} result-icon`}></i>
+              <i className={`fa-solid ${resultData.passed ? 'fa-trophy' : 'fa-book-open'} result-icon`} style={{ fontSize: '3rem', color: resultData.passed ? '#f59e0b' : '#6b7280' }}></i>
               <h2>{resultData.passed ? `Congratulations, ${user?.email?.split('@')[0] || 'Learner'}!` : 'Block Complete'}</h2>
               <div className="result-score">{resultData.percentage}%</div>
               <p>{resultData.score}/{resultData.total} correct</p>
               <p style={{ fontStyle: 'italic' }}>{resultData.passed ? 'Outstanding! You really know this!' : 'Keep studying! Every expert was once a beginner.'}</p>
               <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`}>{resultData.passed ? '✓ Passed' : '✗ Not passed'}</span>
               <div className="share-buttons">
-                <button className="share-btn-sm" onClick={() => navigator.clipboard.writeText(`I scored ${resultData.percentage}% on ${currentTopic} Block ${currentBlock+1} at AliverBiopharm!`)}><i className="fa-solid fa-link"></i></button>
+                <button className="share-btn-sm" onClick={() => navigator.clipboard.writeText(`I scored ${resultData.percentage}% on ${currentTopic} Block ${currentBlock+1} at AliverBiopharm!`)}><i className="fa-solid fa-link" style={{ color: '#3b82f6' }}></i></button>
               </div>
             </div>
             {adaptivePath && (
               <div className="adaptive-path-card">
-                <div className="ap-icon"><i className="fa-solid fa-lightbulb"></i></div>
+                <div className="ap-icon"><i className="fa-solid fa-lightbulb" style={{ color: '#fbbf24' }}></i></div>
                 <h4>{resultData.passed ? 'Great Progress!' : 'Keep Going!'}</h4>
                 <p>{adaptivePath.message}</p>
               </div>
@@ -433,7 +433,7 @@ export default function Quiz() {
                   let icon = null, cls = '';
                   if (locked) { cls = 'locked'; icon = <i className="fa-solid fa-lock" style={{ marginRight: '6px', color: '#ef4444' }}></i>; }
                   else if (completed) { cls = 'completed'; icon = <i className="fa-solid fa-check-circle" style={{ marginRight: '6px', color: '#10b981' }}></i>; }
-                  else { icon = <i className="fa-regular fa-circle" style={{ marginRight: '6px', color: 'var(--clr-cyan)' }}></i>; }
+                  else { icon = <i className="fa-regular fa-circle" style={{ marginRight: '6px', color: '#0ab5b5' }}></i>; }
                   return (
                     <button key={i} className={`block-nav-btn ${cls}`} disabled={locked} onClick={() => startBlock(i)}>
                       {icon} Block {i+1}
