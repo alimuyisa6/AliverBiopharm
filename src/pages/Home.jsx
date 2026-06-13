@@ -921,9 +921,22 @@ export default function Home() {
                               <span className="topic-badge" style={{ background: 'rgba(184,135,58,0.12)', color: 'var(--clr-magenta)', padding: '4px 14px', borderRadius: '30px', fontSize: '0.7rem', fontWeight: 700, display: 'inline-block', marginBottom: '16px' }}>{notesSelectedTopic}</span>
                               <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.3rem', fontWeight: 700, margin: '12px 0 8px', color: 'var(--clr-white)' }}>{item.subtopic_name}</h3>
                               <p className="subtopic-preview" style={{ color: 'var(--clr-text-dim)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '20px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.subtopic_preview || 'Comprehensive study notes covering key concepts.'}</p>
-                              <button className="read-note-btn" onClick={() => navigate(`/notes?highlight=${item.subtopic_id}`)} style={{ width: '100%', background: 'transparent', border: '2px solid var(--clr-cyan)', color: 'var(--clr-cyan)', padding: '12px 20px', borderRadius: '50px', fontWeight: 700, cursor: 'pointer' }}>
-                              <i className="fa-solid fa-book-open-reader"></i> Read More 
-                               </button>          
+                               <button 
+  className="read-note-btn" 
+  onClick={() => navigate(`/notes/read?id=${item.subtopic_id}`)} 
+  style={{ 
+    width: '100%', 
+    background: 'transparent', 
+    border: '2px solid var(--clr-cyan)', 
+    color: 'var(--clr-cyan)', 
+    padding: '12px 20px', 
+    borderRadius: '50px', 
+    fontWeight: 700, 
+    cursor: 'pointer' 
+  }}
+>
+  <i className="fa-solid fa-book-open-reader"></i> Read More 
+</button>          
                             </div>
                           </div>
                         ))}
