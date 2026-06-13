@@ -923,7 +923,7 @@ export default function Home() {
                               <p className="subtopic-preview" style={{ color: 'var(--clr-text-dim)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '20px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.subtopic_preview || 'Comprehensive study notes covering key concepts.'}</p>
                                <button 
   className="read-note-btn" 
-  onClick={() => navigate(`/notes/read?id=${item.subtopic_id}`)} 
+   onClick={() => alert('button works')} 
   style={{ 
     width: '100%', 
     background: 'transparent', 
