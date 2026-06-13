@@ -935,7 +935,7 @@ export default function Home() {
     cursor: 'pointer' 
   }}
 >
- <i className="fa-solid fa-book-open-reader"></i> TESTING123 
+ <i className="fa-solid fa-book-open-reader"></i> Read This Note 
 </button>          
                             </div>
                           </div>
