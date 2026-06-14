@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getAllSiteSections } from '../api/client';
 import './InteractiveShowcase.css';
 
@@ -226,9 +226,18 @@ export default function InteractiveShowcase() {
         {/* RIGHT COLUMN: iPhone mockup with animated guided tour */}
         <div className="showcase-phone-wrap">
           <div className="phone-mockup" role="img" aria-label="Preview of the AliverBiopharm mobile experience">
+            <div className="phone-side-btn power"></div>
+            <div className="phone-side-btn volume-up"></div>
+            <div className="phone-side-btn volume-down"></div>
             <div className="phone-notch"></div>
 
             <div className="phone-screen">
+
+              <div className="phone-status-bar" aria-hidden="true">
+                <i className="fa-solid fa-signal status-signal"></i>
+                <i className="fa-solid fa-wifi status-wifi"></i>
+                <i className="fa-solid fa-battery-three-quarters status-battery"></i>
+              </div>
 
               {/* Top bar with dynamic logo and site name */}
               <div className="phone-topbar">
@@ -245,10 +254,10 @@ export default function InteractiveShowcase() {
               {/* Feature list with animated guided cursor */}
               <div className="phone-feature-list">
                 {FEATURES.map((feature, idx) => (
-                  <div
+                  <div></div>
                     key={feature.id}
                     ref={(el) => (featureRefs.current[idx] = el)}
-                    className={`phone-feature-item ${idx === activeIndex ? 'active' : ''}`}
+                    className={`phone-feature-item ${idx === activeIndex ? 'active' : ''} ${idx === activeIndex && isClicking ? 'pressed' : ''}`}
                   >
                     <div className={`feature-icon ${feature.gradient}`} aria-hidden="true">
                       <i className={`fa-solid ${feature.icon} feature-icon-main`}></i>
