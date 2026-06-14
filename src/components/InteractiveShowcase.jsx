@@ -254,7 +254,7 @@ export default function InteractiveShowcase() {
               {/* Feature list with animated guided cursor */}
               <div className="phone-feature-list">
                 {FEATURES.map((feature, idx) => (
-                  <div></div>
+                  <div
                     key={feature.id}
                     ref={(el) => (featureRefs.current[idx] = el)}
                     className={`phone-feature-item ${idx === activeIndex ? 'active' : ''} ${idx === activeIndex && isClicking ? 'pressed' : ''}`}
