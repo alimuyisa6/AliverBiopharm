@@ -1752,3 +1752,45 @@ body.dark-mode .pdf-section-subtitle { color: rgba(255,255,255,0.65); }
   85% { opacity:1; transform:translateY(0); }
   100% { opacity:0; transform:translateY(-10px); }
 }
+
+/* ── Weekly Challenge Buttons (quiz-option-btn) ── */
+.quiz-option-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  margin: 0.3rem;
+  border: 1.5px solid var(--clr-cyan);
+  border-radius: 30px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-base);
+  letter-spacing: 0.005em;
+  color: var(--clr-white);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quiz-option-btn:hover {
+  background: var(--clr-cyan);
+  color: #012c2c;
+  border-color: var(--clr-cyan);
+}
+
+.quiz-option-btn.correct {
+  background: #10b981;
+  color: #fff;
+  border-color: #10b981;
+}
+
+.quiz-option-btn.incorrect {
+  background: #e74c3c;
+  color: #fff;
+  border-color: #e74c3c;
+}
+
+.quiz-option-btn:disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
