@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
+import QuizHero from '../components/quiz/QuizHero';
+import QuizDashboard from '../components/quiz/QuizDashboard';
+import QuizChallenges from '../components/quiz/QuizChallenges';
+import QuizLearningPath from '../components/quiz/QuizLearningPath';
+import QuizWeakAreas from '../components/quiz/QuizWeakAreas';
 import {
   getAllSiteSections,
   getQuizTopics,
@@ -532,11 +537,23 @@ function Quiz() {
           </div>
         )}
 
-        <div className="breadcrumb">
-          <a href="/">Home</a><span>›</span><span>Quizzes</span>
-          {currentTopic && (<><span>›</span><span>{currentTopic}</span></>)}
-          {currentTopic && resultData && (<><span>›</span><span>Results</span></>)}
-        </div>
+         <div className="breadcrumb">
+  <a href="/">Home</a><span>›</span><span>Quizzes</span>
+  {currentTopic && (<><span>›</span><span>{currentTopic}</span></>)}
+  {currentTopic && resultData && (<><span>›</span><span>Results</span></>)}
+</div>
+
+{!currentTopic && (
+  <>
+    <QuizHero />
+    {user && <QuizDashboard user={user} />}
+    {user && <QuizChallenges user={user} />}
+    <QuizLearningPath level={currentLevel} />
+    <QuizWeakAreas user={user} onRecommend={(topic, block) => { setCurrentTopic(topic); startBlock(block); }} />
+  </>
+)}
+
+{!currentTopic ? (
 
         {tabWarning && quizQuestions.length > 0 && (
           <div style={{ background: '#f59e0b22', border: '1px solid #f59e0b', borderRadius: '8px', padding: '10px 16px', marginBottom: '1rem', fontSize: '0.85rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px' }}>
