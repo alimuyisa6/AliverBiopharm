@@ -1,4 +1,4 @@
-/* ==========================================================================
+ /* ==========================================================================
    InteractiveShowcase
    Premium two-column platform overview with an animated iPhone mockup
    demoing a guided tour of AliverBiopharm's core features.
@@ -115,17 +115,38 @@
 
 .phone-mockup {
   position: relative;
-  width: 300px;
-  height: 610px;
-  background: linear-gradient(160deg, #1b1f24, #06070a);
-  border-radius: 46px;
-  padding: 14px;
+  width: 330px;
+  height: 660px;
+  background: linear-gradient(155deg, #f4f6f8 0%, #d9dee3 45%, #c4cad1 100%);
+  border-radius: 52px;
+  padding: 12px;
   box-shadow:
-    0 30px 60px -20px rgba(10, 60, 60, 0.35),
-    0 12px 30px -8px rgba(10, 110, 110, 0.18),
-    inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+    0 40px 80px -25px rgba(10, 60, 60, 0.28),
+    0 16px 40px -10px rgba(10, 110, 110, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.08);
   animation: phone-float 6s ease-in-out infinite;
 }
+
+.phone-mockup::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 52px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+.phone-side-btn {
+  position: absolute;
+  background: linear-gradient(180deg, #e2e6ea, #b8bfc7);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.phone-side-btn.power { right: -3px; top: 150px; width: 3px; height: 70px; border-radius: 0 3px 3px 0; }
+.phone-side-btn.volume-up { left: -3px; top: 130px; width: 3px; height: 45px; border-radius: 3px 0 0 3px; }
+.phone-side-btn.volume-down { left: -3px; top: 185px; width: 3px; height: 45px; border-radius: 3px 0 0 3px; }
 
 @keyframes phone-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -134,14 +155,37 @@
 
 .phone-notch {
   position: absolute;
-  top: 14px;
+  top: 12px;
   left: 50%;
   transform: translateX(-50%);
-  width: 120px;
-  height: 26px;
-  background: #06070a;
-  border-radius: 0 0 18px 18px;
+  width: 132px;
+  height: 28px;
+  background: #0a0c0f;
+  border-radius: 0 0 20px 20px;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.phone-notch::after {
+  content: '';
+  width: 50px;
+  height: 6px;
+  border-radius: 4px;
+  background: #1c1f24;
+}
+
+.phone-notch::before {
+  content: '';
+  position: absolute;
+  left: 22px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1c1f24;
+  box-shadow: inset 0 0 0 1.5px #2c3b4a, inset -1px -1px 2px rgba(80, 140, 200, 0.4);
 }
 
 .phone-screen {
@@ -149,36 +193,52 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(170deg, #ffffff 0%, #eef7f7 100%);
-  border-radius: 34px;
+  border-radius: 42px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06), inset 0 0 0 8px #0a0c0f;
 }
+
+/* Status bar icons */
+.phone-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 20px 0;
+  flex-shrink: 0;
+}
+
+.phone-status-bar i {
+  font-size: 0.7rem;
+}
+
+.phone-status-bar .status-signal { color: #0a7e7e; }
+.phone-status-bar .status-wifi { color: #5aa9e6; }
+.phone-status-bar .status-battery { color: #3fb38a; }
 
 /* Top bar */
 .phone-topbar {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 36px 20px 18px;
+  padding: 14px 22px 18px;
   border-bottom: 1px solid var(--clr-border-glow);
   flex-shrink: 0;
 }
 
 .phone-logo {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--gradient-cyan);
-  color: #fff;
-  font-size: 0.95rem;
+  color: var(--clr-cyan);
+  font-size: 1.05rem;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 3px 10px rgba(10, 126, 126, 0.25);
 }
 
 .phone-logo img {
@@ -223,6 +283,16 @@
   border-color: rgba(10, 181, 181, 0.35);
   box-shadow: 0 6px 16px rgba(10, 126, 126, 0.12);
   transform: translateX(4px);
+}
+
+.phone-feature-item.pressed {
+  animation: feature-press 0.32s ease-out;
+}
+
+@keyframes feature-press {
+  0% { transform: translateX(4px) scale(1); }
+  45% { transform: translateX(4px) scale(0.97); }
+  100% { transform: translateX(4px) scale(1); }
 }
 
 /* Custom icon system: gradient container + layered icon pair */
@@ -289,7 +359,7 @@
   transform: translateX(3px);
 }
 
-/* Content card revealed on click */
+/* Content card revealed on click - simulates a page/screen opening */
 .phone-content-card {
   margin-top: 6px;
   padding: 14px;
@@ -298,14 +368,15 @@
   border: 1px solid var(--clr-border-glow);
   box-shadow: var(--shadow-card);
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(14px) scale(0.96);
+  transform-origin: top center;
   transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
 
 .phone-content-card.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .content-card-icon {
@@ -405,11 +476,11 @@
 @media (max-width: 768px) {
   .showcase-section { padding: 48px 16px; }
   .showcase-highlights { grid-template-columns: 1fr; gap: 12px; }
-  .phone-mockup { width: 270px; height: 560px; }
+  .phone-mockup { width: 290px; height: 580px; }
 }
 
 @media (max-width: 480px) {
-  .phone-mockup { width: 240px; height: 500px; }
+  .phone-mockup { width: 260px; height: 520px; }
   .feature-label { font-size: 0.75rem; }
   .content-card-description { font-size: 0.7rem; }
 }
