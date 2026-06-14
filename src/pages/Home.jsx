@@ -591,9 +591,7 @@ export default function Home() {
         </div>
       </section>
 
-      </section>
-
-<InteractiveShowcase />
+       <InteractiveShowcase />
 
 <section id="stats" className="section reveal">
       
