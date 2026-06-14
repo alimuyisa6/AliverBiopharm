@@ -22,6 +22,8 @@ async function getRequest(endpoint, path, params = {}) {
   return json.data !== undefined ? json.data : json;
 }
 
+export { getRequest, apiCall };
+
 export async function signup(email, password) { return apiCall('auth', 'signup', { email, password }); }
 export async function signin(email, password) { return apiCall('auth', 'signin', { email, password }); }
 export async function signout() { return apiCall('auth', 'signout', {}); }
