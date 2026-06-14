@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+ const API_BASE = '/api';
 
 async function apiCall(endpoint, path, body = {}, method = 'POST') {
   const url = `${API_BASE}/${endpoint}?path=${path}`;
@@ -52,11 +52,15 @@ export async function getResourceSubmissions() { return getRequest('resources', 
 export async function getQuizTopics({ level }) { return getRequest('quiz', 'get_quiz_topics', { level }); }
 export async function getQuizBlock({ level, topic, block_number }) { return getRequest('quiz', 'get_quiz_block', { level, topic, block_number }); }
 export async function checkDailyRetry({ level, topic, block_number }) { return getRequest('quiz', 'check_daily_retry', { level, topic, block_number }); }
- export async function checkQuizAnswer({ question_id, selected_option, level, topic, block_number }) {
-  return apiCall('quiz', 'check_quiz_answer', { question_id, selected_option, level, topic, block_number });
- }
+export async function checkQuizAnswer({ question_id, selected_option }) { return apiCall('quiz', 'check_quiz_answer', { question_id, selected_option }); }
 export async function submitQuizBlock({ level, topic, block_number, answers, time_taken }) { return apiCall('quiz', 'submit_quiz_block', { level, topic, block_number, answers, time_taken }); }
 export async function addQuizQuestionsBatch(level, topic, questions, batch_name) { return apiCall('quiz', 'add_quiz_questions_batch', { level, topic, questions, batch_name }); }
+export async function getPlatformStats() { return getRequest('quiz', 'platform-stats'); }
+export async function getUserDashboard() { return getRequest('quiz', 'dashboard'); }
+export async function getDailyChallenge() { return getRequest('quiz', 'daily-challenge'); }
+export async function getWeakAreas() { return getRequest('quiz', 'weak-areas'); }
+export async function getLearningPaths(level) { return getRequest('quiz', 'learning-paths', { level }); }
+export async function getPersonalRecords() { return getRequest('quiz', 'personal-records'); }
 
 export async function getPastPapers(filters = {}) { return getRequest('past-papers', 'get_papers', filters); }
 export async function getPastPaperFilterOptions() { return getRequest('past-papers', 'get_filter_options'); }
