@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import InteractiveShowcase from '../components/InteractiveShowcase';
 import {
   getAllSiteSections,
   getResources,
@@ -590,6 +591,12 @@ export default function Home() {
         </div>
       </section>
 
+      </section>
+
+<InteractiveShowcase />
+
+<section id="stats" className="section reveal">
+      
       <section id="stats" className="section reveal">
         <span className="sec-label">IMPACT</span>
         <h2 className="section-title">Our Impact in Numbers</h2>
