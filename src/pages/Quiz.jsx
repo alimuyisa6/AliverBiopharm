@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
 import {
@@ -532,19 +532,19 @@ function Quiz() {
         <h1 className="section-title">Knowledge Quizzes</h1>
 
         {user && streak > 0 && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #f59e0b22, #f59e0b11)', border: '1px solid #f59e0b44', borderRadius: '20px', padding: '4px 14px', marginBottom: '1rem', fontSize: '0.85rem', color: '#f59e0b' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #f59e0b22, #f59e0b11)', border: '1px solid #f59e0b44', borderRadius: '20px', padding: '4px 14px', marginBottom: '1rem', fontSize: '0.875rem', color: '#f59e0b' }}>
             <i className="fa-solid fa-fire"></i> {streak}-day streak
           </div>
         )}
 
-        <div className="breadcrumb">
+        <div className="breadcrumb" style={{ fontSize: '0.875rem' }}>
           <a href="/">Home</a><span>›</span><span>Quizzes</span>
           {currentTopic && (<><span>›</span><span>{currentTopic}</span></>)}
           {currentTopic && resultData && (<><span>›</span><span>Results</span></>)}
         </div>
 
         {tabWarning && quizQuestions.length > 0 && (
-          <div style={{ background: '#f59e0b22', border: '1px solid #f59e0b', borderRadius: '8px', padding: '10px 16px', marginBottom: '1rem', fontSize: '0.85rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ background: '#f59e0b22', border: '1px solid #f59e0b', borderRadius: '8px', padding: '10px 16px', marginBottom: '1rem', fontSize: '0.875rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <i className="fa-solid fa-triangle-exclamation"></i>
             Tab switch detected ({tabSwitchCount}). Focus on your quiz!
           </div>
@@ -564,11 +564,11 @@ function Quiz() {
           <>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
               <div className="topic-search" style={{ flex: 1 }}>
-                <input type="text" placeholder="Search topics..." value={topicSearch} onChange={e => setTopicSearch(e.target.value)} />
+                <input type="text" placeholder="Search topics..." value={topicSearch} onChange={e => setTopicSearch(e.target.value)} style={{ fontSize: '0.9rem' }} />
               </div>
               <button
                 className="btn-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.875rem' }}
                 onClick={() => { setShowLeaderboard(true); loadLeaderboard(); }}
               >
                 <i className="fa-solid fa-trophy" style={{ color: '#f59e0b' }}></i> Leaderboard
@@ -599,7 +599,7 @@ function Quiz() {
 
             <div className="topic-grid">
               {allTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).length === 0 && (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--clr-text-muted)' }}>
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--clr-text-muted)', fontSize: '1rem' }}>
                   <i className="fa-solid fa-magnifying-glass" style={{ fontSize: '2rem', marginBottom: '1rem', display: 'block', opacity: 0.4 }}></i>
                   No topics match your search.
                 </div>
@@ -610,17 +610,17 @@ function Quiz() {
                 if (hasQuestions && !allDone) {
                   return (
                     <div key={topic.topic_name} className="topic-card clickable" onClick={() => openTopicBlocks(topic.topic_name, topic.total_blocks)}>
-                      <h3>{topic.topic_name}</h3>
-                      <span className="q-count ready">{topic.question_count} questions • {topic.total_blocks} blocks</span>
-                      <small>Tap to start →</small>
+                      <h3 style={{ fontSize: '1.1rem', color: 'var(--clr-text-dim)' }}>{topic.topic_name}</h3>
+                      <span className="q-count ready" style={{ fontSize: '0.85rem', color: 'var(--clr-text-dim)' }}>{topic.question_count} questions • {topic.total_blocks} blocks</span>
+                      <small style={{ fontSize: '0.8rem', color: 'var(--clr-text-dim)' }}>Tap to start →</small>
                     </div>
                   );
                 } else {
                   return (
                     <div key={topic.topic_name} className="topic-card">
-                      <h3>{topic.topic_name}</h3>
-                      <span className="q-count">{topic.question_count} questions</span>
-                      <small>{allDone ? 'All blocks done!' : 'Questions being added'}</small>
+                      <h3 style={{ fontSize: '1.1rem', color: 'var(--clr-text-dim)' }}>{topic.topic_name}</h3>
+                      <span className="q-count" style={{ fontSize: '0.85rem', color: 'var(--clr-text-dim)' }}>{topic.question_count} questions</span>
+                      <small style={{ fontSize: '0.8rem', color: 'var(--clr-text-dim)' }}>{allDone ? 'All blocks done!' : 'Questions being added'}</small>
                     </div>
                   );
                 }
@@ -631,13 +631,13 @@ function Quiz() {
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <div className="question-card" style={{ textAlign: 'center' }}>
               <i className={`fa-solid ${resultData.passed ? 'fa-trophy' : 'fa-book-open'} result-icon`} style={{ fontSize: '3rem', color: resultData.passed ? '#f59e0b' : '#6b7280' }}></i>
-              <h2>{resultData.passed ? `Congratulations, ${user?.email?.split('@')[0] || 'Learner'}!` : 'Block Complete'}</h2>
+              <h2 style={{ color: 'var(--clr-text-dim)' }}>{resultData.passed ? `Congratulations, ${user?.email?.split('@')[0] || 'Learner'}!` : 'Block Complete'}</h2>
               <div className="result-score">{resultData.percentage}%</div>
-              <p>{resultData.score}/{resultData.total} correct</p>
-              <p style={{ fontStyle: 'italic' }}>{resultData.passed ? 'Outstanding! You really know this!' : 'Keep studying! Every expert was once a beginner.'}</p>
-              <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`}>{resultData.passed ? '✓ Passed' : '✗ Not passed'}</span>
+              <p style={{ fontSize: '1rem', color: 'var(--clr-text-dim)' }}>{resultData.score}/{resultData.total} correct</p>
+              <p style={{ fontStyle: 'italic', fontSize: '0.95rem', color: 'var(--clr-text-dim)' }}>{resultData.passed ? 'Outstanding! You really know this!' : 'Keep studying! Every expert was once a beginner.'}</p>
+              <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`} style={{ fontSize: '0.9rem' }}>{resultData.passed ? '✓ Passed' : '✗ Not passed'}</span>
               {tabSwitchCount > 0 && (
-                <p style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.5rem' }}>
+                <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.5rem' }}>
                   <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '4px' }}></i>
                   {tabSwitchCount} tab switch{tabSwitchCount > 1 ? 'es' : ''} recorded
                 </p>
@@ -650,35 +650,35 @@ function Quiz() {
             </div>
 
             {adaptivePath && (
-              <div className="adaptive-path-card">
+              <div className="adaptive-path-card" style={{ fontSize: '0.9rem' }}>
                 <div className="ap-icon"><i className="fa-solid fa-lightbulb" style={{ color: '#fbbf24' }}></i></div>
-                <h4>{resultData.passed ? 'Great Progress!' : 'Keep Going!'}</h4>
-                <p>{adaptivePath.message}</p>
+                <h4 style={{ color: 'var(--clr-text-dim)' }}>{resultData.passed ? 'Great Progress!' : 'Keep Going!'}</h4>
+                <p style={{ fontSize: '0.85rem', color: 'var(--clr-text-dim)' }}>{adaptivePath.message}</p>
               </div>
             )}
 
-            <h3>Block {currentBlock + 1} Review</h3>
+            <h3 style={{ fontSize: '1.1rem', color: 'var(--clr-text-dim)' }}>Block {currentBlock + 1} Review</h3>
             {(resultData.answers || []).map((a, idx) => (
               <div key={idx} className="question-card" style={{ padding: '1.2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', fontSize: '0.95rem' }}>
                   {a.isCorrect ? <i className="fa-solid fa-circle-check" style={{ color: '#10b981' }}></i> : <i className="fa-solid fa-circle-xmark" style={{ color: '#ef4444' }}></i>}
-                  <p style={{ fontWeight: 600, color: 'var(--clr-white)' }}>Q{idx + 1}</p>
+                  <p style={{ fontWeight: 600, color: 'var(--clr-text-dim)' }}>Q{idx + 1}</p>
                   {confidence[idx] && (
-                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', background: confidence[idx] === 'sure' ? '#10b98122' : '#f59e0b22', color: confidence[idx] === 'sure' ? '#10b981' : '#f59e0b', marginLeft: 'auto' }}>
+                    <span style={{ fontSize: '0.8rem', padding: '2px 8px', borderRadius: '10px', background: confidence[idx] === 'sure' ? '#10b98122' : '#f59e0b22', color: confidence[idx] === 'sure' ? '#10b981' : '#f59e0b', marginLeft: 'auto' }}>
                       {confidence[idx] === 'sure' ? 'Was sure' : 'Was unsure'}
                     </span>
                   )}
                 </div>
-                <p style={{ color: 'var(--clr-white)', marginBottom: '0.75rem' }} dangerouslySetInnerHTML={{ __html: renderGlossary(a.question) }} />
-                <p style={{ fontSize: '0.85rem' }}>Your answer: <span style={{ color: a.isCorrect ? '#10b981' : '#ef4444', fontWeight: 600 }}>{a.userAnswerText}</span></p>
-                {!a.isCorrect && <p style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>Correct: <span style={{ color: '#10b981', fontWeight: 600 }}>{a.correctAnswerText}</span></p>}
-                <div className="explanation-box" dangerouslySetInnerHTML={{ __html: renderGlossary(a.explanation) }} />
+                <p style={{ color: 'var(--clr-text-dim)', marginBottom: '0.75rem', fontSize: '0.95rem' }} dangerouslySetInnerHTML={{ __html: renderGlossary(a.question) }} />
+                <p style={{ fontSize: '0.9rem', color: 'var(--clr-text-dim)' }}>Your answer: <span style={{ color: a.isCorrect ? '#10b981' : '#ef4444', fontWeight: 600 }}>{a.userAnswerText}</span></p>
+                {!a.isCorrect && <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--clr-text-dim)' }}>Correct: <span style={{ color: '#10b981', fontWeight: 600 }}>{a.correctAnswerText}</span></p>}
+                <div className="explanation-box" style={{ fontSize: '0.9rem', color: 'var(--clr-text-dim)' }} dangerouslySetInnerHTML={{ __html: renderGlossary(a.explanation) }} />
               </div>
             ))}
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem', flexWrap: 'wrap' }}>
-              {currentBlock + 1 < totalBlocks && <button className="btn-primary" onClick={() => startBlock(currentBlock + 1)}>Next Block →</button>}
-              <button className="btn-secondary" onClick={() => { setCurrentTopic(''); setResultData(null); }}>← All Topics</button>
+              {currentBlock + 1 < totalBlocks && <button className="btn-primary" style={{ fontSize: '0.95rem' }} onClick={() => startBlock(currentBlock + 1)}>Next Block →</button>}
+              <button className="btn-secondary" style={{ fontSize: '0.95rem' }} onClick={() => { setCurrentTopic(''); setResultData(null); }}>← All Topics</button>
             </div>
           </div>
         ) : quizQuestions.length > 0 ? (
@@ -704,8 +704,8 @@ function Quiz() {
             {timeLeft !== null && (
               <div style={{ marginBottom: '0.75rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>Time remaining</span>
-                  <span style={{ fontSize: '0.9rem', color: timerColor, fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--clr-text-muted)' }}>Time remaining</span>
+                  <span style={{ fontSize: '0.95rem', color: timerColor, fontWeight: 600 }}>
                     {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
                   </span>
                 </div>
@@ -716,15 +716,15 @@ function Quiz() {
             )}
 
             <div className="progress-bar"><div className="progress-fill" style={{ width: `${((currentIndex + 1) / quizQuestions.length) * 100}%` }}></div></div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--clr-text-muted)', marginBottom: '0.5rem' }}>Block {currentBlock + 1} • Q {currentIndex + 1}/{quizQuestions.length}</p>
-            <p style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)', marginBottom: '1rem' }}>{currentTopic}</p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--clr-text-muted)', marginBottom: '0.5rem' }}>Block {currentBlock + 1} • Q {currentIndex + 1}/{quizQuestions.length}</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--clr-text-muted)', marginBottom: '1rem' }}>{currentTopic}</p>
 
             <div className="spinner-top-container" style={{ display: showingSpinner ? 'flex' : 'none' }}>
-              <span className="answer-spinner"></span><span className="spinner-text">{spinnerWord}</span>
+              <span className="answer-spinner"></span><span className="spinner-text" style={{ fontSize: '0.9rem' }}>{spinnerWord}</span>
             </div>
 
             <div className={`question-card`} style={{ opacity: questionTransition ? 0 : 1, transform: questionTransition ? 'translateY(8px)' : 'translateY(0)', transition: 'opacity 0.2s ease, transform 0.2s ease' }}>
-              <h2 dangerouslySetInnerHTML={{ __html: renderGlossary(quizQuestions[currentIndex].question_text) }} />
+              <h2 style={{ color: 'var(--clr-text-dim)' }} dangerouslySetInnerHTML={{ __html: renderGlossary(quizQuestions[currentIndex].question_text) }} />
 
               {['A','B','C','D'].map(opt => {
                 const answered = userAnswers[currentIndex] !== null;
@@ -732,13 +732,13 @@ function Quiz() {
                 const correctOpt = userAnswers[currentIndex]?.correct_option;
                 let cls = '', icon = null;
                 if (answered) {
-                  if (opt === correctOpt) { cls = ' correct'; icon = <i className="fa-solid fa-circle-check" style={{ color: '#10b981', marginLeft: 'auto' }}></i>; }
-                  else if (opt === selected) { cls = ' incorrect'; icon = <i className="fa-solid fa-circle-xmark" style={{ color: '#ef4444', marginLeft: 'auto' }}></i>; }
+                  if (opt === correctOpt) { cls = ' correct'; icon = <i className="fa-solid fa-circle-check" style={{ color: '#10b981', marginLeft: 'auto', fontSize: '1rem' }}></i>; }
+                  else if (opt === selected) { cls = ' incorrect'; icon = <i className="fa-solid fa-circle-xmark" style={{ color: '#ef4444', marginLeft: 'auto', fontSize: '1rem' }}></i>; }
                 }
                 return (
                   <button key={opt} className={`option-btn${cls}`} disabled={answered || answerSubmitting} onClick={() => selectAnswer(opt)}>
                     <span className="option-letter">{opt}</span>
-                    <span dangerouslySetInnerHTML={{ __html: renderGlossary(quizQuestions[currentIndex][`option_${opt.toLowerCase()}`]) }} />
+                    <span style={{ color: 'var(--clr-text-dim)' }} dangerouslySetInnerHTML={{ __html: renderGlossary(quizQuestions[currentIndex][`option_${opt.toLowerCase()}`]) }} />
                     {icon}
                   </button>
                 );
@@ -746,16 +746,16 @@ function Quiz() {
 
               {userAnswers[currentIndex] === null && (
                 <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>Confidence:</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--clr-text-muted)' }}>Confidence:</span>
                   <button
                     onClick={() => setConfidenceForCurrent('sure')}
-                    style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '10px', border: '1px solid', borderColor: confidence[currentIndex] === 'sure' ? '#10b981' : 'rgba(255,255,255,0.15)', background: confidence[currentIndex] === 'sure' ? '#10b98122' : 'transparent', color: confidence[currentIndex] === 'sure' ? '#10b981' : 'var(--clr-text-muted)', cursor: 'pointer' }}
+                    style={{ fontSize: '0.85rem', padding: '3px 10px', borderRadius: '10px', border: '1px solid', borderColor: confidence[currentIndex] === 'sure' ? '#10b981' : 'rgba(255,255,255,0.15)', background: confidence[currentIndex] === 'sure' ? '#10b98122' : 'transparent', color: confidence[currentIndex] === 'sure' ? '#10b981' : 'var(--clr-text-muted)', cursor: 'pointer' }}
                   >
                     Sure
                   </button>
                   <button
                     onClick={() => setConfidenceForCurrent('unsure')}
-                    style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '10px', border: '1px solid', borderColor: confidence[currentIndex] === 'unsure' ? '#f59e0b' : 'rgba(255,255,255,0.15)', background: confidence[currentIndex] === 'unsure' ? '#f59e0b22' : 'transparent', color: confidence[currentIndex] === 'unsure' ? '#f59e0b' : 'var(--clr-text-muted)', cursor: 'pointer' }}
+                    style={{ fontSize: '0.85rem', padding: '3px 10px', borderRadius: '10px', border: '1px solid', borderColor: confidence[currentIndex] === 'unsure' ? '#f59e0b' : 'rgba(255,255,255,0.15)', background: confidence[currentIndex] === 'unsure' ? '#f59e0b22' : 'transparent', color: confidence[currentIndex] === 'unsure' ? '#f59e0b' : 'var(--clr-text-muted)', cursor: 'pointer' }}
                   >
                     Unsure
                   </button>
@@ -764,25 +764,25 @@ function Quiz() {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-              {currentIndex > 0 && <button className="btn-secondary" onClick={prevQuestion}>← Prev</button>}
+              {currentIndex > 0 && <button className="btn-secondary" style={{ fontSize: '0.95rem' }} onClick={prevQuestion}>← Prev</button>}
               {userAnswers[currentIndex] !== null && (
                 firstUnanswered !== -1 && firstUnanswered !== currentIndex ? (
-                  <button className="btn-primary" onClick={nextQuestion}>Next →</button>
+                  <button className="btn-primary" style={{ fontSize: '0.95rem' }} onClick={nextQuestion}>Next →</button>
                 ) : currentIndex < quizQuestions.length - 1 && userAnswers[currentIndex] !== null ? (
-                  <button className="btn-primary" onClick={nextQuestion}>Next →</button>
+                  <button className="btn-primary" style={{ fontSize: '0.95rem' }} onClick={nextQuestion}>Next →</button>
                 ) : allAnswered ? (
-                  <button className="btn-primary" onClick={submitBlock}>Submit Block</button>
+                  <button className="btn-primary" style={{ fontSize: '0.95rem' }} onClick={submitBlock}>Submit Block</button>
                 ) : null
               )}
             </div>
-            <div className="keyboard-hint">💡 Press A B C D keys • ← → to navigate • Swipe on mobile</div>
+            <div className="keyboard-hint" style={{ fontSize: '0.8rem' }}>💡 Press A B C D keys • ← → to navigate • Swipe on mobile</div>
           </div>
         ) : (
           <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', color: 'var(--clr-white)' }}>{currentTopic}</h2>
             <div className="block-nav">
               {totalBlocks === 0 ? (
-                <p>No blocks available for this topic.</p>
+                <p style={{ fontSize: '1rem', color: 'var(--clr-text-dim)' }}>No blocks available for this topic.</p>
               ) : (
                 Array.from({ length: totalBlocks }).map((_, i) => {
                   const topicData = allTopics.find(t => t.topic_name === currentTopic);
@@ -793,22 +793,22 @@ function Quiz() {
                   else if (completed) { cls = 'completed'; icon = <i className="fa-solid fa-check-circle" style={{ marginRight: '6px', color: '#10b981' }}></i>; }
                   else { icon = <i className="fa-regular fa-circle" style={{ marginRight: '6px', color: '#0ab5b5' }}></i>; }
                   return (
-                    <button key={i} className={`block-nav-btn ${cls}`} disabled={locked} onClick={() => startBlock(i)}>
+                    <button key={i} className={`block-nav-btn ${cls}`} style={{ fontSize: '0.9rem' }} disabled={locked} onClick={() => startBlock(i)}>
                       {icon} Block {i + 1}
                     </button>
                   );
                 })
               )}
             </div>
-            <button className="btn-secondary" onClick={() => setCurrentTopic('')}>← Back</button>
+            <button className="btn-secondary" style={{ fontSize: '0.95rem' }} onClick={() => setCurrentTopic('')}>← Back</button>
           </div>
         )}
 
         {showRulesModal && (
           <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
             <div style={{ background: 'var(--clr-navy-card)', padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '420px', width: '90%' }}>
-              <h3>Quiz Rules</h3>
-              <ul style={{ listStyle: 'none' }}>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--clr-text-dim)' }}>Quiz Rules</h3>
+              <ul style={{ listStyle: 'none', fontSize: '0.9rem', color: 'var(--clr-text-dim)' }}>
                 <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> 10 questions per block</li>
                 <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> 70% to pass</li>
                 <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> Immediate feedback per question</li>
@@ -817,7 +817,7 @@ function Quiz() {
                 <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> Block locks for 24h after completion</li>
                 <li><i className="fa-solid fa-triangle-exclamation" style={{ color: '#f59e0b', marginRight: '8px' }}></i> Tab switches are recorded</li>
               </ul>
-              <button className="btn-primary" style={{ width: '100%' }} onClick={confirmStartBlock}>I understand, let's begin!</button>
+              <button className="btn-primary" style={{ width: '100%', fontSize: '0.95rem' }} onClick={confirmStartBlock}>I understand, let's begin!</button>
             </div>
           </div>
         )}
@@ -825,17 +825,17 @@ function Quiz() {
         {showResumeModal && resumeData && (
           <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
             <div style={{ background: 'var(--clr-navy-card)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', maxWidth: '420px', width: '90%' }}>
-              <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>Resume Previous Quiz</h3>
-              <div style={{ fontSize: '0.9rem', lineHeight: '1.5' }}>
+              <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem', color: 'var(--clr-text-dim)' }}>Resume Previous Quiz</h3>
+              <div style={{ fontSize: '0.95rem', lineHeight: '1.5', color: 'var(--clr-text-dim)' }}>
                 <p><strong>Topic:</strong> {resumeData.topic || 'Unknown'}</p>
                 <p><strong>Level:</strong> {resumeData.level || currentLevel}</p>
                 <p><strong>Block:</strong> {resumeData.block !== undefined ? resumeData.block + 1 : '?'}</p>
                 <p><strong>Question:</strong> {(resumeData.index !== undefined ? resumeData.index : 0) + 1} of {resumeData.totalQuestions || resumeData.questions?.length || '?'}</p>
               </div>
-              <p style={{ marginTop: '1rem', fontSize: '0.85rem' }}>Would you like to continue where you left off?</p>
+              <p style={{ marginTop: '1rem', fontSize: '0.95rem', color: 'var(--clr-text-dim)' }}>Would you like to continue where you left off?</p>
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                <button className="btn-primary" onClick={handleResume} style={{ flex: 1 }}>Resume</button>
-                <button className="btn-secondary" onClick={handleDiscardResume} style={{ flex: 1 }}>Start Fresh</button>
+                <button className="btn-primary" onClick={handleResume} style={{ flex: 1, fontSize: '0.95rem' }}>Resume</button>
+                <button className="btn-secondary" onClick={handleDiscardResume} style={{ flex: 1, fontSize: '0.95rem' }}>Start Fresh</button>
               </div>
             </div>
           </div>
@@ -845,22 +845,22 @@ function Quiz() {
           <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
             <div style={{ background: 'var(--clr-navy-card)', padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '480px', width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3 style={{ margin: 0 }}><i className="fa-solid fa-trophy" style={{ color: '#f59e0b', marginRight: '8px' }}></i>Leaderboard — {currentLevel}</h3>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--clr-text-dim)' }}><i className="fa-solid fa-trophy" style={{ color: '#f59e0b', marginRight: '8px' }}></i>Leaderboard — {currentLevel}</h3>
                 <button onClick={() => setShowLeaderboard(false)} style={{ background: 'none', border: 'none', color: 'var(--clr-text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}><i className="fa-solid fa-xmark"></i></button>
               </div>
               {leaderboardLoading ? (
-                <p style={{ textAlign: 'center', color: 'var(--clr-text-muted)' }}>Loading...</p>
+                <p style={{ textAlign: 'center', color: 'var(--clr-text-dim)', fontSize: '0.95rem' }}>Loading...</p>
               ) : leaderboard.length === 0 ? (
-                <p style={{ textAlign: 'center', color: 'var(--clr-text-muted)' }}>No data yet. Be the first!</p>
+                <p style={{ textAlign: 'center', color: 'var(--clr-text-dim)', fontSize: '0.95rem' }}>No data yet. Be the first!</p>
               ) : (
                 leaderboard.map((entry, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', borderBottom: '1px solid rgba(255,255,255,0.06)', fontSize: '0.9rem' }}>
                     <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: idx === 0 ? '#f59e0b' : idx === 1 ? '#9ca3af' : idx === 2 ? '#b8873a' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, color: idx < 3 ? '#000' : 'var(--clr-text-muted)', flexShrink: 0 }}>
                       {idx + 1}
                     </span>
-                    <span style={{ flex: 1, fontSize: '0.9rem', color: 'var(--clr-white)' }}>{entry.user_name || entry.email?.split('@')[0] || 'Learner'}</span>
-                    <span style={{ fontSize: '0.85rem', color: '#0ab5b5', fontWeight: 600 }}>{entry.avg_score || entry.percentage || 0}%</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>{entry.total_attempts || entry.attempts || 0} attempts</span>
+                    <span style={{ flex: 1, color: 'var(--clr-text-dim)' }}>{entry.user_name || entry.email?.split('@')[0] || 'Learner'}</span>
+                    <span style={{ color: '#0ab5b5', fontWeight: 600 }}>{entry.avg_score || entry.percentage || 0}%</span>
+                    <span style={{ color: 'var(--clr-text-dim)' }}>{entry.total_attempts || entry.attempts || 0} attempts</span>
                   </div>
                 ))
               )}
@@ -909,7 +909,7 @@ function Quiz() {
       <a href="#pricing" className="sticky-cta"><i className="fa-solid fa-rocket"></i> Start Learning</a>
 
       {toast && (
-        <div className={`toast toast-${toast.type}`} style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 10000, background: toast.type === 'error' ? '#ef4444' : toast.type === 'warning' ? '#f59e0b' : '#10b981', color: 'white', padding: '12px 20px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', animation: 'slideIn 0.3s ease' }}>
+        <div className={`toast toast-${toast.type}`} style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 10000, background: toast.type === 'error' ? '#ef4444' : toast.type === 'warning' ? '#f59e0b' : '#10b981', color: 'white', padding: '12px 20px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)', animation: 'slideIn 0.3s ease', fontSize: '0.9rem' }}>
           {toast.message}
         </div>
       )}
