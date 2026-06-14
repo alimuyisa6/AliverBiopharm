@@ -158,8 +158,8 @@ body.dark-mode .site-header { background: rgba(1, 44, 44, 0.85); }
 .logo-link:hover { opacity: 0.88; }
 
 .logo-link img {
-  height: 162px !important;
-  max-height: 162px !important;
+  height: 150px !important;
+  max-height: 150px !important;
   width: auto;
   max-width: 302px;
   object-fit: contain;
