@@ -57,12 +57,12 @@ export async function checkDailyRetry({ level, topic, block_number }) { return g
 export async function checkQuizAnswer({ question_id, selected_option }) { return apiCall('quiz', 'check_quiz_answer', { question_id, selected_option }); }
 export async function submitQuizBlock({ level, topic, block_number, answers, time_taken }) { return apiCall('quiz', 'submit_quiz_block', { level, topic, block_number, answers, time_taken }); }
 export async function addQuizQuestionsBatch(level, topic, questions, batch_name) { return apiCall('quiz', 'add_quiz_questions_batch', { level, topic, questions, batch_name }); }
-export async function getPlatformStats() { return getRequest('quiz', 'platform-stats'); }
-export async function getUserDashboard() { return getRequest('quiz', 'dashboard'); }
-export async function getDailyChallenge() { return getRequest('quiz', 'daily-challenge'); }
-export async function getWeakAreas() { return getRequest('quiz', 'weak-areas'); }
-export async function getLearningPaths(level) { return getRequest('quiz', 'learning-paths', { level }); }
-export async function getPersonalRecords() { return getRequest('quiz', 'personal-records'); }
+export async function getPlatformStats() { return getRequest('interactions', 'platform-stats'); }
+export async function getUserDashboard() { return getRequest('interactions', 'dashboard'); }
+export async function getDailyChallenge() { return getRequest('interactions', 'daily-challenge'); }
+export async function getWeakAreas() { return getRequest('interactions', 'weak-areas'); }
+export async function getLearningPaths(level) { return getRequest('interactions', 'learning-paths', { level }); }
+export async function getPersonalRecords() { return getRequest('interactions', 'personal-records'); }
 
 export async function getPastPapers(filters = {}) { return getRequest('past-papers', 'get_papers', filters); }
 export async function getPastPaperFilterOptions() { return getRequest('past-papers', 'get_filter_options'); }
