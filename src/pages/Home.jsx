@@ -592,8 +592,7 @@ export default function Home() {
       </section>
 
        <InteractiveShowcase />
-
-<section id="stats" className="section reveal">
+ 
       
       <section id="stats" className="section reveal">
         <span className="sec-label">IMPACT</span>
