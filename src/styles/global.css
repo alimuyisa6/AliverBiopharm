@@ -1085,8 +1085,8 @@ body.dark-mode .f-input:focus {
   .filter-dropdown { padding: 0.6rem 0.8rem 0.8rem; }
   .nav-actions { right: 12px; top: 8px; }
   .logo-link img {
-    height: 122px !important;
-    max-height: 122px !important;
+    height: 100px !important;
+    max-height: 100px !important;
     max-width: 262px;
     margin-top: -35px;
     margin-bottom: -35px;
@@ -1114,8 +1114,8 @@ body.dark-mode .f-input:focus {
   .footer-grid { grid-template-columns: 1fr; }
   .section-title { font-size: clamp(1.8rem, 6vw, 2.5rem); }
   .logo-link img {
-    height: 102px !important;
-    max-height: 102px !important;
+    height: 80px !important;
+    max-height: 80px !important;
     max-width: 242px;
     margin-top: -30px;
     margin-bottom: -30px;
