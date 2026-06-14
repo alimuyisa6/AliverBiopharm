@@ -1,4 +1,4 @@
- const API_BASE = '/api';
+  const API_BASE = '/api';
 
 async function apiCall(endpoint, path, body = {}, method = 'POST') {
   const url = `${API_BASE}/${endpoint}?path=${path}`;
@@ -24,8 +24,8 @@ async function getRequest(endpoint, path, params = {}) {
 
 export { getRequest, apiCall };
 
-export async function signup(email, password) { return apiCall('auth', 'signup', { email, password }); }
-export async function signin(email, password) { return apiCall('auth', 'signin', { email, password }); }
+export async function signup(email, password, turnstile_token) { return apiCall('auth', 'signup', { email, password, turnstile_token }); }
+export async function signin(email, password, turnstile_token) { return apiCall('auth', 'signin', { email, password, turnstile_token }); }
 export async function signout() { return apiCall('auth', 'signout', {}); }
 export async function getUser() { return getRequest('auth', 'get_user'); }
 
