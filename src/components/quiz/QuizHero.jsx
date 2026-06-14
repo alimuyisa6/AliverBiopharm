@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+ import { useEffect, useState } from 'react';
 import { getRequest } from '../../api/client';
 
 export default function QuizHero() {
   const [stats, setStats] = useState({ total_questions: 0, total_topics: 0, total_learners: 0, average_pass_rate: 0 });
   useEffect(() => {
-    getRequest('quiz', 'platform-stats').then(setStats).catch(()=>{});
+    getRequest('interactions', 'platform-stats').then(setStats).catch(() => {});
   }, []);
   return (
     <div className="quiz-hero">
