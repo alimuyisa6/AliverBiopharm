@@ -1,6 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+ import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 function setCorsHeaders(res, req) {
   const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://aliverbiopharm.com').split(',').map(o => o.trim());
@@ -25,7 +29,12 @@ function parseCookies(req) {
   }));
 }
 
-function hashToken(token) { return require('crypto').createHash('sha256').update(token).digest('hex'); }
+ function hashToken(token) {
+  return crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+ }
 
 async function validateSession(token) {
   if (!token || token.length < 20) return null;
