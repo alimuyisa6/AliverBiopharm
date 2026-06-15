@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
+import { cachedFetch } from '../utils/dataCache';
 import {
   getAllSiteSections,
   getResources,
@@ -166,11 +167,20 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [sections, resources, flashcards]);
 
-  async function fetchAllData() {
-    try {
-      const siteSections = await getAllSiteSections();
-      setSections(siteSections);
-    } catch (err) { console.error(err); }
+   async function fetchAllData() {
+    const { data: cachedSections } = cachedFetch(
+      'site_sections',
+      getAllSiteSections,
+      { onUpdate: (fresh) => setSections(fresh) }
+    );
+    if (cachedSections) {
+      setSections(cachedSections);
+    } else {
+      try {
+        const siteSections = await getAllSiteSections();
+        setSections(siteSections);
+      } catch (err) { console.error(err); }
+    }
     fetchResources();
     fetchFilterOptions();
     fetchFlashcards();
@@ -231,12 +241,21 @@ export default function Home() {
     } catch (err) { console.error(err); }
   }
 
-  async function fetchPublicStats() {
-    try {
-      const data = await getPublicStats();
-      setPublicStats(data);
-    } catch (err) { console.error(err); }
-  }
+   async function fetchPublicStats() {
+    const { data: cachedStats } = cachedFetch(
+      'public_stats',
+      getPublicStats,
+      { onUpdate: (fresh) => setPublicStats(fresh) }
+    );
+    if (cachedStats) {
+      setPublicStats(cachedStats);
+    } else {
+      try {
+        const data = await getPublicStats();
+        setPublicStats(data);
+      } catch (err) { console.error(err); }
+    }
+   }
 
   async function fetchCommunityActivity() {
     try {
