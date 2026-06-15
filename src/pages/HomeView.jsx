@@ -2,6 +2,163 @@
 import { Link, useNavigate } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
 
+ function MicrobiomePersona() {
+  const [answers, setAnswers] = React.useState({ diet: null, sleep: null, stress: null });
+  const [showHypothetical, setShowHypothetical] = React.useState(false);
+  const allAnswered = answers.diet && answers.sleep && answers.stress;
+  const persona = allAnswered ? computePersona(answers) : null;
+  const displayPersona = showHypothetical && persona ? computeHypothetical(persona) : persona;
+
+  return (
+    <section style={{ maxWidth: '600px', margin: '40px auto', padding: '30px', background: 'linear-gradient(135deg, #0b1a2f 0%, #122b44 100%)', borderRadius: '24px', border: '1px solid var(--clr-border-glow)', textAlign: 'center' }}>
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes wobble {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(3deg); }
+          75% { transform: rotate(-3deg); }
+        }
+        .bacteria {
+          position: absolute;
+          animation: float 3s ease-in-out infinite, wobble 4s ease-in-out infinite;
+        }
+      `}</style>
+      <h3 style={{ color: 'var(--clr-cyan)', fontFamily: "'Playfair Display', serif", fontSize: '1.6rem', marginBottom: '8px' }}>
+        <span role="img" aria-label="microscope">🔬</span> Your Microbiome Persona
+      </h3>
+      <p style={{ color: 'var(--clr-text-dim)', marginBottom: '24px', fontSize: '0.9rem' }}>Discover the tiny universe inside you. Answer three quick questions.</p>
+
+      {!allAnswered ? (
+        <div>
+          <div style={{ marginBottom: '24px' }}>
+            <p style={{ color: 'var(--clr-white)', fontWeight: 600, marginBottom: '8px' }}>What does your typical diet look like?</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {['Plant-heavy', 'Mixed', 'Processed/meat-heavy'].map(option => (
+                <button key={option} onClick={() => setAnswers(prev => ({ ...prev, diet: option }))} style={{
+                  padding: '8px 18px', borderRadius: '20px', border: `2px solid ${answers.diet === option ? '#0ab5b5' : 'var(--clr-border-glow)'}`,
+                  background: answers.diet === option ? '#0ab5b5' : 'transparent', color: answers.diet === option ? '#fff' : 'var(--clr-text-dim)',
+                  cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
+                }}>{option}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginBottom: '24px' }}>
+            <p style={{ color: 'var(--clr-white)', fontWeight: 600, marginBottom: '8px' }}>How well do you sleep on average?</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {['Great', 'Okay', 'Poorly'].map(option => (
+                <button key={option} onClick={() => setAnswers(prev => ({ ...prev, sleep: option }))} style={{
+                  padding: '8px 18px', borderRadius: '20px', border: `2px solid ${answers.sleep === option ? '#0ab5b5' : 'var(--clr-border-glow)'}`,
+                  background: answers.sleep === option ? '#0ab5b5' : 'transparent', color: answers.sleep === option ? '#fff' : 'var(--clr-text-dim)',
+                  cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
+                }}>{option}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginBottom: '24px' }}>
+            <p style={{ color: 'var(--clr-white)', fontWeight: 600, marginBottom: '8px' }}>How would you rate your stress level?</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {['Low', 'Moderate', 'High'].map(option => (
+                <button key={option} onClick={() => setAnswers(prev => ({ ...prev, stress: option }))} style={{
+                  padding: '8px 18px', borderRadius: '20px', border: `2px solid ${answers.stress === option ? '#0ab5b5' : 'var(--clr-border-glow)'}`,
+                  background: answers.stress === option ? '#0ab5b5' : 'transparent', color: answers.stress === option ? '#fff' : 'var(--clr-text-dim)',
+                  cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
+                }}>{option}</button>
+              ))}
+            </div>
+          </div>
+          <p style={{ color: 'var(--clr-text-muted)', fontSize: '0.8rem' }}>Select all three to reveal your gut profile.</p>
+        </div>
+      ) : (
+        <div>
+          <div style={{ width: '160px', height: '260px', margin: '0 auto 24px', border: '3px solid #0ab5b5', borderRadius: '0 0 80px 80px', background: 'linear-gradient(to top, rgba(10,181,181,0.15), rgba(255,255,255,0.05))', position: 'relative', overflow: 'hidden' }}>
+            {displayPersona && displayPersona.bacteria.map((b, i) => (
+              <div key={i} className="bacteria" style={{
+                left: `${b.x}%`, top: `${b.y}%`, width: `${b.size}px`, height: b.shape === 'rod' ? `${b.size * 0.6}px` : `${b.size}px`,
+                backgroundColor: b.color, borderRadius: b.shape === 'rod' ? '30% / 50%' : '50%',
+                opacity: 0.85, animationDelay: `${i * 0.5}s`
+              }}></div>
+            ))}
+            <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', textAlign: 'center', paddingBottom: '4px', fontSize: '0.65rem', color: 'var(--clr-text-dim)' }}>your inner ecosystem</div>
+          </div>
+          <h4 style={{ color: 'var(--clr-magenta)', fontSize: '1.2rem', margin: '0 0 4px' }}>{displayPersona.name}</h4>
+          <p style={{ color: 'var(--clr-text-dim)', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto 20px' }}>{displayPersona.description}</p>
+          <button onClick={() => setShowHypothetical(!showHypothetical)} style={{
+            padding: '10px 24px', borderRadius: '30px', border: '2px solid var(--clr-magenta)', background: showHypothetical ? 'var(--clr-magenta)' : 'transparent',
+            color: showHypothetical ? '#fff' : 'var(--clr-magenta)', cursor: 'pointer', fontWeight: 700, transition: 'all 0.2s', marginBottom: '12px'
+          }}>
+            {showHypothetical ? 'Back to my results' : 'What if I ate more fiber?'}
+          </button>
+          {showHypothetical && <p style={{ color: 'var(--clr-cyan)', fontSize: '0.85rem', maxWidth: '400px', margin: '0 auto' }}>{displayPersona.hypotheticalNote}</p>}
+          <button onClick={() => { setAnswers({ diet: null, sleep: null, stress: null }); setShowHypothetical(false); }} style={{
+            display: 'block', margin: '24px auto 0', background: 'none', border: 'none', color: 'var(--clr-text-muted)', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8rem'
+          }}>Retake Quiz</button>
+        </div>
+      )}
+    </section>
+  );
+
+  function computePersona(answers) {
+    let score = 0;
+    if (answers.diet === 'Plant-heavy') score += 2;
+    else if (answers.diet === 'Mixed') score += 1;
+    if (answers.sleep === 'Great') score += 2;
+    else if (answers.sleep === 'Okay') score += 1;
+    if (answers.stress === 'Low') score += 2;
+    else if (answers.stress === 'Moderate') score += 1;
+
+    if (score >= 5) {
+      return {
+        name: 'The Protector',
+        description: 'Rich in Bifidobacterium and Lactobacillus — you’re great at fighting off pathogens and supporting immunity.',
+        bacteria: [
+          { x: 20, y: 70, size: 24, color: '#0ab5b5', shape: 'circle' },
+          { x: 60, y: 50, size: 20, color: '#1bc5c5', shape: 'circle' },
+          { x: 40, y: 30, size: 28, color: '#0ab5b5', shape: 'rod' },
+          { x: 75, y: 65, size: 22, color: '#b8873a', shape: 'rod' },
+          { x: 10, y: 40, size: 18, color: '#0ab5b5', shape: 'circle' }
+        ]
+      };
+    } else if (score >= 3) {
+      return {
+        name: 'The Balancer',
+        description: 'A decent mix of good and opportunistic bacteria. A few tweaks could boost your resilience.',
+        bacteria: [
+          { x: 25, y: 60, size: 22, color: '#0ab5b5', shape: 'circle' },
+          { x: 55, y: 45, size: 20, color: '#b8873a', shape: 'rod' },
+          { x: 15, y: 20, size: 18, color: '#888888', shape: 'circle' },
+          { x: 70, y: 70, size: 24, color: '#0ab5b5', shape: 'rod' },
+          { x: 80, y: 30, size: 16, color: '#b8873a', shape: 'circle' }
+        ]
+      };
+    } else {
+      return {
+        name: 'The Disruptor',
+        description: 'Stress and diet may favor less friendly microbes. Small changes can make a big difference.',
+        bacteria: [
+          { x: 30, y: 50, size: 20, color: '#e74c3c', shape: 'circle' },
+          { x: 60, y: 65, size: 18, color: '#e74c3c', shape: 'rod' },
+          { x: 45, y: 30, size: 22, color: '#888888', shape: 'circle' },
+          { x: 75, y: 45, size: 16, color: '#e74c3c', shape: 'rod' },
+          { x: 20, y: 70, size: 20, color: '#888888', shape: 'circle' }
+        ]
+      };
+    }
+  }
+
+  function computeHypothetical(persona) {
+    return {
+      ...persona,
+      name: persona.name + ' (with better diet)',
+      description: persona.description + ' If you shift to a plant‑heavy diet, your beneficial bacteria could thrive.',
+      bacteria: persona.bacteria.map(b => b.color === '#e74c3c' ? { ...b, color: '#0ab5b5', shape: 'circle' } : b),
+      hypotheticalNote: 'A fiber‑rich diet feeds Bifidobacterium and Lactobacillus, crowding out harmful species.'
+    };
+  }
+}
+
 export default function HomeView({
   sections,
   flashcards,
