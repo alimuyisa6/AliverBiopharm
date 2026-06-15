@@ -320,14 +320,19 @@ html, body {
   position: absolute;
   width: 28px;
   height: 28px;
-  background: rgba(0,0,0,0.15);
-  border: 2px solid white;
-  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
   z-index: 100;
-  transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
-  backdrop-filter: blur(2px);
+  transform-origin: center;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.cursor-icon {
+  font-size: 24px;
+  color: #3b82f6;
+  filter: drop-shadow(0 0 2px white);
 }
 
 .cursor-pulse {
@@ -451,4 +456,4 @@ html, body {
   .iphone-frame {
     width: 320px;
   }
-}
+} 
