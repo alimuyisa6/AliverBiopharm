@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
-import { cachedFetch } from '../utils/dataCache';
+import { cachedFetch } from '../utils/DataCache';
 import {
   getAllSiteSections,
   getResources,
