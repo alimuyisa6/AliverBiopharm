@@ -1,9 +1,9 @@
  // src/components/InteractiveShowcase/InteractiveShowcase.jsx
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { 
-  FaDna, FaFileAlt, FaBrain, FaLayerGroup, FaTrophy, 
-  FaBookOpen, FaChartLine, FaSignal, FaWifi, 
-  FaBatteryFull, FaPlay, FaArrowRight 
+import {
+  FaDna, FaFileAlt, FaBrain, FaLayerGroup, FaTrophy,
+  FaBookOpen, FaChartLine, FaSignal, FaWifi,
+  FaBatteryFull, FaPlay, FaArrowRight
 } from 'react-icons/fa';
 import './InteractiveShowcase.css';
 
@@ -65,17 +65,18 @@ const InteractiveShowcase = () => {
   const [flashcardsData, setFlashcardsData] = useState([]);
   const [continueReadingData, setContinueReadingData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
   const [expandedFeature, setExpandedFeature] = useState(null);
   const [previewData, setPreviewData] = useState(null);
   const [isAutoDemoActive, setIsAutoDemoActive] = useState(true);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isCursorVisible, setIsCursorVisible] = useState(false);
-  
+  const [currentTime, setCurrentTime] = useState('');
+
   const menuItemsRef = useRef({});
   const phoneContentRef = useRef(null);
   const autoDemoTimeoutRef = useRef(null);
-  
+  const isScrollingRef = useRef(false);
+
   const menuItems = [
     { key: 'Biology Notes', icon: FaDna },
     { key: 'Past Papers', icon: FaFileAlt },
@@ -85,7 +86,19 @@ const InteractiveShowcase = () => {
     { key: 'Continue Reading', icon: FaBookOpen },
     { key: 'Platform Statistics', icon: FaChartLine }
   ];
-  
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      setCurrentTime(`${hours}:${minutes}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const fetchAllData = async () => {
       setIsLoading(true);
@@ -97,7 +110,6 @@ const InteractiveShowcase = () => {
           fetch('/api/flashcards?path=decks').then(res => res.json()),
           fetch('/api/resources?path=get_continue_reading').then(res => res.json())
         ]);
-        
         setNotesData(notesRes || []);
         setPastPapersData(papersRes?.papers || []);
         setQuizTopicsData(quizRes || []);
@@ -111,23 +123,20 @@ const InteractiveShowcase = () => {
     };
     fetchAllData();
   }, []);
-  
+
   const platformStats = useMemo(() => ({
     totalNotes: notesData.length,
     totalFlashcardDecks: flashcardsData.length,
     totalQuizTopics: quizTopicsData.length,
     totalPastPapers: pastPapersData.length
   }), [notesData, flashcardsData, quizTopicsData, pastPapersData]);
-  
-  const handleFeatureClick = useCallback(async (featureKey) => {
+
+  const handleFeatureClick = useCallback((featureKey) => {
     if (!isAutoDemoActive) return;
-    
     setExpandedFeature(null);
     setPreviewData(null);
-    
     setTimeout(() => {
       setExpandedFeature(featureKey);
-      
       switch(featureKey) {
         case 'Biology Notes':
           setPreviewData(notesData[0] || null);
@@ -159,7 +168,7 @@ const InteractiveShowcase = () => {
       }
     }, 150);
   }, [notesData, pastPapersData, quizTopicsData, flashcardsData, continueReadingData, platformStats, isAutoDemoActive]);
-  
+
   const moveCursorToElement = useCallback((element) => {
     if (!element || !phoneContentRef.current) return;
     const elementRect = element.getBoundingClientRect();
@@ -169,7 +178,7 @@ const InteractiveShowcase = () => {
     setCursorPosition({ x, y });
     setIsCursorVisible(true);
   }, []);
-  
+
   const simulateClickOnItem = useCallback((itemKey) => {
     const element = menuItemsRef.current[itemKey];
     if (element) {
@@ -181,27 +190,29 @@ const InteractiveShowcase = () => {
       pulseDiv.style.top = `${rect.top + rect.height/2 - parentRect.top}px`;
       phoneContentRef.current.appendChild(pulseDiv);
       setTimeout(() => pulseDiv.remove(), 400);
-      
       handleFeatureClick(itemKey);
     }
   }, [handleFeatureClick]);
-  
+
   const scrollToMenuItem = useCallback((itemKey) => {
     const element = menuItemsRef.current[itemKey];
-    if (element) {
+    if (element && !isScrollingRef.current) {
+      isScrollingRef.current = true;
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 500);
     }
   }, []);
-  
+
   const startAutoDemo = useCallback(() => {
     if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
-    
     let currentIndex = 0;
     const runNext = () => {
       if (!isAutoDemoActive) return;
       const item = menuItems[currentIndex % menuItems.length];
       const targetElement = menuItemsRef.current[item.key];
-      if (targetElement) {
+      if (targetElement && !isScrollingRef.current) {
         scrollToMenuItem(item.key);
         setTimeout(() => {
           moveCursorToElement(targetElement);
@@ -212,12 +223,12 @@ const InteractiveShowcase = () => {
           }, 300);
         }, 200);
       } else {
-        runNext();
+        autoDemoTimeoutRef.current = setTimeout(runNext, 500);
       }
     };
     runNext();
   }, [menuItems, scrollToMenuItem, moveCursorToElement, simulateClickOnItem, isAutoDemoActive]);
-  
+
   useEffect(() => {
     if (isAutoDemoActive && !isLoading) {
       startAutoDemo();
@@ -226,7 +237,7 @@ const InteractiveShowcase = () => {
       if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
     };
   }, [isAutoDemoActive, isLoading, startAutoDemo]);
-  
+
   const handleManualClick = (featureKey) => {
     if (isAutoDemoActive) {
       setIsAutoDemoActive(false);
@@ -234,19 +245,19 @@ const InteractiveShowcase = () => {
     }
     handleFeatureClick(featureKey);
   };
-  
+
   const restartDemo = () => {
     setIsAutoDemoActive(true);
     setExpandedFeature(null);
     setPreviewData(null);
     startAutoDemo();
   };
-  
+
   const renderPreviewContent = () => {
     if (!expandedFeature) return <div className="preview-placeholder">Tap any feature to explore</div>;
     if (isLoading) return <PreviewSkeleton />;
     if (!previewData) return <div className="preview-error">Unable to load content</div>;
-    
+
     switch(expandedFeature) {
       case 'Biology Notes':
         return (
@@ -316,7 +327,7 @@ const InteractiveShowcase = () => {
         return null;
     }
   };
-  
+
   return (
     <div className="showcase-wrapper">
       <div className="iphone-container">
@@ -326,25 +337,25 @@ const InteractiveShowcase = () => {
             <div className="volume-down"></div>
             <div className="action-button"></div>
           </div>
-          
+
           <div className="iphone-screen" ref={phoneContentRef}>
             <div className="dynamic-island">
-              <div className="time">9:41</div>
+              <div className="time">{currentTime}</div>
               <div className="status-icons">
                 <FaSignal />
                 <FaWifi />
                 <FaBatteryFull />
               </div>
             </div>
-            
+
             <div className="app-header">
               <h1>AliverBioPharm</h1>
               <p>Learn Biology Smarter</p>
             </div>
-            
+
             <div className="menu-scroll-container">
               {menuItems.map((item) => (
-                <div 
+                <div
                   key={item.key}
                   ref={el => menuItemsRef.current[item.key] = el}
                   className={`menu-item ${expandedFeature === item.key ? 'active' : ''}`}
@@ -355,23 +366,23 @@ const InteractiveShowcase = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="preview-panel">
               {renderPreviewContent()}
             </div>
-            
+
             {isCursorVisible && isAutoDemoActive && (
-              <div 
+              <div
                 className="demo-cursor"
                 style={{ transform: `translate(${cursorPosition.x}px, ${cursorPosition.y}px)` }}
               />
             )}
-            
+
             <div className="dna-helix-bg"></div>
           </div>
         </div>
       </div>
-      
+
       <div className="marketing-content">
         <h2>Master Biology <br />With Confidence</h2>
         <div className="feature-list">
