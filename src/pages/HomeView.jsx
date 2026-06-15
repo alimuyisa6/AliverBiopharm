@@ -570,7 +570,8 @@ export default function HomeView({
         </section>
       )}
 
-      <MicrobiomePersona />
+      <LivingCanvas />
+      
       
       <section id="pdf-library" className="section-wrapper" style={{ margin: '60px 0', padding: '0 20px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
