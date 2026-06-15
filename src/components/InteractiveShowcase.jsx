@@ -4,7 +4,7 @@ import {
   FaBookOpen, FaChartLine, FaSignal, FaWifi,
   FaBatteryFull, FaPlay, FaArrowRight, FaMousePointer, FaLock
 } from 'react-icons/fa';
-import { getUser, getResources, getPastPapers, getQuizTopics, getFlashcardDecks, getContinueReading, getPublicStats } from '../utils/api';
+import { getUser, getResources, getPastPapers, getQuizTopics, getFlashcardDecks, getContinueReading, getPublicStats } from '../api/client';
 import './InteractiveShowcase.css';
 
 const apiCache = {
