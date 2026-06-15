@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
 
 export default function HomeView({
-  // Data
+ export default function HomeView({
   sections,
   flashcards,
   flashcardDecks,
@@ -13,6 +13,7 @@ export default function HomeView({
   flashcardCurrentDeck,
   flashcardCurrentIndex,
   flippedCards,
+  flashcardSelectedLevel,
   flashcardDeckProgress,
   pdfs,
   pdfLevel,
