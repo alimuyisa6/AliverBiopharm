@@ -1,8 +1,8 @@
- 
+ // src/components/InteractiveShowcase/InteractiveShowcase.jsx
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
-  FaDna, FaFileLines, FaBrain, FaLayerGroup, FaTrophy, 
-  FaBookOpenReader, FaChartLine, FaSignal, FaWifi, 
+  FaDna, FaFileAlt, FaBrain, FaLayerGroup, FaTrophy, 
+  FaBookOpen, FaChartLine, FaSignal, FaWifi, 
   FaBatteryFull, FaPlay, FaArrowRight 
 } from 'react-icons/fa';
 import './InteractiveShowcase.css';
@@ -78,11 +78,11 @@ const InteractiveShowcase = () => {
   
   const menuItems = [
     { key: 'Biology Notes', icon: FaDna },
-    { key: 'Past Papers', icon: FaFileLines },
+    { key: 'Past Papers', icon: FaFileAlt },
     { key: 'Quiz System', icon: FaBrain },
     { key: 'Flashcards', icon: FaLayerGroup },
     { key: 'Weekly Challenge', icon: FaTrophy },
-    { key: 'Continue Reading', icon: FaBookOpenReader },
+    { key: 'Continue Reading', icon: FaBookOpen },
     { key: 'Platform Statistics', icon: FaChartLine }
   ];
   
