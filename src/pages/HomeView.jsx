@@ -1,6 +1,8 @@
   import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
+
+
 function LivingCanvas() {
   const [inputSeq, setInputSeq] = React.useState('');
   const [temp, setTemp] = React.useState(37);
@@ -161,7 +163,7 @@ function LivingCanvas() {
         };
       });
 
-      const newBlobs = [];
+      let newBlobs = [];
       next.forEach(blob => {
         const threshold = 120 - (ph - 7) * 10;
         if (blob.splitTimer > threshold && next.length < 30) {
