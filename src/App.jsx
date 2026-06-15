@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import Quiz from './pages/Quiz';
 import PastPapers from './pages/PastPapers';
  import NoteDetail from './pages/NoteDetail';
-import InteractiveShowcase from '../components/InteractiveShowcase';
+ 
 function App() {
   return (
     <BrowserRouter>
