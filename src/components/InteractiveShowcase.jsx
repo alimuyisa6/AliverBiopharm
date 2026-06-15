@@ -1,299 +1,395 @@
- import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { getAllSiteSections } from '../api/client';
+ 
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { 
+  FaDna, FaFileLines, FaBrain, FaLayerGroup, FaTrophy, 
+  FaBookOpenReader, FaChartLine, FaSignal, FaWifi, 
+  FaBatteryFull, FaPlay, FaArrowRight 
+} from 'react-icons/fa';
 import './InteractiveShowcase.css';
 
-/**
- * Feature list displayed inside the iPhone mockup.
- * Each entry defines its icon, gradient theme, and the
- * content card shown when the feature is "clicked" by the
- * automated cursor tour.
- */
-const FEATURES = [
-  {
-    id: 'biology-notes',
-    label: 'Biology Notes',
-    icon: 'fa-dna',
-    badgeIcon: 'fa-book-open',
-    gradient: 'gradient-teal',
-    title: 'Biology Notes',
-    description:
-      'Comprehensive and well-organized biology notes covering major topics for effective learning and revision.'
-  },
-  {
-    id: 'pdf-library',
-    label: 'PDF Library',
-    icon: 'fa-file-circle-check',
-    badgeIcon: 'fa-file-lines',
-    gradient: 'gradient-amber',
-    title: 'PDF Library',
-    description:
-      'Access study materials, revision guides, lecture notes, and downloadable educational resources.'
-  },
-  {
-    id: 'smart-quizzes',
-    label: 'Smart Quizzes',
-    icon: 'fa-brain',
-    badgeIcon: 'fa-square-check',
-    gradient: 'gradient-violet',
-    title: 'Smart Quizzes',
-    description:
-      'Test your knowledge with adaptive quizzes designed to reinforce key concepts and track your progress.'
-  },
-  {
-    id: 'past-papers',
-    label: 'Past Papers',
-    icon: 'fa-file-pen',
-    badgeIcon: 'fa-graduation-cap',
-    gradient: 'gradient-coral',
-    title: 'Past Papers',
-    description:
-      'Practice with a curated archive of past examination papers to build confidence and exam readiness.'
-  },
-  {
-    id: 'pharmacy-hub',
-    label: 'Pharmacy Hub',
-    icon: 'fa-capsules',
-    badgeIcon: 'fa-mortar-pestle',
-    gradient: 'gradient-emerald',
-    title: 'Pharmacy Hub',
-    description:
-      'Explore dedicated pharmacy resources covering pharmacology, dosage forms, and clinical practice essentials.'
-  },
-  {
-    id: 'learning-resources',
-    label: 'Learning Resources',
-    icon: 'fa-atom',
-    badgeIcon: 'fa-microscope',
-    gradient: 'gradient-sky',
-    title: 'Learning Resources',
-    description:
-      'A growing library of guides, diagrams, and reference material to support every stage of your studies.'
-  }
-];
+const getIconGradient = (itemKey) => {
+  const gradients = {
+    'Biology Notes': 'linear-gradient(135deg, #10b981, #14b8a6)',
+    'Past Papers': 'linear-gradient(135deg, #ef4444, #f97316)',
+    'Quiz System': 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+    'Flashcards': 'linear-gradient(135deg, #06b6d4, #2563eb)',
+    'Weekly Challenge': 'linear-gradient(135deg, #f59e0b, #ea580c)',
+    'Continue Reading': 'linear-gradient(135deg, #22c55e, #16a34a)',
+    'Platform Statistics': 'linear-gradient(135deg, #ec4899, #e11d48)'
+  };
+  return gradients[itemKey];
+};
 
-/**
- * Statistic / highlight cards shown on the left column.
- */
-const HIGHLIGHTS = [
-  { icon: 'fa-book-open-reader', label: 'Extensive Study Notes' },
-  { icon: 'fa-square-check', label: 'Interactive Quizzes' },
-  { icon: 'fa-file-pen', label: 'Past Papers' },
-  { icon: 'fa-layer-group', label: 'Learning Resources' }
-];
+const MenuIcon = ({ itemKey, icon: IconComponent }) => (
+  <div className="menu-icon-container" style={{ background: getIconGradient(itemKey) }}>
+    <IconComponent className="menu-icon" />
+  </div>
+);
 
-// Timing constants for the automated guided tour (milliseconds)
-const HOVER_DURATION = 1100; // cursor travel + arrival pause before click
-const CLICK_DURATION = 1700; // ripple + card reveal hold time
-const STEP_DURATION = HOVER_DURATION + CLICK_DURATION;
+const PreviewSkeleton = () => (
+  <div className="preview-skeleton">
+    <div className="skeleton-title"></div>
+    <div className="skeleton-line"></div>
+    <div className="skeleton-line short"></div>
+  </div>
+);
 
-export default function InteractiveShowcase() {
-  const [logoUrl, setLogoUrl] = useState(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isClicking, setIsClicking] = useState(false);
-  const [cardVisible, setCardVisible] = useState(false);
-  const [revealed, setRevealed] = useState(false);
-
-  const sectionRef = useRef(null);
-  const featureRefs = useRef([]);
-
-  // Fetch site settings once to display the dynamic logo, matching
-  // the same data source used across the rest of the project.
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        const sections = await getAllSiteSections();
-        if (isMounted) {
-          setLogoUrl(sections?.site_config?.logo_url || null);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-    return () => { isMounted = false; };
-  }, []);
-
-  // Scroll reveal animation, consistent with the ".reveal" pattern
-  // used elsewhere in the project.
-  useEffect(() => {
-    const node = sectionRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setRevealed(true);
-            observer.disconnect();
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
-
-    observer.observe(node);
-
-    // Handle case where section is already in view on mount
-    const rect = node.getBoundingClientRect();
-    if (rect.top < window.innerHeight) setRevealed(true);
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Automated guided-tour loop: cursor moves to the next feature,
-  // "clicks" it (triggering ripple + click animation), then the
-  // content card fades in. Cycle repeats infinitely.
-  useEffect(() => {
-    let arriveTimer;
-    let clickTimer;
-    let nextTimer;
-
-    function runStep() {
-      setCardVisible(false);
-      setIsClicking(false);
-
-      // Cursor arrives at target, then performs the click
-      arriveTimer = setTimeout(() => {
-        setIsClicking(true);
-        setCardVisible(true);
-
-        // Reset click animation state shortly after triggering it
-        clickTimer = setTimeout(() => setIsClicking(false), 350);
-      }, HOVER_DURATION);
-
-      // Advance to the next feature after the full step duration
-      nextTimer = setTimeout(() => {
-        setActiveIndex((prev) => (prev + 1) % FEATURES.length);
-      }, STEP_DURATION);
-    }
-
-    runStep();
-
-    return () => {
-      clearTimeout(arriveTimer);
-      clearTimeout(clickTimer);
-      clearTimeout(nextTimer);
-    };
-  }, [activeIndex]);
-
-  // Compute cursor position (relative to the feature list container)
-  // by reading the target feature's bounding box once rendered.
-  const getCursorPosition = useCallback(() => {
-    const target = featureRefs.current[activeIndex];
-    if (!target) return { top: 0, left: 0 };
-    return {
-      top: target.offsetTop + target.offsetHeight / 2,
-      left: target.offsetLeft + target.offsetWidth - 28
-    };
-  }, [activeIndex]);
-
-  const cursorPos = getCursorPosition();
-  const activeFeature = FEATURES[activeIndex];
-
-  return (
-    <section
-      id="showcase"
-      ref={sectionRef}
-      className={`showcase-section reveal ${revealed ? 'in' : ''}`}
-      aria-label="AliverBiopharm platform showcase"
-    >
-      <div className="showcase-grid">
-
-        {/* LEFT COLUMN: headline, supporting copy, highlight cards */}
-        <div className="showcase-content">
-          <span className="sec-label">PLATFORM OVERVIEW</span>
-          <h2 className="showcase-title">
-            Everything You Need to Excel in Biology &amp; Pharmacy
-          </h2>
-          <p className="showcase-subtitle">
-            AliverBiopharm brings together comprehensive notes, interactive quizzes,
-            past papers, downloadable PDFs, and curated learning resources, all in one
-            place, so you can study smarter and feel confident going into every exam.
-          </p>
-
-          <div className="showcase-highlights" role="list">
-            {HIGHLIGHTS.map((item) => (
-              <div className="highlight-card" role="listitem" key={item.label}>
-                <div className="highlight-icon" aria-hidden="true">
-                  <i className={`fa-solid ${item.icon}`}></i>
-                </div>
-                <span className="highlight-label">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: iPhone mockup with animated guided tour */}
-        <div className="showcase-phone-wrap">
-          <div className="phone-mockup" role="img" aria-label="Preview of the AliverBiopharm mobile experience">
-            <div className="phone-side-btn power"></div>
-            <div className="phone-side-btn volume-up"></div>
-            <div className="phone-side-btn volume-down"></div>
-            <div className="phone-notch"></div>
-
-            <div className="phone-screen">
-
-              <div className="phone-status-bar" aria-hidden="true">
-                <i className="fa-solid fa-signal status-signal"></i>
-                <i className="fa-solid fa-wifi status-wifi"></i>
-                <i className="fa-solid fa-battery-three-quarters status-battery"></i>
-              </div>
-
-              {/* Top bar with dynamic logo and site name */}
-              <div className="phone-topbar">
-                <div className="phone-logo">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="" />
-                  ) : (
-                    <i className="fa-solid fa-flask" aria-hidden="true"></i>
-                  )}
-                </div>
-                <span className="phone-site-name">AliverBiopharm</span>
-              </div>
-
-              {/* Feature list with animated guided cursor */}
-              <div className="phone-feature-list">
-                {FEATURES.map((feature, idx) => (
-                  <div
-                    key={feature.id}
-                    ref={(el) => (featureRefs.current[idx] = el)}
-                    className={`phone-feature-item ${idx === activeIndex ? 'active' : ''} ${idx === activeIndex && isClicking ? 'pressed' : ''}`}
-                  >
-                    <div className={`feature-icon ${feature.gradient}`} aria-hidden="true">
-                      <i className={`fa-solid ${feature.icon} feature-icon-main`}></i>
-                      <i className={`fa-solid ${feature.badgeIcon} feature-icon-badge`}></i>
-                    </div>
-                    <span className="feature-label">{feature.label}</span>
-                    <i className="fa-solid fa-chevron-right feature-chevron" aria-hidden="true"></i>
-                  </div>
-                ))}
-
-                {/* Animated content card revealed on "click" */}
-                <div className={`phone-content-card ${cardVisible ? 'visible' : ''}`} aria-live="polite">
-                  <div className={`content-card-icon ${activeFeature.gradient}`} aria-hidden="true">
-                    <i className={`fa-solid ${activeFeature.icon} feature-icon-main`}></i>
-                    <i className={`fa-solid ${activeFeature.badgeIcon} feature-icon-badge`}></i>
-                  </div>
-                  <h4 className="content-card-title">{activeFeature.title}</h4>
-                  <p className="content-card-description">{activeFeature.description}</p>
-                </div>
-
-                {/* Simulated mouse cursor performing the guided tour */}
-                <div
-                  className="phone-cursor"
-                  style={{ top: `${cursorPos.top}px`, left: `${cursorPos.left}px` }}
-                  aria-hidden="true"
-                >
-                  <i className="fa-solid fa-arrow-pointer"></i>
-                  <span className={`cursor-ripple ${isClicking ? 'active' : ''}`}></span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
+const StatsDashboard = ({ statsData }) => (
+  <div className="stats-dashboard">
+    <h4>Live Platform Metrics</h4>
+    <div className="stats-grid">
+      <div className="stat-card">
+        <span className="stat-value">{statsData.totalNotes}</span>
+        <span className="stat-label">Biology Notes</span>
       </div>
-    </section>
+      <div className="stat-card">
+        <span className="stat-value">{statsData.totalFlashcardDecks}</span>
+        <span className="stat-label">Flashcard Decks</span>
+      </div>
+      <div className="stat-card">
+        <span className="stat-value">{statsData.totalQuizTopics}</span>
+        <span className="stat-label">Quiz Topics</span>
+      </div>
+      <div className="stat-card">
+        <span className="stat-value">{statsData.totalPastPapers}</span>
+        <span className="stat-label">Past Papers</span>
+      </div>
+    </div>
+  </div>
+);
+
+const InteractiveShowcase = () => {
+  const [notesData, setNotesData] = useState([]);
+  const [pastPapersData, setPastPapersData] = useState([]);
+  const [quizTopicsData, setQuizTopicsData] = useState([]);
+  const [flashcardsData, setFlashcardsData] = useState([]);
+  const [continueReadingData, setContinueReadingData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const [expandedFeature, setExpandedFeature] = useState(null);
+  const [previewData, setPreviewData] = useState(null);
+  const [isAutoDemoActive, setIsAutoDemoActive] = useState(true);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [isCursorVisible, setIsCursorVisible] = useState(false);
+  
+  const menuItemsRef = useRef({});
+  const phoneContentRef = useRef(null);
+  const autoDemoTimeoutRef = useRef(null);
+  
+  const menuItems = [
+    { key: 'Biology Notes', icon: FaDna },
+    { key: 'Past Papers', icon: FaFileLines },
+    { key: 'Quiz System', icon: FaBrain },
+    { key: 'Flashcards', icon: FaLayerGroup },
+    { key: 'Weekly Challenge', icon: FaTrophy },
+    { key: 'Continue Reading', icon: FaBookOpenReader },
+    { key: 'Platform Statistics', icon: FaChartLine }
+  ];
+  
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      try {
+        const [notesRes, papersRes, quizRes, flashcardsRes, continueRes] = await Promise.all([
+          fetch('/api/resources?path=get_resources').then(res => res.json()),
+          fetch('/api/pastpapers?path=get_papers&limit=1').then(res => res.json()),
+          fetch('/api/quiz?path=get_quiz_topics&level=A-Level').then(res => res.json()),
+          fetch('/api/flashcards?path=decks').then(res => res.json()),
+          fetch('/api/resources?path=get_continue_reading').then(res => res.json())
+        ]);
+        
+        setNotesData(notesRes || []);
+        setPastPapersData(papersRes?.papers || []);
+        setQuizTopicsData(quizRes || []);
+        setFlashcardsData(flashcardsRes || []);
+        setContinueReadingData(continueRes || []);
+      } catch (error) {
+        console.error('API fetch error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAllData();
+  }, []);
+  
+  const platformStats = useMemo(() => ({
+    totalNotes: notesData.length,
+    totalFlashcardDecks: flashcardsData.length,
+    totalQuizTopics: quizTopicsData.length,
+    totalPastPapers: pastPapersData.length
+  }), [notesData, flashcardsData, quizTopicsData, pastPapersData]);
+  
+  const handleFeatureClick = useCallback(async (featureKey) => {
+    if (!isAutoDemoActive) return;
+    
+    setExpandedFeature(null);
+    setPreviewData(null);
+    
+    setTimeout(() => {
+      setExpandedFeature(featureKey);
+      
+      switch(featureKey) {
+        case 'Biology Notes':
+          setPreviewData(notesData[0] || null);
+          break;
+        case 'Past Papers':
+          setPreviewData(pastPapersData[0] || null);
+          break;
+        case 'Quiz System':
+          setPreviewData(quizTopicsData[0] || null);
+          break;
+        case 'Flashcards':
+          setPreviewData(flashcardsData[0] || null);
+          break;
+        case 'Weekly Challenge':
+          setPreviewData({ type: 'challenge' });
+          break;
+        case 'Continue Reading':
+          if (continueReadingData.length === 0) {
+            setPreviewData({ type: 'unauthenticated', message: 'Sign in to continue your biology learning journey.' });
+          } else {
+            setPreviewData(continueReadingData[0]);
+          }
+          break;
+        case 'Platform Statistics':
+          setPreviewData({ type: 'stats', stats: platformStats });
+          break;
+        default:
+          setPreviewData(null);
+      }
+    }, 150);
+  }, [notesData, pastPapersData, quizTopicsData, flashcardsData, continueReadingData, platformStats, isAutoDemoActive]);
+  
+  const moveCursorToElement = useCallback((element) => {
+    if (!element || !phoneContentRef.current) return;
+    const elementRect = element.getBoundingClientRect();
+    const containerRect = phoneContentRef.current.getBoundingClientRect();
+    const x = elementRect.left + elementRect.width / 2 - containerRect.left;
+    const y = elementRect.top + elementRect.height / 2 - containerRect.top;
+    setCursorPosition({ x, y });
+    setIsCursorVisible(true);
+  }, []);
+  
+  const simulateClickOnItem = useCallback((itemKey) => {
+    const element = menuItemsRef.current[itemKey];
+    if (element) {
+      const pulseDiv = document.createElement('div');
+      pulseDiv.className = 'cursor-pulse';
+      const rect = element.getBoundingClientRect();
+      const parentRect = phoneContentRef.current.getBoundingClientRect();
+      pulseDiv.style.left = `${rect.left + rect.width/2 - parentRect.left}px`;
+      pulseDiv.style.top = `${rect.top + rect.height/2 - parentRect.top}px`;
+      phoneContentRef.current.appendChild(pulseDiv);
+      setTimeout(() => pulseDiv.remove(), 400);
+      
+      handleFeatureClick(itemKey);
+    }
+  }, [handleFeatureClick]);
+  
+  const scrollToMenuItem = useCallback((itemKey) => {
+    const element = menuItemsRef.current[itemKey];
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+  
+  const startAutoDemo = useCallback(() => {
+    if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
+    
+    let currentIndex = 0;
+    const runNext = () => {
+      if (!isAutoDemoActive) return;
+      const item = menuItems[currentIndex % menuItems.length];
+      const targetElement = menuItemsRef.current[item.key];
+      if (targetElement) {
+        scrollToMenuItem(item.key);
+        setTimeout(() => {
+          moveCursorToElement(targetElement);
+          setTimeout(() => {
+            simulateClickOnItem(item.key);
+            currentIndex++;
+            autoDemoTimeoutRef.current = setTimeout(runNext, 3800);
+          }, 300);
+        }, 200);
+      } else {
+        runNext();
+      }
+    };
+    runNext();
+  }, [menuItems, scrollToMenuItem, moveCursorToElement, simulateClickOnItem, isAutoDemoActive]);
+  
+  useEffect(() => {
+    if (isAutoDemoActive && !isLoading) {
+      startAutoDemo();
+    }
+    return () => {
+      if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
+    };
+  }, [isAutoDemoActive, isLoading, startAutoDemo]);
+  
+  const handleManualClick = (featureKey) => {
+    if (isAutoDemoActive) {
+      setIsAutoDemoActive(false);
+      if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
+    }
+    handleFeatureClick(featureKey);
+  };
+  
+  const restartDemo = () => {
+    setIsAutoDemoActive(true);
+    setExpandedFeature(null);
+    setPreviewData(null);
+    startAutoDemo();
+  };
+  
+  const renderPreviewContent = () => {
+    if (!expandedFeature) return <div className="preview-placeholder">Tap any feature to explore</div>;
+    if (isLoading) return <PreviewSkeleton />;
+    if (!previewData) return <div className="preview-error">Unable to load content</div>;
+    
+    switch(expandedFeature) {
+      case 'Biology Notes':
+        return (
+          <div className="preview-card">
+            <h4>{previewData.title}</h4>
+            <span className="level-badge">{previewData.level}</span>
+            <p>{previewData.description}</p>
+            <div className="meta-info">Downloaded {previewData.download_count || 0} times</div>
+          </div>
+        );
+      case 'Past Papers':
+        return (
+          <div className="preview-card">
+            <h4>{previewData.title}</h4>
+            <p><strong>Subject:</strong> {previewData.subject}</p>
+            <p><strong>Year:</strong> {previewData.year}</p>
+            <p><strong>Downloads:</strong> {(previewData.download_count || 0).toLocaleString()}</p>
+          </div>
+        );
+      case 'Quiz System':
+        return (
+          <div className="preview-card">
+            <h4>{previewData.topic_name}</h4>
+            <p><strong>Questions:</strong> {previewData.question_count}</p>
+            <p><strong>Blocks:</strong> {previewData.total_blocks}</p>
+            <p><strong>Completed blocks:</strong> {previewData.completed_blocks?.length || 0}</p>
+          </div>
+        );
+      case 'Flashcards':
+        return (
+          <div className="preview-card">
+            <h4>{previewData.title}</h4>
+            <p><strong>Category:</strong> {previewData.category}</p>
+            <p><strong>Level:</strong> {previewData.level}</p>
+            <p><strong>Author:</strong> {previewData.author || 'AliverBioPharm'}</p>
+          </div>
+        );
+      case 'Weekly Challenge':
+        return (
+          <div className="preview-card challenge">
+            <h4>Weekly Biology Challenge</h4>
+            <p>Challenge yourself with this week's featured question about cellular respiration and ATP synthesis.</p>
+            <button className="challenge-btn">Start Challenge →</button>
+          </div>
+        );
+      case 'Continue Reading':
+        if (previewData.type === 'unauthenticated') {
+          return (
+            <div className="preview-card auth-message">
+              <p>{previewData.message}</p>
+              <button className="auth-btn">Sign In</button>
+            </div>
+          );
+        }
+        return (
+          <div className="preview-card">
+            <h4>{previewData.title}</h4>
+            <p><strong>Topic:</strong> {previewData.topic}</p>
+            <p><strong>Level:</strong> {previewData.level}</p>
+            <div className="progress-bar"><div style={{ width: `${previewData.progress_percentage}%` }}></div></div>
+            <p>Last accessed: {new Date(previewData.last_accessed).toLocaleDateString()}</p>
+          </div>
+        );
+      case 'Platform Statistics':
+        return <StatsDashboard statsData={previewData.stats} />;
+      default:
+        return null;
+    }
+  };
+  
+  return (
+    <div className="showcase-wrapper">
+      <div className="iphone-container">
+        <div className="iphone-frame">
+          <div className="side-buttons">
+            <div className="volume-up"></div>
+            <div className="volume-down"></div>
+            <div className="action-button"></div>
+          </div>
+          
+          <div className="iphone-screen" ref={phoneContentRef}>
+            <div className="dynamic-island">
+              <div className="time">9:41</div>
+              <div className="status-icons">
+                <FaSignal />
+                <FaWifi />
+                <FaBatteryFull />
+              </div>
+            </div>
+            
+            <div className="app-header">
+              <h1>AliverBioPharm</h1>
+              <p>Learn Biology Smarter</p>
+            </div>
+            
+            <div className="menu-scroll-container">
+              {menuItems.map((item) => (
+                <div 
+                  key={item.key}
+                  ref={el => menuItemsRef.current[item.key] = el}
+                  className={`menu-item ${expandedFeature === item.key ? 'active' : ''}`}
+                  onClick={() => handleManualClick(item.key)}
+                >
+                  <MenuIcon itemKey={item.key} icon={item.icon} />
+                  <span className="menu-label">{item.key}</span>
+                </div>
+              ))}
+            </div>
+            
+            <div className="preview-panel">
+              {renderPreviewContent()}
+            </div>
+            
+            {isCursorVisible && isAutoDemoActive && (
+              <div 
+                className="demo-cursor"
+                style={{ transform: `translate(${cursorPosition.x}px, ${cursorPosition.y}px)` }}
+              />
+            )}
+            
+            <div className="dna-helix-bg"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="marketing-content">
+        <h2>Master Biology <br />With Confidence</h2>
+        <div className="feature-list">
+          <span>Biology Notes</span>
+          <span>Past Papers</span>
+          <span>Quiz System</span>
+          <span>Flashcards</span>
+          <span>Weekly Challenges</span>
+          <span>Continue Reading</span>
+        </div>
+        <p className="trusted-text">Trusted by learners, educators and future healthcare professionals.</p>
+        <div className="cta-buttons">
+          <button className="primary-cta">Start Free Trial <FaArrowRight /></button>
+          <button className="secondary-cta" onClick={restartDemo}><FaPlay /> Watch Demo</button>
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default InteractiveShowcase;
