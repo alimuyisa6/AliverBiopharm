@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   FaDna, FaFileAlt, FaBrain, FaLayerGroup, FaTrophy,
   FaBookOpen, FaChartLine, FaSignal, FaWifi,
@@ -57,6 +57,12 @@ const StatsDashboard = ({ statsData }) => (
   </div>
 );
 
+// Timing constants — single source of truth for the demo loop
+const CURSOR_MOVE_MS = 600;     // how long the pointer takes to glide to an item
+const CLICK_PAUSE_MS = 350;     // small pause after arriving, before "clicking"
+const DWELL_MS = 3200;          // how long the preview stays open before moving on
+const SCROLL_DURATION_MS = 450; // how long the menu-list scroll animation takes
+
 const InteractiveShowcase = () => {
   const [notesData, setNotesData] = useState([]);
   const [pastPapersData, setPastPapersData] = useState([]);
@@ -72,11 +78,15 @@ const InteractiveShowcase = () => {
   const [currentTime, setCurrentTime] = useState('');
 
   const menuItemsRef = useRef({});
+  const menuListRef = useRef(null);
   const phoneContentRef = useRef(null);
   const autoDemoTimeoutRef = useRef(null);
   const cursorAnimationRef = useRef(null);
+  const scrollAnimationRef = useRef(null);
+  const cursorPositionRef = useRef({ x: 0, y: 0 });
+  const isMountedRef = useRef(true);
 
-  const menuItems = [
+  const menuItems = useMemo(() => [
     { key: 'Biology Notes', icon: FaDna },
     { key: 'Past Papers', icon: FaFileAlt },
     { key: 'Quiz System', icon: FaBrain },
@@ -84,7 +94,7 @@ const InteractiveShowcase = () => {
     { key: 'Weekly Challenge', icon: FaTrophy },
     { key: 'Continue Reading', icon: FaBookOpen },
     { key: 'Platform Statistics', icon: FaChartLine }
-  ];
+  ], []);
 
   useEffect(() => {
     const updateTime = () => {
@@ -109,6 +119,7 @@ const InteractiveShowcase = () => {
           fetch('/api/flashcards?path=decks').then(res => res.json()),
           fetch('/api/resources?path=get_continue_reading').then(res => res.json())
         ]);
+        if (!isMountedRef.current) return;
         setNotesData(notesRes || []);
         setPastPapersData(papersRes?.papers || []);
         setQuizTopicsData(quizRes || []);
@@ -117,10 +128,11 @@ const InteractiveShowcase = () => {
       } catch (error) {
         console.error('API fetch error:', error);
       } finally {
-        setIsLoading(false);
+        if (isMountedRef.current) setIsLoading(false);
       }
     };
     fetchAllData();
+    return () => { isMountedRef.current = false; };
   }, []);
 
   const platformStats = useMemo(() => ({
@@ -130,112 +142,181 @@ const InteractiveShowcase = () => {
     totalPastPapers: pastPapersData.length
   }), [notesData, flashcardsData, quizTopicsData, pastPapersData]);
 
-  const handleFeatureClick = useCallback((featureKey) => {
-    if (!isAutoDemoActive) return;
-    setExpandedFeature(null);
-    setPreviewData(null);
-    setTimeout(() => {
-      setExpandedFeature(featureKey);
-      switch(featureKey) {
-        case 'Biology Notes':
-          setPreviewData(notesData[0] || null);
-          break;
-        case 'Past Papers':
-          setPreviewData(pastPapersData[0] || null);
-          break;
-        case 'Quiz System':
-          setPreviewData(quizTopicsData[0] || null);
-          break;
-        case 'Flashcards':
-          setPreviewData(flashcardsData[0] || null);
-          break;
-        case 'Weekly Challenge':
-          setPreviewData({ type: 'challenge' });
-          break;
-        case 'Continue Reading':
-          if (continueReadingData.length === 0) {
-            setPreviewData({ type: 'unauthenticated', message: 'Sign in to continue your biology learning journey.' });
-          } else {
-            setPreviewData(continueReadingData[0]);
-          }
-          break;
-        case 'Platform Statistics':
-          setPreviewData({ type: 'stats', stats: platformStats });
-          break;
-        default:
-          setPreviewData(null);
-      }
-    }, 150);
-  }, [notesData, pastPapersData, quizTopicsData, flashcardsData, continueReadingData, platformStats, isAutoDemoActive]);
+  // Keep a ref copy of cursor position so animation loops never need to
+  // depend on (and re-create themselves around) the latest state value.
+  useEffect(() => {
+    cursorPositionRef.current = cursorPosition;
+  }, [cursorPosition]);
 
-  const moveCursorToElement = useCallback((targetElement) => {
-    if (!targetElement || !phoneContentRef.current) return;
-    const targetRect = targetElement.getBoundingClientRect();
-    const containerRect = phoneContentRef.current.getBoundingClientRect();
-    const targetX = targetRect.left + targetRect.width / 2 - containerRect.left;
-    const targetY = targetRect.top + targetRect.height / 2 - containerRect.top;
-    
-    if (cursorAnimationRef.current) cancelAnimationFrame(cursorAnimationRef.current);
-    
-    const startX = cursorPosition.x;
-    const startY = cursorPosition.y;
-    const duration = 300;
-    const startTime = performance.now();
-    
-    const animate = (now) => {
-      const elapsed = now - startTime;
-      const t = Math.min(1, elapsed / duration);
-      const ease = 1 - Math.pow(1 - t, 3);
-      const x = startX + (targetX - startX) * ease;
-      const y = startY + (targetY - startY) * ease;
-      setCursorPosition({ x, y });
-      if (t < 1) {
-        cursorAnimationRef.current = requestAnimationFrame(animate);
-      } else {
-        setCursorPosition({ x: targetX, y: targetY });
-        cursorAnimationRef.current = null;
-      }
-    };
-    
-    setIsCursorVisible(true);
-    cursorAnimationRef.current = requestAnimationFrame(animate);
-  }, [cursorPosition.x, cursorPosition.y]);
-
-  const simulateClickOnItem = useCallback((itemKey) => {
-    const element = menuItemsRef.current[itemKey];
-    if (element) {
-      const pulseDiv = document.createElement('div');
-      pulseDiv.className = 'cursor-pulse';
-      const rect = element.getBoundingClientRect();
-      const parentRect = phoneContentRef.current.getBoundingClientRect();
-      pulseDiv.style.left = `${rect.left + rect.width/2 - parentRect.left}px`;
-      pulseDiv.style.top = `${rect.top + rect.height/2 - parentRect.top}px`;
-      phoneContentRef.current.appendChild(pulseDiv);
-      setTimeout(() => pulseDiv.remove(), 400);
-      handleFeatureClick(itemKey);
+  const buildPreviewFor = useCallback((featureKey) => {
+    switch (featureKey) {
+      case 'Biology Notes':
+        return notesData[0] || null;
+      case 'Past Papers':
+        return pastPapersData[0] || null;
+      case 'Quiz System':
+        return quizTopicsData[0] || null;
+      case 'Flashcards':
+        return flashcardsData[0] || null;
+      case 'Weekly Challenge':
+        return { type: 'challenge' };
+      case 'Continue Reading':
+        if (continueReadingData.length === 0) {
+          return { type: 'unauthenticated', message: 'Sign in to continue your biology learning journey.' };
+        }
+        return continueReadingData[0];
+      case 'Platform Statistics':
+        return { type: 'stats', stats: platformStats };
+      default:
+        return null;
     }
-  }, [handleFeatureClick]);
+  }, [notesData, pastPapersData, quizTopicsData, flashcardsData, continueReadingData, platformStats]);
 
-  const startAutoDemo = useCallback(() => {
-    if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
+  const handleFeatureClick = useCallback((featureKey) => {
+    setExpandedFeature(featureKey);
+    setPreviewData(buildPreviewFor(featureKey));
+  }, [buildPreviewFor]);
+
+  // Smoothly scroll the menu list so `targetElement` becomes visible,
+  // without ever changing the iPhone frame's own size/position.
+  const scrollItemIntoView = useCallback((targetElement) => {
+    return new Promise((resolve) => {
+      const list = menuListRef.current;
+      if (!list || !targetElement) {
+        resolve();
+        return;
+      }
+
+      const listRect = list.getBoundingClientRect();
+      const itemRect = targetElement.getBoundingClientRect();
+
+      let delta = 0;
+      const margin = 8;
+      if (itemRect.bottom > listRect.bottom - margin) {
+        delta = itemRect.bottom - (listRect.bottom - margin);
+      } else if (itemRect.top < listRect.top + margin) {
+        delta = itemRect.top - (listRect.top + margin);
+      }
+
+      if (Math.abs(delta) < 1) {
+        resolve();
+        return;
+      }
+
+      if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
+
+      const startScroll = list.scrollTop;
+      const targetScroll = Math.max(
+        0,
+        Math.min(startScroll + delta, list.scrollHeight - list.clientHeight)
+      );
+      const startTime = performance.now();
+
+      const animateScroll = (now) => {
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / SCROLL_DURATION_MS);
+        const ease = 1 - Math.pow(1 - t, 3);
+        list.scrollTop = startScroll + (targetScroll - startScroll) * ease;
+        if (t < 1) {
+          scrollAnimationRef.current = requestAnimationFrame(animateScroll);
+        } else {
+          scrollAnimationRef.current = null;
+          resolve();
+        }
+      };
+      scrollAnimationRef.current = requestAnimationFrame(animateScroll);
+    });
+  }, []);
+
+  // Glide the on-screen cursor to sit on top of `targetElement`.
+  const moveCursorToElement = useCallback((targetElement) => {
+    return new Promise((resolve) => {
+      if (!targetElement || !phoneContentRef.current) {
+        resolve();
+        return;
+      }
+      const targetRect = targetElement.getBoundingClientRect();
+      const containerRect = phoneContentRef.current.getBoundingClientRect();
+      const targetX = targetRect.left + targetRect.width / 2 - containerRect.left;
+      const targetY = targetRect.top + targetRect.height / 2 - containerRect.top;
+
+      if (cursorAnimationRef.current) cancelAnimationFrame(cursorAnimationRef.current);
+
+      const startX = cursorPositionRef.current.x;
+      const startY = cursorPositionRef.current.y;
+      const startTime = performance.now();
+
+      setIsCursorVisible(true);
+
+      const animate = (now) => {
+        const elapsed = now - startTime;
+        const t = Math.min(1, elapsed / CURSOR_MOVE_MS);
+        const ease = 1 - Math.pow(1 - t, 3);
+        const x = startX + (targetX - startX) * ease;
+        const y = startY + (targetY - startY) * ease;
+        setCursorPosition({ x, y });
+        if (t < 1) {
+          cursorAnimationRef.current = requestAnimationFrame(animate);
+        } else {
+          setCursorPosition({ x: targetX, y: targetY });
+          cursorAnimationRef.current = null;
+          resolve();
+        }
+      };
+      cursorAnimationRef.current = requestAnimationFrame(animate);
+    });
+  }, []);
+
+  const pulseClick = useCallback((targetElement) => {
+    if (!targetElement || !phoneContentRef.current) return;
+    const pulseDiv = document.createElement('div');
+    pulseDiv.className = 'cursor-pulse';
+    const rect = targetElement.getBoundingClientRect();
+    const parentRect = phoneContentRef.current.getBoundingClientRect();
+    pulseDiv.style.left = `${rect.left + rect.width / 2 - parentRect.left}px`;
+    pulseDiv.style.top = `${rect.top + rect.height / 2 - parentRect.top}px`;
+    phoneContentRef.current.appendChild(pulseDiv);
+    setTimeout(() => pulseDiv.remove(), 400);
+  }, []);
+
+  const sleep = (ms) => new Promise((resolve) => {
+    autoDemoTimeoutRef.current = setTimeout(resolve, ms);
+  });
+
+  // Main demo loop: for each item — scroll it into view, glide the cursor
+  // to it, "click" it, show its preview, wait, then move to the next.
+  const startAutoDemo = useCallback(async () => {
     let currentIndex = 0;
-    const runNext = () => {
-      if (!isAutoDemoActive) return;
+
+    while (isAutoDemoActive && isMountedRef.current) {
       const item = menuItems[currentIndex % menuItems.length];
       const targetElement = menuItemsRef.current[item.key];
-      if (targetElement) {
-        moveCursorToElement(targetElement);
-        setTimeout(() => {
-          simulateClickOnItem(item.key);
-          currentIndex++;
-          autoDemoTimeoutRef.current = setTimeout(runNext, 3800);
-        }, 400);
-      } else {
-        autoDemoTimeoutRef.current = setTimeout(runNext, 500);
+
+      if (!targetElement) {
+        await sleep(300);
+        if (!isAutoDemoActive || !isMountedRef.current) break;
+        currentIndex++;
+        continue;
       }
-    };
-    runNext();
-  }, [menuItems, moveCursorToElement, simulateClickOnItem, isAutoDemoActive]);
+
+      await scrollItemIntoView(targetElement);
+      if (!isAutoDemoActive || !isMountedRef.current) break;
+
+      await moveCursorToElement(targetElement);
+      if (!isAutoDemoActive || !isMountedRef.current) break;
+
+      await sleep(CLICK_PAUSE_MS);
+      if (!isAutoDemoActive || !isMountedRef.current) break;
+
+      pulseClick(targetElement);
+      handleFeatureClick(item.key);
+
+      await sleep(DWELL_MS);
+      if (!isAutoDemoActive || !isMountedRef.current) break;
+
+      currentIndex++;
+    }
+  }, [menuItems, scrollItemIntoView, moveCursorToElement, pulseClick, handleFeatureClick, isAutoDemoActive]);
 
   useEffect(() => {
     if (isAutoDemoActive && !isLoading) {
@@ -244,25 +325,34 @@ const InteractiveShowcase = () => {
     return () => {
       if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
       if (cursorAnimationRef.current) cancelAnimationFrame(cursorAnimationRef.current);
+      if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
     };
   }, [isAutoDemoActive, isLoading, startAutoDemo]);
 
+  const stopAutoDemo = useCallback(() => {
+    setIsAutoDemoActive(false);
+    if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
+    if (cursorAnimationRef.current) cancelAnimationFrame(cursorAnimationRef.current);
+    if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
+    setIsCursorVisible(false);
+  }, []);
+
   const handleManualClick = (featureKey) => {
     if (isAutoDemoActive) {
-      setIsAutoDemoActive(false);
-      if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
-      if (cursorAnimationRef.current) cancelAnimationFrame(cursorAnimationRef.current);
-      setIsCursorVisible(false);
+      stopAutoDemo();
     }
     handleFeatureClick(featureKey);
   };
 
   const restartDemo = () => {
     if (cursorAnimationRef.current) cancelAnimationFrame(cursorAnimationRef.current);
-    setIsAutoDemoActive(true);
+    if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
+    if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
     setExpandedFeature(null);
     setPreviewData(null);
-    startAutoDemo();
+    setCursorPosition({ x: 0, y: 0 });
+    if (menuListRef.current) menuListRef.current.scrollTop = 0;
+    setIsAutoDemoActive(true);
   };
 
   const renderPreviewContent = () => {
@@ -365,7 +455,7 @@ const InteractiveShowcase = () => {
               <p>Learn Biology Smarter</p>
             </div>
 
-            <div className="menu-container">
+            <div className="menu-container" ref={menuListRef}>
               {menuItems.map((item) => (
                 <div
                   key={item.key}
