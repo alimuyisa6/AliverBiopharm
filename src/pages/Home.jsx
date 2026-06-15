@@ -466,8 +466,9 @@ export default function Home() {
       flashcardMode={flashcardMode}
       flashcardCurrentDeck={flashcardCurrentDeck}
       flashcardCurrentIndex={flashcardCurrentIndex}
-      flippedCards={flippedCards}
-      flashcardDeckProgress={flashcardDeckProgress}
+       flippedCards={flippedCards}
+flashcardSelectedLevel={flashcardSelectedLevel}
+flashcardDeckProgress={flashcardDeckProgress}
       pdfs={pdfs}
       pdfLevel={pdfLevel}
       pdfSelectedTopic={pdfSelectedTopic}
