@@ -1,14 +1,18 @@
-  const API_BASE = '/api';
+ let csrfToken = null;
+const API_BASE = '/api';
 
 async function apiCall(endpoint, path, body = {}, method = 'POST') {
   const url = `${API_BASE}/${endpoint}?path=${path}`;
+  const headers = { 'Content-Type': 'application/json' };
+  if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
   const res = await fetch(url, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     credentials: 'include',
     body: method === 'POST' ? JSON.stringify(body) : undefined
   });
   const json = await res.json();
+  if (json.csrf_token) csrfToken = json.csrf_token;
   if (!res.ok) throw new Error(json.error || 'Request failed');
   return json.data !== undefined ? json.data : json;
 }
@@ -18,6 +22,7 @@ async function getRequest(endpoint, path, params = {}) {
   const url = `${API_BASE}/${endpoint}?path=${path}${query ? `&${query}` : ''}`;
   const res = await fetch(url, { credentials: 'include' });
   const json = await res.json();
+  if (json.csrf_token) csrfToken = json.csrf_token;
   if (!res.ok) throw new Error(json.error || 'Request failed');
   return json.data !== undefined ? json.data : json;
 }
@@ -57,6 +62,7 @@ export async function checkDailyRetry({ level, topic, block_number }) { return g
 export async function checkQuizAnswer({ question_id, selected_option }) { return apiCall('quiz', 'check_quiz_answer', { question_id, selected_option }); }
 export async function submitQuizBlock({ level, topic, block_number, answers, time_taken }) { return apiCall('quiz', 'submit_quiz_block', { level, topic, block_number, answers, time_taken }); }
 export async function addQuizQuestionsBatch(level, topic, questions, batch_name) { return apiCall('quiz', 'add_quiz_questions_batch', { level, topic, questions, batch_name }); }
+
 export async function getPlatformStats() { return getRequest('interactions', 'platform-stats'); }
 export async function getUserDashboard() { return getRequest('interactions', 'dashboard'); }
 export async function getDailyChallenge() { return getRequest('interactions', 'daily-challenge'); }
@@ -144,3 +150,16 @@ export async function getCommunityActivity() { return getRequest('community', 'a
 export async function getLeaderboard(level, limit = 20) { return getRequest('stats', 'leaderboard', { level, limit }); }
 
 export async function uploadFile(fileName, fileData) { return apiCall('upload', 'upload_file', { file_name: fileName, file_data: fileData }); }
+
+export async function getRecallSession({ level, topic }) { return getRequest('recall', 'session', { level, topic }); }
+export async function checkRecallSession({ level, topic }) { return getRequest('recall', 'session_check', { level, topic }); }
+export async function getRecallStats() { return getRequest('recall', 'stats'); }
+export async function getRecallAchievements() { return getRequest('recall', 'achievements'); }
+export async function getRecallDashboard() { return getRequest('recall', 'dashboard'); }
+export async function getRecallTopics(level) { return getRequest('recall', 'topics', { level }); }
+export async function checkFirstVisit({ level, topic }) { return getRequest('recall', 'first_visit', { level, topic }); }
+export async function getSelectedLevel() { return getRequest('recall', 'get_selected_level'); }
+export async function continueRecallSession({ session_id }) { return apiCall('recall', 'continue', { session_id }); }
+export async function submitRecallAnswer({ session_id, question_id, user_answer, nonce }) { return apiCall('recall', 'answer', { session_id, question_id, user_answer, nonce }); }
+export async function completeRecallSession({ session_id }) { return apiCall('recall', 'complete', { session_id }); }
+export async function setSelectedLevel(level) { return apiCall('recall', 'set_selected_level', { level }); }
