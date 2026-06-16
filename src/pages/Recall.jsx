@@ -1,6 +1,27 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { FaBrain, FaLock, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine, FaPencil, FaArrowLeft, FaInfoCircle, FaExclamationTriangle, FaExclamationCircle, FaMicroscope, FaDna, FaCapsules, FaBook, FaBookOpen, FaBullseye, FaLeaf, FaFlask, FaTree, FaSeedling, FaGem, FaCrown, FaBolt, FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck } from 'react-icons/fa6';
-import { getUser, getRecallSession, checkRecallSession, getRecallStats, getRecallAchievements, getRecallDashboard, getRecallTopics, getSelectedLevel, setSelectedLevel, continueRecallSession, submitRecallAnswer, completeRecallSession } from '../client'; // adjust path as needed
+ import React, { useState, useEffect, useRef } from 'react';
+import {
+  FaBrain, FaLock, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
+  FaPencil, FaArrowLeft, FaInfoCircle, FaExclamationTriangle, FaExclamationCircle,
+  FaMicroscope, FaDna, FaCapsules, FaBook, FaBookOpen, FaBullseye,
+  FaLeaf, FaFlask, FaTree, FaSeedling, FaGem, FaCrown, FaBolt,
+  FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck, FaLink
+} from 'react-icons/fa6';
+import {
+  getUser,
+  getRecallSession,
+  checkRecallSession,
+  getRecallStats,
+  getRecallAchievements,
+  getRecallDashboard,
+  getRecallTopics,
+  getSelectedLevel,
+  setSelectedLevel,
+  continueRecallSession,
+  submitRecallAnswer,
+  completeRecallSession
+} from '../api/client';
+import '../styles/recall.css';   
+
 
 const levelSpinMessages = {
   'O-Level': ['Checking...', 'Reviewing biology...', 'Comparing terms...', 'Feedback ready'],
