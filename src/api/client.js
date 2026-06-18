@@ -1,8 +1,8 @@
  let csrfToken = null;
-const API_BASE = '/api';
+const API_BASE = '/api/server';
 
-async function apiCall(endpoint, path, body = {}, method = 'POST') {
-  const url = `${API_BASE}/${endpoint}?path=${path}`;
+async function apiCall(module, path, body = {}, method = 'POST') {
+  const url = `${API_BASE}?module=${module}&path=${path}`;
   const headers = { 'Content-Type': 'application/json' };
   if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
   const res = await fetch(url, {
@@ -17,9 +17,9 @@ async function apiCall(endpoint, path, body = {}, method = 'POST') {
   return json.data !== undefined ? json.data : json;
 }
 
-async function getRequest(endpoint, path, params = {}) {
+async function getRequest(module, path, params = {}) {
   const query = new URLSearchParams(params).toString();
-  const url = `${API_BASE}/${endpoint}?path=${path}${query ? `&${query}` : ''}`;
+  const url = `${API_BASE}?module=${module}&path=${path}${query ? `&${query}` : ''}`;
   const res = await fetch(url, { credentials: 'include' });
   const json = await res.json();
   if (json.csrf_token) csrfToken = json.csrf_token;
