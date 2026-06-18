@@ -1,5 +1,17 @@
-// /api/server.js
-import { setCorsHeaders, parseCookies, hashToken, validateSession, isAdmin, getClientIp, checkRateLimit, supabase, generateCsrfToken } from '../lib/core.js';
+ import {
+  setCorsHeaders,
+  supabase,
+  generateCsrfToken,
+  getClientIp
+} from '../lib/core.js';
+import {
+  enforceSecurityHeaders,
+  createAuthenticatedContext,
+  enforceCsrf,
+  rateLimiter,
+  sanitizeError,
+  SecurityError
+} from '../lib/security-middleware.js';
 import * as auth from '../lib/auth.js';
 import * as admin from '../lib/admin.js';
 import * as chat from '../lib/chat.js';
@@ -20,40 +32,77 @@ const modules = {
   resources, site, 'weekly-challenge': weeklyChallenge
 };
 
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const AUTH_ATTEMPT_PATHS = new Set(['signup', 'signin']);
+
 export default async function handler(req, res) {
+  enforceSecurityHeaders(req, res);
   setCorsHeaders(res, req);
-  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
   const { module: moduleName, path } = req.query;
-  if (!moduleName || !path) return res.status(400).json({ error: 'module and path required' });
+  if (!moduleName || !path) {
+    return res.status(400).json({ error: 'module and path required' });
+  }
 
   const mod = modules[moduleName];
-  if (!mod) return res.status(404).json({ error: 'Module not found' });
-
-  const cookies = parseCookies(req);
-  const token = cookies.session || '';
-  let userId = null, adminData = null, csrfSecret = null;
-  const ip = getClientIp(req);
-
-  if (token) {
-    const session = await validateSession(token);
-    if (session) {
-      userId = session.user_id;
-      adminData = await isAdmin(userId, ip);
-      const { data: sessData } = await supabase.from('user_sessions').select('csrf_secret').eq('session_token_hash', hashToken(token)).single();
-      csrfSecret = sessData?.csrf_secret || null;
-    }
+  if (!mod) {
+    return res.status(404).json({ error: 'Module not found' });
   }
 
-  if (userId && !(await checkRateLimit(ip, userId))) {
-    return res.status(429).json({ error: 'Too many requests' });
-  }
-
-  const ctx = { userId, adminData, ip, csrfSecret };
   try {
+    const ctx = await createAuthenticatedContext(req, res);
+
+    if (ctx.fingerprintRejected) {
+      return res.status(401).json({ error: 'Session invalidated due to security concern. Please sign in again.' });
+    }
+
+    const isAuthAttempt = moduleName === 'auth' && AUTH_ATTEMPT_PATHS.has(path);
+    const rateLimitAction = isAuthAttempt ? 'auth_attempt' : null;
+
+    if (!rateLimiter.check(ctx.fingerprint || getClientIp(req), ctx.userId, rateLimitAction)) {
+      if (isAuthAttempt) {
+        const remaining = rateLimiter.getAuthAttemptsRemaining(getClientIp(req));
+        return res.status(429).json({
+          error: 'Too many login attempts. Please try again later.',
+          retry_after_minutes: 15,
+          attempts_remaining: remaining
+        });
+      }
+      return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
+
+    if (!SAFE_METHODS.has(req.method)) {
+      try {
+        enforceCsrf(req, ctx);
+      } catch (csrfError) {
+        return res.status(csrfError.statusCode || 403).json({ error: csrfError.message });
+      }
+    }
+
+    if (mod.setContext) {
+      await mod.setContext(ctx);
+    }
+
     await mod.handler(req, res, path, ctx);
-    if (!res.writableEnded) res.status(405).json({ error: 'Method not allowed' });
+
+    if (!res.writableEnded) {
+      res.status(405).json({ error: 'Method not allowed' });
+    }
   } catch (err) {
-    if (!res.writableEnded) res.status(500).json({ error: err.message || 'Internal error' });
+    if (err instanceof SecurityError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    if (!res.writableEnded) {
+      const statusCode = err.statusCode || 500;
+      const message = statusCode === 500 ? 'Internal server error' : sanitizeError(err);
+      if (statusCode === 500) {
+        console.error(`[SECURITY] ${new Date().toISOString()} ${moduleName}/${path}:`, err.message);
+      }
+      res.status(statusCode).json({ error: message });
+    }
   }
 }
