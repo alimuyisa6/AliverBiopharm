@@ -7,7 +7,8 @@ import Home from './pages/Home';
 import Quiz from './pages/Quiz';
 import PastPapers from './pages/PastPapers';
  import NoteDetail from './pages/NoteDetail';
- 
+ import BioRecall from './pages/Recall';
+
 function App() {
   return (
     <BrowserRouter>
@@ -17,7 +18,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
           <Route path="/past-papers" element={<PastPapers />} />
-          <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
+          <Route path="/recall" element={<ProtectedRoute><BioRecall /></ProtectedRoute>} />
+         <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
