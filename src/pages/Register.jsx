@@ -1,6 +1,7 @@
  import React, { useState, useEffect, useRef } from 'react';
 import { signup } from '../api/client';
 import { Link, useNavigate } from 'react-router-dom';
+import './Auth.css';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
@@ -10,6 +11,7 @@ export default function Register() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
   const navigate = useNavigate();
   const turnstileRef = useRef(null);
   const widgetIdRef = useRef(null);
@@ -24,19 +26,26 @@ export default function Register() {
     }
 
     let attempts = 0;
+
     const interval = setInterval(() => {
       attempts++;
+
       if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
           sitekey: TURNSTILE_SITE_KEY
         });
+
         clearInterval(interval);
       }
-      if (attempts > 50) clearInterval(interval);
+
+      if (attempts > 50) {
+        clearInterval(interval);
+      }
     }, 100);
 
     return () => {
       clearInterval(interval);
+
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
@@ -46,19 +55,23 @@ export default function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+
     setError('');
+
     if (password !== confirm) {
       setError('Passwords do not match');
       return;
     }
+
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
     }
 
-    const turnstileToken = window.turnstile && widgetIdRef.current
-      ? window.turnstile.getResponse(widgetIdRef.current)
-      : '';
+    const turnstileToken =
+      window.turnstile && widgetIdRef.current
+        ? window.turnstile.getResponse(widgetIdRef.current)
+        : '';
 
     if (!turnstileToken) {
       setError('Please complete the captcha');
@@ -67,10 +80,15 @@ export default function Register() {
 
     try {
       await signup(email, password, turnstileToken);
+
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 2000);
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err) {
       setError(err.message || 'Registration failed');
+
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.reset(widgetIdRef.current);
       }
@@ -79,27 +97,102 @@ export default function Register() {
 
   if (success) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--clr-deep-space)' }}>
-        <div style={{ background: '#d4edda', padding: '1rem', borderRadius: '8px', color: '#155724' }}>✅ Registration successful! Redirecting to login...</div>
+      <div className="auth-success-screen">
+        <div className="auth-success-card">
+          Registration successful. Redirecting to login...
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--clr-deep-space)' }}>
-      <div style={{ background: 'var(--clr-navy-card)', padding: '2rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '400px' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--clr-white)' }}>Register</h2>
-        {error && <div style={{ background: '#fee', color: '#c00', padding: '0.5rem', borderRadius: '8px', marginBottom: '1rem' }}>{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="form-input" style={{ width: '100%', marginBottom: '1rem' }} required />
-          <input type="password" placeholder="Password (min 8 chars)" value={password} onChange={e => setPassword(e.target.value)} className="form-input" style={{ width: '100%', marginBottom: '1rem' }} required />
-          <input type="password" placeholder="Confirm Password" value={confirm} onChange={e => setConfirm(e.target.value)} className="form-input" style={{ width: '100%', marginBottom: '1rem' }} required />
-          <div ref={turnstileRef} style={{ marginBottom: '1rem' }}></div>
-          <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>Create Account</button>
-        </form>
-        <p style={{ textAlign: 'center', marginTop: '1rem', color: 'var(--clr-text-dim)' }}>
-          Already have an account? <Link to="/login" style={{ color: 'var(--clr-magenta)' }}>Login</Link>
-        </p>
+    <div className="auth-page">
+      <div className="auth-brand-panel">
+        <div className="auth-brand-content">
+          <span className="auth-label">ALIVER BIOPHARM</span>
+
+          <h1 className="auth-brand-title">
+            Your Scientific
+            <br />
+            Journey Starts
+            <br />
+            Here.
+          </h1>
+
+          <p className="auth-brand-description">
+            Create an account to access interactive learning resources,
+            monitor your progress, and build a stronger foundation in
+            biology and pharmaceutical sciences.
+          </p>
+
+          <div className="auth-features">
+            <div className="auth-feature">✓ Personalized Learning</div>
+            <div className="auth-feature">✓ Track Achievements</div>
+            <div className="auth-feature">✓ Community Learning</div>
+            <div className="auth-feature">✓ Modern Study Tools</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="auth-form-panel">
+        <div className="auth-card">
+          <h2 className="auth-title">Create Account</h2>
+
+          <p className="auth-subtitle">
+            Join Aliver BIOPHARM and start learning today.
+          </p>
+
+          {error && (
+            <div className="auth-error">
+              {error}
+            </div>
+          )}
+
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <input
+              type="email"
+              placeholder="Email Address"
+              className="form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              className="form-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              className="form-input"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+            />
+
+            <div ref={turnstileRef} className="auth-captcha" />
+
+            <button
+              type="submit"
+              className="btn-primary auth-submit"
+            >
+              Create Account
+            </button>
+          </form>
+
+          <p className="auth-footer-text">
+            Already have an account?{' '}
+            <Link to="/login" className="auth-link">
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
