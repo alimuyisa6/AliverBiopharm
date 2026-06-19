@@ -1,7 +1,7 @@
  import React, { useState, useEffect, useRef } from 'react';
 import { signup } from '../api/client';
 import { Link, useNavigate } from 'react-router-dom';
-import './Auth.css';
+import '../styles/Auth.css';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
