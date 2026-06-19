@@ -1,7 +1,8 @@
  import React, { useState, useEffect, useRef } from 'react';
 import { signup } from '../api/client';
-import { Link, useNavigate } from 'react-router-dom';
-import '../styles/Auth.css';
+import { useNavigate, Link } from 'react-router-dom';
+import AuthLayout from '../layouts/AuthLayout';
+import './styles/Auth.css';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
@@ -25,73 +26,43 @@ export default function Register() {
       document.head.appendChild(script);
     }
 
-    let attempts = 0;
-
     const interval = setInterval(() => {
-      attempts++;
-
       if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
           sitekey: TURNSTILE_SITE_KEY
         });
-
-        clearInterval(interval);
-      }
-
-      if (attempts > 50) {
         clearInterval(interval);
       }
     }, 100);
 
     return () => {
       clearInterval(interval);
-
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
       }
     };
   }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
-
     setError('');
 
-    if (password !== confirm) {
-      setError('Passwords do not match');
-      return;
-    }
+    if (password !== confirm) return setError('Passwords do not match');
+    if (password.length < 8) return setError('Password too short');
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-
-    const turnstileToken =
+    const token =
       window.turnstile && widgetIdRef.current
         ? window.turnstile.getResponse(widgetIdRef.current)
         : '';
 
-    if (!turnstileToken) {
-      setError('Please complete the captcha');
-      return;
-    }
+    if (!token) return setError('Verify first');
 
     try {
-      await signup(email, password, turnstileToken);
-
+      await signup(email, password, token);
       setSuccess(true);
-
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      setError(err.message || 'Registration failed');
-
-      if (window.turnstile && widgetIdRef.current) {
-        window.turnstile.reset(widgetIdRef.current);
-      }
+      setError(err.message || 'Signup failed');
     }
   }
 
@@ -99,101 +70,59 @@ export default function Register() {
     return (
       <div className="auth-success-screen">
         <div className="auth-success-card">
-          Registration successful. Redirecting to login...
+          Account created. Redirecting...
         </div>
       </div>
     );
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-brand-panel">
-        <div className="auth-brand-content">
-          <span className="auth-label">ALIVER BIOPHARM</span>
+    <AuthLayout
+      title="Create account"
+      subtitle="Join Aliver Biopharm secure platform"
+    >
+      <div className="auth-title">Register</div>
+      <div className="auth-subtitle">Fill details to continue</div>
 
-          <h1 className="auth-brand-title">
-            Your Scientific
-            <br />
-            Journey Starts
-            <br />
-            Here.
-          </h1>
+      {error && <div className="auth-error">{error}</div>}
 
-          <p className="auth-brand-description">
-            Create an account to access interactive learning resources,
-            monitor your progress, and build a stronger foundation in
-            biology and pharmaceutical sciences.
-          </p>
+      <form onSubmit={handleSubmit} className="auth-form">
+        <input
+          className="form-input"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
 
-          <div className="auth-features">
-            <div className="auth-feature">✓ Personalized Learning</div>
-            <div className="auth-feature">✓ Track Achievements</div>
-            <div className="auth-feature">✓ Community Learning</div>
-            <div className="auth-feature">✓ Modern Study Tools</div>
-          </div>
-        </div>
+        <input
+          className="form-input"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+
+        <input
+          className="form-input"
+          type="password"
+          placeholder="Confirm Password"
+          value={confirm}
+          onChange={e => setConfirm(e.target.value)}
+        />
+
+        <div ref={turnstileRef} className="auth-captcha"></div>
+
+        <button className="btn-primary auth-submit">
+          Create account
+        </button>
+      </form>
+
+      <div className="auth-footer-text">
+        Already have account?{" "}
+        <Link className="auth-link" to="/login">
+          Login
+        </Link>
       </div>
-
-      <div className="auth-form-panel">
-        <div className="auth-card">
-          <h2 className="auth-title">Create Account</h2>
-
-          <p className="auth-subtitle">
-            Join Aliver BIOPHARM and start learning today.
-          </p>
-
-          {error && (
-            <div className="auth-error">
-              {error}
-            </div>
-          )}
-
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <input
-              type="email"
-              placeholder="Email Address"
-              className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              className="form-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              className="form-input"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-            />
-
-            <div ref={turnstileRef} className="auth-captcha" />
-
-            <button
-              type="submit"
-              className="btn-primary auth-submit"
-            >
-              Create Account
-            </button>
-          </form>
-
-          <p className="auth-footer-text">
-            Already have an account?{' '}
-            <Link to="/login" className="auth-link">
-              Sign In
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+    </AuthLayout>
   );
 }
