@@ -34,7 +34,7 @@ const modules = {
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const AUTH_ATTEMPT_PATHS = new Set(['signup', 'signin']);
-const CSRF_EXEMPT_PATHS = new Set(['signup', 'signin']);
+const CSRF_EXEMPT_PATHS = new Set(['signup', 'signin', 'submit_contact', 'subscribe_newsletter']);
 
 export default async function handler(req, res) {
   enforceSecurityHeaders(req, res);
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     }
 
     const isAuthAttempt = moduleName === 'auth' && AUTH_ATTEMPT_PATHS.has(path);
-    const isCsrfExempt = moduleName === 'auth' && CSRF_EXEMPT_PATHS.has(path);
+    const isCsrfExempt = CSRF_EXEMPT_PATHS.has(path);
     const rateLimitAction = isAuthAttempt ? 'auth_attempt' : null;
 
     if (!rateLimiter.check(ctx.fingerprint || getClientIp(req), ctx.userId, rateLimitAction)) {
