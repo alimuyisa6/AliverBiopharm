@@ -21,7 +21,7 @@ import {
   submitRecallAnswer,
   completeRecallSession
 } from '../api/client';
-import '../styles/recall.css';
+import '../styles/bio-Recall.css';
 
 const levelSpinMessages = {
   'O-Level': ['Checking...', 'Reviewing biology...', 'Comparing terms...', 'Feedback ready'],
