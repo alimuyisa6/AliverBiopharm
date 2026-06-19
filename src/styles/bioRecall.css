@@ -1,6 +1,3 @@
-body {
-  outline: 5px solid red !important;
-}
 .bio-recall{max-width:900px;margin:auto;padding:20px;color:#e6eefc}
 .bio-recall .panel{background:linear-gradient(145deg,#111a2e,#0f172a);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.35);margin-bottom:14px}
 .bio-recall .lock-banner{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0f1a33;border:1px solid rgba(255,255,255,.06);padding:12px 14px;border-radius:12px;color:#8aa0b6}
