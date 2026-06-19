@@ -25,26 +25,19 @@ export default function Login() {
     }
 
     let attempts = 0;
-
     const interval = setInterval(() => {
       attempts++;
-
       if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
           sitekey: TURNSTILE_SITE_KEY
         });
-
         clearInterval(interval);
       }
-
-      if (attempts > 50) {
-        clearInterval(interval);
-      }
+      if (attempts > 50) clearInterval(interval);
     }, 100);
 
     return () => {
       clearInterval(interval);
-
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
@@ -56,23 +49,22 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    const turnstileToken =
+    const token =
       window.turnstile && widgetIdRef.current
         ? window.turnstile.getResponse(widgetIdRef.current)
         : '';
 
-    if (!turnstileToken) {
-      setError('Please complete the captcha');
+    if (!token) {
+      setError('Verify to continue');
       return;
     }
 
     try {
-      await signin(email, password, turnstileToken);
+      await signin(email, password, token);
       await refresh();
       navigate('/');
     } catch (err) {
       setError(err.message || 'Login failed');
-
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.reset(widgetIdRef.current);
       }
@@ -83,80 +75,50 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-brand-panel">
         <div className="auth-brand-content">
-          <span className="auth-label">ALIVER BIOPHARM</span>
-
-          <h1 className="auth-brand-title">
-            Learn Biology.
-            <br />
-            Master Pharmacy.
-            <br />
-            Advance Healthcare.
-          </h1>
-
-          <p className="auth-brand-description">
-            Empowering students and professionals through evidence-based
-            biological and pharmaceutical education designed for academic
-            excellence and lifelong learning.
-          </p>
-
-          <div className="auth-features">
-            <div className="auth-feature">✓ Interactive Quizzes</div>
-            <div className="auth-feature">✓ Study Resources</div>
-            <div className="auth-feature">✓ Expert Learning Content</div>
-            <div className="auth-feature">✓ Progress Tracking</div>
+          <div className="auth-label">ALIVER BIOPHARM</div>
+          <div className="auth-brand-title">Welcome back</div>
+          <div className="auth-brand-description">
+            Sign in to continue.
           </div>
         </div>
       </div>
 
       <div className="auth-form-panel">
         <div className="auth-card">
-          <h2 className="auth-title">Welcome Back</h2>
+          <div className="auth-title">Login</div>
+          <div className="auth-subtitle">Access your account securely</div>
 
-          <p className="auth-subtitle">
-            Sign in to continue your learning journey.
-          </p>
+          {error && <div className="auth-error">{error}</div>}
 
-          {error && (
-            <div className="auth-error">
-              {error}
-            </div>
-          )}
-
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="auth-form">
             <input
               type="email"
-              placeholder="Email Address"
-              className="form-input"
+              placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
+              className="form-input"
               required
             />
 
             <input
               type="password"
               placeholder="Password"
-              className="form-input"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
+              className="form-input"
               required
             />
 
-            <div ref={turnstileRef} className="auth-captcha" />
+            <div ref={turnstileRef} className="auth-captcha"></div>
 
-            <button
-              type="submit"
-              className="btn-primary auth-submit"
-            >
-              Sign In
+            <button type="submit" className="btn-primary auth-submit">
+              Sign in
             </button>
           </form>
 
-          <p className="auth-footer-text">
-            Don't have an account?{' '}
-            <Link to="/register" className="auth-link">
-              Create Account
-            </Link>
-          </p>
+          <div className="auth-footer-text">
+            No account? <Link to="/register" className="auth-link">Register</Link>
+          </div>
         </div>
       </div>
     </div>
