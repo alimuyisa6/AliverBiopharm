@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import {
   FaBrain, FaLock, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
-  FaPencil, FaArrowLeft, FaInfoCircle,
+  FaPencil, FaArrowLeft, FaCircleInfo,
   FaMicroscope, FaDna, FaCapsules, FaBook, FaBookOpen, FaBullseye,
   FaLeaf, FaFlask, FaTree, FaSeedling, FaGem, FaCrown, FaBolt,
   FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck, FaLink,
@@ -509,7 +509,7 @@ function BioRecall() {
           </div>
         )}
         {study_note && (
-          <div className="study-note"><FaInfoCircle /> Study Note: {escapeHtml(study_note)}</div>
+          <div className="study-note"><FaCircleInfo /> Study Note: {escapeHtml(study_note)}</div>
         )}
       </div>
     );
