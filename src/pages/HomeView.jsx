@@ -1,4 +1,4 @@
-  import React, { useState } from 'react';
+ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
 
@@ -92,6 +92,21 @@ export default function HomeView({
   setNotesCommentInput,
   chatBodyRef,
 }) {
+  const handleChatInputChange = (e) => {
+    setChatInput(e.target.value);
+    e.target.style.height = 'auto';
+    const maxHeight = 160;
+    const newHeight = Math.min(e.target.scrollHeight, maxHeight);
+    e.target.style.height = newHeight + 'px';
+  };
+
+  const handleChatKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (chatInput.trim()) sendChat();
+    }
+  };
+
   return (
     <div className="homepage">
       <header className="site-header" id="site-header">
@@ -267,9 +282,6 @@ export default function HomeView({
         </section>
       )}
 
-      
-      
-      
       <section id="pdf-library" className="section-wrapper" style={{ margin: '60px 0', padding: '0 20px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ marginBottom: '30px', paddingLeft: '20px' }}>
@@ -694,8 +706,24 @@ export default function HomeView({
               ))}
             </div>
             <div className="chat-input-area">
-              <input type="text" className="chat-input" placeholder="Type a message..." value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && sendChat()} />
-              <button className="chat-send-btn" onClick={sendChat}>Send</button>
+              <div className="chat-input-wrapper">
+                <textarea 
+                  className="chat-input" 
+                  placeholder="Type a message..." 
+                  value={chatInput}
+                  onChange={handleChatInputChange}
+                  onKeyPress={handleChatKeyPress}
+                  rows="1"
+                  maxLength="500"
+                />
+              </div>
+              <button 
+                className="chat-send-btn" 
+                onClick={sendChat}
+                disabled={!chatInput.trim()}
+              >
+                <i className="fa-solid fa-paper-plane"></i> Send
+              </button>
             </div>
           </div>
         )}
