@@ -34,6 +34,7 @@ const modules = {
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const AUTH_ATTEMPT_PATHS = new Set(['signup', 'signin']);
+const CSRF_EXEMPT_PATHS = new Set(['signup', 'signin']);
 
 export default async function handler(req, res) {
   enforceSecurityHeaders(req, res);
@@ -61,6 +62,7 @@ export default async function handler(req, res) {
     }
 
     const isAuthAttempt = moduleName === 'auth' && AUTH_ATTEMPT_PATHS.has(path);
+    const isCsrfExempt = moduleName === 'auth' && CSRF_EXEMPT_PATHS.has(path);
     const rateLimitAction = isAuthAttempt ? 'auth_attempt' : null;
 
     if (!rateLimiter.check(ctx.fingerprint || getClientIp(req), ctx.userId, rateLimitAction)) {
@@ -75,7 +77,7 @@ export default async function handler(req, res) {
       return res.status(429).json({ error: 'Too many requests. Please try again later.' });
     }
 
-    if (!SAFE_METHODS.has(req.method)) {
+    if (!SAFE_METHODS.has(req.method) && !isCsrfExempt) {
       try {
         enforceCsrf(req, ctx);
       } catch (csrfError) {
