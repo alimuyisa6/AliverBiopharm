@@ -61,6 +61,16 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Session invalidated due to security concern. Please sign in again.' });
     }
 
+    if (ctx.csrfSecret) {
+      const originalJson = res.json.bind(res);
+      res.json = (data) => {
+        if (data && typeof data === 'object' && !data.error) {
+          data.csrf_token = generateCsrfToken(ctx.csrfSecret);
+        }
+        return originalJson(data);
+      };
+    }
+
     const isAuthAttempt = moduleName === 'auth' && AUTH_ATTEMPT_PATHS.has(path);
     const isCsrfExempt = moduleName === 'auth' && CSRF_EXEMPT_PATHS.has(path);
     const rateLimitAction = isAuthAttempt ? 'auth_attempt' : null;
