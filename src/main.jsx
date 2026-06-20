@@ -1,9 +1,11 @@
-import React from 'react';
+ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
 import './styles/component-bundle.css';
 import './styles/quiz.css';
+import './styles/loading.css';
+import LoadingProvider from './loading/LoadingProvider';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -33,7 +35,9 @@ class ErrorBoundary extends React.Component {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <App />
+      <LoadingProvider>
+        <App />
+      </LoadingProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );
