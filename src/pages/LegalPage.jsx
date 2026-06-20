@@ -1,20 +1,6 @@
  import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getAllSiteSections } from '../api/client';
-
-let _sectionsCache = null;
-let _sectionsPromise = null;
-
-function getSections() {
-  if (_sectionsCache) return Promise.resolve(_sectionsCache);
-  if (_sectionsPromise) return _sectionsPromise;
-  _sectionsPromise = getAllSiteSections().then(data => {
-    _sectionsCache = data;
-    _sectionsPromise = null;
-    return data;
-  });
-  return _sectionsPromise;
-}
+import { getSections } from '../api/sections';
 
 function RichText({ text }) {
   const TOKEN_RE = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})|((https?:\/\/)[^\s<>"']+)/g;
@@ -45,7 +31,7 @@ function RichText({ text }) {
 }
 
 export default function LegalPage({ type }) {
-  const [sections, setSections] = useState(() => _sectionsCache);
+  const [sections, setSections] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const { pathname } = useLocation();
@@ -55,8 +41,7 @@ export default function LegalPage({ type }) {
   }, [pathname]);
 
   useEffect(() => {
-    if (_sectionsCache) return;
-    getSections().then(data => setSections(data));
+    getSections().then(setSections);
   }, []);
 
   if (!sections) return <div className="homepage">Loading...</div>;
