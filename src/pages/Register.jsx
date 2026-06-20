@@ -2,6 +2,8 @@
 import { signup } from '../api/client';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Auth.css';
+import useLoading from '../loading/useLoading';
+import InlineSpinner from '../loading/components/InlineSpinner';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
@@ -11,10 +13,12 @@ export default function Register() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const turnstileRef = useRef(null);
   const widgetIdRef = useRef(null);
+  const { show, hide } = useLoading();
 
   useEffect(() => {
     if (!document.querySelector('script[src*="turnstile"]')) {
@@ -75,19 +79,26 @@ export default function Register() {
       return;
     }
 
+    setSubmitting(true);
+    show("form", "Creating your account...");
+
     try {
       await signup(email, password, token);
       setSuccess(true);
+      hide();
 
       setTimeout(() => {
         navigate('/login');
       }, 1500);
     } catch (err) {
       setError(err.message || 'Registration failed');
+      hide();
 
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.reset(widgetIdRef.current);
       }
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -135,6 +146,7 @@ export default function Register() {
               onChange={e => setEmail(e.target.value)}
               className="form-input"
               required
+              disabled={submitting}
             />
 
             <input
@@ -144,6 +156,7 @@ export default function Register() {
               onChange={e => setPassword(e.target.value)}
               className="form-input"
               required
+              disabled={submitting}
             />
 
             <input
@@ -153,15 +166,17 @@ export default function Register() {
               onChange={e => setConfirm(e.target.value)}
               className="form-input"
               required
+              disabled={submitting}
             />
 
             <div ref={turnstileRef} className="auth-captcha"></div>
 
             <button
               type="submit"
-              className="btn-primary auth-submit"
+              className={`btn-primary auth-submit${submitting ? ' alv-btn-loading' : ''}`}
+              disabled={submitting}
             >
-              Create Account
+              {submitting ? <><InlineSpinner /> Creating account...</> : 'Create Account'}
             </button>
           </form>
 
