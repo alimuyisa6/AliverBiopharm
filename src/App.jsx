@@ -8,6 +8,7 @@ import Quiz from './pages/Quiz';
 import PastPapers from './pages/PastPapers';
  import NoteDetail from './pages/NoteDetail';
  import BioRecall from './pages/Recall';
+import LegalPage from './pages/LegalPage';
 
 function App() {
   return (
