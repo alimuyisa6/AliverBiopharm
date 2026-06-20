@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -22,7 +22,6 @@ export default function NoteDetail() {
   const [reactions, setReactions] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentInput, setCommentInput] = useState('');
-  const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState('light');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [readProgress, setReadProgress] = useState(0);
@@ -54,10 +53,9 @@ export default function NoteDetail() {
             setTimeout(() => window.scrollTo({ top: progress.scroll_position, behavior: 'smooth' }), 500);
           }
         }
-       } catch (err) { 
-  document.title = 'ERR: ' + err.message; 
-  setLoading(false);
-  return;
+      } catch (err) {
+        document.title = 'ERR: ' + err.message;
+        return;
       }
     };
     init();
@@ -109,18 +107,6 @@ export default function NoteDetail() {
     navigate(`/notes?highlight=${subtopicId}`);
   }
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="pdf-loading-spinner">
-          <div className="spinner-dot dot-magenta"></div>
-          <div className="spinner-dot dot-cyan"></div>
-          <div className="spinner-dot dot-orange"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ position: 'fixed', top: 0, left: 0, height: '3px', width: `${readProgress}%`, background: 'var(--gradient-cyan)', zIndex: 200, transition: 'width 0.3s ease' }}></div>
@@ -134,7 +120,7 @@ export default function NoteDetail() {
           </a>
           <nav aria-label="Main navigation">
             <ul className="main-nav">
-              {sections?.navigation?.links?.map(link => (
+              {(sections?.navigation?.links || []).filter(Boolean).map(link => (
                 <li key={link.href}><a href={link.href}>{link.label}</a></li>
               ))}
             </ul>
@@ -172,7 +158,7 @@ export default function NoteDetail() {
             </div>
           </div>
           <nav className="mobile-nav-links">
-            {(sections?.navigation?.links || []).map(link => (
+            {(sections?.navigation?.links || []).filter(Boolean).map(link => (
               <a key={link.href} href={link.href}>{link.label}</a>
             ))}
           </nav>
@@ -255,7 +241,7 @@ export default function NoteDetail() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {comments.length === 0 ? (
                 <p style={{ color: 'var(--clr-text-muted)', fontSize: 'var(--text-sm)', textAlign: 'center', padding: '1.5rem' }}>No comments yet. Be the first to share your thoughts.</p>
-              ) : comments.map((c, idx) => (
+              ) : comments.filter(Boolean).map((c, idx) => (
                 <div key={idx} style={{ background: 'var(--clr-navy-card)', border: '1px solid var(--clr-border-glow)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
                     <strong style={{ color: 'var(--clr-cyan)', fontSize: 'var(--text-sm)' }}>{c.user_name}</strong>
@@ -286,17 +272,17 @@ export default function NoteDetail() {
             </a>
             <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>Advancing biology and pharmacy education for every learner.</p>
             <div className="footer-social">
-              {(sections?.footer?.social_links || []).map(s => (
+              {(sections?.footer?.social_links || []).filter(Boolean).map(s => (
                 <a key={s.platform} href={s.url} target="_blank" rel="noopener noreferrer"><i className={s.icon}></i></a>
               ))}
             </div>
           </div>
           <div className="footer-grid">
-            {(sections?.footer?.columns || []).map(col => (
+            {(sections?.footer?.columns || []).filter(Boolean).map(col => (
               <div key={col.heading}>
                 <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>{col.heading}</h4>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {col.items?.map(item => (
+                  {(col.items || []).filter(Boolean).map(item => (
                     <li key={item.label}><a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</a></li>
                   ))}
                 </ul>
