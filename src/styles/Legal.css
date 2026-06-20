@@ -1,0 +1,141 @@
+.legal-page {
+  min-height: 100vh;
+  background: var(--clr-navy);
+  color: var(--clr-white);
+  display: flex;
+  flex-direction: column;
+}
+
+.legal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  border-bottom: 1px solid var(--clr-border-glow);
+  background: rgba(10, 20, 35, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.legal-logo {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--clr-white);
+  text-decoration: none;
+  gap: 10px;
+}
+
+.legal-logo img {
+  height: 42px;
+  width: auto;
+}
+
+.legal-nav {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.legal-nav a {
+  text-decoration: none;
+  font-size: 0.9rem;
+  color: var(--clr-text-dim);
+}
+
+.legal-nav a:hover {
+  color: var(--clr-cyan);
+}
+
+.legal-container {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 70px 20px;
+  line-height: 1.75;
+}
+
+.legal-container h1 {
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  margin-bottom: 20px;
+  color: var(--clr-white);
+  font-family: 'Playfair Display', serif;
+}
+
+.legal-container h2 {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  color: var(--clr-cyan);
+  font-size: 1.2rem;
+}
+
+.legal-container p {
+  font-size: 0.95rem;
+  color: var(--clr-text-dim);
+  margin-bottom: 14px;
+}
+
+.legal-container a {
+  color: var(--clr-cyan);
+  text-decoration: none;
+}
+
+.legal-container a:hover {
+  text-decoration: underline;
+}
+
+.legal-footer {
+  margin-top: auto;
+  background: var(--clr-navy-card);
+  border-top: 1px solid var(--clr-border-glow);
+  padding: 40px 20px 20px;
+}
+
+.legal-footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.legal-footer-inner img {
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.legal-footer-inner p {
+  font-size: 0.85rem;
+  color: var(--clr-text-dim);
+  max-width: 260px;
+  line-height: 1.6;
+}
+
+.legal-footer h4 {
+  color: var(--clr-white);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.legal-footer a {
+  display: block;
+  text-decoration: none;
+  color: var(--clr-text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.legal-footer a:hover {
+  color: var(--clr-cyan);
+}
+
+.legal-bottom {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid var(--clr-border-glow);
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+}
