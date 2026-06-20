@@ -2,7 +2,7 @@
 import { signup } from '../api/client';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';
-import './styles/Auth.css';
+import '../styles/Auth.css';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
