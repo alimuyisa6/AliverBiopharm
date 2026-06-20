@@ -4,7 +4,7 @@ import PageProgressBar from "./components/PageProgressBar";
 import BackgroundIndicator from "./components/BackgroundIndicator";
 import AuthOverlay from "./components/AuthOverlay";
 import FormOverlay from "./components/FormOverlay";
-import QuizOverlay from "../components/QuizOverlay";
+import QuizOverlay from "./components/QuizOverlay";
 
 export default function LoadingLayer() {
   const { type, message, progress } = useContext(LoadingContext);
