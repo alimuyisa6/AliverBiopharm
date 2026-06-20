@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import '../styles/Legal.css';
+ import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getAllSiteSections } from '../api/client';
 
 export default function LegalPage({ type }) {
@@ -13,52 +13,106 @@ export default function LegalPage({ type }) {
     load();
   }, []);
 
-  if (!sections) return <div className="legal-page">Loading...</div>;
+  if (!sections) return <div className="homepage">Loading...</div>;
 
   const page = sections.legal?.[type];
+  const currentYear = new Date().getFullYear();
 
   return (
-    <div className="legal-page">
-      <header className="legal-header">
-        <a href="/" className="legal-logo">
-          {sections.site_config?.logo_url ? (
-            <img src={sections.site_config.logo_url} alt="logo" />
-          ) : (
-            'AliverBiopharm'
-          )}
-        </a>
-
-        <nav className="legal-nav">
-          {(sections.navigation?.links || []).map(link => (
-            <a key={link.href} href={link.href}>
-              {link.label}
-            </a>
-          ))}
-        </nav>
+    <div className="homepage">
+      <header className="site-header" id="site-header">
+        <div className="header-container">
+          <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
+            {sections?.site_config?.logo_url ? (
+              <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
+            ) : (
+              'AliverBiopharm'
+            )}
+          </Link>
+          <nav aria-label="Main navigation">
+            <ul className="main-nav" id="main-nav">
+              {(sections?.navigation?.links || [{ href: '/', label: 'Home' }]).map(link => (
+                <li key={link.href}>
+                  {link.href.startsWith('#') || link.href.startsWith('http') ? (
+                    <a href={link.href}>{link.label}</a>
+                  ) : (
+                    <Link to={link.href}>{link.label}</Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
       </header>
 
-      <main className="legal-container">
-        <h1>{page?.title}</h1>
-        <div dangerouslySetInnerHTML={{ __html: page?.content }} />
-      </main>
+      <section className="section reveal legal-section">
+        <div className="legal-content-wrap">
+          <h1 className="legal-title">{page?.title || 'Page not found'}</h1>
+          {page?.content ? (
+            <div className="legal-body" dangerouslySetInnerHTML={{ __html: page.content }} />
+          ) : (
+            <p className="legal-empty">No content has been added for this page yet.</p>
+          )}
+        </div>
+      </section>
 
-      <footer className="legal-footer">
-        <div className="legal-footer-inner">
-          <div>
-            <img src={sections.site_config?.logo_url} alt="" />
-            <p>{sections.footer?.description}</p>
-          </div>
-
-          <div>
-            <h4>Legal</h4>
-            {(sections.footer?.columns || [])
-              .find(c => c.heading === 'Legal')
-              ?.items?.map(item => (
-                <a key={item.href} href={item.href}>
-                  {item.label}
+      <footer className="footer-fat">
+        <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
+          <div style={{ maxWidth: '260px' }}>
+            <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
+              {sections?.site_config?.logo_url ? (
+                <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} />
+              ) : (
+                'AliverBiopharm'
+              )}
+            </Link>
+            <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>
+              Advancing biology and pharmacy education for every learner.
+            </p>
+            <div className="footer-social">
+              {(sections?.footer?.social_links || []).map(s => (
+                <a key={s.platform} href={s.url} target="_blank" rel="noreferrer">
+                  <i className={s.icon}></i>
                 </a>
               ))}
+            </div>
           </div>
+
+          <div className="footer-grid">
+            {(sections?.footer?.columns || []).map(col => (
+              <div key={col.heading}>
+                <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                  {col.heading}
+                </h4>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {col.items?.map(item => (
+                    <li key={item.label}>
+                      {item.href.startsWith('#') || item.href.startsWith('http') ? (
+                        <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
+          <nav style={{ display: 'flex', gap: '22px' }}>
+            <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
+            <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
+            <Link to="/accessibility" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Accessibility</Link>
+          </nav>
         </div>
       </footer>
     </div>
