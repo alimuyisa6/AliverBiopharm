@@ -1,5 +1,5 @@
  import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { getAllSiteSections } from '../api/client';
 
 let _sectionsCache = null;
@@ -48,6 +48,11 @@ export default function LegalPage({ type }) {
   const [sections, setSections] = useState(() => _sectionsCache);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
 
   useEffect(() => {
     if (_sectionsCache) return;
