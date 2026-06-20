@@ -22,6 +22,9 @@ function App() {
           <Route path="/recall" element={<ProtectedRoute><BioRecall /></ProtectedRoute>} />
          <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/terms" element={<LegalPage type="terms" />} />
+<Route path="/privacy" element={<LegalPage type="privacy" />} />
+        
         </Routes>
       </AuthProvider>
     </BrowserRouter>
