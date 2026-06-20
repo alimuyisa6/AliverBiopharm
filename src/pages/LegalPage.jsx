@@ -1,18 +1,61 @@
-import React, { useEffect, useState } from 'react';
+ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllSiteSections } from '../api/client';
 
+let _sectionsCache = null;
+let _sectionsPromise = null;
+
+function getSections() {
+  if (_sectionsCache) return Promise.resolve(_sectionsCache);
+  if (_sectionsPromise) return _sectionsPromise;
+  _sectionsPromise = getAllSiteSections().then(data => {
+    _sectionsCache = data;
+    _sectionsPromise = null;
+    return data;
+  });
+  return _sectionsPromise;
+}
+
+function RichText({ text }) {
+  const TOKEN_RE = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})|((https?:\/\/)[^\s<>"']+)/g;
+  const parts = [];
+  let last = 0;
+  let match;
+
+  while ((match = TOKEN_RE.exec(text)) !== null) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+
+    const raw = match[0];
+    const isEmail = !!match[1];
+
+    parts.push(
+      <a
+        key={match.index}
+        href={isEmail ? `mailto:${raw}` : raw}
+        target={isEmail ? undefined : '_blank'}
+        rel={isEmail ? undefined : 'noopener noreferrer'}
+        style={{ color: 'var(--clr-accent, #2563eb)', textDecoration: 'underline', wordBreak: 'break-all' }}
+      >
+        {raw}
+      </a>
+    );
+
+    last = match.index + raw.length;
+  }
+
+  if (last < text.length) parts.push(text.slice(last));
+
+  return <>{parts}</>;
+}
+
 export default function LegalPage({ type }) {
-  const [sections, setSections] = useState(null);
+  const [sections, setSections] = useState(() => _sectionsCache);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
-    async function load() {
-      const data = await getAllSiteSections();
-      setSections(data);
-    }
-    load();
+    if (_sectionsCache) return;
+    getSections().then(data => setSections(data));
   }, []);
 
   if (!sections) return <div className="homepage">Loading...</div>;
@@ -86,7 +129,7 @@ export default function LegalPage({ type }) {
       </div>
       <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
 
-      <section className="section legal-section">
+      <section className="section reveal legal-section">
         <div className="legal-content-wrap">
           <h1 className="legal-title">{page?.title || 'Page not found'}</h1>
           {page?.sections?.length ? (
@@ -95,7 +138,9 @@ export default function LegalPage({ type }) {
                 <div key={idx} className="legal-block">
                   {block.heading && <h2>{block.heading}</h2>}
                   {block.content.split('\n\n').map((para, pIdx) => (
-                    <p key={pIdx}>{para}</p>
+                    <p key={pIdx}>
+                      <RichText text={para} />
+                    </p>
                   ))}
                 </div>
               ))}
