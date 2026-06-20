@@ -95,6 +95,11 @@ export default function HomeView({
   chatBodyRef,
 }) {
   const { show, hide } = useLoading();
+  const safePdfs = pdfs || [];
+  const safeChatMessages = chatMessages || [];
+  const safeNotesComments = notesComments || [];
+  const safeCommunityActivity = communityActivity || [];
+  const safeContinueLearning = continueLearning || { views: [], favorites: [], streak: 0 };
 
   const handleChatInputChange = (e) => {
     setChatInput(e.target.value);
@@ -272,7 +277,7 @@ export default function HomeView({
             <h3 style={{ fontFamily: "'Playfair Display', serif", color: 'var(--clr-cyan)' }}><i className="fa-solid fa-trophy" style={{ color: 'var(--clr-magenta)' }}></i> {sections.weekly_challenge.question}</h3>
             {!weeklyChallengeAnswer ? (
               <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                {sections.weekly_challenge.options.map((opt, i) => (
+                {(sections.weekly_challenge.options || []).map((opt, i) => (
                   <button key={i} className="quiz-option-btn" onClick={() => wrappedWeeklyChallenge(i, sections.weekly_challenge.correct, sections.weekly_challenge.explanation)}>
                     {String.fromCharCode(65 + i)}) {opt}
                   </button>
@@ -281,7 +286,7 @@ export default function HomeView({
             ) : (
               <p style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                 <i className={`fa-solid fa-${weeklyChallengeAnswer.correct ? 'check-circle' : 'times-circle'}`} style={{ color: weeklyChallengeAnswer.correct ? '#0ab5b5' : '#e74c3c' }}></i>
-                {weeklyChallengeAnswer.correct ? ' Correct!' : ' Incorrect.'} {String.fromCharCode(65 + sections.weekly_challenge.correct)}) {sections.weekly_challenge.options[sections.weekly_challenge.correct]}
+                {weeklyChallengeAnswer.correct ? ' Correct!' : ' Incorrect.'} {String.fromCharCode(65 + sections.weekly_challenge.correct)}) {sections.weekly_challenge.options?.[sections.weekly_challenge.correct]}
                 <br /><small>{weeklyChallengeAnswer.explanation}</small>
               </p>
             )}
@@ -315,19 +320,19 @@ export default function HomeView({
         </div>
       </section>
 
-      {user && (continueLearning.views.length > 0 || continueLearning.favorites.length > 0 || continueLearning.streak > 0) && (
+      {user && safeContinueLearning && ((safeContinueLearning.views?.length > 0) || (safeContinueLearning.favorites?.length > 0) || safeContinueLearning.streak > 0) && (
         <section id="continue-learning" className="section reveal">
           <span className="sec-label">YOUR JOURNEY</span>
           <h2 className="section-title">Continue Learning</h2>
           <div className="continue-learning-grid">
-            {continueLearning.streak > 0 && (
-              <div className="continue-card"><i className="fa-solid fa-fire" style={{ color: 'var(--clr-magenta)' }}></i> <strong>{continueLearning.streak}-Day Streak</strong><p style={{ fontSize: '0.8rem' }}>Keep it up!</p></div>
+            {safeContinueLearning.streak > 0 && (
+              <div className="continue-card"><i className="fa-solid fa-fire" style={{ color: 'var(--clr-magenta)' }}></i> <strong>{safeContinueLearning.streak}-Day Streak</strong><p style={{ fontSize: '0.8rem' }}>Keep it up!</p></div>
             )}
-            {continueLearning.views.length > 0 && (
-              <div className="continue-card"><strong>Recent Views</strong><ul style={{ listStyle: 'none' }}>{continueLearning.views.map(v => <li key={v.resource_id}><a href="#" style={{ color: 'var(--clr-cyan)' }}>{v.title}</a></li>)}</ul></div>
+            {safeContinueLearning.views?.length > 0 && (
+              <div className="continue-card"><strong>Recent Views</strong><ul style={{ listStyle: 'none' }}>{safeContinueLearning.views.map(v => <li key={v.resource_id}><a href="#" style={{ color: 'var(--clr-cyan)' }}>{v.title}</a></li>)}</ul></div>
             )}
-            {continueLearning.favorites.length > 0 && (
-              <div className="continue-card"><strong>Favorites</strong><ul style={{ listStyle: 'none' }}>{continueLearning.favorites.slice(0,3).map(f => <li key={f.resource_id}>{f.title}</li>)}</ul></div>
+            {safeContinueLearning.favorites?.length > 0 && (
+              <div className="continue-card"><strong>Favorites</strong><ul style={{ listStyle: 'none' }}>{safeContinueLearning.favorites.slice(0,3).map(f => <li key={f.resource_id}>{f.title}</li>)}</ul></div>
             )}
           </div>
         </section>
@@ -350,18 +355,18 @@ export default function HomeView({
             </div>
             <div className="pdf-content-wrapper">
               <div className="pdf-cards-area">
-                {pdfs.length === 0 ? (
+                {safePdfs.length === 0 ? (
                   <div className="pdf-loading">No PDFs available for this level.</div>
                 ) : (
                   <>
-                    {Array.from(new Set(pdfs.map(p => p.topic || 'General'))).map(topic => (
+                    {Array.from(new Set(safePdfs.map(p => p.topic || 'General'))).map(topic => (
                       <div key={topic} className="pdf-topic-group" style={{ marginBottom: '28px' }}>
                         <h4 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1rem', fontWeight: 700, color: 'var(--clr-magenta)', borderLeft: '4px solid var(--clr-cyan)', paddingLeft: '12px', marginBottom: '14px' }}>{topic}</h4>
                         <div className="pdf-cards-grid">
-                          {pdfs.filter(p => (p.topic || 'General') === topic).map(pdf => (
+                          {safePdfs.filter(p => (p.topic || 'General') === topic).map(pdf => (
                             <div key={pdf.id} className="pdf-card" onClick={() => handlePdfPreview(pdf)}>
                               <div className="pdf-card-icon"><i className="fa-solid fa-file-pdf"></i></div>
-                              <div className="pdf-card-title">{pdf.title.length > 45 ? pdf.title.substring(0,42)+'...' : pdf.title}</div>
+                              <div className="pdf-card-title">{(pdf.title || '').length > 45 ? pdf.title.substring(0,42)+'...' : pdf.title}</div>
                               <div className="pdf-card-author">{pdf.author || 'Unknown'}</div>
                             </div>
                           ))}
@@ -374,10 +379,10 @@ export default function HomeView({
               <div className="pdf-subtopics-column">
                 <div className="pdf-subtopics-header">Browse Topics</div>
                 <div className="pdf-subtopics-list">
-                  {Array.from(new Set(pdfs.map(p => p.topic || 'General'))).map(topic => (
+                  {Array.from(new Set(safePdfs.map(p => p.topic || 'General'))).map(topic => (
                     <div key={topic} className={`pdf-subtopic-item ${pdfSelectedTopic === topic ? 'active' : ''}`} onClick={() => setPdfSelectedTopic(topic)}>
                       <div className="pdf-subtopic-title">{topic}</div>
-                      <div className="pdf-subtopic-author">{pdfs.filter(p => (p.topic || 'General') === topic).length} resources</div>
+                      <div className="pdf-subtopic-author">{safePdfs.filter(p => (p.topic || 'General') === topic).length} resources</div>
                     </div>
                   ))}
                 </div>
@@ -408,14 +413,14 @@ export default function HomeView({
           <button className="shuffle-btn" onClick={shuffleFlashcards}><i className="fa-solid fa-shuffle"></i> Shuffle</button>
         </div>
         <div id="flashcards-container">
-          {Object.entries(flashcardShuffled).map(([deckName, cards]) => (
+          {Object.entries(flashcardShuffled || {}).map(([deckName, cards]) => (
             <div key={deckName} className="flashcard-category" data-category={deckName}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--clr-magenta)', fontSize: '1.35rem', borderLeft: '4px solid var(--clr-cyan)', paddingLeft: '14px' }}><i className="fa-solid fa-layer-group"></i> {deckName} <span style={{ fontSize: '0.8rem' }}>({cards.length} cards)</span></h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--clr-magenta)', fontSize: '1.35rem', borderLeft: '4px solid var(--clr-cyan)', paddingLeft: '14px' }}><i className="fa-solid fa-layer-group"></i> {deckName} <span style={{ fontSize: '0.8rem' }}>({(cards || []).length} cards)</span></h3>
                 <button className="btn-download" onClick={() => { setFlashcardCurrentDeck(deckName); setFlashcardCurrentIndex(0); }}><i className="fa-solid fa-play"></i> Study</button>
               </div>
               <div className="flashcard-grid">
-                {cards.slice(0, flashcardCurrentDeck === deckName ? cards.length : 3).map((card, idx) => (
+                {(cards || []).slice(0, flashcardCurrentDeck === deckName ? cards.length : 3).map((card, idx) => (
                   <div key={card.id} className="flashcard-deck" data-id={card.id}>
                     <div
                       className={`flashcard-face ${flippedCards[card.id] ? 'flipped' : ''} ${flashcardCurrentDeck === deckName && flashcardCurrentIndex === idx ? 'active-card' : ''}`}
@@ -473,7 +478,7 @@ export default function HomeView({
                     </div>
                   </div>
                 ))}
-                {cards.length > 3 && flashcardCurrentDeck !== deckName && (
+                {(cards || []).length > 3 && flashcardCurrentDeck !== deckName && (
                   <div className="flashcard-deck" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => { setFlashcardCurrentDeck(deckName); setFlashcardCurrentIndex(0); }}>
                     <div style={{ textAlign: 'center', color: 'var(--clr-cyan)' }}><i className="fa-solid fa-ellipsis" style={{ fontSize: '2rem' }}></i><p>Show all {cards.length} cards</p></div>
                   </div>
@@ -498,7 +503,7 @@ export default function HomeView({
               {notesFilterVisible && (
                 <div id="notes-filter-area">
                   <div id="notes-level-buttons" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
-                    {Object.keys(groupedNotes).map(level => (
+                    {Object.keys(groupedNotes || {}).map(level => (
                       <button key={level} className="level-btn" style={{ background: notesSelectedLevel === level ? 'var(--clr-cyan)' : 'transparent', border: `2px solid ${getLevelColor(level)}`, color: notesSelectedLevel === level ? '#fff' : 'var(--clr-white)', padding: '8px 24px', borderRadius: '50px', cursor: 'pointer', fontWeight: 600 }} onClick={() => { setNotesSelectedLevel(level); setNotesSelectedTopic(null); setNotesContent(null); }}>
                         {level}
                       </button>
@@ -508,7 +513,7 @@ export default function HomeView({
                     <div id="notes-topics-container" style={{ marginBottom: '20px' }}>
                       <h4 style={{ color: 'var(--clr-magenta)', marginBottom: '12px' }}><i className="fa-solid fa-folder-tree"></i> Topics</h4>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                        {Object.keys(groupedNotes[notesSelectedLevel] || {}).map(topic => (
+                        {Object.keys(groupedNotes?.[notesSelectedLevel] || {}).map(topic => (
                           <button key={topic} className="topic-btn" style={{ background: notesSelectedTopic === topic ? 'var(--clr-magenta)' : 'rgba(184,135,58,0.15)', border: '1px solid var(--clr-magenta)', color: notesSelectedTopic === topic ? '#fff' : 'var(--clr-magenta)', padding: '6px 18px', borderRadius: '50px', cursor: 'pointer' }} onClick={() => { setNotesSelectedTopic(topic); setNotesContent(null); }}>
                             {topic}
                           </button>
@@ -520,7 +525,7 @@ export default function HomeView({
                     <div id="notes-subtopics-container">
                       <h4 style={{ color: 'var(--clr-cyan)', margin: '16px 0' }}><i className="fa-solid fa-file-lines"></i> Study Notes</h4>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-                        {groupedNotes[notesSelectedLevel][notesSelectedTopic].map(item => (
+                        {(groupedNotes?.[notesSelectedLevel]?.[notesSelectedTopic] || []).map(item => (
                           <div key={item.subtopic_id} className="subtopic-card" style={{ background: 'var(--clr-navy-card)', borderRadius: '20px', border: '1px solid var(--clr-border-glow)', overflow: 'hidden' }}>
                             <div style={{ padding: '20px' }}>
                               <span className="topic-badge" style={{ background: 'rgba(184,135,58,0.12)', color: 'var(--clr-magenta)', padding: '4px 14px', borderRadius: '30px', fontSize: '0.7rem', fontWeight: 700, display: 'inline-block', marginBottom: '16px' }}>{notesSelectedTopic}</span>
@@ -547,9 +552,9 @@ export default function HomeView({
                     <h1>{notesContent.subtopicName}</h1>
                     <div dangerouslySetInnerHTML={{ __html: notesContent.content || '<p>No content available.</p>' }} />
                     <div className="notes-reaction-bar">
-                      <button className={`reaction-btn ${notesReactions?.user_reaction === 'like' ? 'active' : ''}`} onClick={() => handleNoteReaction(notesContent.subtopicId, 'like')}><i className="fa-regular fa-thumbs-up"></i> <span className="reaction-count">{notesReactions?.counts.like || 0}</span></button>
-                      <button className={`reaction-btn ${notesReactions?.user_reaction === 'love' ? 'active' : ''}`} onClick={() => handleNoteReaction(notesContent.subtopicId, 'love')}><i className="fa-regular fa-heart"></i> <span>{notesReactions?.counts.love || 0}</span></button>
-                      <button className={`reaction-btn ${notesReactions?.user_reaction === 'helpful' ? 'active' : ''}`} onClick={() => handleNoteReaction(notesContent.subtopicId, 'helpful')}><i className="fa-regular fa-lightbulb"></i> <span>{notesReactions?.counts.helpful || 0}</span></button>
+                      <button className={`reaction-btn ${notesReactions?.user_reaction === 'like' ? 'active' : ''}`} onClick={() => handleNoteReaction(notesContent.subtopicId, 'like')}><i className="fa-regular fa-thumbs-up"></i> <span className="reaction-count">{notesReactions?.counts?.like || 0}</span></button>
+                      <button className={`reaction-btn ${notesReactions?.user_reaction === 'love' ? 'active' : ''}`} onClick={() => handleNoteReaction(notesContent.subtopicId, 'love')}><i className="fa-regular fa-heart"></i> <span>{notesReactions?.counts?.love || 0}</span></button>
+                      <button className={`reaction-btn ${notesReactions?.user_reaction === 'helpful' ? 'active' : ''}`} onClick={() => handleNoteReaction(notesContent.subtopicId, 'helpful')}><i className="fa-regular fa-lightbulb"></i> <span>{notesReactions?.counts?.helpful || 0}</span></button>
                     </div>
                     <div className="comment-section">
                       <div className="comment-input-group">
@@ -557,7 +562,7 @@ export default function HomeView({
                         <button className="btn-primary" onClick={() => handleNoteComment(notesContent.subtopicId)}>Post</button>
                       </div>
                       <div className="comment-list">
-                        {notesComments.map(c => (
+                        {safeNotesComments.map(c => (
                           <div key={c.created_at} className="comment-item"><strong>{c.user_name}</strong> <span style={{ fontSize: '0.7rem', color: 'var(--clr-text-muted)' }}>{new Date(c.created_at).toLocaleDateString()}</span><br />{c.comment}</div>
                         ))}
                       </div>
@@ -608,7 +613,7 @@ export default function HomeView({
         <span className="sec-label">COMMUNITY</span>
         <h2 className="section-title">Live Learning Stream</h2>
         <div className="community-stream">
-          {communityActivity.map((act, idx) => (
+          {safeCommunityActivity.map((act, idx) => (
             <div key={idx} className="stream-item"><i className={`fa-solid fa-${act.type === 'download' ? 'download' : 'graduation-cap'}`} style={{ color: 'var(--clr-cyan)' }}></i> <span>{act.message}</span><small style={{ marginLeft: 'auto', color: 'var(--clr-text-muted)' }}>{new Date(act.time).toLocaleDateString()}</small></div>
           ))}
         </div>
@@ -749,7 +754,7 @@ export default function HomeView({
               <button className="chat-close-btn" onClick={() => setChatOpen(false)}>✕</button>
             </div>
             <div className="chat-body" ref={chatBodyRef}>
-              {chatMessages.map(msg => (
+              {safeChatMessages.map(msg => (
                 <div key={msg.id} className={`chat-msg ${msg.sender_type === 'user' ? 'user' : 'admin'}`}>
                   <strong>{msg.sender_type === 'user' ? 'You' : 'Admin'}:</strong> {msg.content}
                   {msg.sender_type === 'user' && <button className="chat-clear-btn" onClick={() => deleteChatMsg(msg.id)}>✖</button>}
