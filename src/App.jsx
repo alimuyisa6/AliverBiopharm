@@ -1,6 +1,6 @@
  import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -17,11 +17,11 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/quiz" element={<ProtectedRoute><div>Quiz disabled</div></ProtectedRoute>} />
           <Route path="/past-papers" element={<PastPapers />} />
-          <Route path="/recall" element={<BioRecall />} />
-          <Route path="/notes/read" element={<NoteDetail />} />
-          <Route path="*" element={<Home />} />
+          <Route path="/recall" element={<ProtectedRoute><div>Recall disabled</div></ProtectedRoute>} />
+          <Route path="/notes/read" element={<ProtectedRoute><div>Notes disabled</div></ProtectedRoute>} />
+          <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
         </Routes>
