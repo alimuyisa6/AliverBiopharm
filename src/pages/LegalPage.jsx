@@ -17,7 +17,7 @@ export default function LegalPage({ type }) {
 
   if (!sections) return <div className="homepage">Loading...</div>;
 
-  const page = sections.legal?.[type];
+  const page = sections[type];
   const currentYear = new Date().getFullYear();
   const navLinks = sections?.navigation?.links || [{ href: '/', label: 'Home' }];
 
@@ -89,8 +89,17 @@ export default function LegalPage({ type }) {
       <section className="section reveal legal-section">
         <div className="legal-content-wrap">
           <h1 className="legal-title">{page?.title || 'Page not found'}</h1>
-          {page?.content ? (
-            <div className="legal-body" dangerouslySetInnerHTML={{ __html: page.content }} />
+          {page?.sections?.length ? (
+            <div className="legal-body">
+              {page.sections.map((block, idx) => (
+                <div key={idx} className="legal-block">
+                  {block.heading && <h2>{block.heading}</h2>}
+                  {block.content.split('\n\n').map((para, pIdx) => (
+                    <p key={pIdx}>{para}</p>
+                  ))}
+                </div>
+              ))}
+            </div>
           ) : (
             <p className="legal-empty">No content has been added for this page yet.</p>
           )}
