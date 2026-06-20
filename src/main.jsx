@@ -4,7 +4,7 @@ import App from './App';
 import './styles/global.css';
 import './styles/component-bundle.css';
 import './styles/quiz.css';
-import './styles/loading.css';
+import './loading/Loading.css';
 import LoadingProvider from './loading/LoadingProvider';
 
 class ErrorBoundary extends React.Component {
