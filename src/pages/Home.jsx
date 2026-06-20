@@ -176,7 +176,7 @@ export default function HomeView({
           </Link>
           <nav aria-label="Main navigation">
             <ul className="main-nav" id="main-nav">
-              {(sections?.navigation?.links || [{ href: '/', label: 'Home' }, { href: '#courses', label: 'Courses' }, { href: '#contact', label: 'Contact' }]).map(link => (
+              {(sections?.navigation?.links || [{ href: '/', label: 'Home' }, { href: '#courses', label: 'Courses' }, { href: '#contact', label: 'Contact' }]).filter(Boolean).map(link => (
                 <li key={link.href}>{link.href.startsWith('#') || link.href.startsWith('http') ? <a href={link.href}>{link.label}</a> : <Link to={link.href}>{link.label}</Link>}</li>
               ))}
             </ul>
@@ -214,7 +214,7 @@ export default function HomeView({
             </div>
           </div>
           <nav className="mobile-nav-links">
-            {(sections?.navigation?.links || []).map(link => (
+            {(sections?.navigation?.links || []).filter(Boolean).map(link => (
               link.href.startsWith('#') || link.href.startsWith('http') ? <a key={link.href} href={link.href}>{link.label}</a> : <Link key={link.href} to={link.href}>{link.label}</Link>
             ))}
           </nav>
@@ -223,7 +223,7 @@ export default function HomeView({
       <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
 
       <section id="home" className="hero-carousel">
-        {(sections?.hero?.slides || []).map((slide, idx) => (
+        {(sections?.hero?.slides || []).filter(Boolean).map((slide, idx) => (
           <div
             key={idx}
             className={`carousel-slide ${idx === currentSlide ? 'active' : ''}`}
@@ -277,7 +277,7 @@ export default function HomeView({
             <h3 style={{ fontFamily: "'Playfair Display', serif", color: 'var(--clr-cyan)' }}><i className="fa-solid fa-trophy" style={{ color: 'var(--clr-magenta)' }}></i> {sections.weekly_challenge.question}</h3>
             {!weeklyChallengeAnswer ? (
               <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                {(sections.weekly_challenge.options || []).map((opt, i) => (
+                {(sections.weekly_challenge.options || []).filter(Boolean).map((opt, i) => (
                   <button key={i} className="quiz-option-btn" onClick={() => wrappedWeeklyChallenge(i, sections.weekly_challenge.correct, sections.weekly_challenge.explanation)}>
                     {String.fromCharCode(65 + i)}) {opt}
                   </button>
@@ -329,10 +329,10 @@ export default function HomeView({
               <div className="continue-card"><i className="fa-solid fa-fire" style={{ color: 'var(--clr-magenta)' }}></i> <strong>{safeContinueLearning.streak}-Day Streak</strong><p style={{ fontSize: '0.8rem' }}>Keep it up!</p></div>
             )}
             {safeContinueLearning.views?.length > 0 && (
-              <div className="continue-card"><strong>Recent Views</strong><ul style={{ listStyle: 'none' }}>{safeContinueLearning.views.map(v => <li key={v.resource_id}><a href="#" style={{ color: 'var(--clr-cyan)' }}>{v.title}</a></li>)}</ul></div>
+              <div className="continue-card"><strong>Recent Views</strong><ul style={{ listStyle: 'none' }}>{safeContinueLearning.views.filter(Boolean).map(v => <li key={v.resource_id}><a href="#" style={{ color: 'var(--clr-cyan)' }}>{v.title}</a></li>)}</ul></div>
             )}
             {safeContinueLearning.favorites?.length > 0 && (
-              <div className="continue-card"><strong>Favorites</strong><ul style={{ listStyle: 'none' }}>{safeContinueLearning.favorites.slice(0,3).map(f => <li key={f.resource_id}>{f.title}</li>)}</ul></div>
+              <div className="continue-card"><strong>Favorites</strong><ul style={{ listStyle: 'none' }}>{safeContinueLearning.favorites.slice(0,3).filter(Boolean).map(f => <li key={f.resource_id}>{f.title}</li>)}</ul></div>
             )}
           </div>
         </section>
@@ -363,7 +363,7 @@ export default function HomeView({
                       <div key={topic} className="pdf-topic-group" style={{ marginBottom: '28px' }}>
                         <h4 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1rem', fontWeight: 700, color: 'var(--clr-magenta)', borderLeft: '4px solid var(--clr-cyan)', paddingLeft: '12px', marginBottom: '14px' }}>{topic}</h4>
                         <div className="pdf-cards-grid">
-                          {safePdfs.filter(p => (p.topic || 'General') === topic).map(pdf => (
+                          {safePdfs.filter(p => (p.topic || 'General') === topic).filter(Boolean).map(pdf => (
                             <div key={pdf.id} className="pdf-card" onClick={() => handlePdfPreview(pdf)}>
                               <div className="pdf-card-icon"><i className="fa-solid fa-file-pdf"></i></div>
                               <div className="pdf-card-title">{(pdf.title || '').length > 45 ? pdf.title.substring(0,42)+'...' : pdf.title}</div>
@@ -420,7 +420,7 @@ export default function HomeView({
                 <button className="btn-download" onClick={() => { setFlashcardCurrentDeck(deckName); setFlashcardCurrentIndex(0); }}><i className="fa-solid fa-play"></i> Study</button>
               </div>
               <div className="flashcard-grid">
-                {(cards || []).slice(0, flashcardCurrentDeck === deckName ? cards.length : 3).map((card, idx) => (
+                {(cards || []).slice(0, flashcardCurrentDeck === deckName ? cards.length : 3).filter(Boolean).map((card, idx) => (
                   <div key={card.id} className="flashcard-deck" data-id={card.id}>
                     <div
                       className={`flashcard-face ${flippedCards[card.id] ? 'flipped' : ''} ${flashcardCurrentDeck === deckName && flashcardCurrentIndex === idx ? 'active-card' : ''}`}
@@ -525,7 +525,7 @@ export default function HomeView({
                     <div id="notes-subtopics-container">
                       <h4 style={{ color: 'var(--clr-cyan)', margin: '16px 0' }}><i className="fa-solid fa-file-lines"></i> Study Notes</h4>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-                        {(groupedNotes?.[notesSelectedLevel]?.[notesSelectedTopic] || []).map(item => (
+                        {(groupedNotes?.[notesSelectedLevel]?.[notesSelectedTopic] || []).filter(Boolean).map(item => (
                           <div key={item.subtopic_id} className="subtopic-card" style={{ background: 'var(--clr-navy-card)', borderRadius: '20px', border: '1px solid var(--clr-border-glow)', overflow: 'hidden' }}>
                             <div style={{ padding: '20px' }}>
                               <span className="topic-badge" style={{ background: 'rgba(184,135,58,0.12)', color: 'var(--clr-magenta)', padding: '4px 14px', borderRadius: '30px', fontSize: '0.7rem', fontWeight: 700, display: 'inline-block', marginBottom: '16px' }}>{notesSelectedTopic}</span>
@@ -562,7 +562,7 @@ export default function HomeView({
                         <button className="btn-primary" onClick={() => handleNoteComment(notesContent.subtopicId)}>Post</button>
                       </div>
                       <div className="comment-list">
-                        {safeNotesComments.map(c => (
+                        {safeNotesComments.filter(Boolean).map(c => (
                           <div key={c.created_at} className="comment-item"><strong>{c.user_name}</strong> <span style={{ fontSize: '0.7rem', color: 'var(--clr-text-muted)' }}>{new Date(c.created_at).toLocaleDateString()}</span><br />{c.comment}</div>
                         ))}
                       </div>
@@ -580,7 +580,7 @@ export default function HomeView({
         <h2 className="section-title">{sections?.section_headings?.team_title || 'Guided by distinguished pharmacologists and molecular biologists'}</h2>
         <p className="section-subtitle">{sections?.section_headings?.team_subtitle || 'Learn from distinguished pharmacologists, molecular biologists, and clinical researchers with decades of combined teaching experience.'}</p>
         <div className="team-scroll-container">
-          {(sections?.team?.members || []).map(member => (
+          {(sections?.team?.members || []).filter(Boolean).map(member => (
             <div key={member.name} className="team-card" style={{ minWidth: '280px' }}>
               <div className="team-avatar">{member.avatar_url ? <img src={member.avatar_url} alt={member.name} /> : <i className="fa-solid fa-user-tie"></i>}</div>
               <h3>{member.name}</h3>
@@ -613,7 +613,7 @@ export default function HomeView({
         <span className="sec-label">COMMUNITY</span>
         <h2 className="section-title">Live Learning Stream</h2>
         <div className="community-stream">
-          {safeCommunityActivity.map((act, idx) => (
+          {safeCommunityActivity.filter(Boolean).map((act, idx) => (
             <div key={idx} className="stream-item"><i className={`fa-solid fa-${act.type === 'download' ? 'download' : 'graduation-cap'}`} style={{ color: 'var(--clr-cyan)' }}></i> <span>{act.message}</span><small style={{ marginLeft: 'auto', color: 'var(--clr-text-muted)' }}>{new Date(act.time).toLocaleDateString()}</small></div>
           ))}
         </div>
@@ -624,12 +624,12 @@ export default function HomeView({
         <h2 className="section-title">{sections?.section_headings?.pricing_title || 'Invest in your future with flexible plans designed to grow alongside your learning journey'}</h2>
         <p className="section-subtitle">{sections?.section_headings?.pricing_subtitle || 'Choose the plan that fits your learning journey. All plans include access to our complete resource library with regular updates.'}</p>
         <div className="grid-3">
-          {(sections?.pricing?.plans || []).map(plan => (
+          {(sections?.pricing?.plans || []).filter(Boolean).map(plan => (
             <div key={plan.name} className={`card pricing-card ${plan.featured ? 'featured' : ''}`}>
               <h3>{plan.name}</h3>
               <p>{plan.description}</p>
               <div className="price my-3">{plan.price}<span style={{ fontSize: '1rem' }}>{plan.period}</span></div>
-              <ul className="pricing-features">{plan.features?.map(f => <li key={f}><i className="fa-solid fa-check"></i> {f}</li>)}</ul>
+              <ul className="pricing-features">{(plan.features || []).filter(Boolean).map(f => <li key={f}><i className="fa-solid fa-check"></i> {f}</li>)}</ul>
               <button className="btn-primary mt-4" style={{ width: 'auto', display: 'inline-flex', margin: '0 auto' }}>{plan.cta_text || 'Subscribe'}</button>
             </div>
           ))}
@@ -641,7 +641,7 @@ export default function HomeView({
         <h2 className="section-title">{sections?.section_headings?.blog_title || 'Deepen your understanding with insights from leading voices in biology, pharmacy, and research'}</h2>
         <p className="section-subtitle">{sections?.section_headings?.blog_subtitle || 'Stay informed with the latest developments in biology, pharmacy, and life sciences from our expert contributors.'}</p>
         <div className="grid-3">
-          {(sections?.blog?.posts || []).map(post => (
+          {(sections?.blog?.posts || []).filter(Boolean).map(post => (
             <article key={post.title} className="card">
               {post.image_url && <img src={post.image_url} alt={post.title} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }} />}
               <div className="flex gap-4 text-xs" style={{ color: 'var(--clr-text-muted)', marginBottom: '0.5rem' }}><span><i className="fa-regular fa-calendar"></i> {post.date}</span><span><i className="fa-regular fa-user"></i> {post.author}</span></div>
@@ -658,7 +658,7 @@ export default function HomeView({
         <h2 className="section-title">{sections?.section_headings?.faq_title || 'Clear answers to the questions learners ask most about our platform and methodology'}</h2>
         <p className="section-subtitle">{sections?.section_headings?.faq_subtitle || 'Quick answers to common questions about our platform, courses, resources, and membership options.'}</p>
         <div className="faq-list">
-          {(sections?.faq?.items || []).map((item, idx) => (
+          {(sections?.faq?.items || []).filter(Boolean).map((item, idx) => (
             <div key={idx} className="faq-item">
               <button className="faq-question" onClick={e => e.currentTarget.parentElement.classList.toggle('active')}><span>{item.question}</span><span style={{ color: 'var(--clr-cyan)' }}>+</span></button>
               <div className="faq-answer"><p>{item.answer}</p></div>
@@ -682,7 +682,7 @@ export default function HomeView({
           </form>
           <aside className="contact-info-card" id="contact-info-card">
             <div className="text-center mb-4"><i className="fa-solid fa-headset text-4xl" style={{ color: 'var(--clr-cyan)' }}></i><h3 style={{ marginTop: '.5rem', fontSize: '1.1rem', fontWeight: 600 }}>24/7 Support</h3></div>
-            {(sections?.contact?.info || []).map(info => (
+            {(sections?.contact?.info || []).filter(Boolean).map(info => (
               <div key={info.label} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.8rem 0', borderBottom: '1px solid var(--clr-border-glow)' }}>
                 <div className="contact-icon"><i className={info.icon}></i></div>
                 <div><div style={{ fontSize: '0.7rem', color: 'var(--clr-text-muted)' }}>{info.label}</div><a href={info.href} style={{ color: 'var(--clr-white)', textDecoration: 'none' }}>{info.value}</a></div>
@@ -713,17 +713,17 @@ export default function HomeView({
             </Link>
             <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>Advancing biology and pharmacy education for every learner.</p>
             <div className="footer-social">
-              {(sections?.footer?.social_links || []).map(s => (
+              {(sections?.footer?.social_links || []).filter(Boolean).map(s => (
                 <a key={s.platform} href={s.url} target="_blank"><i className={s.icon}></i></a>
               ))}
             </div>
           </div>
           <div className="footer-grid">
-            {(sections?.footer?.columns || []).map(col => (
+            {(sections?.footer?.columns || []).filter(Boolean).map(col => (
               <div key={col.heading}>
                 <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>{col.heading}</h4>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {col.items?.map(item => (
+                  {(col.items || []).filter(Boolean).map(item => (
                     <li key={item.label}>{item.href.startsWith('#') || item.href.startsWith('http') ? <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</a> : <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</Link>}</li>
                   ))}
                 </ul>
@@ -754,7 +754,7 @@ export default function HomeView({
               <button className="chat-close-btn" onClick={() => setChatOpen(false)}>✕</button>
             </div>
             <div className="chat-body" ref={chatBodyRef}>
-              {safeChatMessages.map(msg => (
+              {safeChatMessages.filter(Boolean).map(msg => (
                 <div key={msg.id} className={`chat-msg ${msg.sender_type === 'user' ? 'user' : 'admin'}`}>
                   <strong>{msg.sender_type === 'user' ? 'You' : 'Admin'}:</strong> {msg.content}
                   {msg.sender_type === 'user' && <button className="chat-clear-btn" onClick={() => deleteChatMsg(msg.id)}>✖</button>}
