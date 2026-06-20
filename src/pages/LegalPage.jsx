@@ -4,6 +4,8 @@ import { getAllSiteSections } from '../api/client';
 
 export default function LegalPage({ type }) {
   const [sections, setSections] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
     async function load() {
@@ -17,6 +19,7 @@ export default function LegalPage({ type }) {
 
   const page = sections.legal?.[type];
   const currentYear = new Date().getFullYear();
+  const navLinks = sections?.navigation?.links || [{ href: '/', label: 'Home' }];
 
   return (
     <div className="homepage">
@@ -31,7 +34,7 @@ export default function LegalPage({ type }) {
           </Link>
           <nav aria-label="Main navigation">
             <ul className="main-nav" id="main-nav">
-              {(sections?.navigation?.links || [{ href: '/', label: 'Home' }]).map(link => (
+              {navLinks.map(link => (
                 <li key={link.href}>
                   {link.href.startsWith('#') || link.href.startsWith('http') ? (
                     <a href={link.href}>{link.label}</a>
@@ -42,8 +45,46 @@ export default function LegalPage({ type }) {
               ))}
             </ul>
           </nav>
+          <div className="nav-actions">
+            <button
+              className="theme-toggle"
+              onClick={() => {
+                const dark = document.body.classList.toggle('dark-mode');
+                localStorage.setItem('theme', dark ? 'dark' : 'light');
+                setTheme(dark ? 'dark' : 'light');
+              }}
+              aria-label="Toggle dark mode"
+            >
+              <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
+            </button>
+            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open menu">
+              <i className="fa-solid fa-bars"></i>
+            </button>
+          </div>
         </div>
       </header>
+
+      <div className={`mobile-nav-panel ${mobileMenuOpen ? 'active' : ''}`}>
+        <div className="mobile-nav-panel-inner">
+          <div className="mobile-nav-header">
+            <div className="mobile-nav-header-row">
+              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+          <nav className="mobile-nav-links">
+            {navLinks.map(link => (
+              link.href.startsWith('#') || link.href.startsWith('http') ? (
+                <a key={link.href} href={link.href}>{link.label}</a>
+              ) : (
+                <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
+              )
+            ))}
+          </nav>
+        </div>
+      </div>
+      <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
 
       <section className="section reveal legal-section">
         <div className="legal-content-wrap">
