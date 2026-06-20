@@ -36,7 +36,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <LoadingProvider>
-        <App />
+        <LoadingLayer />
+       <App />
       </LoadingProvider>
     </ErrorBoundary>
   </React.StrictMode>
