@@ -24,27 +24,23 @@ function RichText({ text }) {
 
   while ((match = TOKEN_RE.exec(text)) !== null) {
     if (match.index > last) parts.push(text.slice(last, match.index));
-
     const raw = match[0];
     const isEmail = !!match[1];
-
     parts.push(
       <a
         key={match.index}
         href={isEmail ? `mailto:${raw}` : raw}
         target={isEmail ? undefined : '_blank'}
         rel={isEmail ? undefined : 'noopener noreferrer'}
-        style={{ color: 'var(--clr-accent, #2563eb)', textDecoration: 'underline', wordBreak: 'break-all' }}
+        style={{ color: 'var(--clr-cyan)', textDecoration: 'underline', wordBreak: 'break-all' }}
       >
         {raw}
       </a>
     );
-
     last = match.index + raw.length;
   }
 
   if (last < text.length) parts.push(text.slice(last));
-
   return <>{parts}</>;
 }
 
@@ -117,19 +113,19 @@ export default function LegalPage({ type }) {
             </div>
           </div>
           <nav className="mobile-nav-links">
-            {navLinks.map(link => (
+            {navLinks.map(link =>
               link.href.startsWith('#') || link.href.startsWith('http') ? (
                 <a key={link.href} href={link.href}>{link.label}</a>
               ) : (
                 <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
               )
-            ))}
+            )}
           </nav>
         </div>
       </div>
       <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
 
-      <section className="section reveal legal-section">
+      <section className="section legal-section">
         <div className="legal-content-wrap">
           <h1 className="legal-title">{page?.title || 'Page not found'}</h1>
           {page?.sections?.length ? (
