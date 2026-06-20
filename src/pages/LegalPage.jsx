@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './LegalPage.css';
+import '../Legal.css';
 import { getAllSiteSections } from '../api/client';
 
 export default function LegalPage({ type }) {
