@@ -1,4 +1,4 @@
- import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllSiteSections } from '../api/client';
 
@@ -86,7 +86,7 @@ export default function LegalPage({ type }) {
       </div>
       <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
 
-      <section className="section reveal legal-section">
+      <section className="section legal-section">
         <div className="legal-content-wrap">
           <h1 className="legal-title">{page?.title || 'Page not found'}</h1>
           {page?.sections?.length ? (
