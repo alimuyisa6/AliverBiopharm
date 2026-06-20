@@ -2816,3 +2816,67 @@ body.dark-mode .pdf-section-subtitle {
   pointer-events: none;
   opacity: 0.7;
 }
+
+.legal-section {
+  margin-top: 60px;
+}
+
+.legal-content-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.legal-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--clr-white);
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.legal-body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--lh-relaxed);
+  color: var(--clr-text-dim);
+}
+
+.legal-body h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--clr-white);
+  margin: 2rem 0 0.75rem;
+}
+
+.legal-body h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--clr-white);
+  margin: 1.5rem 0 0.5rem;
+}
+
+.legal-body p {
+  margin-bottom: 1rem;
+}
+
+.legal-body ul,
+.legal-body ol {
+  margin: 0 0 1rem 1.25rem;
+}
+
+.legal-body a {
+  color: var(--clr-cyan);
+  text-decoration: underline;
+}
+
+.legal-empty {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--clr-text-dim);
+  font-style: italic;
+}
