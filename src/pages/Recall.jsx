@@ -22,6 +22,8 @@ import {
   completeRecallSession
 } from '../api/client';
 import '../styles/bioRecall.css';
+import useLoading from '../loading/useLoading';
+import InlineSpinner from '../loading/components/InlineSpinner';
 
 const levelSpinMessages = {
   'O-Level': ['Checking...', 'Reviewing biology...', 'Comparing terms...', 'Feedback ready'],
@@ -74,6 +76,7 @@ function BioRecall() {
   const [countdown, setCountdown] = useState(8);
   const [spinnerMessage, setSpinnerMessage] = useState('');
   const [floatingCards, setFloatingCards] = useState(false);
+  const { show, hide } = useLoading();
 
   useEffect(() => {
     document.body.classList.remove('theme-olevel', 'theme-alevel', 'theme-pharmacy');
@@ -167,6 +170,7 @@ function BioRecall() {
       return;
     }
     setSettingLevel(true);
+    show("form", "Setting your level...");
     try {
       await setSelectedLevel(level);
       setCurrentLevel(level);
@@ -179,6 +183,7 @@ function BioRecall() {
       setMessage({ text: e.message, type: 'error' });
     } finally {
       setSettingLevel(false);
+      hide();
     }
   };
 
@@ -210,11 +215,13 @@ function BioRecall() {
 
   const startSession = async (topic = null) => {
     setLoading(true);
+    show("quiz", "Preparing session...");
     try {
       await checkRecallSession({ level: currentLevel, topic });
     } catch (e) {
       setMessage({ text: e.message === 'Daily session already completed' ? 'You have already completed today\'s session. Come back tomorrow!' : e.message, type: 'warning' });
       setLoading(false);
+      hide();
       return;
     }
     try {
@@ -238,6 +245,7 @@ function BioRecall() {
       setMessage({ text: e.message, type: 'error' });
     } finally {
       setLoading(false);
+      hide();
     }
   };
 
@@ -248,6 +256,7 @@ function BioRecall() {
     const question = sessionQuestions[currentIndex];
     setAnalyzing(true);
     setFeedbackResult(null);
+    show("quiz", "Checking your answer...");
     const spinPool = levelSpinMessages[currentLevel] || levelSpinMessages['O-Level'];
     let idx = 0;
     setSpinnerMessage(spinPool[0]);
@@ -264,6 +273,7 @@ function BioRecall() {
       });
       clearInterval(spinnerInterval);
       setFeedbackResult(result);
+      hide();
       const newAnswersRecord = [...userAnswersRecord, { strength: result.strength, topic: question.topic }];
       setUserAnswersRecord(newAnswersRecord);
       setBrainEnergy(Math.max(0, brainEnergy - 5));
@@ -275,6 +285,7 @@ function BioRecall() {
       await fetchDashboardAndAchievements();
     } catch (err) {
       clearInterval(spinnerInterval);
+      hide();
       if (err.message === 'Question already answered') {
         setMessage({ text: 'You have already answered this question. Moving to the next one...', type: 'warning' });
         moveToNextQuestion();
@@ -301,6 +312,7 @@ function BioRecall() {
         setShowConfirm({
           message: 'You have completed 5 questions. Would you like to continue with 5 more questions? You will receive +5 XP bonus.',
           onConfirm: async () => {
+            show("quiz", "Loading more questions...");
             try {
               const result = await continueRecallSession({ session_id: sessionId });
               if (result && result.questions?.length) {
@@ -313,6 +325,8 @@ function BioRecall() {
               }
             } catch (e) {
               setMessage({ text: 'Failed to load more questions.', type: 'error' });
+            } finally {
+              hide();
             }
           },
           onCancel: () => endSession()
@@ -325,12 +339,14 @@ function BioRecall() {
 
   const endSession = async () => {
     setSessionActive(false);
+    show("form", "Saving your progress...");
     if (sessionId) {
       await completeRecallSession({ session_id: sessionId }).catch(() => {});
     }
     setShowReport(true);
     await loadUserProgress(currentLevel);
     setBrainEnergy(100);
+    hide();
   };
 
   const startSessionFromTopicModal = (topic) => {
@@ -387,7 +403,7 @@ function BioRecall() {
         onClick={handleSetLevel}
         disabled={settingLevel}
       >
-        {settingLevel ? 'Setting...' : 'Set Level'}
+        {settingLevel ? <><InlineSpinner /> Setting...</> : 'Set Level'}
       </button>
       {message && <div className={`user-message ${message.type}`}>{message.text}</div>}
     </div>
@@ -530,7 +546,7 @@ function BioRecall() {
           onKeyDown={(e) => { if (e.key === 'Enter' && !analyzing && sessionActive) handleAnswerSubmission(); }}
         />
         <button className="btn-check" onClick={handleAnswerSubmission} disabled={analyzing || !sessionActive}>
-          <FaPencil /> Check
+          {analyzing ? <><InlineSpinner /> Checking...</> : <><FaPencil /> Check</>}
         </button>
         {analyzing && !feedbackResult && (
           <div className="spinner-overlay">{spinnerMessage} <span className="dot-spin"></span><span className="dot-spin"></span><span className="dot-spin"></span></div>
