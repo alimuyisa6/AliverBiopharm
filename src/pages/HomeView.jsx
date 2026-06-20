@@ -111,17 +111,17 @@ export default function HomeView({
     <div className="homepage">
       <header className="site-header" id="site-header">
         <div className="header-container">
-          <a href="/" className="logo-link" aria-label="AliverBiopharm Home">
+          <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
             {sections?.site_config?.logo_url ? (
               <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
             ) : (
               'AliverBiopharm'
             )}
-          </a>
+          </Link>
           <nav aria-label="Main navigation">
             <ul className="main-nav" id="main-nav">
               {(sections?.navigation?.links || [{ href: '/', label: 'Home' }, { href: '#courses', label: 'Courses' }, { href: '#contact', label: 'Contact' }]).map(link => (
-                <li key={link.href}><a href={link.href}>{link.label}</a></li>
+                <li key={link.href}>{link.href.startsWith('#') || link.href.startsWith('http') ? <a href={link.href}>{link.label}</a> : <Link to={link.href}>{link.label}</Link>}</li>
               ))}
             </ul>
           </nav>
@@ -159,7 +159,7 @@ export default function HomeView({
           </div>
           <nav className="mobile-nav-links">
             {(sections?.navigation?.links || []).map(link => (
-              <a key={link.href} href={link.href}>{link.label}</a>
+              link.href.startsWith('#') || link.href.startsWith('http') ? <a key={link.href} href={link.href}>{link.label}</a> : <Link key={link.href} to={link.href}>{link.label}</Link>
             ))}
           </nav>
         </div>
@@ -181,7 +181,7 @@ export default function HomeView({
             <div className="slide-overlay">
               <h1 className="hero-title">{slide.title}</h1>
               <p className="hero-subtitle">{slide.subtitle}</p>
-              <a href={slide.cta_link} className="btn-primary"><i className={`fa-solid ${slide.icon || 'fa-arrow-right'}`}></i> {slide.cta_text}</a>
+              {slide.cta_link.startsWith('#') || slide.cta_link.startsWith('http') ? <a href={slide.cta_link} className="btn-primary"><i className={`fa-solid ${slide.icon || 'fa-arrow-right'}`}></i> {slide.cta_text}</a> : <Link to={slide.cta_link} className="btn-primary"><i className={`fa-solid ${slide.icon || 'fa-arrow-right'}`}></i> {slide.cta_text}</Link>}
             </div>
           </div>
         ))}
@@ -652,9 +652,9 @@ export default function HomeView({
       <footer className="footer-fat">
         <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
           <div style={{ maxWidth: '260px' }}>
-            <a href="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
+            <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
               {sections?.site_config?.logo_url ? <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} /> : 'AliverBiopharm'}
-            </a>
+            </Link>
             <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>Advancing biology and pharmacy education for every learner.</p>
             <div className="footer-social">
               {(sections?.footer?.social_links || []).map(s => (
@@ -668,7 +668,7 @@ export default function HomeView({
                 <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>{col.heading}</h4>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {col.items?.map(item => (
-                    <li key={item.label}><a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</a></li>
+                    <li key={item.label}>{item.href.startsWith('#') || item.href.startsWith('http') ? <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</a> : <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</Link>}</li>
                   ))}
                 </ul>
               </div>
@@ -678,9 +678,9 @@ export default function HomeView({
         <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
           <nav style={{ display: 'flex', gap: '22px' }}>
-            <a href="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</a>
-            <a href="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</a>
-            <a href="/accessibility" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Accessibility</a>
+            <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
+            <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
+            <Link to="/accessibility" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Accessibility</Link>
           </nav>
         </div>
       </footer>
