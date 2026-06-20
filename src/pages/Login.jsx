@@ -1,8 +1,10 @@
- import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { signin } from '../api/client';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css';
+import useLoading from '../loading/useLoading';
+import InlineSpinner from '../loading/components/InlineSpinner';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
@@ -10,10 +12,12 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const { refresh } = useAuth();
   const navigate = useNavigate();
   const turnstileRef = useRef(null);
   const widgetIdRef = useRef(null);
+  const { show, hide } = useLoading();
 
   useEffect(() => {
     if (!document.querySelector('script[src*="turnstile"]')) {
@@ -59,15 +63,22 @@ export default function Login() {
       return;
     }
 
+    setSubmitting(true);
+    show("auth", "Signing you in...");
+
     try {
       await signin(email, password, token);
       await refresh();
+      hide();
       navigate('/');
     } catch (err) {
       setError(err.message || 'Login failed');
+      hide();
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.reset(widgetIdRef.current);
       }
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -98,6 +109,7 @@ export default function Login() {
               onChange={e => setEmail(e.target.value)}
               className="form-input"
               required
+              disabled={submitting}
             />
 
             <input
@@ -107,12 +119,13 @@ export default function Login() {
               onChange={e => setPassword(e.target.value)}
               className="form-input"
               required
+              disabled={submitting}
             />
 
             <div ref={turnstileRef} className="auth-captcha"></div>
 
-            <button type="submit" className="btn-primary auth-submit">
-              Sign in
+            <button type="submit" className={`btn-primary auth-submit${submitting ? ' alv-btn-loading' : ''}`} disabled={submitting}>
+              {submitting ? <><InlineSpinner /> Signing in...</> : 'Sign in'}
             </button>
           </form>
 
