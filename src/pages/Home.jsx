@@ -1,17 +1,37 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import HomeView from './HomeView';
 import { getSections } from '../api/sections';
-import { getFlashcards, getKnownFlashcards, getFlashcardDecks, getFlashcardProgress } from '../api/client';
-import { getPdfsByLevel } from '../api/client';
-import { getNotesStructure, getNoteContent, getNoteReactions, toggleNoteReaction, getResourceInteractions, commentResource } from '../api/client';
-import { getPublicStats, getCommunityActivity, getContinueReading } from '../api/client';
-import { getUserDashboard, getUserFavorites, getRecentViews, getUserStreak } from '../api/client';
-import { getQuizTopics } from '../api/client';
-import { getWeeklyChallengeStatus, submitWeeklyChallenge } from '../api/client';
-import { submitMood } from '../api/client';
-import { submitContact, subscribeNewsletter } from '../api/client';
-import { requestChat, getChatMessages, sendChatMessage, deleteChatMessage, checkAdminOnline } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  getFlashcards,
+  getFlashcardDecks,
+  getKnownFlashcards,
+  getFlashcardProgress,
+  getPdfsByLevel,
+  getNotesStructure,
+  getNoteContent,
+  getNoteReactions,
+  toggleNoteReaction,
+  getResourceInteractions,
+  commentResource,
+  getPublicStats,
+  getCommunityActivity,
+  getContinueReading,
+  getUserFavorites,
+  getUserStreak,
+  submitWeeklyChallenge,
+  submitMood,
+  submitContact,
+  subscribeNewsletter,
+  requestChat,
+  getChatMessages,
+  sendChatMessage,
+  deleteChatMessage,
+  checkAdminOnline,
+  rateFlashcard as apiRateFlashcard,
+  checkFlashcardAnswer as apiCheckFlashcardAnswer,
+  toggleFlashcardBookmark as apiToggleFlashcardBookmark
+} from '../api/client';
 
 function shuffleArray(arr) {
   const a = [...arr];
@@ -248,22 +268,19 @@ export default function Home() {
 
   async function rateFlashcard(cardId, difficulty) {
     try {
-      const { rateFlashcard: apiRate } = await import('../api/client');
-      await apiRate(cardId, difficulty);
+      await apiRateFlashcard(cardId, difficulty);
     } catch (e) { console.error(e); }
   }
 
   async function checkFlashcardAnswer(cardId, userAnswer) {
     try {
-      const { checkFlashcardAnswer: apiCheck } = await import('../api/client');
-      return await apiCheck(cardId, userAnswer);
+      return await apiCheckFlashcardAnswer(cardId, userAnswer);
     } catch (e) { return { correct: false, correct_answer: 'Error' }; }
   }
 
   async function toggleFlashcardBookmark(cardId) {
     try {
-      const { toggleFlashcardBookmark: apiToggle } = await import('../api/client');
-      await apiToggle(cardId);
+      await apiToggleFlashcardBookmark(cardId);
     } catch (e) { console.error(e); }
   }
 
@@ -393,6 +410,8 @@ export default function Home() {
       setContactForm={setContactForm}
       setNewsletterEmail={setNewsletterEmail}
       setPdfPreviewOpen={setPdfPreviewOpen}
+      setPdfLevel={setPdfLevel}
+      setPdfSelectedTopic={setPdfSelectedTopic}
       setNotesSelectedLevel={setNotesSelectedLevel}
       setNotesSelectedTopic={setNotesSelectedTopic}
       setNotesFilterVisible={setNotesFilterVisible}
