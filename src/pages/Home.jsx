@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import HomeView from './HomeView';
-import { getSections } from '../data/sections';
+import { getSections } from '../api/sections';
 import { getFlashcards, getKnownFlashcards, getFlashcardDecks, getFlashcardProgress } from '../api/client';
 import { getPdfsByLevel } from '../api/client';
 import { getNotesStructure, getNoteContent, getNoteReactions, toggleNoteReaction, getResourceInteractions, commentResource } from '../api/client';
