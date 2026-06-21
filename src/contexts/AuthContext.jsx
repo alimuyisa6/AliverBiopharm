@@ -1,8 +1,7 @@
  import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getUser, signout } from '../api/client';
 import { Navigate } from 'react-router-dom';
-import { LoadingContext } from '../../loading/LoadingProvider';
-
+ import { LoadingContext } from '../loading/LoadingProvider';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
