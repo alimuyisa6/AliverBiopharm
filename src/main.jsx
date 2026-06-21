@@ -1,4 +1,4 @@
- import React from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
@@ -284,7 +284,20 @@ function initRevealObserver() {
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  const observeElements = () => {
+    document.querySelectorAll('.reveal:not(.in)').forEach(el => observer.observe(el));
+  };
+
+  observeElements();
+
+  const mutationObserver = new MutationObserver(() => {
+    observeElements();
+  });
+
+  mutationObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 }
 
 if (document.readyState === 'loading') {
@@ -315,4 +328,4 @@ try {
       <pre style="background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; font-size: 13px;">${error.stack}</pre>
     </div>
   `);
-}
+} 
