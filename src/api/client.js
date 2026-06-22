@@ -163,3 +163,18 @@ export async function continueRecallSession({ session_id }) { return apiCall('re
 export async function submitRecallAnswer({ session_id, question_id, user_answer, nonce }) { return apiCall('recall', 'answer', { session_id, question_id, user_answer, nonce }); }
 export async function completeRecallSession({ session_id }) { return apiCall('recall', 'complete', { session_id }); }
 export async function setSelectedLevel(level) { return apiCall('recall', 'set_selected_level', { level }); }
+
+export async function getGlossaryTerms(level, category, search) {
+  const params = { level };
+  if (category) params.category = category;
+  if (search) params.search = search;
+  return getRequest('glossary', 'list', params);
+}
+
+export async function getGlossaryTerm(slug, level) {
+  return getRequest('glossary', 'term', { slug, level });
+}
+
+export async function getGlossaryCategories(level) {
+  return getRequest('glossary', 'categories', { level });
+}
