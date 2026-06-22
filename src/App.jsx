@@ -1,4 +1,4 @@
- import React from 'react';
+  import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import Login from './pages/Login';
@@ -22,8 +22,8 @@ function App() {
           <Route path="/past-papers" element={<PastPapers />} />
           <Route path="/recall" element={<ProtectedRoute><BioRecall /></ProtectedRoute>} />
           <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
-          <Route path="/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
-          <Route path="/glossary/:slug" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
+          <Route path="/glossary/:slug" element={<ProtectedRoute><Glossary />} />
+          <Route path="/glossary" element={<ProtectedRoute><Glossary />} />
           <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
