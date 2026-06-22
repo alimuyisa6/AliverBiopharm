@@ -22,11 +22,11 @@ function App() {
           <Route path="/past-papers" element={<PastPapers />} />
           <Route path="/recall" element={<ProtectedRoute><BioRecall /></ProtectedRoute>} />
           <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
-           <Route path="/glossary" element={<Glossary />} />
-          <Route path="/glossary/:slug" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
-          <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/glossary" element={<Glossary />} />
+          <Route path="/glossary/:slug" element={<Glossary />} />
           <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
+          <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
