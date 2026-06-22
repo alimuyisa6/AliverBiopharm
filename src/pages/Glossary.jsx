@@ -7,6 +7,8 @@ import {
   getGlossaryCategories,
   getSelectedLevel
 } from '../api/client';
+import { getSections } from '../api/sections';
+
 
 export default function Glossary() {
   const { user } = useAuth();
