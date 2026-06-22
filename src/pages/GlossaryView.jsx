@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { getSections } from '../api/sections';
-
+ 
 
 export default function GlossaryView({
   user,
