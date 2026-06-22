@@ -18,6 +18,7 @@ import * as chat from '../lib/chat.js';
 import * as community from '../lib/community.js';
 import * as contact from '../lib/contact.js';
 import * as flashcards from '../lib/flashcards.js';
+import * as glossary from '../lib/glossary.js';
 import * as interactions from '../lib/interactions.js';
 import * as pastPapers from '../lib/past-papers.js';
 import * as quiz from '../lib/quiz.js';
@@ -28,8 +29,8 @@ import * as weeklyChallenge from '../lib/weekly-challenge.js';
 
 const modules = {
   auth, admin, chat, community, contact, flashcards,
-  interactions, 'past-papers': pastPapers, quiz, recall,
-  resources, site, 'weekly-challenge': weeklyChallenge
+  glossary, interactions, 'past-papers': pastPapers, quiz,
+  recall, resources, site, 'weekly-challenge': weeklyChallenge
 };
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
