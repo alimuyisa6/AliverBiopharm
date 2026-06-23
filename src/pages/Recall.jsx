@@ -24,6 +24,8 @@ import {
 import '../styles/bioRecall.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
+import '../api/sections.js';
+
 
 const levelSpinMessages = {
   'O-Level': ['Checking...', 'Reviewing biology...', 'Comparing terms...', 'Feedback ready'],
