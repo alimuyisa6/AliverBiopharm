@@ -35,7 +35,13 @@ const modules = {
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const AUTH_ATTEMPT_PATHS = new Set(['signup', 'signin']);
-const CSRF_EXEMPT_PATHS = new Set(['signup', 'signin', 'submit_contact', 'subscribe_newsletter']);
+const CSRF_EXEMPT_PATHS = new Set([
+  'signup',
+  'signin',
+  'submit_contact',
+  'subscribe_newsletter',
+  'set_selected_level'
+]);
 
 export default async function handler(req, res) {
   enforceSecurityHeaders(req, res);
@@ -113,7 +119,7 @@ export default async function handler(req, res) {
       const statusCode = err.statusCode || 500;
       const message = statusCode === 500 ? 'Internal server error' : sanitizeError(err);
       if (statusCode === 500) {
-        console.error(`[SECURITY] ${new Date().toISOString()} ${moduleName}/${path}:`, err.message);
+        console.error(`[SECURITY] ${new Date().toISOString()} ${moduleName}/${path}:`, err.message, err.stack);
       }
       res.status(statusCode).json({ error: message });
     }
