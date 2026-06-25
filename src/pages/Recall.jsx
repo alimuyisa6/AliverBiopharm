@@ -51,7 +51,7 @@ function formatTime(seconds) {
 
 let audioCtx = null;
 
-function getAudioContext() {
+ async function getAudioContext() {
   if (!audioCtx) {
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -60,14 +60,13 @@ function getAudioContext() {
     }
   }
   if (audioCtx.state === 'suspended') {
-    audioCtx.resume().catch(() => {});
+    await audioCtx.resume();
   }
   return audioCtx;
 }
-
-function playTone(type) {
+ async function playTone(type) {
   try {
-    const ctx = getAudioContext();
+    const ctx = await getAudioContext();
     if (!ctx) return;
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
