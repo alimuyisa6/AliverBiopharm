@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import {
   FaBrain, FaLock, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
   FaPencil, FaArrowLeft, FaCircleInfo,
@@ -6,7 +6,7 @@ import {
   FaLeaf, FaFlask, FaTree, FaSeedling, FaGem, FaCrown, FaBolt,
   FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck, FaLink,
   FaTriangleExclamation, FaCircleExclamation, FaExclamation, FaDownload,
-  FaMedal
+  FaMedal, FaClock
 } from 'react-icons/fa6';
 import {
   getUser,
@@ -39,6 +39,14 @@ function escapeHtml(unsafe) {
   return unsafe.replace(/[&<>"']/g, (m) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
   }[m]));
+}
+
+function formatTime(seconds) {
+  if (!seconds || seconds <= 0) return '0s';
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  if (mins > 0) return `${mins}m ${secs}s`;
+  return `${secs}s`;
 }
 
 function BioRecall() {
@@ -81,11 +89,12 @@ function BioRecall() {
   const [spinnerMessage, setSpinnerMessage] = useState('');
   const [floatingCards, setFloatingCards] = useState(false);
   const { show, hide } = useLoading();
-
   const [leaderboard, setLeaderboard] = useState([]);
   const [heatmap, setHeatmap] = useState({});
   const [showConfetti, setShowConfetti] = useState(false);
   const confettiCanvasRef = useRef(null);
+  const [questionStartTime, setQuestionStartTime] = useState(null);
+  const [sessionStartTime, setSessionStartTime] = useState(null);
 
   const addDebug = (msg) => {
     setDebugLog(prev => [...prev.slice(-10), `${new Date().toISOString().slice(11, 19)} ${msg}`]);
@@ -158,6 +167,8 @@ function BioRecall() {
         setSessionActive(true);
         setShowLevelInput(false);
         setShowReport(false);
+        if (!sessionStartTime) setSessionStartTime(new Date());
+        setQuestionStartTime(new Date());
         setMessage({ text: 'Your previous session was restored.', type: 'info' });
         return true;
       }
@@ -303,6 +314,8 @@ function BioRecall() {
         setShowReport(false);
         setFeedbackResult(null);
         setDebugLog([]);
+        setSessionStartTime(new Date());
+        setQuestionStartTime(new Date());
         setFloatingCards(true);
         setTimeout(() => setFloatingCards(false), 2800);
       } else {
@@ -327,6 +340,7 @@ function BioRecall() {
     addDebug(`Submitting answer for question ${question?.id}`);
     show("quiz", "Checking your answer...");
     if (navigator.vibrate) navigator.vibrate(50);
+    const startedAt = questionStartTime ? questionStartTime.toISOString() : new Date().toISOString();
 
     const spinPool = levelSpinMessages[currentLevel] || levelSpinMessages['O-Level'];
     let idx = 0;
@@ -341,7 +355,8 @@ function BioRecall() {
         session_id: sessionId,
         question_id: question.id,
         user_answer: answer,
-        nonce: crypto.randomUUID?.() || Math.random().toString(36)
+        nonce: crypto.randomUUID?.() || Math.random().toString(36),
+        started_at: startedAt
       });
       clearInterval(spinnerInterval);
       addDebug(`Got result: ${JSON.stringify(result)}`);
@@ -366,6 +381,7 @@ function BioRecall() {
         });
       }, 1000);
       hide();
+      const timeTaken = questionStartTime ? Math.round((new Date() - questionStartTime) / 1000) : 0;
       const detailedAnswer = {
         question: question.text,
         userAnswer: answer,
@@ -376,7 +392,8 @@ function BioRecall() {
         commonMistakeExplanation: result.common_mistake_explanation,
         studyNote: result.study_note,
         topic: question.topic,
-        answeredAt: new Date().toISOString()
+        answeredAt: new Date().toISOString(),
+        timeTaken
       };
       setUserAnswersRecord(prev => [...prev, detailedAnswer]);
       setBrainEnergy(Math.max(0, brainEnergy - 5));
@@ -407,6 +424,7 @@ function BioRecall() {
     setDebugLog([]);
     if (currentIndex + 1 < sessionQuestions.length) {
       setCurrentIndex(prev => prev + 1);
+      setQuestionStartTime(new Date());
       if (answerInputRef.current) {
         answerInputRef.current.value = '';
         answerInputRef.current.focus();
@@ -424,6 +442,7 @@ function BioRecall() {
                 setHasMoreQuestions(result.has_more);
                 setCurrentIndex(prev => prev + 1);
                 setXpTotal(prev => prev + 5);
+                setQuestionStartTime(new Date());
               } else {
                 await endSession();
               }
@@ -444,8 +463,15 @@ function BioRecall() {
   const endSession = async () => {
     setSessionActive(false);
     show("form", "Saving your progress...");
+    let sessionTime = 0;
     if (sessionId) {
-      await completeRecallSession({ session_id: sessionId }).catch(() => {});
+      const result = await completeRecallSession({ session_id: sessionId }).catch(() => {});
+      if (result?.session_time_seconds) {
+        sessionTime = result.session_time_seconds;
+      }
+    }
+    if (!sessionTime && sessionStartTime) {
+      sessionTime = Math.round((new Date() - sessionStartTime) / 1000);
     }
     setShowReport(true);
     await loadUserProgress(currentLevel);
@@ -460,15 +486,18 @@ function BioRecall() {
 
   const exportStudyNotes = () => {
     if (!userAnswersRecord.length) return;
+    const totalSessionTime = userAnswersRecord.reduce((sum, item) => sum + (item.timeTaken || 0), 0);
     let content = `BioRecall Study Notes – ${currentLevel}\n` +
       `Session Date: ${new Date().toLocaleDateString()}\n` +
-      `Total Questions: ${userAnswersRecord.length}\n\n`;
+      `Total Questions: ${userAnswersRecord.length}\n` +
+      `Total Time: ${formatTime(totalSessionTime)}\n\n`;
 
     userAnswersRecord.forEach((item, idx) => {
       content += `Q${idx + 1}: ${item.question}\n`;
       content += `Your answer: ${item.userAnswer}\n`;
       content += `Correct answer: ${item.correctAnswer}\n`;
       content += `Strength: ${item.strength} (XP: ${item.xp})\n`;
+      content += `Time: ${formatTime(item.timeTaken || 0)}\n`;
       if (item.feedback?.answer_explanation) {
         content += `Explanation: ${item.feedback.answer_explanation}\n`;
       }
@@ -715,6 +744,8 @@ function BioRecall() {
     const s = userAnswersRecord.filter(r => r.strength === 'strong').length;
     const d = userAnswersRecord.filter(r => r.strength === 'developing').length;
     const masteryScore = sessionQuestions.length ? Math.round(((e * 100 + s * 70) / (sessionQuestions.length * 100)) * 100) : 0;
+    const totalTime = userAnswersRecord.reduce((sum, item) => sum + (item.timeTaken || 0), 0);
+    const avgTime = userAnswersRecord.length ? Math.round(totalTime / userAnswersRecord.length) : 0;
     return (
       <div className="report-screen">
         <div className="recall-card" style={{ textAlign: 'center' }}>
@@ -723,6 +754,7 @@ function BioRecall() {
           <p>Reviewed: {sessionQuestions.length}</p>
           <p>Excellent: {e} Strong: {s} Developing: {d}</p>
           <p>Mastery: {masteryScore}%</p>
+          <p><FaClock /> Total time: {formatTime(totalTime)} | Avg per question: {formatTime(avgTime)}</p>
           <p>Top Topic: {Object.entries(userAnswersRecord.reduce((acc, r) => { acc[r.topic] = (acc[r.topic] || 0) + 1; return acc; }, {})).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}</p>
           <p><FaFire color="#e67e22" /> Streak: {streakDays} days</p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '1.5rem' }}>
