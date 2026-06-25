@@ -1,6 +1,5 @@
  import {
   setCorsHeaders,
-  supabase,
   generateCsrfToken,
   getClientIp
 } from '../lib/core.js';
@@ -12,53 +11,56 @@ import {
   sanitizeError,
   SecurityError
 } from '../lib/security-middleware.js';
-import * as auth from '../lib/auth.js';
-import * as admin from '../lib/admin.js';
-import * as chat from '../lib/chat.js';
-import * as community from '../lib/community.js';
-import * as contact from '../lib/contact.js';
-import * as flashcards from '../lib/flashcards.js';
-import * as glossary from '../lib/glossary.js';
-import * as interactions from '../lib/interactions.js';
-import * as pastPapers from '../lib/past-papers.js';
-import * as quiz from '../lib/quiz.js';
-import * as recall from '../lib/recall.js';
-import * as resources from '../lib/resources.js';
-import * as site from '../lib/site.js';
-import * as weeklyChallenge from '../lib/weekly-challenge.js';
 
-const modules = {
-  auth, admin, chat, community, contact, flashcards,
-  glossary, interactions, 'past-papers': pastPapers, quiz,
-  recall, resources, site, 'weekly-challenge': weeklyChallenge
+const MODULE_MAP = {
+  auth:               '../lib/auth.js',
+  admin:              '../lib/admin.js',
+  chat:               '../lib/chat.js',
+  community:          '../lib/community.js',
+  contact:            '../lib/contact.js',
+  flashcards:         '../lib/flashcards.js',
+  glossary:           '../lib/glossary.js',
+  interactions:       '../lib/interactions.js',
+  'past-papers':      '../lib/past-papers.js',
+  quiz:               '../lib/quiz.js',
+  recall:             '../lib/recall.js',
+  resources:          '../lib/resources.js',
+  site:               '../lib/site.js',
+  'weekly-challenge': '../lib/weekly-challenge.js',
 };
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const AUTH_ATTEMPT_PATHS = new Set(['signup', 'signin']);
 const CSRF_EXEMPT_PATHS = new Set([
-  'signup',
-  'signin',
-  'submit_contact',
-  'subscribe_newsletter',
-  'set_selected_level'
+  'signup', 'signin', 'submit_contact', 'subscribe_newsletter', 'set_selected_level'
 ]);
 
 export default async function handler(req, res) {
   enforceSecurityHeaders(req, res);
   setCorsHeaders(res, req);
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { module: moduleName, path } = req.query;
   if (!moduleName || !path) {
     return res.status(400).json({ error: 'module and path required' });
   }
 
-  const mod = modules[moduleName];
-  if (!mod) {
+  const modulePath = MODULE_MAP[moduleName];
+  if (!modulePath) {
     return res.status(404).json({ error: 'Module not found' });
+  }
+
+  let mod;
+  try {
+    mod = await import(modulePath);
+  } catch (importErr) {
+    console.error(`[IMPORT ERROR] Failed to load module "${moduleName}" from "${modulePath}":`, importErr.message, importErr.stack);
+    return res.status(500).json({
+      error: 'Module load failed',
+      module: moduleName,
+      detail: importErr.message
+    });
   }
 
   try {
@@ -102,9 +104,7 @@ export default async function handler(req, res) {
       }
     }
 
-    if (mod.setContext) {
-      await mod.setContext(ctx);
-    }
+    if (mod.setContext) await mod.setContext(ctx);
 
     await mod.handler(req, res, path, ctx);
 
@@ -118,9 +118,7 @@ export default async function handler(req, res) {
     if (!res.writableEnded) {
       const statusCode = err.statusCode || 500;
       const message = statusCode === 500 ? 'Internal server error' : sanitizeError(err);
-      if (statusCode === 500) {
-        console.error(`[SECURITY] ${new Date().toISOString()} ${moduleName}/${path}:`, err.message, err.stack);
-      }
+      console.error(`[ERROR] ${new Date().toISOString()} ${moduleName}/${path}:`, err.message, err.stack);
       res.status(statusCode).json({ error: message });
     }
   }
