@@ -13,20 +13,20 @@ import {
 } from '../lib/security-middleware.js';
 
 const MODULE_MAP = {
-  auth:               '../lib/auth.js',
-  admin:              '../lib/admin.js',
-  chat:               '../lib/chat.js',
-  community:          '../lib/community.js',
-  contact:            '../lib/contact.js',
-  flashcards:         '../lib/flashcards.js',
-  glossary:           '../lib/glossary.js',
-  interactions:       '../lib/interactions.js',
-  'past-papers':      '../lib/past-papers.js',
-  quiz:               '../lib/quiz.js',
-  recall:             '../lib/recall.js',
-  resources:          '../lib/resources.js',
-  site:               '../lib/site.js',
-  'weekly-challenge': '../lib/weekly-challenge.js',
+  auth:               new URL('../lib/auth.js', import.meta.url).href,
+  admin:              new URL('../lib/admin.js', import.meta.url).href,
+  chat:               new URL('../lib/chat.js', import.meta.url).href,
+  community:          new URL('../lib/community.js', import.meta.url).href,
+  contact:            new URL('../lib/contact.js', import.meta.url).href,
+  flashcards:         new URL('../lib/flashcards.js', import.meta.url).href,
+  glossary:           new URL('../lib/glossary.js', import.meta.url).href,
+  interactions:       new URL('../lib/interactions.js', import.meta.url).href,
+  'past-papers':      new URL('../lib/past-papers.js', import.meta.url).href,
+  quiz:               new URL('../lib/quiz.js', import.meta.url).href,
+  recall:             new URL('../lib/recall.js', import.meta.url).href,
+  resources:          new URL('../lib/resources.js', import.meta.url).href,
+  site:               new URL('../lib/site.js', import.meta.url).href,
+  'weekly-challenge': new URL('../lib/weekly-challenge.js', import.meta.url).href,
 };
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
