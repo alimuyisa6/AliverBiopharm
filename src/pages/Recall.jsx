@@ -41,12 +41,12 @@ function escapeHtml(unsafe) {
   }[m]));
 }
 
-function formatTime(seconds) {
-  if (!seconds || seconds <= 0) return '0s';
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  if (mins > 0) return `${mins}m ${secs}s`;
-  return `${secs}s`;
+function formatSeconds(seconds) {
+  if (seconds === null || seconds === undefined) return 'N/A';
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}m ${s}s`;
 }
 
 function BioRecall() {
@@ -68,6 +68,7 @@ function BioRecall() {
   const [brainEnergy, setBrainEnergy] = useState(100);
   const [hasMoreQuestions, setHasMoreQuestions] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [sessionTimeSeconds, setSessionTimeSeconds] = useState(0);
   const [dashboardData, setDashboardData] = useState(null);
   const [achievementsList, setAchievementsList] = useState([]);
   const [topicModalOpen, setTopicModalOpen] = useState(false);
@@ -89,12 +90,13 @@ function BioRecall() {
   const [spinnerMessage, setSpinnerMessage] = useState('');
   const [floatingCards, setFloatingCards] = useState(false);
   const { show, hide } = useLoading();
+
   const [leaderboard, setLeaderboard] = useState([]);
   const [heatmap, setHeatmap] = useState({});
   const [showConfetti, setShowConfetti] = useState(false);
   const confettiCanvasRef = useRef(null);
-  const [questionStartTime, setQuestionStartTime] = useState(null);
-  const [sessionStartTime, setSessionStartTime] = useState(null);
+
+  const questionStartTimeRef = useRef(null);
 
   const addDebug = (msg) => {
     setDebugLog(prev => [...prev.slice(-10), `${new Date().toISOString().slice(11, 19)} ${msg}`]);
@@ -167,8 +169,7 @@ function BioRecall() {
         setSessionActive(true);
         setShowLevelInput(false);
         setShowReport(false);
-        if (!sessionStartTime) setSessionStartTime(new Date());
-        setQuestionStartTime(new Date());
+        questionStartTimeRef.current = new Date().toISOString();
         setMessage({ text: 'Your previous session was restored.', type: 'info' });
         return true;
       }
@@ -314,9 +315,8 @@ function BioRecall() {
         setShowReport(false);
         setFeedbackResult(null);
         setDebugLog([]);
-        setSessionStartTime(new Date());
-        setQuestionStartTime(new Date());
         setFloatingCards(true);
+        questionStartTimeRef.current = new Date().toISOString();
         setTimeout(() => setFloatingCards(false), 2800);
       } else {
         setMessage({ text: 'No recall questions available for this level and topic yet.', type: 'warning' });
@@ -334,13 +334,13 @@ function BioRecall() {
     const answer = answerInputRef.current?.value.trim();
     if (!answer) return;
     const question = sessionQuestions[currentIndex];
+    const started_at = questionStartTimeRef.current;
     setAnalyzing(true);
     setFeedbackResult(null);
     setMessage(null);
     addDebug(`Submitting answer for question ${question?.id}`);
     show("quiz", "Checking your answer...");
     if (navigator.vibrate) navigator.vibrate(50);
-    const startedAt = questionStartTime ? questionStartTime.toISOString() : new Date().toISOString();
 
     const spinPool = levelSpinMessages[currentLevel] || levelSpinMessages['O-Level'];
     let idx = 0;
@@ -356,7 +356,7 @@ function BioRecall() {
         question_id: question.id,
         user_answer: answer,
         nonce: crypto.randomUUID?.() || Math.random().toString(36),
-        started_at: startedAt
+        started_at
       });
       clearInterval(spinnerInterval);
       addDebug(`Got result: ${JSON.stringify(result)}`);
@@ -381,7 +381,6 @@ function BioRecall() {
         });
       }, 1000);
       hide();
-      const timeTaken = questionStartTime ? Math.round((new Date() - questionStartTime) / 1000) : 0;
       const detailedAnswer = {
         question: question.text,
         userAnswer: answer,
@@ -393,7 +392,7 @@ function BioRecall() {
         studyNote: result.study_note,
         topic: question.topic,
         answeredAt: new Date().toISOString(),
-        timeTaken
+        timeTakenSeconds: result.time_taken_seconds ?? null
       };
       setUserAnswersRecord(prev => [...prev, detailedAnswer]);
       setBrainEnergy(Math.max(0, brainEnergy - 5));
@@ -424,7 +423,7 @@ function BioRecall() {
     setDebugLog([]);
     if (currentIndex + 1 < sessionQuestions.length) {
       setCurrentIndex(prev => prev + 1);
-      setQuestionStartTime(new Date());
+      questionStartTimeRef.current = new Date().toISOString();
       if (answerInputRef.current) {
         answerInputRef.current.value = '';
         answerInputRef.current.focus();
@@ -442,7 +441,7 @@ function BioRecall() {
                 setHasMoreQuestions(result.has_more);
                 setCurrentIndex(prev => prev + 1);
                 setXpTotal(prev => prev + 5);
-                setQuestionStartTime(new Date());
+                questionStartTimeRef.current = new Date().toISOString();
               } else {
                 await endSession();
               }
@@ -463,16 +462,14 @@ function BioRecall() {
   const endSession = async () => {
     setSessionActive(false);
     show("form", "Saving your progress...");
-    let sessionTime = 0;
+    let totalTime = 0;
     if (sessionId) {
-      const result = await completeRecallSession({ session_id: sessionId }).catch(() => {});
-      if (result?.session_time_seconds) {
-        sessionTime = result.session_time_seconds;
-      }
+      try {
+        const result = await completeRecallSession({ session_id: sessionId });
+        totalTime = result?.session_time_seconds || 0;
+      } catch (_) {}
     }
-    if (!sessionTime && sessionStartTime) {
-      sessionTime = Math.round((new Date() - sessionStartTime) / 1000);
-    }
+    setSessionTimeSeconds(totalTime);
     setShowReport(true);
     await loadUserProgress(currentLevel);
     setBrainEnergy(100);
@@ -486,18 +483,18 @@ function BioRecall() {
 
   const exportStudyNotes = () => {
     if (!userAnswersRecord.length) return;
-    const totalSessionTime = userAnswersRecord.reduce((sum, item) => sum + (item.timeTaken || 0), 0);
+    const totalTime = userAnswersRecord.reduce((sum, r) => sum + (r.timeTakenSeconds || 0), 0);
     let content = `BioRecall Study Notes – ${currentLevel}\n` +
       `Session Date: ${new Date().toLocaleDateString()}\n` +
       `Total Questions: ${userAnswersRecord.length}\n` +
-      `Total Time: ${formatTime(totalSessionTime)}\n\n`;
+      `Total Time: ${formatSeconds(sessionTimeSeconds || totalTime)}\n\n`;
 
     userAnswersRecord.forEach((item, idx) => {
       content += `Q${idx + 1}: ${item.question}\n`;
       content += `Your answer: ${item.userAnswer}\n`;
       content += `Correct answer: ${item.correctAnswer}\n`;
       content += `Strength: ${item.strength} (XP: ${item.xp})\n`;
-      content += `Time: ${formatTime(item.timeTaken || 0)}\n`;
+      content += `Time taken: ${formatSeconds(item.timeTakenSeconds)}\n`;
       if (item.feedback?.answer_explanation) {
         content += `Explanation: ${item.feedback.answer_explanation}\n`;
       }
@@ -538,7 +535,6 @@ function BioRecall() {
       const dateStr = d.toISOString().split('T')[0];
       days.push(dateStr);
     }
-
     const getIntensity = (count) => {
       if (!count || count === 0) return 0;
       if (count <= 2) return 1;
@@ -546,7 +542,6 @@ function BioRecall() {
       if (count <= 10) return 3;
       return 4;
     };
-
     return (
       <div className="heatmap-container">
         <div className="heatmap-grid">
@@ -612,7 +607,8 @@ function BioRecall() {
             session_id: sessionId,
             question_id: item.questionId,
             user_answer: item.answer,
-            nonce: crypto.randomUUID?.()
+            nonce: crypto.randomUUID?.(),
+            started_at: item.started_at || null
           });
           setMessage({ text: 'Your saved answer has been submitted!', type: 'info' });
         } catch (e) {
@@ -744,19 +740,44 @@ function BioRecall() {
     const s = userAnswersRecord.filter(r => r.strength === 'strong').length;
     const d = userAnswersRecord.filter(r => r.strength === 'developing').length;
     const masteryScore = sessionQuestions.length ? Math.round(((e * 100 + s * 70) / (sessionQuestions.length * 100)) * 100) : 0;
-    const totalTime = userAnswersRecord.reduce((sum, item) => sum + (item.timeTaken || 0), 0);
-    const avgTime = userAnswersRecord.length ? Math.round(totalTime / userAnswersRecord.length) : 0;
+    const totalQuestionTime = userAnswersRecord.reduce((sum, r) => sum + (r.timeTakenSeconds || 0), 0);
+    const avgTime = userAnswersRecord.length ? Math.round(totalQuestionTime / userAnswersRecord.length) : 0;
     return (
       <div className="report-screen">
         <div className="recall-card" style={{ textAlign: 'center' }}>
           <FaChartSimple size="3rem" color="var(--primary)" />
           <h2>Today's Recall Report</h2>
           <p>Reviewed: {sessionQuestions.length}</p>
-          <p>Excellent: {e} Strong: {s} Developing: {d}</p>
+          <p>Excellent: {e} &nbsp; Strong: {s} &nbsp; Developing: {d}</p>
           <p>Mastery: {masteryScore}%</p>
-          <p><FaClock /> Total time: {formatTime(totalTime)} | Avg per question: {formatTime(avgTime)}</p>
           <p>Top Topic: {Object.entries(userAnswersRecord.reduce((acc, r) => { acc[r.topic] = (acc[r.topic] || 0) + 1; return acc; }, {})).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}</p>
           <p><FaFire color="#e67e22" /> Streak: {streakDays} days</p>
+          <p><FaClock color="var(--primary)" /> Session Time: {formatSeconds(sessionTimeSeconds)}</p>
+          <p><FaClock color="var(--primary)" /> Avg per Question: {formatSeconds(avgTime)}</p>
+          {userAnswersRecord.length > 0 && (
+            <div style={{ marginTop: '1rem', textAlign: 'left' }}>
+              <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>Q</th>
+                    <th style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>Strength</th>
+                    <th style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>Time</th>
+                    <th style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>XP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userAnswersRecord.map((r, i) => (
+                    <tr key={i}>
+                      <td style={{ padding: '4px 8px' }}>{i + 1}</td>
+                      <td style={{ padding: '4px 8px' }}>{r.strength}</td>
+                      <td style={{ padding: '4px 8px' }}>{formatSeconds(r.timeTakenSeconds)}</td>
+                      <td style={{ padding: '4px 8px' }}>+{r.xp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '1.5rem' }}>
             <button className="btn-check" style={{ width: 'auto' }} onClick={() => { setShowReport(false); setSessionActive(false); }}>See You Tomorrow</button>
             <button className="export-btn" onClick={exportStudyNotes}><FaDownload /> Export Notes</button>
@@ -768,7 +789,7 @@ function BioRecall() {
 
   const renderFeedback = () => {
     if (!feedbackResult) return null;
-    const { strength, xp, matched, feedback, common_mistake_explanation, study_note } = feedbackResult;
+    const { strength, xp, matched, feedback, common_mistake_explanation, study_note, time_taken_seconds } = feedbackResult;
     const strengthClass = strength === 'excellent' ? 'strength-excellent' : strength === 'strong' ? 'strength-strong' : 'strength-developing';
     const strengthLabel = strength === 'excellent' ? 'Excellent' : strength === 'strong' ? 'Strong' : 'Developing';
     return (
@@ -776,6 +797,9 @@ function BioRecall() {
         <div className={`recall-strength ${strengthClass}`}>Recall Strength: {strengthLabel}</div>
         <div>Matched: {escapeHtml(matched)}</div>
         <div><FaTrophy color="#f1c40f" /> +{xp} XP</div>
+        {time_taken_seconds !== null && time_taken_seconds !== undefined && (
+          <div><FaClock color="var(--primary)" /> Time: {formatSeconds(time_taken_seconds)}</div>
+        )}
         {feedback?.answer_explanation && (
           <div className="feedback-section">
             <h4><FaBookOpen color="var(--primary)" /> Explanation</h4>
