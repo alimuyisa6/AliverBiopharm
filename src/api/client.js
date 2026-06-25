@@ -1,4 +1,4 @@
-let csrfToken = null;
+ let csrfToken = null;
 const API_BASE = '/api/server';
 
 async function apiCall(module, path, body = {}, method = 'POST') {
@@ -160,7 +160,7 @@ export async function getRecallTopics(level) { return getRequest('recall', 'topi
 export async function checkFirstVisit({ level, topic }) { return getRequest('recall', 'first_visit', { level, topic }); }
 export async function getSelectedLevel() { return getRequest('recall', 'get_selected_level'); }
 export async function continueRecallSession({ session_id }) { return apiCall('recall', 'continue', { session_id }); }
-export async function submitRecallAnswer({ session_id, question_id, user_answer, nonce }) { return apiCall('recall', 'answer', { session_id, question_id, user_answer, nonce }); }
+export async function submitRecallAnswer({ session_id, question_id, user_answer, nonce, started_at }) { return apiCall('recall', 'answer', { session_id, question_id, user_answer, nonce, started_at }); }
 export async function completeRecallSession({ session_id }) { return apiCall('recall', 'complete', { session_id }); }
 export async function setSelectedLevel(level) { return apiCall('recall', 'set_selected_level', { level }); }
 
