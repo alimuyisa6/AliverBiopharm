@@ -1,12 +1,12 @@
  import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
+ import {
   FaBrain, FaLock, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
   FaPencil, FaArrowLeft, FaCircleInfo,
   FaMicroscope, FaDna, FaCapsules, FaBook, FaBookOpen, FaBullseye,
   FaLeaf, FaFlask, FaTree, FaSeedling, FaGem, FaCrown, FaBolt,
   FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck, FaLink,
   FaTriangleExclamation, FaCircleExclamation, FaExclamation, FaDownload,
-  FaMedal, FaClock, FaVolumeUp, FaVolumeMute, FaRefresh
+  FaMedal, FaClock, FaVolumeHigh, FaVolumeXmark, FaRotate
 } from 'react-icons/fa6';
 import {
   getUser,
@@ -123,7 +123,7 @@ let audioCtx = null;
 const strengthIcons = {
   excellent: FaStar,
   strong: FaCircleCheck,
-  developing: FaRefresh
+  developing: FaRotate
 };
 
 const strengthLabels = {
