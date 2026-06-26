@@ -295,7 +295,7 @@ export default function NoteDetail() {
           <nav style={{ display: 'flex', gap: '22px' }}>
             <a href="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</a>
             <a href="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</a>
-            <a href="/accessibility" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Accessibility</a>
+            <a href="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About</a>
           </nav>
         </div>
       </footer>
