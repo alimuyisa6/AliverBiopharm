@@ -1,4 +1,4 @@
-.about-hero {
+ .about-hero {
   padding: 100px 20px;
   text-align: center;
   background: var(--clr-navy);
@@ -214,9 +214,11 @@
   .about-hero {
     padding: 60px 16px;
   }
+
   .team-grid {
     grid-template-columns: 1fr;
   }
+
   .contributors-grid {
     grid-template-columns: 1fr;
   }
