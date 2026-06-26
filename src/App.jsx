@@ -10,6 +10,7 @@ import NoteDetail from './pages/NoteDetail';
 import BioRecall from './pages/Recall';
 import LegalPage from './pages/LegalPage';
 import Glossary from './pages/Glossary';
+import AboutPage from './pages/AboutPage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
           <Route path="/glossary/:slug" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
           <Route path="/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
