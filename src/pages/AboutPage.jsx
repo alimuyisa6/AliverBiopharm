@@ -1,8 +1,8 @@
  import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getSections } from '../api/sections';
-import { FaEnvelope, FaMapMarkerAlt, FaLinkedinIn, FaXTwitter, FaInstagram, FaGlobe } from 'react-icons/fa6';
-import '../styles/About.css';
+import { FaEnvelope, FaLocationDot, FaLinkedinIn, FaXTwitter, FaInstagram, FaGlobe } from 'react-icons/fa6';
+import '../styles/about.css';
 
 function RichText({ text }) {
   const TOKEN_RE = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})|((https?:\/\/)[^\s<>"']+)/g;
@@ -199,10 +199,55 @@ export default function AboutPage() {
             </div>
           )}
 
+          {page?.vision && (
+            <div className="about-block">
+              {page.vision.heading && <h2>{page.vision.heading}</h2>}
+              {page.vision.content.split('\n\n').map((para, i) => (
+                <p key={i}><RichText text={para} /></p>
+              ))}
+            </div>
+          )}
+
           {page?.story && (
             <div className="about-block">
               {page.story.heading && <h2>{page.story.heading}</h2>}
               {page.story.content.split('\n\n').map((para, i) => (
+                <p key={i}><RichText text={para} /></p>
+              ))}
+            </div>
+          )}
+
+          {page?.why_choose_us && (
+            <div className="about-block">
+              {page.why_choose_us.heading && <h2>{page.why_choose_us.heading}</h2>}
+              {page.why_choose_us.content.split('\n\n').map((para, i) => (
+                <p key={i}><RichText text={para} /></p>
+              ))}
+            </div>
+          )}
+
+          {page?.learning_philosophy && (
+            <div className="about-block">
+              {page.learning_philosophy.heading && <h2>{page.learning_philosophy.heading}</h2>}
+              {page.learning_philosophy.content.split('\n\n').map((para, i) => (
+                <p key={i}><RichText text={para} /></p>
+              ))}
+            </div>
+          )}
+
+          {page?.founders && (
+            <div className="about-block">
+              {page.founders.heading && <h2>{page.founders.heading}</h2>}
+              {page.founders.content.split('\n\n').map((para, i) => (
+                <p key={i}><RichText text={para} /></p>
+              ))}
+            </div>
+          )}
+
+          {page?.values && (
+            <div className="about-block">
+              {page.values.heading && <h2>{page.values.heading}</h2>}
+              {page.values.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
             </div>
@@ -230,6 +275,24 @@ export default function AboutPage() {
             </div>
           )}
 
+          {page?.commitment_to_quality && (
+            <div className="about-block">
+              {page.commitment_to_quality.heading && <h2>{page.commitment_to_quality.heading}</h2>}
+              {page.commitment_to_quality.content.split('\n\n').map((para, i) => (
+                <p key={i}><RichText text={para} /></p>
+              ))}
+            </div>
+          )}
+
+          {page?.future && (
+            <div className="about-block">
+              {page.future.heading && <h2>{page.future.heading}</h2>}
+              {page.future.content.split('\n\n').map((para, i) => (
+                <p key={i}><RichText text={para} /></p>
+              ))}
+            </div>
+          )}
+
           {page?.legal && (
             <div className="about-block">
               {page.legal.heading && <h2>{page.legal.heading}</h2>}
@@ -239,18 +302,38 @@ export default function AboutPage() {
             </div>
           )}
 
+          {page?.faq && (
+            <div className="about-block">
+              {page.faq.heading && <h2>{page.faq.heading}</h2>}
+              <div className="faq-list">
+                {(page.faq.questions || []).map((item, idx) => (
+                  <details key={idx} className="faq-item">
+                    <summary className="faq-question">{item.question}</summary>
+                    <p className="faq-answer"><RichText text={item.answer} /></p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          )}
+
           {page?.contact && (
             <div className="about-block about-contact">
               {page.contact.heading && <h2>{page.contact.heading}</h2>}
+              {page.contact.subtext && <p style={{ marginBottom: '20px' }}><RichText text={page.contact.subtext} /></p>}
               <div className="about-contact-details">
                 {page.contact.email && (
                   <a href={`mailto:${page.contact.email}`} className="about-contact-item">
                     <FaEnvelope /> {page.contact.email}
                   </a>
                 )}
+                {page.contact.phone && (
+                  <div className="about-contact-item">
+                    <FaEnvelope /> {page.contact.phone}
+                  </div>
+                )}
                 {page.contact.address && (
                   <div className="about-contact-item">
-                    <FaMapMarkerAlt /> {page.contact.address}
+                    <FaLocationDot /> {page.contact.address}
                   </div>
                 )}
               </div>
@@ -262,6 +345,31 @@ export default function AboutPage() {
                     </a>
                   ))}
                 </div>
+              )}
+            </div>
+          )}
+
+          {page?.call_to_action && (
+            <div className="about-block about-cta" style={{ textAlign: 'center', background: 'var(--clr-navy-card)', border: '1px solid var(--clr-border-glow)', borderRadius: '12px', padding: '40px 20px', marginTop: '40px' }}>
+              <h2>{page.call_to_action.heading || 'Start Your Learning Journey'}</h2>
+              {page.call_to_action.content && <p style={{ maxWidth: '600px', margin: '16px auto' }}><RichText text={page.call_to_action.content} /></p>}
+              {page.call_to_action.button_text && (
+                <Link
+                  to={page.call_to_action.button_url || '/register'}
+                  style={{
+                    display: 'inline-block',
+                    marginTop: '16px',
+                    padding: '14px 32px',
+                    background: 'var(--clr-cyan)',
+                    color: 'var(--clr-navy)',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    fontSize: '1rem'
+                  }}
+                >
+                  {page.call_to_action.button_text}
+                </Link>
               )}
             </div>
           )}
