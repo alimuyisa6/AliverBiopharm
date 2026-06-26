@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FaBell, FaCheck, FaXmark, FaTrophy, FaFire, FaStar, FaBookOpenReader, FaRotate, FaBullhorn, FaTriangleExclamation, FaHeart, FaComment, FaUserPlus, FaLayerGroup, FaFilePdf, FaBookOpen, FaClipboardCheck, FaCrown, FaMedal, FaHandHoldingHeart, FaCreditCard, FaLock, FaUnlock, FaChartLine, FaFlask, FaHeadset, FaMessage, FaRocket, FaCircleCheck, FaClock, FaDownload, FaEnvelopeCircleCheck, FaRightToBracket, FaShieldHalved, FaUserPen, FaFileLines, FaSpellCheck, FaPen, FaPenToSquare, FaRoute, FaCircleXmark, FaFileContract, FaScrewdriverWrench, FaUsers, FaFaceSmile } from 'react-icons/fa6';
 import { getNotifications, markNotificationRead, markAllNotificationsRead, dismissNotification } from '../api/client';
 
@@ -30,22 +30,15 @@ export default function NotificationBell({ user }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const pollRef = useRef(null);
-  const hasFetchedRef = useRef(false);
 
   const fetchNotifications = useCallback(async () => {
     if (!user?.id) return;
     try {
       const data = await getNotifications({ limit: 30 });
-      
-      // The API might return data directly or nested
-      const notifs = data?.notifications || data || [];
-      const count = data?.unread_count ?? data?.unreadCount ?? 0;
-      
-      setNotifications(Array.isArray(notifs) ? notifs : []);
-      setUnreadCount(typeof count === 'number' ? count : 0);
-      hasFetchedRef.current = true;
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unread_count || 0);
     } catch (e) {
-      // Silent fail - keep existing state
+      console.error('Failed to fetch notifications', e);
     }
   }, [user?.id]);
 
@@ -65,37 +58,33 @@ export default function NotificationBell({ user }) {
   }, []);
 
   const handleMarkRead = async (id, actionUrl) => {
-    try { await markNotificationRead(id); } catch (_) {}
+    await markNotificationRead(id);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
     setUnreadCount(prev => Math.max(0, prev - 1));
     if (actionUrl) window.location.href = actionUrl;
   };
 
   const handleMarkAllRead = async () => {
-    try { await markAllNotificationsRead(); } catch (_) {}
+    await markAllNotificationsRead();
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     setUnreadCount(0);
   };
 
   const handleDismiss = async (e, id) => {
     e.stopPropagation();
-    try { await dismissNotification(id); } catch (_) {}
+    await dismissNotification(id);
     setNotifications(prev => prev.filter(n => n.id !== id));
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   const formatTime = (dateStr) => {
-    if (!dateStr) return '';
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return '';
-      const diff = Date.now() - date.getTime();
-      if (diff < 60000) return 'Just now';
-      if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
-      if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
-      if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
-      return date.toLocaleDateString();
-    } catch (_) { return ''; }
+    const date = new Date(dateStr);
+    const diff = new Date() - date;
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
+    return date.toLocaleDateString();
   };
 
   if (!user?.id) return null;
@@ -104,7 +93,7 @@ export default function NotificationBell({ user }) {
     <div className="notification-bell-container" ref={dropdownRef}>
       <button
         className="notification-bell-btn"
-        onClick={() => { setOpen(!open); if (!open && !hasFetchedRef.current) fetchNotifications(); }}
+        onClick={() => setOpen(!open)}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
         <FaBell />
@@ -134,20 +123,20 @@ export default function NotificationBell({ user }) {
               </div>
             )}
 
-            {notifications.map((notification) => {
+            {notifications.map(notification => {
               const IconComponent = getIconComponent(notification.icon);
               return (
                 <div
                   key={notification.id}
-                  className={`notification-item ${notification.is_read ? 'read' : 'unread'} priority-${notification.priority || 'normal'}`}
+                  className={`notification-item ${notification.is_read ? 'read' : 'unread'} priority-${notification.priority}`}
                   onClick={() => handleMarkRead(notification.id, notification.action_url)}
                 >
-                  <div className="notification-icon" style={{ color: notification.color || '#0ab5b5' }}>
+                  <div className="notification-icon" style={{ color: notification.color }}>
                     <IconComponent />
                   </div>
                   <div className="notification-content">
-                    <div className="notification-title">{notification.title || ''}</div>
-                    {notification.body && <div className="notification-body">{notification.body}</div>}
+                    <div className="notification-title">{notification.title}</div>
+                    <div className="notification-body">{notification.body}</div>
                     {notification.action_text && (
                       <span className="notification-action-text">{notification.action_text}</span>
                     )}
@@ -168,4 +157,4 @@ export default function NotificationBell({ user }) {
       )}
     </div>
   );
-}
+} 
