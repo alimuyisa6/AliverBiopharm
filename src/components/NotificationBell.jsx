@@ -24,7 +24,7 @@ function getIconComponent(iconName) {
   return iconMap[iconName] || FaBell;
 }
 
-export default function NotificationBell() {
+export default function NotificationBell({ user }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -32,6 +32,7 @@ export default function NotificationBell() {
   const pollRef = useRef(null);
 
   const fetchNotifications = useCallback(async () => {
+    if (!user?.id) return;
     try {
       const data = await getNotifications({ limit: 30 });
       setNotifications(data.notifications || []);
@@ -39,13 +40,14 @@ export default function NotificationBell() {
     } catch (e) {
       console.error('Failed to fetch notifications', e);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
+    if (!user?.id) return;
     fetchNotifications();
     pollRef.current = setInterval(fetchNotifications, 15000);
     return () => clearInterval(pollRef.current);
-  }, [fetchNotifications]);
+  }, [fetchNotifications, user?.id]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -84,6 +86,8 @@ export default function NotificationBell() {
     if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
     return date.toLocaleDateString();
   };
+
+  if (!user?.id) return null;
 
   return (
     <div className="notification-bell-container" ref={dropdownRef}>
