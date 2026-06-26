@@ -28,18 +28,16 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
-  const [debug, setDebug] = useState({ status: 'idle', raw: null, error: null, ts: null });
   const dropdownRef = useRef(null);
   const pollRef = useRef(null);
 
   const fetchNotifications = useCallback(async () => {
     try {
       const data = await getNotifications({ limit: 30 });
-      setDebug({ status: 'ok', raw: JSON.stringify(data).slice(0, 300), error: null, ts: new Date().toISOString() });
       setNotifications(data.notifications || []);
       setUnreadCount(data.unread_count || 0);
     } catch (e) {
-      setDebug({ status: 'error', raw: null, error: e.message, ts: new Date().toISOString() });
+      console.error('Failed to fetch notifications', e);
     }
   }, []);
 
@@ -88,87 +86,71 @@ export default function NotificationBell() {
   };
 
   return (
-    <>
-      <div
-         style={{
-  position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99999,
-  background: debug.status === 'error' ? '#3b0000' : '#001a00',
-  color: debug.status === 'error' ? '#ff6b6b' : '#00ff88',
-  fontSize: '10px', padding: '6px 8px', wordBreak: 'break-all',
-  borderBottom: '1px solid #333', lineHeight: 1.4
-}}
+    <div className="notification-bell-container" ref={dropdownRef}>
+      <button
+        className="notification-bell-btn"
+        onClick={() => setOpen(!open)}
+        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
-        <strong>NOTIF DEBUG</strong> [{debug.ts?.slice(11, 19) || '—'}] status={debug.status} | count={notifications.length} | unread={unreadCount}
-        {debug.error && <> | ERR: {debug.error}</>}
-        {debug.raw && <><br />{debug.raw}</>}
-      </div>
+        <FaBell />
+        {unreadCount > 0 && (
+          <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+        )}
+      </button>
 
-      <div className="notification-bell-container" ref={dropdownRef}>
-        <button
-          className="notification-bell-btn"
-          onClick={() => setOpen(!open)}
-          aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-        >
-          <FaBell />
-          {unreadCount > 0 && (
-            <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
-          )}
-        </button>
-
-        {open && (
-          <div className="notification-dropdown">
-            <div className="notification-dropdown-header">
-              <h3>Notifications</h3>
-              <div className="notification-header-actions">
-                {unreadCount > 0 && (
-                  <button onClick={handleMarkAllRead} className="notification-action-btn">
-                    <FaCheck /> Mark all read
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="notification-list">
-              {notifications.length === 0 && (
-                <div className="notification-empty">
-                  <FaBell size="2rem" color="var(--clr-text-muted)" />
-                  <p>No notifications yet</p>
-                </div>
+      {open && (
+        <div className="notification-dropdown">
+          <div className="notification-dropdown-header">
+            <h3>Notifications</h3>
+            <div className="notification-header-actions">
+              {unreadCount > 0 && (
+                <button onClick={handleMarkAllRead} className="notification-action-btn">
+                  <FaCheck /> Mark all read
+                </button>
               )}
-
-              {notifications.map(notification => {
-                const IconComponent = getIconComponent(notification.icon);
-                return (
-                  <div
-                    key={notification.id}
-                    className={`notification-item ${notification.is_read ? 'read' : 'unread'} priority-${notification.priority}`}
-                    onClick={() => handleMarkRead(notification.id, notification.action_url)}
-                  >
-                    <div className="notification-icon" style={{ color: notification.color }}>
-                      <IconComponent />
-                    </div>
-                    <div className="notification-content">
-                      <div className="notification-title">{notification.title}</div>
-                      <div className="notification-body">{notification.body}</div>
-                      {notification.action_text && (
-                        <span className="notification-action-text">{notification.action_text}</span>
-                      )}
-                      <div className="notification-time">{formatTime(notification.created_at)}</div>
-                    </div>
-                    <button
-                      className="notification-dismiss-btn"
-                      onClick={(e) => handleDismiss(e, notification.id)}
-                      aria-label="Dismiss notification"
-                    >
-                      <FaXmark />
-                    </button>
-                  </div>
-                );
-              })}
             </div>
           </div>
-        )}
-      </div>
-    </>
+
+          <div className="notification-list">
+            {notifications.length === 0 && (
+              <div className="notification-empty">
+                <FaBell size="2rem" color="var(--clr-text-muted)" />
+                <p>No notifications yet</p>
+              </div>
+            )}
+
+            {notifications.map(notification => {
+              const IconComponent = getIconComponent(notification.icon);
+              return (
+                <div
+                  key={notification.id}
+                  className={`notification-item ${notification.is_read ? 'read' : 'unread'} priority-${notification.priority}`}
+                  onClick={() => handleMarkRead(notification.id, notification.action_url)}
+                >
+                  <div className="notification-icon" style={{ color: notification.color }}>
+                    <IconComponent />
+                  </div>
+                  <div className="notification-content">
+                    <div className="notification-title">{notification.title}</div>
+                    <div className="notification-body">{notification.body}</div>
+                    {notification.action_text && (
+                      <span className="notification-action-text">{notification.action_text}</span>
+                    )}
+                    <div className="notification-time">{formatTime(notification.created_at)}</div>
+                  </div>
+                  <button
+                    className="notification-dismiss-btn"
+                    onClick={(e) => handleDismiss(e, notification.id)}
+                    aria-label="Dismiss notification"
+                  >
+                    <FaXmark />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
