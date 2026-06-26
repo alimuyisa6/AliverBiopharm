@@ -6,6 +6,7 @@ import './styles/component-bundle.css';
 import './styles/quiz.css';
 import './styles/glossary.css';
 import './loading/Loading.css';
+import './styles/notifications.css';
 import LoadingProvider from './loading/LoadingProvider';
 
 function displayError(errorInfo) {
