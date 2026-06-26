@@ -164,6 +164,13 @@ export async function submitRecallAnswer({ session_id, question_id, user_answer,
 export async function completeRecallSession({ session_id }) { return apiCall('recall', 'complete', { session_id }); }
 export async function setSelectedLevel(level) { return apiCall('recall', 'set_selected_level', { level }); }
 
+export async function getNotifications(params = {}) { return getRequest('recall', 'notifications', params); }
+export async function markNotificationRead(notificationId) { return apiCall('recall', 'notification_read', { notification_id: notificationId }); }
+export async function markAllNotificationsRead() { return apiCall('recall', 'notification_read_all', {}); }
+export async function dismissNotification(notificationId) { return apiCall('recall', 'notification_dismiss', { notification_id: notificationId }); }
+export async function getNotificationPreferences() { return getRequest('recall', 'notification_prefs'); }
+export async function updateNotificationPreferences(preferences) { return apiCall('recall', 'notification_prefs_update', { preferences }); }
+
 export async function getGlossaryTerms(level, category, search) {
   const params = { level };
   if (category) params.category = category;
