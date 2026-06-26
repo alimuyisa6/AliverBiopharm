@@ -690,7 +690,7 @@ export default function HomeView({
           <nav style={{ display: 'flex', gap: '22px' }}>
             <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
             <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
-            <Link to="/About Us" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Accessibility</Link>
+            <Link to="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</Link>
           </nav>
         </div>
       </footer>
