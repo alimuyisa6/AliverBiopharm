@@ -141,7 +141,7 @@ export default function HomeView({
               <div className="search-icon-placeholder" style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--clr-text-dim)', fontSize: '1.2rem', cursor: 'default', opacity: 0.4 }}>
                 <i className="fa-solid fa-magnifying-glass"></i>
               </div>
-              <NotificationBell />
+              <NotificationBell user={user} />
               <button className="theme-toggle" onClick={() => {
                 const dark = document.body.classList.toggle('dark-mode');
                 localStorage.setItem('theme', dark ? 'dark' : 'light');
