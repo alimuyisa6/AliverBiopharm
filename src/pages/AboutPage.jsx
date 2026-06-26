@@ -2,7 +2,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { getSections } from '../api/sections';
 import { FaEnvelope, FaMapMarkerAlt, FaLinkedinIn, FaXTwitter, FaInstagram, FaGlobe } from 'react-icons/fa6';
-import '../styles/about.css';
+import '../styles/About.css';
 
 function RichText({ text }) {
   const TOKEN_RE = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})|((https?:\/\/)[^\s<>"']+)/g;
