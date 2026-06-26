@@ -90,13 +90,13 @@ export default function NotificationBell() {
   return (
     <>
       <div
-        style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99999,
-          background: debug.status === 'error' ? '#3b0000' : '#001a00',
-          color: debug.status === 'error' ? '#ff6b6b' : '#00ff88',
-          fontSize: '10px', padding: '6px 8px', wordBreak: 'break-all',
-          borderTop: '1px solid #333', lineHeight: 1.4
-        }}
+         style={{
+  position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99999,
+  background: debug.status === 'error' ? '#3b0000' : '#001a00',
+  color: debug.status === 'error' ? '#ff6b6b' : '#00ff88',
+  fontSize: '10px', padding: '6px 8px', wordBreak: 'break-all',
+  borderBottom: '1px solid #333', lineHeight: 1.4
+}}
       >
         <strong>NOTIF DEBUG</strong> [{debug.ts?.slice(11, 19) || '—'}] status={debug.status} | count={notifications.length} | unread={unreadCount}
         {debug.error && <> | ERR: {debug.error}</>}
