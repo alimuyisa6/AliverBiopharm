@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FaBell, FaCheck, FaXmark, FaTrophy, FaFire, FaStar, FaBookOpenReader, FaRotate, FaBullhorn, FaTriangleExclamation, FaHeart, FaComment, FaUserPlus, FaLayerGroup, FaFilePdf, FaBookOpen, FaClipboardCheck, FaCrown, FaMedal, FaHandHoldingHeart, FaCreditCard, FaLock, FaUnlock, FaChartLine, FaFlask, FaHeadset, FaMessage, FaRocket, FaCircleCheck, FaClock, FaDownload, FaEnvelopeCircleCheck, FaRightToBracket, FaShieldHalved, FaUserPen, FaFileLines, FaSpellCheck, FaPen, FaPenToSquare, FaRoute, FaCircleXmark, FaFileContract, FaScrewdriverWrench, FaUsers, FaFaceSmile } from 'react-icons/fa6';
 import { getNotifications, markNotificationRead, markAllNotificationsRead, dismissNotification } from '../api/client';
 
@@ -80,6 +80,10 @@ export default function NotificationBell({ user }) {
           ? data.unread_count
           : notifs.filter((n) => !n.is_read).length
       );
+      const debugEl = document.getElementById('notif-debug');
+      if (debugEl && data?._debug) {
+        debugEl.textContent = JSON.stringify(data._debug, null, 2);
+      }
     } catch (_) {
       setNotifications([]);
       setUnreadCount(0);
@@ -180,6 +184,8 @@ export default function NotificationBell({ user }) {
               )}
             </div>
           </div>
+
+          <pre id="notif-debug" style={{background:'#111',color:'#0f0',fontSize:'9px',padding:'8px',maxHeight:'180px',overflow:'auto',whiteSpace:'pre-wrap',wordBreak:'break-all',margin:0,borderBottom:'2px solid #333'}}>Waiting for data...</pre>
 
           <div className="notification-list">
             {loading && notifications.length === 0 && (
