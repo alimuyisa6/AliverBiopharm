@@ -2,7 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
 import NotificationBell from '../components/NotificationBell';
-import InfoCards from '../components/CardsInfo';
+ import InfoCards from '../components/InfoCards';
 
 export default function HomeView({
   sections,
