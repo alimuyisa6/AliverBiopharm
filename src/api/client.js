@@ -185,3 +185,15 @@ export async function getGlossaryTerm(slug, level) {
 export async function getGlossaryCategories(level) {
   return getRequest('glossary', 'categories', { level });
 }
+ 
+export async function getInfoSection(section) {
+  return getRequest('site', 'get_info_section', { section });
+}
+
+export async function getInfoSectionsList() {
+  return getRequest('site', 'get_info_sections_list');
+}
+
+export async function updateInfoSection(section, data) {
+  return apiCall('site', 'update_info_section', { section, ...data });
+}
