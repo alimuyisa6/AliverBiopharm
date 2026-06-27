@@ -11,6 +11,7 @@ import BioRecall from './pages/Recall';
 import LegalPage from './pages/LegalPage';
 import Glossary from './pages/Glossary';
 import AboutPage from './pages/AboutPage';
+import InfoPage from './pages/PageInfo';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
+          <Route path="/info/:slug" element={<InfoPage />} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
