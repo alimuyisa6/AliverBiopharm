@@ -1,4 +1,5 @@
  import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { getInfoSection } from '../api/client';
 
 function escapeHtml(str) {
@@ -36,7 +37,8 @@ function getCategoryLabel(category) {
   return map[category] || 'Resource';
 }
 
-export default function InfoPage({ slug }) {
+export default function InfoPage() {
+  const { slug } = useParams();
   const [section, setSection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
