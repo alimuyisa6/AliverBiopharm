@@ -141,27 +141,17 @@ function ContentBlocks({ blocks }) {
       case 'image':
         return (
           <figure key={i} className="info-image-block">
-            <img
-              src={escapeAttr(block.src || '')}
-              alt={escapeAttr(block.alt || 'Image')}
-              loading="lazy"
-            />
+            <img src={escapeAttr(block.src || '')} alt={escapeAttr(block.alt || 'Image')} loading="lazy" />
             {block.caption && <figcaption>{escapeHtml(block.caption)}</figcaption>}
           </figure>
         );
 
       case 'callout': {
-        const variantClass = `info-callout-${block.variant || 'info'}`;
-        const iconMap = {
-          tip: 'fa-lightbulb',
-          warning: 'fa-triangle-exclamation',
-          info: 'fa-circle-info',
-          danger: 'fa-skull',
-          success: 'fa-circle-check'
-        };
+        const variant = block.variant || 'info';
+        const iconMap = { tip: 'fa-lightbulb', warning: 'fa-triangle-exclamation', info: 'fa-circle-info', danger: 'fa-skull', success: 'fa-circle-check' };
         return (
-          <div key={i} className={`info-callout ${variantClass}`}>
-            <i className={`fa-solid ${iconMap[block.variant] || 'fa-circle-info'}`} aria-hidden="true" />
+          <div key={i} className={`info-callout info-callout-${variant}`}>
+            <i className={`fa-solid ${iconMap[variant] || 'fa-circle-info'}`} aria-hidden="true" />
             <div>
               {block.heading && <strong>{escapeHtml(block.heading)}</strong>}
               <p>{escapeHtml(block.body || '')}</p>
@@ -190,9 +180,7 @@ function ContentBlocks({ blocks }) {
             <table>
               {headers.length > 0 && (
                 <thead>
-                  <tr>
-                    {headers.map((h, j) => <th key={j}>{escapeHtml(h)}</th>)}
-                  </tr>
+                  <tr>{headers.map((h, j) => <th key={j}>{escapeHtml(h)}</th>)}</tr>
                 </thead>
               )}
               <tbody>
