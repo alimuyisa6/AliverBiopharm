@@ -40,22 +40,10 @@
   right: 0;
   width: 400px;
   max-height: 500px;
-  background:
-    linear-gradient(
-      160deg,
-      rgba(10, 181, 181, 0.08) 0%,
-      rgba(184, 135, 58, 0.04) 40%,
-      rgba(14, 14, 44, 0.95) 70%,
-      rgba(10, 14, 36, 0.98) 100%
-    );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(10, 181, 181, 0.15);
+  background: #0e0e2d;
+  border: 1px solid rgba(10, 181, 181, 0.2);
   border-radius: 16px;
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.4),
-    0 0 60px rgba(10, 181, 181, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(10, 181, 181, 0.08);
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -68,7 +56,7 @@
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(10, 181, 181, 0.1);
-  background: rgba(10, 181, 181, 0.03);
+  background: #0a0a23;
 }
 
 .notification-dropdown-header h3 {
@@ -144,43 +132,28 @@
   padding: 14px 16px;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s;
   position: relative;
   margin-bottom: 4px;
-  background: rgba(255, 255, 255, 0.01);
 }
 
 .notification-item:hover {
-  background: rgba(10, 181, 181, 0.06);
-  box-shadow: 0 0 20px rgba(10, 181, 181, 0.04);
+  background: rgba(10, 181, 181, 0.05);
 }
 
 .notification-item.unread {
-  background: linear-gradient(
-    90deg,
-    rgba(10, 181, 181, 0.08) 0%,
-    rgba(10, 181, 181, 0.02) 100%
-  );
+  background: rgba(10, 181, 181, 0.06);
   border-left: 3px solid var(--clr-cyan);
-  box-shadow: 0 0 15px rgba(10, 181, 181, 0.03);
 }
 
 .notification-item.priority-urgent {
   border-left-color: #e74c3c;
-  background: linear-gradient(
-    90deg,
-    rgba(231, 76, 60, 0.08) 0%,
-    rgba(231, 76, 60, 0.01) 100%
-  );
+  background: rgba(231, 76, 60, 0.05);
 }
 
 .notification-item.priority-high {
   border-left-color: #f39c12;
-  background: linear-gradient(
-    90deg,
-    rgba(243, 156, 18, 0.06) 0%,
-    rgba(243, 156, 18, 0.01) 100%
-  );
+  background: rgba(243, 156, 18, 0.05);
 }
 
 .notification-icon {
@@ -189,7 +162,6 @@
   width: 28px;
   text-align: center;
   margin-top: 3px;
-  filter: drop-shadow(0 0 4px rgba(10, 181, 181, 0.3));
 }
 
 .notification-content {
