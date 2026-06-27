@@ -104,7 +104,6 @@ export default function InfoPage({ slug }) {
   return (
     <article className="info-page">
       <div className="section" style={{ paddingTop: '80px' }}>
-
         <a href="/" className="info-back-link" aria-label="Back to home" style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
           color: 'var(--clr-cyan)', textDecoration: 'none',
@@ -141,7 +140,6 @@ export default function InfoPage({ slug }) {
             All Resources
           </a>
         </nav>
-
       </div>
     </article>
   );
@@ -159,7 +157,6 @@ function ContentBlocks({ blocks }) {
 
   return blocks.map((block, i) => {
     switch (block.type) {
-
       case 'heading':
         return (
           <h2 key={i} style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.25rem,3vw,1.75rem)', fontWeight: 700, color: 'var(--clr-white)', margin: '2rem 0 1rem', letterSpacing: 'var(--ls-snug)', lineHeight: 'var(--lh-snug)' }}>
