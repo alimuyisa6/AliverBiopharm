@@ -1,5 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import HomeView from './HomeView';
+import InfoPage from './InfoPage';
 import { getSections } from '../api/sections';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -42,7 +43,19 @@ function shuffleArray(arr) {
   return a;
 }
 
+function getInfoSlugFromPath() {
+  const path = window.location.pathname;
+  const match = path.match(/^\/info\/([a-zA-Z0-9_-]+)$/);
+  return match ? match[1] : null;
+}
+
 export default function Home() {
+  const infoSlug = getInfoSlugFromPath();
+
+  if (infoSlug) {
+    return <InfoPage slug={infoSlug} />;
+  }
+
   const { user, logout } = useAuth();
   const [sections, setSections] = useState(null);
   const [flashcards, setFlashcards] = useState([]);
