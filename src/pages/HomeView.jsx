@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
 import NotificationBell from '../components/NotificationBell';
+import InfoCards from './CardsInfo';
 
 export default function HomeView({
   sections,
@@ -219,6 +220,13 @@ export default function HomeView({
       </section>
 
       <InteractiveShowcase />
+
+      <section id="info-resources" className="section reveal">
+        <span className="sec-label">LEARNING RESOURCES</span>
+        <h2 className="section-title">Explore Our Resources</h2>
+        <p className="section-subtitle">In-depth guides, case studies, and reference materials for Biology and Pharmacy students.</p>
+        <InfoCards />
+      </section>
 
       <section id="stats" className="section reveal">
         <span className="sec-label">IMPACT</span>
