@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FaBell, FaCheck, FaXmark, FaTrophy, FaFire, FaStar, FaBookOpenReader, FaRotate, FaBullhorn, FaTriangleExclamation, FaHeart, FaComment, FaUserPlus, FaLayerGroup, FaFilePdf, FaBookOpen, FaClipboardCheck, FaCrown, FaMedal, FaHandHoldingHeart, FaCreditCard, FaLock, FaUnlock, FaChartLine, FaFlask, FaHeadset, FaMessage, FaRocket, FaCircleCheck, FaClock, FaDownload, FaEnvelopeCircleCheck, FaRightToBracket, FaShieldHalved, FaUserPen, FaFileLines, FaSpellCheck, FaPen, FaPenToSquare, FaRoute, FaCircleXmark, FaFileContract, FaScrewdriverWrench, FaUsers, FaFaceSmile } from 'react-icons/fa6';
 import { getNotifications, markNotificationRead, markAllNotificationsRead, dismissNotification } from '../api/client';
 
@@ -28,17 +28,26 @@ export default function NotificationBell({ user }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [debugText, setDebugText] = useState('');
   const dropdownRef = useRef(null);
   const pollRef = useRef(null);
 
   const fetchNotifications = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setDebugText('No user.id');
+      return;
+    }
     try {
+      setDebugText('Fetching...');
       const data = await getNotifications({ limit: 30 });
-      setNotifications(data.notifications || []);
-      setUnreadCount(data.unread_count || 0);
+      
+      const rawJson = JSON.stringify(data, null, 2);
+      setDebugText('RAW RESPONSE:\n' + rawJson + '\n\nnotifications: ' + JSON.stringify(data?.notifications) + '\nunread_count: ' + data?.unread_count + '\ntotal: ' + data?.total);
+      
+      setNotifications(data?.notifications || []);
+      setUnreadCount(data?.unread_count || 0);
     } catch (e) {
-      console.error('Failed to fetch notifications', e);
+      setDebugText('FETCH ERROR: ' + e.message + '\n\n' + e.stack);
     }
   }, [user?.id]);
 
@@ -115,6 +124,22 @@ export default function NotificationBell({ user }) {
             </div>
           </div>
 
+          {/* DEBUG PANEL - Shows raw API response */}
+          <div style={{
+            background: '#111',
+            color: '#0f0',
+            fontFamily: 'monospace',
+            fontSize: '10px',
+            padding: '8px 12px',
+            maxHeight: '200px',
+            overflowY: 'auto',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
+            borderBottom: '2px solid #333'
+          }}>
+            {debugText || 'No data yet...'}
+          </div>
+
           <div className="notification-list">
             {notifications.length === 0 && (
               <div className="notification-empty">
@@ -157,4 +182,4 @@ export default function NotificationBell({ user }) {
       )}
     </div>
   );
-} 
+}
