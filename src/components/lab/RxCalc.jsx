@@ -7,7 +7,7 @@ export default function RxCalc({ user }) {
   const [inputValues, setInputValues] = useState({});
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const [level, setLevel] = useState('pharmacy');
+  const [level, setLevel] = useState('Pharmacy');
   const [drugSearch, setDrugSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
