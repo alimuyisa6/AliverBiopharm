@@ -11,7 +11,7 @@ const SEVERITY_COLORS = {
 export default function InteractionMatrix({ user }) {
   const [drugs, setDrugs] = useState([]);
   const [selectedDrugs, setSelectedDrugs] = useState([]);
-  const [level, setLevel] = useState('pharmacy');
+  const [level, setLevel] = useState('Pharmacy');
   const [interactions, setInteractions] = useState([]);
   const [selectedEdge, setSelectedEdge] = useState(null);
   const [loading, setLoading] = useState(true);
