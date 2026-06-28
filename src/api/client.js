@@ -254,3 +254,14 @@ export async function getInfoSectionsList() {
 export async function updateInfoSection(section, data) {
   return apiCall('site', 'update_info_section', { section, ...data });
 }
+
+
+export async function fetchLabTools() { return getRequest('lab', 'tools'); }
+export async function fetchLabDrugs(level) { return getRequest('lab', 'drugs', { level }); }
+export async function fetchLabInteraction(drugAId, drugBId) { return getRequest('lab', 'interactions', { drug_a_id: drugAId, drug_b_id: drugBId }); }
+export async function fetchLabPathways(level) { return getRequest('lab', 'pathways', { level }); }
+export async function fetchLabPathway(slug) { return getRequest('lab', 'pathway_by_slug', { slug }); }
+export async function fetchLabCases(level, difficulty) { return getRequest('lab', 'cases', { level, difficulty }); }
+export async function fetchLabCase(id) { return getRequest('lab', 'case_by_id', { id }); }
+export async function submitLabScore(caseId, userId, score, maxScore) { return apiCall('lab', 'submit_score', { case_id: caseId, user_id: userId, score, max_score: maxScore }); }
+export async function fetchLabFormulas(level, drug) { return getRequest('lab', 'formulas', { level, drug }); }
