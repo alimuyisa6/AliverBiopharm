@@ -1,21 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getNoteContent, saveReadingProgress, getReadingProgress } from '../api/client';
 
-export default function NotePage() {
+export default function NoteDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [savedProgress, setSavedProgress] = useState(0);
+  const [progressRestored, setProgressRestored] = useState(false);
   const contentRef = useRef(null);
   const startTime = useRef(Date.now());
   const scrollTimeout = useRef(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
     loadNote();
     return () => {
+      isMounted.current = false;
       if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
       if (note && user) {
         const scrollPercent = getScrollPercentage();
@@ -23,31 +27,37 @@ export default function NotePage() {
         saveReadingProgress(id, scrollPercent, window.scrollY, timeSpent);
       }
     };
-  }, [id, user]);
+  }, [id]);
 
   useEffect(() => {
-    if (!note || !contentRef.current || !user) return;
+    if (!note || !contentRef.current || !user || progressRestored) return;
     if (savedProgress > 0) {
       const totalHeight = contentRef.current.scrollHeight - window.innerHeight;
-      window.scrollTo(0, totalHeight * (savedProgress / 100));
+      const targetY = totalHeight * (savedProgress / 100);
+      window.scrollTo(0, targetY);
+      setProgressRestored(true);
     }
-  }, [note, savedProgress, user]);
+  }, [note, savedProgress, user, progressRestored]);
 
   async function loadNote() {
     setLoading(true);
     try {
       const data = await getNoteContent(id);
+      if (!isMounted.current) return;
       setNote(data);
       if (user) {
         try {
           const prog = await getReadingProgress(id);
-          if (prog) setSavedProgress(prog.scroll_percentage || 0);
+          if (isMounted.current && prog) {
+            setSavedProgress(prog.scroll_percentage || 0);
+          }
         } catch {}
       }
     } catch (err) {
       console.error(err);
+      if (isMounted.current) setNote(null);
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   }
 
@@ -70,7 +80,7 @@ export default function NotePage() {
 
   useEffect(() => {
     if (user) {
-      window.addEventListener('scroll', handleScroll);
+      window.addEventListener('scroll', handleScroll, { passive: true });
       return () => window.removeEventListener('scroll', handleScroll);
     }
   }, [note, user]);
