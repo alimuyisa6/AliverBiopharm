@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
 import NotificationBell from '../components/NotificationBell';
 import InfoCards from '../components/InfoCards';
-import LabHome from '../components/lab/LabHome';
 
 export default function HomeView({
   sections,
@@ -119,6 +118,13 @@ export default function HomeView({
   const safeContinueLearning = continueLearning || { views: [], favorites: [], streak: 0 };
   const safeFlashcardShuffled = flashcardShuffled || {};
   const safeGroupedNotes = groupedNotes || {};
+
+  const labTools = [
+    { slug: 'interaction-matrix', icon: 'fa-circle-nodes', title: 'Interaction Matrix', subtitle: 'Visualize drug interactions in real time.', color: '#00bcd4' },
+    { slug: 'biopathways', icon: 'fa-dna', title: 'BioPathways', subtitle: 'Walk through biological pathways step by step.', color: '#e91e8c' },
+    { slug: 'clinical-rounds', icon: 'fa-stethoscope', title: 'Clinical Rounds', subtitle: 'Diagnose and treat real patient scenarios.', color: '#00bcd4' },
+    { slug: 'rxcalc', icon: 'fa-flask-vial', title: 'RxCalc', subtitle: 'Master dosing with formula-driven calculations.', color: '#e91e8c' },
+  ];
 
   return (
     <div className="homepage">
@@ -239,25 +245,41 @@ export default function HomeView({
 
       <InteractiveShowcase />
 
-     <section id="info-resources" className="section reveal">
-  <span className="sec-label">LEARNING RESOURCES</span>
-  <h2 className="section-title">Explore Our Resources</h2>
-  <p className="section-subtitle">In-depth guides, case studies, and reference materials for Biology and Pharmacy students.</p>
-  <InfoCards />
-</section>
+      <section id="info-resources" className="section reveal">
+        <span className="sec-label">LEARNING RESOURCES</span>
+        <h2 className="section-title">Explore Our Resources</h2>
+        <p className="section-subtitle">In-depth guides, case studies, and reference materials for Biology and Pharmacy students.</p>
+        <InfoCards />
+      </section>
 
-<section id="learning-lab" className="section reveal">
-  <span className="sec-label">LEARNING LAB</span>
-  <h2 className="section-title">Interactive Learning Tools</h2>
-  <p className="section-subtitle">
-    Hands-on tools built for O-Level, A-Level and Pharmacy students.
-  </p>
-  <LabHome user={user} navigate={navigate} />
-</section>
+      <section id="learning-lab" className="section reveal">
+        <span className="sec-label">LEARNING LAB</span>
+        <h2 className="section-title">Interactive Learning Tools</h2>
+        <p className="section-subtitle">
+          Hands-on tools built for O-Level, A-Level and Pharmacy students.
+        </p>
+        <div className="lab-home-grid">
+          {labTools.map(tool => (
+            <div key={tool.slug} className="lab-tool-card" style={{ borderTopColor: tool.color }}>
+              <div className="lab-tool-icon-wrap" style={{ color: tool.color }}>
+                <i className={`fa-solid ${tool.icon}`}></i>
+              </div>
+              <h3 className="lab-tool-title">{tool.title}</h3>
+              <p className="lab-tool-subtitle">{tool.subtitle}</p>
+              <button
+                className="lab-tool-btn"
+                style={{ background: tool.color }}
+                onClick={() => user ? navigate(`/lab?tool=${tool.slug}`) : navigate('/login')}
+              >
+                {user ? 'Launch Tool' : 'Login to Access'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
 
-<section id="stats" className="section reveal">
-        
-     <span className="sec-label">IMPACT</span>
+      <section id="stats" className="section reveal">
+        <span className="sec-label">IMPACT</span>
         <h2 className="section-title">Our Impact in Numbers</h2>
         <div className="stats-grid">
           <div><div className="stat-number">{publicStats?.resources_count || 0}</div><div className="stat-label">Resources</div></div>
