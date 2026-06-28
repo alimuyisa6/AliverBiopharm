@@ -1,5 +1,5 @@
- import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+ import React, { useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -13,10 +13,45 @@ import Glossary from './pages/Glossary';
 import AboutPage from './pages/AboutPage';
 import InfoPage from './pages/PageInfo';
 
+function ScrollManager() {
+  const location = useLocation();
+  const isInitialRender = useRef(true);
+
+  useEffect(() => {
+    const key = `scrollPos_${location.pathname}`;
+
+    if (isInitialRender.current) {
+      const savedPosition = sessionStorage.getItem(key);
+      if (savedPosition) {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, parseInt(savedPosition, 10));
+        });
+      }
+      isInitialRender.current = false;
+    } else {
+      const savedPosition = sessionStorage.getItem(key);
+      if (savedPosition) {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, parseInt(savedPosition, 10));
+        });
+      } else {
+        window.scrollTo(0, 0);
+      }
+    }
+
+    return () => {
+      sessionStorage.setItem(key, window.scrollY.toString());
+    };
+  }, [location.pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ScrollManager />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
