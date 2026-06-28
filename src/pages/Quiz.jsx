@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
 import {
@@ -16,7 +16,7 @@ import {
   trackEvent,
   getLeaderboard
 } from '../api/cachedClient';
-import { getSections } from '../api/sections';
+import { getAllSiteSections } from '../api/client';
 import QuizHero from '../components/quiz/QuizHero';
 import QuizDashboard from '../components/quiz/QuizDashboard';
 import QuizChallenges from '../components/quiz/QuizChallenges';
@@ -175,7 +175,7 @@ function Quiz() {
     const load = async () => {
       try {
         setLoading(true);
-        const siteData = await getSections();
+        const siteData = await getAllSiteSections();
         setSections(siteData);
         const glossary = siteData?.glossary?.data || [];
         const map = {};
