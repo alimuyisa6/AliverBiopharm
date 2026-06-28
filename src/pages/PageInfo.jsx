@@ -1,8 +1,6 @@
  import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { getInfoSection } from '../api/client';
-import { getSections } from '../api/sections';
-
+import { Link, useParams, useLocation } from 'react-router-dom';
+import { getInfoSection, getAllSiteSections } from '../api/client';
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -30,9 +28,23 @@ function getCategoryLabel(category) {
 
 export default function InfoPage() {
   const { slug } = useParams();
+  const { pathname } = useLocation();
   const [section, setSection] = useState(null);
+  const [siteSections, setSiteSections] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  useEffect(() => {
+    getAllSiteSections().then(setSiteSections).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!slug) {
@@ -52,68 +64,216 @@ export default function InfoPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  const navLinks = siteSections?.navigation?.links || [{ href: '/', label: 'Home' }];
+
+  const header = (
+    <header className="site-header" id="site-header">
+      <div className="header-container">
+        <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
+          {siteSections?.site_config?.logo_url ? (
+            <img src={siteSections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
+          ) : (
+            'AliverBiopharm'
+          )}
+        </Link>
+        <nav aria-label="Main navigation">
+          <ul className="main-nav" id="main-nav">
+            {navLinks.map(link => (
+              <li key={link.href}>
+                {link.href.startsWith('#') || link.href.startsWith('http') ? (
+                  <a href={link.href}>{link.label}</a>
+                ) : (
+                  <Link to={link.href}>{link.label}</Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="nav-actions">
+          <button
+            className="theme-toggle"
+            onClick={() => {
+              const dark = document.body.classList.toggle('dark-mode');
+              localStorage.setItem('theme', dark ? 'dark' : 'light');
+              setTheme(dark ? 'dark' : 'light');
+            }}
+            aria-label="Toggle dark mode"
+          >
+            <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
+          </button>
+          <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open menu">
+            <i className="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+
+  const mobileNav = (
+    <>
+      <div className={`mobile-nav-panel ${mobileMenuOpen ? 'active' : ''}`}>
+        <div className="mobile-nav-panel-inner">
+          <div className="mobile-nav-header">
+            <div className="mobile-nav-header-row">
+              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+          <nav className="mobile-nav-links">
+            {navLinks.map(link =>
+              link.href.startsWith('#') || link.href.startsWith('http') ? (
+                <a key={link.href} href={link.href}>{link.label}</a>
+              ) : (
+                <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
+              )
+            )}
+          </nav>
+        </div>
+      </div>
+      <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
+    </>
+  );
+
+  const footer = (
+    <footer className="footer-fat">
+      <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
+        <div style={{ maxWidth: '260px' }}>
+          <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
+            {siteSections?.site_config?.logo_url ? (
+              <img src={siteSections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} />
+            ) : (
+              'AliverBiopharm'
+            )}
+          </Link>
+          <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>
+            Advancing biology and pharmacy education for every learner.
+          </p>
+          <div className="footer-social">
+            {(siteSections?.footer?.social_links || []).filter(Boolean).map(s => (
+              <a key={s.platform} href={s.url} target="_blank" rel="noreferrer">
+                <i className={s.icon}></i>
+              </a>
+            ))}
+          </div>
+        </div>
+        <div className="footer-grid">
+          {(siteSections?.footer?.columns || []).filter(Boolean).map(col => (
+            <div key={col.heading}>
+              <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                {col.heading}
+              </h4>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {(col.items || []).filter(Boolean).map(item => (
+                  <li key={item.label}>
+                    {item.href.startsWith('#') || item.href.startsWith('http') ? (
+                      <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                        {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                        {item.label}
+                      </a>
+                    ) : (
+                      <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                        {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                        {item.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
+        <nav style={{ display: 'flex', gap: '22px' }}>
+          <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
+          <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
+          <Link to="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</Link>
+        </nav>
+      </div>
+    </footer>
+  );
+
   if (loading) {
     return (
-      <div className="info-page-loading">
-        <div className="info-page-spinner" />
-        <p>Loading content...</p>
+      <div className="homepage">
+        {header}
+        {mobileNav}
+        <div className="info-page-loading">
+          <div className="info-page-spinner" />
+          <p>Loading content...</p>
+        </div>
+        {footer}
       </div>
     );
   }
 
   if (error === 'not_found' || !section || !section.title) {
     return (
-      <div className="info-page-error">
-        <i className="fa-solid fa-file-circle-question" aria-hidden="true" />
-        <h2>Section Not Found</h2>
-        <p>This page doesn't exist or has been moved.</p>
-        <a href="/" className="btn-primary"><i className="fa-solid fa-house" aria-hidden="true" /> Back to Home</a>
+      <div className="homepage">
+        {header}
+        {mobileNav}
+        <div className="info-page-error">
+          <i className="fa-solid fa-file-circle-question" aria-hidden="true" />
+          <h2>Section Not Found</h2>
+          <p>This page doesn't exist or has been moved.</p>
+          <Link to="/" className="btn-primary"><i className="fa-solid fa-house" aria-hidden="true" /> Back to Home</Link>
+        </div>
+        {footer}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="info-page-error">
-        <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
-        <h2>Something Went Wrong</h2>
-        <p>Please try refreshing the page or come back later.</p>
-        <a href="/" className="btn-primary"><i className="fa-solid fa-rotate-right" aria-hidden="true" /> Try Again</a>
+      <div className="homepage">
+        {header}
+        {mobileNav}
+        <div className="info-page-error">
+          <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
+          <h2>Something Went Wrong</h2>
+          <p>Please try refreshing the page or come back later.</p>
+          <Link to="/" className="btn-primary"><i className="fa-solid fa-rotate-right" aria-hidden="true" /> Try Again</Link>
+        </div>
+        {footer}
       </div>
     );
   }
 
   return (
-    <article className="info-page">
-      <div className="section info-page-section">
-        <a href="/" className="info-back-link" aria-label="Back to home">
-          <i className="fa-solid fa-arrow-left" aria-hidden="true" />
-          Back to Home
-        </a>
-
-        <header className="info-header">
-          <span className="sec-label">
-            <i className={`fa-solid ${section.icon || 'fa-file-lines'}`} aria-hidden="true" />
-            {getCategoryLabel(section.category || 'general')}
-          </span>
-          <h1 className="section-title info-page-title">{escapeHtml(section.title)}</h1>
-          {section.description && (
-            <p className="section-subtitle info-page-subtitle">{escapeHtml(section.description)}</p>
-          )}
-        </header>
-
-        <div className="info-content">
-          <ContentBlocks blocks={section.content || []} />
-        </div>
-
-        <nav className="info-bottom-nav">
-          <a href="/" className="btn-primary">
+    <div className="homepage">
+      {header}
+      {mobileNav}
+      <article className="info-page">
+        <div className="section info-page-section">
+          <Link to="/" className="info-back-link" aria-label="Back to home">
             <i className="fa-solid fa-arrow-left" aria-hidden="true" />
-            All Resources
-          </a>
-        </nav>
-      </div>
-    </article>
+            Back to Home
+          </Link>
+          <header className="info-header">
+            <span className="sec-label">
+              <i className={`fa-solid ${section.icon || 'fa-file-lines'}`} aria-hidden="true" />
+              {' '}{getCategoryLabel(section.category || 'general')}
+            </span>
+            <h1 className="section-title info-page-title">{escapeHtml(section.title)}</h1>
+            {section.description && (
+              <p className="section-subtitle info-page-subtitle">{escapeHtml(section.description)}</p>
+            )}
+          </header>
+          <div className="info-content">
+            <ContentBlocks blocks={section.content || []} />
+          </div>
+          <nav className="info-bottom-nav">
+            <Link to="/" className="btn-primary">
+              <i className="fa-solid fa-arrow-left" aria-hidden="true" />
+              All Resources
+            </Link>
+          </nav>
+        </div>
+      </article>
+      {footer}
+    </div>
   );
 }
 
