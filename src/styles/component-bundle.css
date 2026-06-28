@@ -2480,3 +2480,9 @@ body.dark-mode .pdf-section-subtitle { color: rgba(255,255,255,0.65); }
   .card .btn-primary { margin: 0 1rem 1.1rem; }
   .card-link-arrow { padding: 0 1rem 1.1rem; }
 }
+footer ul,
+footer li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+ }
