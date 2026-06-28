@@ -1,6 +1,8 @@
  import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getInfoSection } from '../api/client';
+import { getSections } from '../api/sections';
+
 
 function escapeHtml(str) {
   if (!str) return '';
