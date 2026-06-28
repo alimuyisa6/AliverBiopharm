@@ -27,6 +27,7 @@ const MODULE_MAP = {
   resources:          new URL('../lib/resources.js', import.meta.url).href,
   site:               new URL('../lib/site.js', import.meta.url).href,
   'weekly-challenge': new URL('../lib/weekly-challenge.js', import.meta.url).href,
+  lab:                new URL('../lib/lab.js', import.meta.url).href,
 };
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
