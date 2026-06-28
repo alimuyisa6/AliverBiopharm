@@ -1,30 +1,87 @@
  let csrfToken = null;
 const API_BASE = '/api/server';
 
+const pendingRequests = new Map();
+const requestQueue = [];
+let processingQueue = false;
+const MAX_CONCURRENT = 3;
+let activeRequests = 0;
+
+async function processQueue() {
+  if (processingQueue) return;
+  processingQueue = true;
+
+  while (requestQueue.length > 0 && activeRequests < MAX_CONCURRENT) {
+    const { key, execute, resolve, reject } = requestQueue.shift();
+    activeRequests++;
+
+    execute()
+      .then(resolve)
+      .catch(reject)
+      .finally(() => {
+        activeRequests--;
+        pendingRequests.delete(key);
+        processQueue();
+      });
+  }
+
+  processingQueue = false;
+}
+
+function dedupeAndQueue(key, execute) {
+  if (pendingRequests.has(key)) {
+    return pendingRequests.get(key);
+  }
+
+  const promise = new Promise((resolve, reject) => {
+    requestQueue.push({ key, execute, resolve, reject });
+    processQueue();
+  });
+
+  pendingRequests.set(key, promise);
+  return promise;
+}
+
 async function apiCall(module, path, body = {}, method = 'POST') {
   const url = `${API_BASE}?module=${module}&path=${path}`;
-  const headers = { 'Content-Type': 'application/json' };
-  if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
-  const res = await fetch(url, {
-    method,
-    headers,
-    credentials: 'include',
-    body: method === 'POST' ? JSON.stringify(body) : undefined
+  const cacheKey = `${method}:${module}:${path}`;
+
+  return dedupeAndQueue(cacheKey, async () => {
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+
+    const res = await fetch(url, {
+      method,
+      headers,
+      credentials: 'include',
+      body: method === 'POST' ? JSON.stringify(body) : undefined
+    });
+
+    const json = await res.json();
+    if (json.csrf_token) csrfToken = json.csrf_token;
+    if (!res.ok) {
+      console.error(`API Error ${res.status}: ${module}/${path}`, json.error);
+      throw new Error(json.error || 'Request failed');
+    }
+    return json.data !== undefined ? json.data : json;
   });
-  const json = await res.json();
-  if (json.csrf_token) csrfToken = json.csrf_token;
-  if (!res.ok) throw new Error(json.error || 'Request failed');
-  return json.data !== undefined ? json.data : json;
 }
 
 async function getRequest(module, path, params = {}) {
   const query = new URLSearchParams(params).toString();
   const url = `${API_BASE}?module=${module}&path=${path}${query ? `&${query}` : ''}`;
-  const res = await fetch(url, { credentials: 'include' });
-  const json = await res.json();
-  if (json.csrf_token) csrfToken = json.csrf_token;
-  if (!res.ok) throw new Error(json.error || 'Request failed');
-  return json.data !== undefined ? json.data : json;
+  const cacheKey = `GET:${module}:${path}:${query}`;
+
+  return dedupeAndQueue(cacheKey, async () => {
+    const res = await fetch(url, { credentials: 'include' });
+    const json = await res.json();
+    if (json.csrf_token) csrfToken = json.csrf_token;
+    if (!res.ok) {
+      console.error(`API Error ${res.status}: ${module}/${path}`, json.error);
+      throw new Error(json.error || 'Request failed');
+    }
+    return json.data !== undefined ? json.data : json;
+  });
 }
 
 export { getRequest, apiCall };
@@ -185,7 +242,7 @@ export async function getGlossaryTerm(slug, level) {
 export async function getGlossaryCategories(level) {
   return getRequest('glossary', 'categories', { level });
 }
- 
+
 export async function getInfoSection(section) {
   return getRequest('site', 'get_info_section', { section });
 }
