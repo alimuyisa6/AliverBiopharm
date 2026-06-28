@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import { fetchLabPathways, fetchLabPathway } from '../../api/client';
 
 export default function BioPathways({ user }) {
@@ -12,16 +12,24 @@ export default function BioPathways({ user }) {
   const svgRef = useRef(null);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     fetchLabPathways(level)
       .then(data => {
-        setPathways(data || []);
-        setSelectedPathway(null);
-        setPathwayData(null);
-        setCurrentStep(0);
+        if (!cancelled) {
+          setPathways(data || []);
+          setSelectedPathway(null);
+          setPathwayData(null);
+          setCurrentStep(0);
+        }
       })
-      .catch(() => setPathways([]))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setPathways([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [level]);
 
   const handlePathwaySelect = async (slug) => {
@@ -42,8 +50,6 @@ export default function BioPathways({ user }) {
 
     const svg = svgRef.current;
     const steps = pathwayData.steps;
-    const width = 800;
-    const height = 500;
 
     svg.innerHTML = '';
 
