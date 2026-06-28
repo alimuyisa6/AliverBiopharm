@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as d3 from 'd3';
 import { fetchLabDrugs, fetchLabInteraction } from '../../api/client';
 
@@ -256,4 +256,32 @@ export default function InteractionMatrix({ user }) {
                   </div>
                   <div className="lab-edge-detail">
                     <strong>Mechanism:</strong>
-                    <p>{selectedEdge.me
+                    <p>{selectedEdge.mechanism}</p>
+                  </div>
+                  <div className="lab-edge-detail">
+                    <strong>Clinical Note:</strong>
+                    <p>{selectedEdge.clinical_note}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {interactions.length > 0 && !selectedEdge && (
+              <div className="lab-interaction-legend">
+                <span className="lab-legend-item">
+                  <span className="lab-legend-dot" style={{ background: SEVERITY_COLORS.minor }}></span> Minor
+                </span>
+                <span className="lab-legend-item">
+                  <span className="lab-legend-dot" style={{ background: SEVERITY_COLORS.moderate }}></span> Moderate
+                </span>
+                <span className="lab-legend-item">
+                  <span className="lab-legend-dot" style={{ background: SEVERITY_COLORS.severe }}></span> Severe
+                </span>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
