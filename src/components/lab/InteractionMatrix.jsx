@@ -19,16 +19,24 @@ export default function InteractionMatrix({ user }) {
   const svgRef = useRef(null);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     fetchLabDrugs(level)
       .then(data => {
-        setDrugs(data || []);
-        setSelectedDrugs([]);
-        setInteractions([]);
-        setSelectedEdge(null);
+        if (!cancelled) {
+          setDrugs(data || []);
+          setSelectedDrugs([]);
+          setInteractions([]);
+          setSelectedEdge(null);
+        }
       })
-      .catch(() => setDrugs([]))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setDrugs([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [level]);
 
   const handleDrugToggle = (drugId) => {
