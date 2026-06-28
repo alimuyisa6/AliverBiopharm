@@ -6,7 +6,7 @@ export default function BioPathways({ user }) {
   const [selectedPathway, setSelectedPathway] = useState(null);
   const [pathwayData, setPathwayData] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [level, setLevel] = useState('alevel');
+  const [level, setLevel] = useState('Alevel');
   const [loading, setLoading] = useState(true);
   const [pathwayLoading, setPathwayLoading] = useState(false);
   const svgRef = useRef(null);
