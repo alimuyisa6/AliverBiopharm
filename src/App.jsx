@@ -1,4 +1,4 @@
- import React, { useEffect, useRef, useCallback } from 'react';
+ import React, { useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import Login from './pages/Login';
@@ -14,7 +14,6 @@ import AboutPage from './pages/AboutPage';
 import InfoPage from './pages/PageInfo';
 
 const scrollPositions = {};
-let saveTimer = null;
 
 function ScrollManager() {
   const location = useLocation();
@@ -22,7 +21,7 @@ function ScrollManager() {
   const restoreAttemptsRef = useRef(0);
 
   useEffect(() => {
-    const key = location.pathname + location.search;
+    const key = location.pathname;
     const prevPath = prevPathRef.current;
 
     if (prevPath && prevPath !== key) {
@@ -57,6 +56,7 @@ function ScrollManager() {
       window.scrollTo(0, 0);
     }
 
+    let saveTimer;
     const handleScroll = () => {
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => {
@@ -71,7 +71,7 @@ function ScrollManager() {
       clearTimeout(saveTimer);
       scrollPositions[key] = window.scrollY;
     };
-  }, [location.pathname, location.search]);
+  }, [location.pathname]);
 
   return null;
 }
