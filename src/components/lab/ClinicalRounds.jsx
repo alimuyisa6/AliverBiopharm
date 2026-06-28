@@ -11,7 +11,7 @@ export default function ClinicalRounds({ user }) {
   const [stageResults, setStageResults] = useState([]);
   const [completed, setCompleted] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
-  const [level, setLevel] = useState('pharmacy');
+  const [level, setLevel] = useState('Pharmacy');
   const [difficulty, setDifficulty] = useState('');
   const [loading, setLoading] = useState(true);
   const [caseLoading, setCaseLoading] = useState(false);
