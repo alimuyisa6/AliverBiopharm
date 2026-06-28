@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LabHome from '../components/lab/LabHome';
@@ -8,10 +8,18 @@ import ClinicalRounds from '../components/lab/ClinicalRounds';
 import RxCalc from '../components/lab/RxCalc';
 
 export default function LearningLab() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const tool = searchParams.get('tool');
+
+  if (authLoading) {
+    return (
+      <div className="learning-lab">
+        <div className="lab-loading">Loading...</div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
