@@ -32,7 +32,7 @@ import {
   rateFlashcard as apiRateFlashcard,
   checkFlashcardAnswer as apiCheckFlashcardAnswer,
   toggleFlashcardBookmark as apiToggleFlashcardBookmark
-} from '../api/client';
+} from '../api/cachedClient';
 
 function shuffleArray(arr) {
   const a = [...arr];
