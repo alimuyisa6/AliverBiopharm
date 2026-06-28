@@ -12,6 +12,7 @@ import LegalPage from './pages/LegalPage';
 import Glossary from './pages/Glossary';
 import AboutPage from './pages/AboutPage';
 import InfoPage from './pages/PageInfo';
+import LearningLab from './pages/LearningLab';
 
 const scrollPositions = {};
 
@@ -90,6 +91,7 @@ function App() {
           <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
           <Route path="/glossary/:slug" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
           <Route path="/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
+          <Route path="/lab" element={<ProtectedRoute><LearningLab /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
