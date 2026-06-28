@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import InteractiveShowcase from '../components/InteractiveShowcase';
 import NotificationBell from '../components/NotificationBell';
 import InfoCards from '../components/InfoCards';
+import LabHome from '../components/lab/LabHome';
 
 export default function HomeView({
   sections,
@@ -238,15 +239,25 @@ export default function HomeView({
 
       <InteractiveShowcase />
 
-      <section id="info-resources" className="section reveal">
-        <span className="sec-label">LEARNING RESOURCES</span>
-        <h2 className="section-title">Explore Our Resources</h2>
-        <p className="section-subtitle">In-depth guides, case studies, and reference materials for Biology and Pharmacy students.</p>
-        <InfoCards />
-      </section>
+     <section id="info-resources" className="section reveal">
+  <span className="sec-label">LEARNING RESOURCES</span>
+  <h2 className="section-title">Explore Our Resources</h2>
+  <p className="section-subtitle">In-depth guides, case studies, and reference materials for Biology and Pharmacy students.</p>
+  <InfoCards />
+</section>
 
-      <section id="stats" className="section reveal">
-        <span className="sec-label">IMPACT</span>
+<section id="learning-lab" className="section reveal">
+  <span className="sec-label">LEARNING LAB</span>
+  <h2 className="section-title">Interactive Learning Tools</h2>
+  <p className="section-subtitle">
+    Hands-on tools built for O-Level, A-Level and Pharmacy students.
+  </p>
+  <LabHome user={user} navigate={navigate} />
+</section>
+
+<section id="stats" className="section reveal">
+        
+     <span className="sec-label">IMPACT</span>
         <h2 className="section-title">Our Impact in Numbers</h2>
         <div className="stats-grid">
           <div><div className="stat-number">{publicStats?.resources_count || 0}</div><div className="stat-label">Resources</div></div>
