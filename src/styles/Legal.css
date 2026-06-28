@@ -210,6 +210,37 @@ body.dark-mode .footer-fat {
   color: var(--clr-cyan);
 }
 
+.footer-fat p,
+.footer-fat address,
+.footer-fat li {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--lh-relaxed);
+  color: var(--clr-text-dim);
+}
+
+.footer-fat h4,
+.footer-fat .footer-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: var(--ls-snug);
+  color: var(--clr-white);
+  margin-bottom: 0.75rem;
+}
+
+.footer-fat a {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--clr-text-dim);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-fat a:hover {
+  color: var(--clr-cyan);
+}
+
 .info-page-loading {
   text-align: center;
   padding: 6rem 1rem;
