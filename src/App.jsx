@@ -13,143 +13,65 @@ import Glossary from './pages/Glossary';
 import AboutPage from './pages/AboutPage';
 import InfoPage from './pages/PageInfo';
 
-const scrollCache = new Map();
-const skipScrollPaths = ['/notes/read'];
+const scrollPositions = {};
+let saveTimer = null;
 
 function ScrollManager() {
   const location = useLocation();
-  const isInitialRender = useRef(true);
-  const retryTimer = useRef(null);
-  const lastSavedY = useRef(0);
-  const restoreInProgress = useRef(false);
-  const currentKey = useRef('');
+  const prevPathRef = useRef(null);
+  const restoreAttemptsRef = useRef(0);
 
-  const savePosition = useCallback(() => {
-    const key = location.pathname;
-    if (skipScrollPaths.some(p => key.startsWith(p))) return;
-    const y = window.scrollY;
-    if (y === lastSavedY.current && key === currentKey.current) return;
-    lastSavedY.current = y;
-    currentKey.current = key;
-    scrollCache.set(key, {
-      x: window.scrollX,
-      y: y,
-      timestamp: Date.now()
-    });
-    try {
-      const cacheObj = Object.fromEntries(scrollCache);
-      sessionStorage.setItem('scrollCache', JSON.stringify(cacheObj));
-    } catch (e) {}
-  }, [location.pathname]);
+  useEffect(() => {
+    const key = location.pathname + location.search;
+    const prevPath = prevPathRef.current;
 
-  const restorePosition = useCallback((key, targetY) => {
-    if (skipScrollPaths.some(p => key.startsWith(p))) return;
-    restoreInProgress.current = true;
-    let attempts = 0;
-    const maxAttempts = 50;
+    if (prevPath && prevPath !== key) {
+      scrollPositions[prevPath] = window.scrollY;
+    }
 
-    const tryScroll = () => {
-      if (!restoreInProgress.current) return;
-      if (currentKey.current !== key) return;
+    prevPathRef.current = key;
 
-      const docHeight = document.documentElement.scrollHeight;
-      const bodyHeight = document.body.scrollHeight;
-      const maxHeight = Math.max(docHeight, bodyHeight);
-      const viewportHeight = window.innerHeight;
-      const maxScrollY = maxHeight - viewportHeight;
+    const savedY = scrollPositions[key];
+    restoreAttemptsRef.current = 0;
 
-      if (maxScrollY >= targetY - 200 || attempts >= maxAttempts) {
-        window.scrollTo(0, Math.min(targetY, maxScrollY));
-        if (attempts < 5) {
-          requestAnimationFrame(() => {
-            window.scrollTo(0, Math.min(targetY, maxScrollY));
-          });
+    if (savedY !== undefined) {
+      const attemptRestore = () => {
+        const maxHeight = Math.max(
+          document.documentElement.scrollHeight,
+          document.body.scrollHeight
+        );
+        const viewportHeight = window.innerHeight;
+        const maxScrollY = maxHeight - viewportHeight;
+
+        if (maxScrollY >= savedY - 100 || restoreAttemptsRef.current >= 30) {
+          window.scrollTo(0, Math.min(savedY, Math.max(0, maxScrollY)));
+          return;
         }
-        restoreInProgress.current = false;
-        return;
-      }
 
-      attempts++;
-      retryTimer.current = setTimeout(() => {
-        requestAnimationFrame(tryScroll);
-      }, 200);
-    };
+        restoreAttemptsRef.current++;
+        requestAnimationFrame(attemptRestore);
+      };
 
-    tryScroll();
-  }, []);
-
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('scrollCache');
-      if (saved && scrollCache.size === 0) {
-        const parsed = JSON.parse(saved);
-        Object.entries(parsed).forEach(([key, value]) => {
-          scrollCache.set(key, value);
-        });
-      }
-    } catch (e) {}
-
-    const handleBeforeUnload = () => savePosition();
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('pagehide', savePosition);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('pagehide', savePosition);
-    };
-  }, [savePosition]);
-
-  useEffect(() => {
-    const key = location.pathname;
-    const skip = skipScrollPaths.some(p => key.startsWith(p));
-
-    currentKey.current = key;
-    restoreInProgress.current = false;
-    if (retryTimer.current) clearTimeout(retryTimer.current);
-
-    if (skip) {
-      isInitialRender.current = false;
-      return;
-    }
-
-    if (isInitialRender.current) {
-      const cached = scrollCache.get(key);
-      if (cached && cached.y > 0) {
-        restorePosition(key, cached.y);
-      }
-      isInitialRender.current = false;
-      return;
-    }
-
-    const cached = scrollCache.get(key);
-    if (cached && cached.y > 0) {
-      restorePosition(key, cached.y);
+      requestAnimationFrame(attemptRestore);
     } else {
       window.scrollTo(0, 0);
     }
-  }, [location.pathname, restorePosition]);
 
-  useEffect(() => {
-    let saveTimer;
     const handleScroll = () => {
       clearTimeout(saveTimer);
-      saveTimer = setTimeout(savePosition, 100);
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) savePosition();
+      saveTimer = setTimeout(() => {
+        scrollPositions[key] = window.scrollY;
+      }, 150);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
       clearTimeout(saveTimer);
-      savePosition();
+      scrollPositions[key] = window.scrollY;
     };
-  }, [savePosition]);
+  }, [location.pathname, location.search]);
 
   return null;
 }
