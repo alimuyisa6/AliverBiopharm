@@ -2486,3 +2486,36 @@ footer li {
   padding: 0;
   margin: 0;
  }
+
+.footer-bottom {
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--clr-border-glow);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+.footer-bottom-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+}
+
+.footer-bottom-nav a {
+  color: var(--clr-text-dim);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  transition: color var(--transition-fast);
+}
+
+.footer-bottom-nav a:hover {
+  color: var(--clr-cyan);
+}
