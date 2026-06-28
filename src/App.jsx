@@ -14,6 +14,7 @@ import AboutPage from './pages/AboutPage';
 import InfoPage from './pages/PageInfo';
 
 const scrollCache = new Map();
+const skipScrollPaths = ['/notes/read'];
 
 function ScrollManager() {
   const location = useLocation();
@@ -24,7 +25,8 @@ function ScrollManager() {
   const currentKey = useRef('');
 
   const savePosition = useCallback(() => {
-    const key = location.pathname + location.search;
+    const key = location.pathname;
+    if (skipScrollPaths.some(p => key.startsWith(p))) return;
     const y = window.scrollY;
     if (y === lastSavedY.current && key === currentKey.current) return;
     lastSavedY.current = y;
@@ -38,9 +40,10 @@ function ScrollManager() {
       const cacheObj = Object.fromEntries(scrollCache);
       sessionStorage.setItem('scrollCache', JSON.stringify(cacheObj));
     } catch (e) {}
-  }, [location.pathname, location.search]);
+  }, [location.pathname]);
 
   const restorePosition = useCallback((key, targetY) => {
+    if (skipScrollPaths.some(p => key.startsWith(p))) return;
     restoreInProgress.current = true;
     let attempts = 0;
     const maxAttempts = 50;
@@ -97,10 +100,17 @@ function ScrollManager() {
   }, [savePosition]);
 
   useEffect(() => {
-    const key = location.pathname + location.search;
+    const key = location.pathname;
+    const skip = skipScrollPaths.some(p => key.startsWith(p));
+
     currentKey.current = key;
     restoreInProgress.current = false;
     if (retryTimer.current) clearTimeout(retryTimer.current);
+
+    if (skip) {
+      isInitialRender.current = false;
+      return;
+    }
 
     if (isInitialRender.current) {
       const cached = scrollCache.get(key);
@@ -117,13 +127,7 @@ function ScrollManager() {
     } else {
       window.scrollTo(0, 0);
     }
-
-    return () => {
-      savePosition();
-      restoreInProgress.current = false;
-      if (retryTimer.current) clearTimeout(retryTimer.current);
-    };
-  }, [location.pathname, location.search, savePosition, restorePosition]);
+  }, [location.pathname, restorePosition]);
 
   useEffect(() => {
     let saveTimer;
