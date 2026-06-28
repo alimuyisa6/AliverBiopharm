@@ -1,4 +1,4 @@
- import React, { useEffect, useRef } from 'react';
+ import React, { useEffect, useRef, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import Login from './pages/Login';
@@ -13,36 +13,97 @@ import Glossary from './pages/Glossary';
 import AboutPage from './pages/AboutPage';
 import InfoPage from './pages/PageInfo';
 
+const scrollCache = new Map();
+
 function ScrollManager() {
   const location = useLocation();
   const isInitialRender = useRef(true);
+  const restoreAttempts = useRef(0);
+  const maxRestoreAttempts = 10;
+
+  const savePosition = useCallback(() => {
+    const key = location.pathname + location.search;
+    scrollCache.set(key, {
+      x: window.scrollX,
+      y: window.scrollY,
+      timestamp: Date.now()
+    });
+    try {
+      const cacheObj = Object.fromEntries(scrollCache);
+      sessionStorage.setItem('scrollCache', JSON.stringify(cacheObj));
+    } catch (e) {}
+  }, [location.pathname, location.search]);
+
+  const restorePosition = useCallback((key, y, attempts = 0) => {
+    if (attempts >= maxRestoreAttempts) return;
+    
+    const docHeight = document.documentElement.scrollHeight;
+    if (docHeight >= y || attempts > 5) {
+      window.scrollTo(0, y);
+      restoreAttempts.current = 0;
+    } else {
+      restoreAttempts.current = attempts + 1;
+      requestAnimationFrame(() => restorePosition(key, y, attempts + 1));
+    }
+  }, []);
 
   useEffect(() => {
-    const key = `scrollPos_${location.pathname}`;
+    try {
+      const saved = sessionStorage.getItem('scrollCache');
+      if (saved && scrollCache.size === 0) {
+        const parsed = JSON.parse(saved);
+        Object.entries(parsed).forEach(([key, value]) => {
+          scrollCache.set(key, value);
+        });
+      }
+    } catch (e) {}
+
+    const handleBeforeUnload = () => savePosition();
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [savePosition]);
+
+  useEffect(() => {
+    const key = location.pathname + location.search;
 
     if (isInitialRender.current) {
-      const savedPosition = sessionStorage.getItem(key);
-      if (savedPosition) {
-        requestAnimationFrame(() => {
-          window.scrollTo(0, parseInt(savedPosition, 10));
-        });
+      const cached = scrollCache.get(key);
+      if (cached && cached.y > 0) {
+        restorePosition(key, cached.y);
       }
       isInitialRender.current = false;
+      return;
+    }
+
+    const cached = scrollCache.get(key);
+    if (cached && cached.y > 0) {
+      restorePosition(key, cached.y);
     } else {
-      const savedPosition = sessionStorage.getItem(key);
-      if (savedPosition) {
-        requestAnimationFrame(() => {
-          window.scrollTo(0, parseInt(savedPosition, 10));
-        });
-      } else {
-        window.scrollTo(0, 0);
-      }
+      window.scrollTo(0, 0);
     }
 
     return () => {
-      sessionStorage.setItem(key, window.scrollY.toString());
+      savePosition();
     };
-  }, [location.pathname]);
+  }, [location.pathname, location.search, savePosition, restorePosition]);
+
+  useEffect(() => {
+    let saveTimer;
+    const handleScroll = () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(savePosition, 150);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(saveTimer);
+      savePosition();
+    };
+  }, [savePosition]);
 
   return null;
 }
