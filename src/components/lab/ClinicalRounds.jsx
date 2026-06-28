@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { fetchLabCases, fetchLabCase, submitLabScore } from '../../api/client';
 
 export default function ClinicalRounds({ user }) {
@@ -18,16 +18,24 @@ export default function ClinicalRounds({ user }) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     fetchLabCases(level, difficulty || null)
       .then(data => {
-        setCases(data || []);
-        setSelectedCase(null);
-        setCaseData(null);
-        resetGame();
+        if (!cancelled) {
+          setCases(data || []);
+          setSelectedCase(null);
+          setCaseData(null);
+          resetGame();
+        }
       })
-      .catch(() => setCases([]))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setCases([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [level, difficulty]);
 
   const resetGame = () => {
@@ -72,7 +80,7 @@ export default function ClinicalRounds({ user }) {
       setSubmitting(true);
       const maxScore = stages.length;
       try {
-        const result = await submitLabScore(caseData.id, user.id, score, maxScore);
+        await submitLabScore(caseData.id, user.id, score, maxScore);
         setFinalScore({ score, maxScore, percentage: Math.round((score / maxScore) * 100) });
       } catch (e) {
         setFinalScore({ score, maxScore: stages.length, percentage: Math.round((score / stages.length) * 100) });
