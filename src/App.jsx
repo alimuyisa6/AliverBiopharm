@@ -18,14 +18,20 @@ const scrollCache = new Map();
 function ScrollManager() {
   const location = useLocation();
   const isInitialRender = useRef(true);
-  const restoreAttempts = useRef(0);
-  const maxRestoreAttempts = 10;
+  const retryTimer = useRef(null);
+  const lastSavedY = useRef(0);
+  const restoreInProgress = useRef(false);
+  const currentKey = useRef('');
 
   const savePosition = useCallback(() => {
     const key = location.pathname + location.search;
+    const y = window.scrollY;
+    if (y === lastSavedY.current && key === currentKey.current) return;
+    lastSavedY.current = y;
+    currentKey.current = key;
     scrollCache.set(key, {
       x: window.scrollX,
-      y: window.scrollY,
+      y: y,
       timestamp: Date.now()
     });
     try {
@@ -34,17 +40,39 @@ function ScrollManager() {
     } catch (e) {}
   }, [location.pathname, location.search]);
 
-  const restorePosition = useCallback((key, y, attempts = 0) => {
-    if (attempts >= maxRestoreAttempts) return;
-    
-    const docHeight = document.documentElement.scrollHeight;
-    if (docHeight >= y || attempts > 5) {
-      window.scrollTo(0, y);
-      restoreAttempts.current = 0;
-    } else {
-      restoreAttempts.current = attempts + 1;
-      requestAnimationFrame(() => restorePosition(key, y, attempts + 1));
-    }
+  const restorePosition = useCallback((key, targetY) => {
+    restoreInProgress.current = true;
+    let attempts = 0;
+    const maxAttempts = 50;
+
+    const tryScroll = () => {
+      if (!restoreInProgress.current) return;
+      if (currentKey.current !== key) return;
+
+      const docHeight = document.documentElement.scrollHeight;
+      const bodyHeight = document.body.scrollHeight;
+      const maxHeight = Math.max(docHeight, bodyHeight);
+      const viewportHeight = window.innerHeight;
+      const maxScrollY = maxHeight - viewportHeight;
+
+      if (maxScrollY >= targetY - 200 || attempts >= maxAttempts) {
+        window.scrollTo(0, Math.min(targetY, maxScrollY));
+        if (attempts < 5) {
+          requestAnimationFrame(() => {
+            window.scrollTo(0, Math.min(targetY, maxScrollY));
+          });
+        }
+        restoreInProgress.current = false;
+        return;
+      }
+
+      attempts++;
+      retryTimer.current = setTimeout(() => {
+        requestAnimationFrame(tryScroll);
+      }, 200);
+    };
+
+    tryScroll();
   }, []);
 
   useEffect(() => {
@@ -60,14 +88,19 @@ function ScrollManager() {
 
     const handleBeforeUnload = () => savePosition();
     window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', savePosition);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', savePosition);
     };
   }, [savePosition]);
 
   useEffect(() => {
     const key = location.pathname + location.search;
+    currentKey.current = key;
+    restoreInProgress.current = false;
+    if (retryTimer.current) clearTimeout(retryTimer.current);
 
     if (isInitialRender.current) {
       const cached = scrollCache.get(key);
@@ -87,6 +120,8 @@ function ScrollManager() {
 
     return () => {
       savePosition();
+      restoreInProgress.current = false;
+      if (retryTimer.current) clearTimeout(retryTimer.current);
     };
   }, [location.pathname, location.search, savePosition, restorePosition]);
 
@@ -94,12 +129,19 @@ function ScrollManager() {
     let saveTimer;
     const handleScroll = () => {
       clearTimeout(saveTimer);
-      saveTimer = setTimeout(savePosition, 150);
+      saveTimer = setTimeout(savePosition, 100);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) savePosition();
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       clearTimeout(saveTimer);
       savePosition();
     };
