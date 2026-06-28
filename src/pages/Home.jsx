@@ -1,4 +1,5 @@
- import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import HomeView from './HomeView';
 import { getSections } from '../api/sections';
 import { useAuth } from '../contexts/AuthContext';
@@ -324,7 +325,7 @@ export default function Home() {
     } catch (e) { console.error(e); }
   }
 
-  const navigate = React.useMemo(() => (path) => window.location.href = path, []);
+   const navigate = useNavigate();
 
   return (
     <HomeView
