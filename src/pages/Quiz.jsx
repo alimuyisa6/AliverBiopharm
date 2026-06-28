@@ -15,7 +15,7 @@ import {
   getQuizState,
   trackEvent,
   getLeaderboard
-} from '../api/client';
+} from '../api/cachedClient';
 import { getSections } from '../api/sections';
 import QuizHero from '../components/quiz/QuizHero';
 import QuizDashboard from '../components/quiz/QuizDashboard';
