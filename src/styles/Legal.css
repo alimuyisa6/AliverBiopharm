@@ -314,3 +314,29 @@ body.dark-mode .info-page-spinner {
     padding: 50px 12px 30px;
   }
 }
+
+.footer-col-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.footer-col-list li {
+  list-style: none !important;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-bottom-nav {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.footer-bottom-nav a {
+  font-size: 0.875rem;
+  color: var(--clr-text-dim);
+  text-decoration: none;
+  transition: color 180ms ease;
+  white-space: nowrap;
+ }
