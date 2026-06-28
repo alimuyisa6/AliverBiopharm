@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { fetchLabFormulas } from '../../api/client';
 
 export default function RxCalc({ user }) {
@@ -12,17 +12,25 @@ export default function RxCalc({ user }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     fetchLabFormulas(level, drugSearch || null)
       .then(data => {
-        setFormulas(data || []);
-        setSelectedFormula(null);
-        setInputValues({});
-        setResult(null);
-        setError(null);
+        if (!cancelled) {
+          setFormulas(data || []);
+          setSelectedFormula(null);
+          setInputValues({});
+          setResult(null);
+          setError(null);
+        }
       })
-      .catch(() => setFormulas([]))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setFormulas([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [level, drugSearch]);
 
   const handleFormulaSelect = (formula) => {
