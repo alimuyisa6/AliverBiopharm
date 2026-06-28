@@ -12,7 +12,7 @@ import {
   getRecallAchievements, getRecallDashboard, getRecallTopics,
   getSelectedLevel, setSelectedLevel, continueRecallSession,
   submitRecallAnswer, completeRecallSession, getLeaderboard
-} from '../api/client';
+} from '../api/cachedClient';
 import '../styles/bioRecall.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
