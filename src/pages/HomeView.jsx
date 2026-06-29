@@ -446,109 +446,54 @@ export default function HomeView({
         </div>
       </section>
 
-      <section id="flashcards" className="section reveal">
-        <span className="sec-label">Study Tools</span>
-        <h2 className="section-title">Master Concepts Through Active Recall</h2>
-        <p className="section-subtitle">
-          Flip cards, quiz yourself, and track your progress. The most proven way to retain Biology and Pharmacy knowledge long-term.
-        </p>
-        <div className="flashcard-filter">
-          <i className="fa-solid fa-filter flashcard-filter-icon"></i>
-          <label htmlFor="level-select">Filter by Level:</label>
-          <select id="level-select" value={flashcardSelectedLevel} onChange={e => setFlashcardSelectedLevel(e.target.value)}>
-            <option value="">All Levels</option>
-            <option value="O-Level">O-Level</option>
-            <option value="A-Level">A-Level</option>
-            <option value="Pharmacy">Pharmacy</option>
-          </select>
-          <span id="deck-count" className="deck-count"></span>
-        </div>
-        <div className="mode-toggle">
-          <button className={`mode-btn ${flashcardMode === 'study' ? 'active' : ''}`} onClick={() => setFlashcardMode('study')}><i className="fa-solid fa-eye"></i> Study Mode</button>
-          <button className={`mode-btn ${flashcardMode === 'quiz' ? 'active' : ''}`} onClick={() => setFlashcardMode('quiz')}><i className="fa-solid fa-pen-to-square"></i> Quiz Mode</button>
-          <button className="shuffle-btn" onClick={shuffleFlashcards}><i className="fa-solid fa-shuffle"></i> Shuffle</button>
-        </div>
-        <div id="flashcards-container">
-          {Object.entries(safeFlashcardShuffled).map(([deckName, cards]) => (
-            <div key={deckName} className="flashcard-category" data-category={deckName}>
-              <div className="flashcard-category-header">
-                <h3 className="flashcard-category-title">
-                  <i className="fa-solid fa-layer-group"></i> {deckName} <span className="flashcard-count">({(cards || []).length} cards)</span>
-                </h3>
-                <button className="btn-download" onClick={() => { setFlashcardCurrentDeck(deckName); setFlashcardCurrentIndex(0); }}>
-                  <i className="fa-solid fa-play"></i> Study
-                </button>
-              </div>
-              <div className="flashcard-grid">
-                {(cards || []).slice(0, flashcardCurrentDeck === deckName ? (cards || []).length : 3).filter(Boolean).map((card, idx) => (
-                  <div key={card.id} className="flashcard-deck" data-id={card.id}>
-                    <div
-                      className={`flashcard-face ${flippedCards[card.id] ? 'flipped' : ''} ${flashcardCurrentDeck === deckName && flashcardCurrentIndex === idx ? 'active-card' : ''}`}
-                      onClick={() => toggleCardFlip(card.id, deckName, idx)}
-                    >
-                      <div className="front">
-                        {card.image_url && <div className="flashcard-image-wrap"><img src={card.image_url} alt="" /></div>}
-                        <div className="flashcard-question"><strong>{card.front_text}</strong></div>
-                        <button className="speak-btn" onClick={(e) => { e.stopPropagation(); speakText(card.front_text); }} aria-label="Read question aloud">
-                          <i className="fa-solid fa-volume-high"></i>
-                        </button>
-                      </div>
-                      <div className="back">
-                        {card.back_text}
-                        <button className="speak-btn" onClick={(e) => { e.stopPropagation(); speakText(card.back_text); }} aria-label="Read answer aloud">
-                          <i className="fa-solid fa-volume-high"></i>
-                        </button>
-                      </div>
-                    </div>
-                    {flashcardMode === 'quiz' && (
-                      <div className="quiz-input-container">
-                        <input type="text" className="quiz-answer-input" placeholder="Type your answer..." />
-                        <button className="quiz-check-btn" onClick={async (e) => {
-                          const input = e.target.previousElementSibling;
-                          const result = await checkFlashcardAnswer(card.id, input.value);
-                          const resultDiv = e.target.parentElement.nextElementSibling;
-                          if (result.correct) {
-                            resultDiv.innerHTML = '<i class="fa-solid fa-circle-check"></i> Correct!';
-                            resultDiv.className = 'quiz-result correct';
-                          } else {
-                            resultDiv.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Incorrect. Correct answer: ${result.correct_answer}`;
-                            resultDiv.className = 'quiz-result incorrect';
-                          }
-                          resultDiv.style.display = 'flex';
-                          setTimeout(() => { resultDiv.style.display = 'none'; }, 3000);
-                        }}><i className="fa-solid fa-check"></i></button>
-                      </div>
-                    )}
-                    <div className="difficulty-rating">
-                      <button className="difficulty-btn easy" onClick={() => rateFlashcard(card.id, 'easy')}>Easy</button>
-                      <button className="difficulty-btn medium" onClick={() => rateFlashcard(card.id, 'medium')}>Medium</button>
-                      <button className="difficulty-btn hard" onClick={() => rateFlashcard(card.id, 'hard')}>Hard</button>
-                    </div>
-                    <div className="flashcard-actions">
-                      <button className={`bookmark-btn ${knownFlashcardIds.includes(card.id) ? 'bookmarked' : ''}`} onClick={() => toggleFlashcardBookmark(card.id)}>
-                        <i className="fa-solid fa-bookmark"></i>
-                      </button>
-                      <button className="btn-download" onClick={(e) => toggleKnown(card.id, e.target)}>
-                        {knownFlashcardIds.includes(card.id) ? 'Known' : 'Mark Known'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {(cards || []).length > 3 && flashcardCurrentDeck !== deckName && (
-                  <div className="flashcard-deck flashcard-show-more" onClick={() => { setFlashcardCurrentDeck(deckName); setFlashcardCurrentIndex(0); }}>
-                    <div className="flashcard-show-more-inner">
-                      <i className="fa-solid fa-ellipsis flashcard-ellipsis"></i>
-                      <p>Show all {(cards || []).length} cards</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+       <section id="flashcards" className="section reveal">
+  <span className="sec-label">STUDY TOOLS</span>
+  <h2 className="section-title">
+    {sections?.section_headings?.flashcards_title || 'Transform the way you retain complex scientific concepts through active recall'}
+  </h2>
+  <p className="section-subtitle">
+    {sections?.section_headings?.flashcards_subtitle || 'Flip cards, typed answers, multiple choice and structure identification — all in one adaptive system.'}
+  </p>
+
+  <div className="fc-home-preview">
+    {[
+      { q: 'What is the function of the mitochondria?',  label: 'Cell Biology' },
+      { q: 'Define the term osmosis.',                   label: 'Transport'    },
+      { q: 'What enzyme breaks down starch?',            label: 'Nutrition'    },
+    ].map((item, i) => (
+      <div key={i} className="fc-preview-card">
+        <p className="fc-preview-q">{item.q}</p>
+        <span className="fc-chip" style={{ margin: '0 auto' }}>{item.label}</span>
+        <div className="fc-preview-dots">
+          {[0, 1, 2].map(d => (
+            <span key={d} className={`fc-preview-dot ${d === i ? 'fc-active' : ''}`}></span>
           ))}
         </div>
-        <p className="keyboard-hint"><i className="fa-regular fa-keyboard"></i> Keyboard: ← → navigate | Space flip | 1-3 rate difficulty</p>
-      </section>
+      </div>
+    ))}
+  </div>
 
+  <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+    <button
+      className="btn-primary"
+      onClick={() => user ? navigate('/flashcards') : navigate('/login')}
+    >
+      <i className="fa-solid fa-layer-group"></i>
+      {user ? 'Start Studying' : 'Login to Study'}
+    </button>
+    {user && (
+      <button
+        className="btn-download"
+        onClick={() => navigate('/flashcards')}
+        style={{ padding: '10px 20px' }}
+      >
+        <i className="fa-solid fa-arrow-right"></i> Browse Decks
+      </button>
+    )}
+  </div>
+</section>
+
+        
       <section id="notes-section" className="section-wrapper notes-wrapper">
         <div className="notes-inner">
           <div className="notes-heading">
