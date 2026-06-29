@@ -9,6 +9,7 @@ import './loading/Loading.css';
 import './styles/notifications.css';
 import './styles/Info.css';
 import './styles/Lab.css';
+import '../styles/flashcards.css';
 
 import LoadingProvider from './loading/LoadingProvider';
 
