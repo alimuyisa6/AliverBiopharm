@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FlashcardOnboarding from '../components/flashcards/FlashcardOnboarding';
-import FlashcardWelcome from '../components/flashcards/FlashcardWelcome';
-import FlashcardSubjectSelect from '../components/flashcards/FlashcardSubjectSelect';
-import FlashcardDeckView from '../components/flashcards/FlashcardDeckView';
-import FlashcardProgress from '../components/flashcards/FlashcardProgress';
+import FlashcardOnboarding from '../components/FlashcardOnboarding';
+import FlashcardWelcome from '../components/FlashcardWelcome';
+import FlashcardSubjectSelect from '../components/FlashcardSubjectSelect';
+import FlashcardDeckView from '../components/FlashcardDeckView';
+import FlashcardProgress from '../components/FlashcardProgress';
 import {
   getFlashcardOnboardingState,
   saveFlashcardOnboarding,
