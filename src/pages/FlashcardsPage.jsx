@@ -4,7 +4,7 @@ import FlashcardOnboarding from '../components/FlashcardOnboarding';
 import FlashcardWelcome from '../components/FlashcardWelcome';
 import FlashcardSubjectSelect from '../components/FlashcardSubjectSelect';
 import FlashcardDeckView from '../components/FlashcardDeckView';
-import FlashcardProgress from '../components/FlashcardProgress';
+import FlashcardProgress from '../components/Flashcardprogress';
 import {
   getFlashcardOnboardingState,
   saveFlashcardOnboarding,
