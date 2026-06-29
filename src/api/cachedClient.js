@@ -78,20 +78,29 @@ export const getInfoSection = (section) =>
 export const getInfoSectionsList = () =>
   withCache('info_sections_list', api.getInfoSectionsList)();
 
-export const getFlashcards = () =>
-  withCache('flashcards_list', api.getFlashcards)();
+ export const getFlashcards = (filters = {}) =>
+  withArgsCache((f) => `flashcards_list_${JSON.stringify(f)}`, api.getFlashcards)(filters);
 
-export const getFlashcardDecks = () =>
-  withCache('flashcard_decks', api.getFlashcardDecks)();
+export const getFlashcardDecks = (filters = {}) =>
+  withArgsCache((f) => `flashcard_decks_${JSON.stringify(f)}`, api.getFlashcardDecks)(filters);
 
 export const getFlashcardDeck = (deckId) =>
   withCache(`flashcard_deck_${deckId}`, () => api.getFlashcardDeck(deckId))();
 
 export const getKnownFlashcards = () =>
-  withCache('known_flashcards', api.getKnownFlashcards)();
+  withCache('known_flashcards', api.getKnownFlashcards, false)();
 
 export const getFlashcardProgress = () =>
-  withCache('flashcard_progress', api.getFlashcardProgress)();
+  withCache('flashcard_progress', api.getFlashcardProgress, false)();
+
+export const getFlashcardOnboardingState = () =>
+  api.getFlashcardOnboardingState();
+
+export const getFlashcardActiveSession = (deckId) =>
+  api.getFlashcardActiveSession(deckId);
+
+export const getAdaptiveFlashcardDecks = () =>
+  api.getAdaptiveFlashcardDecks();
 
 export const getPublicStats = () =>
   withCache('public_stats', api.getPublicStats)();
@@ -221,15 +230,20 @@ export {
   adminGetActiveChats,
   submitWeeklyChallenge,
   getWeeklyChallengeStatus,
-  createFlashcardDeck,
-  updateFlashcardDeck,
-  deleteFlashcardDeck,
-  addFlashcardCards,
-  removeFlashcardCard,
-  toggleFlashcardKnown,
-  rateFlashcard,
-  checkFlashcardAnswer,
-  toggleFlashcardBookmark,
+   createFlashcardDeck,
+updateFlashcardDeck,
+deleteFlashcardDeck,
+addFlashcardCards,
+removeFlashcardCard,
+toggleFlashcardKnown,
+rateFlashcard,
+checkFlashcardAnswer,
+toggleFlashcardBookmark,
+saveFlashcardOnboarding,
+resetFlashcardOnboarding,
+startFlashcardSession,
+updateFlashcardSession,
+completeFlashcardSession,
   uploadFile,
   getRecallSession,
   checkRecallSession,
