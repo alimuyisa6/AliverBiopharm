@@ -11,7 +11,7 @@ import {
   completeFlashcardSession,
   getKnownFlashcards,
 } from '../api/cachedClient';
-import '../styles/flashcards.css';
+ 
 
 const STAGE = {
   LOADING:   'loading',
