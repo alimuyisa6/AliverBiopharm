@@ -94,7 +94,7 @@ function App() {
           <Route path="/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
           <Route path="/lab" element={<ProtectedRoute><LearningLab /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/flashcards" element={<FlashcardsPage user={user} />} />
+           <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
          <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
           <Route path="/info/:slug" element={<InfoPage />} />
