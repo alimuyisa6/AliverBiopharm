@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import FlashcardOnboarding from '../components/FlashcardOnboarding';
 import FlashcardWelcome from '../components/FlashcardWelcome';
 import FlashcardSubjectSelect from '../components/FlashcardSubjectSelect';
@@ -11,29 +12,32 @@ import {
   completeFlashcardSession,
   getKnownFlashcards,
 } from '../api/cachedClient';
- 
 
 const STAGE = {
-  LOADING:   'loading',
-  ONBOARDING:'onboarding',
-  WELCOME:   'welcome',
-  SUBJECT:   'subject',
-  STUDY:     'study',
-  COMPLETE:  'complete',
+  LOADING: 'loading',
+  ONBOARDING: 'onboarding',
+  WELCOME: 'welcome',
+  SUBJECT: 'subject',
+  STUDY: 'study',
+  COMPLETE: 'complete',
 };
 
-export default function FlashcardsPage({ user }) {
+export default function FlashcardsPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [stage, setStage]         = useState(STAGE.LOADING);
-  const [fcState, setFcState]     = useState(null);
+  const [stage, setStage] = useState(STAGE.LOADING);
+  const [fcState, setFcState] = useState(null);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [sessionResult, setSessionResult] = useState(null);
-  const [knownIds, setKnownIds]   = useState([]);
-  const [error, setError]         = useState(null);
+  const [knownIds, setKnownIds] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!user) { navigate('/login'); return; }
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     init();
   }, [user]);
 
@@ -71,8 +75,9 @@ export default function FlashcardsPage({ user }) {
       await saveFlashcardOnboarding({ onboarding_complete: true });
       setFcState(prev => ({ ...prev, onboarding_complete: true }));
       setStage(STAGE.SUBJECT);
-    } catch {}
-    setStage(STAGE.SUBJECT);
+    } catch {
+      setStage(STAGE.SUBJECT);
+    }
   }
 
   function handleSubjectStart({ confidence, topic, deck }) {
@@ -92,10 +97,10 @@ export default function FlashcardsPage({ user }) {
       try {
         const data = await completeFlashcardSession(sessionId);
         result = {
-          total:     data.card_count  ?? total,
-          correct:   data.correct     ?? 0,
-          incorrect: data.incorrect   ?? 0,
-          score:     data.score       ?? 0,
+          total: data.card_count ?? total,
+          correct: data.correct ?? 0,
+          incorrect: data.incorrect ?? 0,
+          score: data.score ?? 0,
         };
       } catch {}
     }
@@ -193,4 +198,4 @@ export default function FlashcardsPage({ user }) {
   }
 
   return null;
-}
+} 
