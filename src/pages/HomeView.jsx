@@ -246,17 +246,19 @@ export default function HomeView({
       <InteractiveShowcase />
 
       <section id="info-resources" className="section reveal">
-        <span className="sec-label">LEARNING RESOURCES</span>
-        <h2 className="section-title">Explore Our Resources</h2>
-        <p className="section-subtitle">In-depth guides, case studies, and reference materials for Biology and Pharmacy students.</p>
+        <span className="sec-label">Learning Resources</span>
+        <h2 className="section-title">Everything You Need to Study Smarter</h2>
+        <p className="section-subtitle">
+          In-depth guides, case studies, and reference materials crafted for Biology and Pharmacy students at every level.
+        </p>
         <InfoCards />
       </section>
 
       <section id="learning-lab" className="section reveal">
-        <span className="sec-label">LEARNING LAB</span>
-        <h2 className="section-title">Interactive Learning Tools</h2>
+        <span className="sec-label">Learning Lab</span>
+        <h2 className="section-title">Learn by Doing, Not Just Reading</h2>
         <p className="section-subtitle">
-          Hands-on tools built for O-Level, A-Level and Pharmacy students.
+          Hands-on tools built for O-Level, A-Level and Pharmacy students. Practice, calculate, and explore at your own pace.
         </p>
         <div className="lab-home-grid">
           {labTools.map(tool => (
@@ -279,8 +281,11 @@ export default function HomeView({
       </section>
 
       <section id="stats" className="section reveal">
-        <span className="sec-label">IMPACT</span>
-        <h2 className="section-title">Our Impact in Numbers</h2>
+        <span className="sec-label">Our Impact</span>
+        <h2 className="section-title">The Numbers Behind Our Community</h2>
+        <p className="section-subtitle">
+          Every number here represents a learner who chose to study smarter with AliverBiopharm.
+        </p>
         <div className="stats-grid">
           <div><div className="stat-number">{publicStats?.resources_count || 0}</div><div className="stat-label">Resources</div></div>
           <div><div className="stat-number">{publicStats?.users_count || 0}</div><div className="stat-label">Learners</div></div>
@@ -327,7 +332,7 @@ export default function HomeView({
       <section id="mood-check" className="section reveal mood-check-section">
         <div className="mood-section">
           <h3 className="mood-title">
-            <i className="fa-solid fa-face-smile mood-icon"></i> How are you feeling about your studies?
+            <i className="fa-solid fa-face-smile mood-icon"></i> How are you feeling about your studies today?
           </h3>
           <div className="mood-emojis">
             {['struggling', 'confused', 'okay', 'good', 'great'].map(m => (
@@ -348,8 +353,11 @@ export default function HomeView({
 
       {user && safeContinueLearning && ((safeContinueLearning.views?.length > 0) || (safeContinueLearning.favorites?.length > 0) || safeContinueLearning.streak > 0) && (
         <section id="continue-learning" className="section reveal">
-          <span className="sec-label">YOUR JOURNEY</span>
-          <h2 className="section-title">Continue Learning</h2>
+          <span className="sec-label">Your Journey</span>
+          <h2 className="section-title">Pick Up Where You Left Off</h2>
+          <p className="section-subtitle">
+            Your recent activity and saved resources, ready when you are.
+          </p>
           <div className="continue-learning-grid">
             {safeContinueLearning.streak > 0 && (
               <div className="continue-card">
@@ -385,9 +393,11 @@ export default function HomeView({
       <section id="pdf-library" className="section-wrapper pdf-library-wrapper">
         <div className="pdf-library-inner">
           <div className="pdf-library-heading">
-            <span className="sec-label pdf-sec-label">PDF RESOURCES</span>
-            <h2 className="pdf-section-title pdf-gradient-title">Study Materials Library</h2>
-            <p className="section-subtitle pdf-subtitle">Access comprehensive PDF resources for Biology and Pharmacy. Preview before downloading.</p>
+            <span className="sec-label pdf-sec-label">PDF Resources</span>
+            <h2 className="pdf-section-title pdf-gradient-title">Your Study Materials Library</h2>
+            <p className="section-subtitle pdf-subtitle">
+              Curated PDF resources for Biology and Pharmacy. Preview any document before downloading.
+            </p>
           </div>
           <div className="pdf-main-container">
             <div className="pdf-level-bar">
@@ -437,9 +447,11 @@ export default function HomeView({
       </section>
 
       <section id="flashcards" className="section reveal">
-        <span className="sec-label">STUDY TOOLS</span>
-        <h2 className="section-title">{sections?.section_headings?.flashcards_title || 'Transform the way you retain complex scientific concepts through active recall and spaced repetition'}</h2>
-        <p className="section-subtitle">{sections?.section_headings?.flashcards_subtitle || 'Active recall is the most effective way to retain complex scientific concepts. Flip each card to reveal detailed answers and mark your progress.'}</p>
+        <span className="sec-label">Study Tools</span>
+        <h2 className="section-title">Master Concepts Through Active Recall</h2>
+        <p className="section-subtitle">
+          Flip cards, quiz yourself, and track your progress. The most proven way to retain Biology and Pharmacy knowledge long-term.
+        </p>
         <div className="flashcard-filter">
           <i className="fa-solid fa-filter flashcard-filter-icon"></i>
           <label htmlFor="level-select">Filter by Level:</label>
@@ -540,9 +552,11 @@ export default function HomeView({
       <section id="notes-section" className="section-wrapper notes-wrapper">
         <div className="notes-inner">
           <div className="notes-heading">
-            <span className="sec-label notes-sec-label">STUDY NOTES</span>
-            <h2 className="pdf-section-title notes-gradient-title">Notes Library</h2>
-            <p className="section-subtitle notes-subtitle">Comprehensive study notes for Biology and Pharmacy. Structured by level, topic, and subtopic.</p>
+            <span className="sec-label notes-sec-label">Study Notes</span>
+            <h2 className="pdf-section-title notes-gradient-title">Structured Notes for Serious Students</h2>
+            <p className="section-subtitle notes-subtitle">
+              Organised by level, topic, and subtopic. Everything you need for focused, efficient revision.
+            </p>
           </div>
           <div className="notes-container-card">
             <div className="notes-container-inner">
@@ -623,9 +637,11 @@ export default function HomeView({
       </section>
 
       <section id="team" className="section reveal">
-        <span className="sec-label">FACULTY</span>
-        <h2 className="section-title">{sections?.section_headings?.team_title || 'Guided by distinguished pharmacologists and molecular biologists'}</h2>
-        <p className="section-subtitle">{sections?.section_headings?.team_subtitle || 'Learn from distinguished pharmacologists, molecular biologists, and clinical researchers with decades of combined teaching experience.'}</p>
+        <span className="sec-label">Faculty</span>
+        <h2 className="section-title">Meet the Minds Behind the Platform</h2>
+        <p className="section-subtitle">
+          Distinguished pharmacologists, molecular biologists, and clinical researchers with decades of combined teaching experience.
+        </p>
         <div className="team-scroll-container">
           {(sections?.team?.members || []).filter(Boolean).map(member => (
             <div key={member.name} className="team-card team-card-min">
@@ -643,9 +659,11 @@ export default function HomeView({
       </section>
 
       <section id="testimonials" className="section alt-bg reveal">
-        <span className="sec-label">TESTIMONIALS</span>
-        <h2 className="section-title">{sections?.section_headings?.testimonials_title || 'Real stories from learners who mastered biology and pharmacy through our structured approach'}</h2>
-        <p className="section-subtitle">{sections?.section_headings?.testimonials_subtitle || 'Hear from students who transformed their understanding of biology and pharmacy through our structured learning approach.'}</p>
+        <span className="sec-label">Testimonials</span>
+        <h2 className="section-title">What Our Students Say</h2>
+        <p className="section-subtitle">
+          Real results from learners who transformed how they study Biology and Pharmacy.
+        </p>
         <div className="testimonial-slider">
           {sections?.testimonials?.quotes && sections.testimonials.quotes.length > 0 && (
             <>
@@ -657,8 +675,11 @@ export default function HomeView({
       </section>
 
       <section id="community" className="section alt-bg reveal">
-        <span className="sec-label">COMMUNITY</span>
-        <h2 className="section-title">Live Learning Stream</h2>
+        <span className="sec-label">Community</span>
+        <h2 className="section-title">See Who's Learning Right Now</h2>
+        <p className="section-subtitle">
+          Join thousands of active students downloading resources, completing quizzes, and building knowledge daily.
+        </p>
         <div className="community-stream">
           {safeCommunityActivity.filter(Boolean).map((act, idx) => (
             <div key={idx} className="stream-item">
@@ -671,9 +692,11 @@ export default function HomeView({
       </section>
 
       <section id="pricing" className="section alt-bg reveal">
-        <span className="sec-label">MEMBERSHIP</span>
-        <h2 className="section-title">{sections?.section_headings?.pricing_title || 'Invest in your future with flexible plans designed to grow alongside your learning journey'}</h2>
-        <p className="section-subtitle">{sections?.section_headings?.pricing_subtitle || 'Choose the plan that fits your learning journey. All plans include access to our complete resource library with regular updates.'}</p>
+        <span className="sec-label">Membership</span>
+        <h2 className="section-title">Find the Plan That Fits Your Goals</h2>
+        <p className="section-subtitle">
+          Every plan includes full access to our complete resource library, updated regularly with new content.
+        </p>
         <div className="grid-3">
           {(sections?.pricing?.plans || []).filter(Boolean).map(plan => (
             <div key={plan.name} className={`card pricing-card ${plan.featured ? 'featured' : ''}`}>
@@ -692,9 +715,11 @@ export default function HomeView({
       </section>
 
       <section id="blog" className="section alt-bg reveal">
-        <span className="sec-label">INSIGHTS</span>
-        <h2 className="section-title">{sections?.section_headings?.blog_title || 'Deepen your understanding with insights from leading voices in biology, pharmacy, and research'}</h2>
-        <p className="section-subtitle">{sections?.section_headings?.blog_subtitle || 'Stay informed with the latest developments in biology, pharmacy, and life sciences from our expert contributors.'}</p>
+        <span className="sec-label">Insights</span>
+        <h2 className="section-title">From the World of Science & Pharmacy</h2>
+        <p className="section-subtitle">
+          The latest developments in Biology, Pharmacy, and Life Sciences from our expert contributors.
+        </p>
         <div className="grid-3">
           {(sections?.blog?.posts || []).filter(Boolean).map(post => (
             <article key={post.title} className="card">
@@ -713,8 +738,10 @@ export default function HomeView({
 
       <section id="faq" className="section reveal">
         <span className="sec-label">FAQ</span>
-        <h2 className="section-title">{sections?.section_headings?.faq_title || 'Clear answers to the questions learners ask most about our platform and methodology'}</h2>
-        <p className="section-subtitle">{sections?.section_headings?.faq_subtitle || 'Quick answers to common questions about our platform, courses, resources, and membership options.'}</p>
+        <h2 className="section-title">Questions We Hear Most Often</h2>
+        <p className="section-subtitle">
+          Straightforward answers about our platform, resources, tools, and membership options.
+        </p>
         <div className="faq-list">
           {(sections?.faq?.items || []).filter(Boolean).map((item, idx) => (
             <div key={idx} className="faq-item">
@@ -729,9 +756,11 @@ export default function HomeView({
       </section>
 
       <section id="contact" className="section alt-bg reveal">
-        <span className="sec-label">SUPPORT</span>
-        <h2 className="section-title">{sections?.section_headings?.contact_title || 'Reach out to our dedicated team who are ready to support your learning goals within 24 hours'}</h2>
-        <p className="section-subtitle">{sections?.section_headings?.contact_subtitle || 'Have questions or feedback? Our support team typically responds within 24 hours.'}</p>
+        <span className="sec-label">Support</span>
+        <h2 className="section-title">We're Here to Help</h2>
+        <p className="section-subtitle">
+          Got a question or need guidance? Reach out and our team will get back to you within 24 hours.
+        </p>
         <div className="grid-2">
           <form id="contact-form" onSubmit={handleContactSubmit} className="contact-form">
             <div><label className="f-label">FULL NAME</label><input type="text" className="f-input" value={contactForm.name} onChange={e => setContactForm({ ...contactForm, name: e.target.value })} required /></div>
@@ -760,9 +789,11 @@ export default function HomeView({
       </section>
 
       <section className="section reveal">
-        <span className="sec-label">UPDATES</span>
-        <h2 className="section-title">Stay Updated</h2>
-        <p className="section-subtitle">Join our community of learners. Get weekly insights, study tips, and new resource alerts.</p>
+        <span className="sec-label">Updates</span>
+        <h2 className="section-title">Never Miss a Resource or Update</h2>
+        <p className="section-subtitle">
+          Join our growing community. Weekly study tips, new content alerts, and platform news straight to your inbox.
+        </p>
         <form id="newsletter-form" onSubmit={handleNewsletterSubmit}>
           <div className="newsletter-box">
             <input type="email" placeholder="Enter your email address" value={newsletterEmail} onChange={e => setNewsletterEmail(e.target.value)} required />
@@ -782,7 +813,7 @@ export default function HomeView({
                 'AliverBiopharm'
               )}
             </Link>
-            <p className="footer-tagline">Advancing biology and pharmacy education for every learner.</p>
+            <p className="footer-tagline">Advancing Biology and Pharmacy education for every learner.</p>
             <div className="footer-social">
               {(sections?.footer?.social_links || []).filter(Boolean).map(s => (
                 <a key={s.platform} href={s.url} target="_blank" rel="noreferrer">
