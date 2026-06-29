@@ -7,7 +7,7 @@ import {
   checkFlashcardAnswer,
   startFlashcardSession,
   updateFlashcardSession,
-} from '../../api/cachedClient';
+} from '../api/cachedClient';
 
 const MODES = [
   { value: 'flip',                   icon: 'fa-rotate',        label: 'Flip' },
