@@ -187,20 +187,119 @@ export async function adminGetActiveChats() { return getRequest('chat', 'admin_g
 export async function submitWeeklyChallenge(weekStart, selectedOption) { return apiCall('weekly-challenge', 'submit', { week_start: weekStart, selected_option: selectedOption }); }
 export async function getWeeklyChallengeStatus(weekStart) { return getRequest('weekly-challenge', 'status', { week_start: weekStart }); }
 
-export async function getFlashcards() { return getRequest('flashcards', 'list'); }
-export async function getFlashcardDecks() { return getRequest('flashcards', 'decks'); }
-export async function getFlashcardDeck(deckId) { return getRequest('flashcards', 'deck', { deck_id: deckId }); }
-export async function createFlashcardDeck(title, description, category, level, cards) { return apiCall('flashcards', 'create_deck', { title, description, category, level, cards }); }
-export async function updateFlashcardDeck(deckId, title, description, category, level, cards) { return apiCall('flashcards', 'update_deck', { deck_id: deckId, title, description, category, level, cards }); }
-export async function deleteFlashcardDeck(deckId) { return apiCall('flashcards', 'delete_deck', { deck_id: deckId }); }
-export async function addFlashcardCards(deckId, cards) { return apiCall('flashcards', 'add_cards', { deck_id: deckId, cards }); }
-export async function removeFlashcardCard(cardId) { return apiCall('flashcards', 'remove_card', { card_id: cardId }); }
-export async function getKnownFlashcards() { return getRequest('flashcards', 'known'); }
-export async function toggleFlashcardKnown(flashcardId) { return apiCall('flashcards', 'toggle_known', { flashcard_id: flashcardId }); }
-export async function rateFlashcard(flashcardId, difficulty) { return apiCall('flashcards', 'rate', { flashcard_id: flashcardId, difficulty }); }
-export async function checkFlashcardAnswer(flashcardId, userAnswer) { return apiCall('flashcards', 'check_answer', { flashcard_id: flashcardId, user_answer: userAnswer }); }
-export async function toggleFlashcardBookmark(flashcardId) { return apiCall('flashcards', 'toggle_bookmark', { flashcard_id: flashcardId }); }
-export async function getFlashcardProgress() { return getRequest('flashcards', 'progress'); }
+ 
+
+export async function getFlashcards(filters = {}) {
+  const params = {};
+  if (filters.level)           params.level           = filters.level;
+  if (filters.discipline)      params.discipline      = filters.discipline;
+  if (filters.class_programme) params.class_programme = filters.class_programme;
+  if (filters.confidence)      params.confidence      = filters.confidence;
+  return getRequest('flashcards', 'list', params);
+}
+
+export async function getFlashcardDecks(filters = {}) {
+  const params = {};
+  if (filters.level)           params.level           = filters.level;
+  if (filters.discipline)      params.discipline      = filters.discipline;
+  if (filters.class_programme) params.class_programme = filters.class_programme;
+  if (filters.confidence)      params.confidence      = filters.confidence;
+  return getRequest('flashcards', 'decks', params);
+}
+
+export async function getFlashcardDeck(deckId) {
+  return getRequest('flashcards', 'deck', { deck_id: deckId });
+}
+
+export async function getFlashcardOnboardingState() {
+  return getRequest('flashcards', 'onboarding_state');
+}
+
+export async function getFlashcardActiveSession(deckId) {
+  const params = {};
+  if (deckId) params.deck_id = deckId;
+  return getRequest('flashcards', 'active_session', params);
+}
+
+export async function getAdaptiveFlashcardDecks() {
+  return getRequest('flashcards', 'adaptive_decks');
+}
+
+export async function saveFlashcardOnboarding(payload) {
+  return apiCall('flashcards', 'save_onboarding', payload);
+}
+
+export async function resetFlashcardOnboarding() {
+  return apiCall('flashcards', 'reset_onboarding', {});
+}
+
+export async function startFlashcardSession(deckId, mode = 'flip') {
+  return apiCall('flashcards', 'start_session', { deck_id: deckId, mode });
+}
+
+export async function updateFlashcardSession(sessionId, cardId, correct, currentIndex) {
+  return apiCall('flashcards', 'update_session', {
+    session_id:    sessionId,
+    card_id:       cardId,
+    correct,
+    current_index: currentIndex
+  });
+}
+
+export async function completeFlashcardSession(sessionId) {
+  return apiCall('flashcards', 'complete_session', { session_id: sessionId });
+}
+
+export async function createFlashcardDeck(title, description, category, level, discipline, class_programme, difficulty_confidence, card_types, cards) {
+  return apiCall('flashcards', 'create_deck', {
+    title, description, category, level,
+    discipline, class_programme, difficulty_confidence, card_types, cards
+  });
+}
+
+export async function updateFlashcardDeck(deckId, updates) {
+  return apiCall('flashcards', 'update_deck', { deck_id: deckId, ...updates });
+}
+
+export async function deleteFlashcardDeck(deckId) {
+  return apiCall('flashcards', 'delete_deck', { deck_id: deckId });
+}
+
+export async function addFlashcardCards(deckId, cards) {
+  return apiCall('flashcards', 'add_cards', { deck_id: deckId, cards });
+}
+
+export async function removeFlashcardCard(cardId) {
+  return apiCall('flashcards', 'remove_card', { card_id: cardId });
+}
+
+export async function getKnownFlashcards() {
+  return getRequest('flashcards', 'known');
+}
+
+export async function toggleFlashcardKnown(flashcardId) {
+  return apiCall('flashcards', 'toggle_known', { flashcard_id: flashcardId });
+}
+
+export async function rateFlashcard(flashcardId, difficulty) {
+  return apiCall('flashcards', 'rate', { flashcard_id: flashcardId, difficulty });
+}
+
+export async function checkFlashcardAnswer(flashcardId, userAnswer, checkType = 'answer') {
+  return apiCall('flashcards', 'check_answer', {
+    flashcard_id: flashcardId,
+    user_answer:  userAnswer,
+    check_type:   checkType
+  });
+}
+
+export async function toggleFlashcardBookmark(flashcardId) {
+  return apiCall('flashcards', 'toggle_bookmark', { flashcard_id: flashcardId });
+}
+
+export async function getFlashcardProgress() {
+  return getRequest('flashcards', 'progress');
+                    }
 
 export async function getCommunityActivity() { return getRequest('community', 'activity'); }
 
