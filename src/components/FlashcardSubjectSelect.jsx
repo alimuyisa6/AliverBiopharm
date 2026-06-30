@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { getAdaptiveFlashcardDecks } from '../api/cachedClient';
+ import React, { useState, useEffect } from 'react';
+import { getAdaptiveFlashcardDecks } from '../../api/cachedClient';
 
 const CONFIDENCE_OPTS = [
   { value: 'Beginner', emoji: '🌱', label: 'Beginner' },
@@ -7,17 +7,6 @@ const CONFIDENCE_OPTS = [
   { value: 'Good',     emoji: '💡', label: 'Good' },
   { value: 'Great',    emoji: '🚀', label: 'Great' },
   { value: 'Expert',   emoji: '🏆', label: 'Expert' },
-];
-
-const BIOLOGY_TOPICS = [
-  'Cell Biology', 'Genetics', 'Ecology', 'Evolution',
-  'Photosynthesis', 'Respiration', 'Nutrition', 'Transport',
-  'Reproduction', 'Coordination', 'Homeostasis',
-];
-
-const PHARMACY_UNITS = [
-  'Pharmacology', 'Pharmaceutics', 'Anatomy',
-  'Physiology', 'Pharmaceutical Chemistry', 'Microbiology',
 ];
 
 export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
@@ -29,8 +18,11 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
   const [loading, setLoading]     = useState(false);
 
   const isPharmacy   = state.selected_discipline === 'Pharmacy';
-  const suggestions  = isPharmacy ? PHARMACY_UNITS : BIOLOGY_TOPICS;
   const topicLabel   = isPharmacy ? 'course unit' : 'topic';
+
+  // Suggestions come from the actual decks returned by the API, not a hardcoded list,
+  // so chips always correspond to real, selectable content.
+  const suggestions = [...new Set(decks.map(d => d.title))].slice(0, 8);
 
   useEffect(() => {
     if (step === 1) loadDecks();
@@ -41,7 +33,9 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
     try {
       const data = await getAdaptiveFlashcardDecks();
       setDecks(data || []);
-    } catch {}
+    } catch {
+      setDecks([]);
+    }
     setLoading(false);
   }
 
@@ -56,9 +50,10 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
   }
 
   function handleRandom() {
-    const pick = suggestions[Math.floor(Math.random() * suggestions.length)];
-    setTopic(pick);
-    setTopicInput(pick);
+    if (!decks.length) return;
+    const pick = decks[Math.floor(Math.random() * decks.length)];
+    setTopic(pick.title);
+    setTopicInput(pick.title);
   }
 
   function handleTopicInputChange(e) {
@@ -73,6 +68,16 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
   function progressPct() {
     return step === 0 ? 80 : 92;
   }
+
+  // Strict filter — if the user's topic search matches nothing, show nothing.
+  // Never fall back to showing decks outside what was actually returned for their class.
+  const visibleDecks = topic
+    ? decks.filter(d =>
+        d.title?.toLowerCase().includes(topic.toLowerCase()) ||
+        d.category?.toLowerCase().includes(topic.toLowerCase()) ||
+        d.description?.toLowerCase().includes(topic.toLowerCase())
+      )
+    : decks;
 
   return (
     <div className="fc-page">
@@ -150,7 +155,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
                 ))}
               </div>
 
-              <button className="fc-random-btn" onClick={handleRandom}>
+              <button className="fc-random-btn" onClick={handleRandom} disabled={!decks.length}>
                 <i className="fa-solid fa-shuffle"></i>
                 Let the system choose for me
               </button>
@@ -163,45 +168,54 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
               </div>
             )}
 
-            {!loading && decks.length === 0 && topic && (
+            {!loading && decks.length === 0 && (
               <div className="fc-empty">
                 <i className="fa-solid fa-layer-group"></i>
-                No decks found for this {topicLabel} yet.
+                No decks found for {state.selected_class} {state.selected_discipline} yet.
                 <br />
                 <span style={{ fontSize: 'var(--text-sm)', marginTop: '0.5rem', display: 'block' }}>
-                  Try a different one or let the system choose.
+                  Check back soon as more decks are added for your class.
                 </span>
               </div>
             )}
 
-            {!loading && decks.length > 0 && (
+            {!loading && decks.length > 0 && topic && visibleDecks.length === 0 && (
+              <div className="fc-empty">
+                <i className="fa-solid fa-magnifying-glass"></i>
+                No decks match "{topic}" for your class.
+                <br />
+                <span style={{ fontSize: 'var(--text-sm)', marginTop: '0.5rem', display: 'block' }}>
+                  Try a different {topicLabel} or pick from the list below.
+                </span>
+              </div>
+            )}
+
+            {!loading && visibleDecks.length > 0 && (
               <>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--clr-text-muted)', textAlign: 'center', marginTop: '1.5rem', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   Available Decks
                 </p>
                 <div className="fc-deck-list">
-                  {decks
-                    .filter(d => !topic || d.category?.toLowerCase().includes(topic.toLowerCase()) || d.title?.toLowerCase().includes(topic.toLowerCase()))
-                    .slice(0, 8)
-                    .map(deck => (
-                      <button
-                        key={deck.id}
-                        className="fc-deck-card"
-                        onClick={() => handleDeckSelect(deck)}
-                      >
-                        <div className="fc-deck-icon">
-                          <i className="fa-solid fa-layer-group"></i>
+                  {visibleDecks.slice(0, 8).map(deck => (
+                    <button
+                      key={deck.id}
+                      className="fc-deck-card"
+                      onClick={() => handleDeckSelect(deck)}
+                    >
+                      <div className="fc-deck-icon">
+                        <i className="fa-solid fa-layer-group"></i>
+                      </div>
+                      <div className="fc-deck-info">
+                        <div className="fc-deck-title">{deck.title}</div>
+                        <div className="fc-deck-meta">
+                          {deck.category} · {deck.level}
+                          {deck.class_programme && ` · ${deck.class_programme}`}
+                          {deck.difficulty_confidence && ` · ${deck.difficulty_confidence}`}
                         </div>
-                        <div className="fc-deck-info">
-                          <div className="fc-deck-title">{deck.title}</div>
-                          <div className="fc-deck-meta">
-                            {deck.category} · {deck.level}
-                            {deck.difficulty_confidence && ` · ${deck.difficulty_confidence}`}
-                          </div>
-                        </div>
-                        <i className="fa-solid fa-chevron-right fc-deck-arrow"></i>
-                      </button>
-                    ))}
+                      </div>
+                      <i className="fa-solid fa-chevron-right fc-deck-arrow"></i>
+                    </button>
+                  ))}
                 </div>
               </>
             )}
