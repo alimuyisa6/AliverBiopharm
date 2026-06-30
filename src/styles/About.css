@@ -1,7 +1,7 @@
  .about-hero {
   padding: 100px 20px;
   text-align: center;
-  background: var(--clr-navy);
+  background: var(--clr-navy-card);
   border-bottom: 1px solid var(--clr-border-glow);
 }
 
@@ -45,7 +45,7 @@
 
 .about-block h2 {
   font-size: 1.4rem;
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   margin-bottom: 16px;
   font-family: 'Playfair Display', serif;
 }
@@ -74,14 +74,14 @@
 
 .team-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 200, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(59, 111, 212, 0.15);
 }
 
 .team-card-image {
   width: 100%;
   height: 260px;
   overflow: hidden;
-  background: var(--clr-navy);
+  background: var(--clr-navy-light);
 }
 
 .team-card-image img {
@@ -102,7 +102,7 @@
 
 .team-card-role {
   font-size: 0.85rem;
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   margin-bottom: 10px;
   font-weight: 500;
 }
@@ -126,7 +126,7 @@
 }
 
 .team-card-social a:hover {
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
 }
 
 .contributors-grid {
@@ -181,7 +181,7 @@
 }
 
 .about-contact-item:hover {
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
 }
 
 .about-social-links {
@@ -205,9 +205,9 @@
 }
 
 .about-social-link:hover {
-  background: var(--clr-cyan);
-  color: var(--clr-navy);
-  border-color: var(--clr-cyan);
+  background: var(--clr-blue);
+  color: #fff;
+  border-color: var(--clr-blue);
 }
 
 @media (max-width: 768px) {
