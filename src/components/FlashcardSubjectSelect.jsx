@@ -1,27 +1,38 @@
  import React, { useState, useEffect } from 'react';
 import { getAdaptiveFlashcardDecks } from '../../api/cachedClient';
+import { 
+  FaSeedling, 
+  FaBookOpen, 
+  FaLightbulb, 
+  FaRocket, 
+  FaTrophy,
+  FaArrowLeft,
+  FaArrowRight,
+  FaRandom,
+  FaLayerGroup,
+  FaSearch,
+  FaChevronRight
+} from 'react-icons/fa';
 
 const CONFIDENCE_OPTS = [
-  { value: 'Beginner', emoji: '🌱', label: 'Beginner' },
-  { value: 'Fair',     emoji: '📖', label: 'Fair' },
-  { value: 'Good',     emoji: '💡', label: 'Good' },
-  { value: 'Great',    emoji: '🚀', label: 'Great' },
-  { value: 'Expert',   emoji: '🏆', label: 'Expert' },
+  { value: 'Beginner', icon: FaSeedling, label: 'Beginner' },
+  { value: 'Fair', icon: FaBookOpen, label: 'Fair' },
+  { value: 'Good', icon: FaLightbulb, label: 'Good' },
+  { value: 'Great', icon: FaRocket, label: 'Great' },
+  { value: 'Expert', icon: FaTrophy, label: 'Expert' },
 ];
 
 export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
-  const [step, setStep]           = useState(0);
-  const [confidence, setConf]     = useState(null);
-  const [topic, setTopic]         = useState('');
+  const [step, setStep] = useState(0);
+  const [confidence, setConf] = useState(null);
+  const [topic, setTopic] = useState('');
   const [topicInput, setTopicInput] = useState('');
-  const [decks, setDecks]         = useState([]);
-  const [loading, setLoading]     = useState(false);
+  const [decks, setDecks] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const isPharmacy   = state.selected_discipline === 'Pharmacy';
-  const topicLabel   = isPharmacy ? 'course unit' : 'topic';
+  const isPharmacy = state.selected_discipline === 'Pharmacy';
+  const topicLabel = isPharmacy ? 'course unit' : 'topic';
 
-  // Suggestions come from the actual decks returned by the API, not a hardcoded list,
-  // so chips always correspond to real, selectable content.
   const suggestions = [...new Set(decks.map(d => d.title))].slice(0, 8);
 
   useEffect(() => {
@@ -69,8 +80,6 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
     return step === 0 ? 80 : 92;
   }
 
-  // Strict filter — if the user's topic search matches nothing, show nothing.
-  // Never fall back to showing decks outside what was actually returned for their class.
   const visibleDecks = topic
     ? decks.filter(d =>
         d.title?.toLowerCase().includes(topic.toLowerCase()) ||
@@ -82,7 +91,6 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
   return (
     <div className="fc-page">
       <div className="fc-page-inner">
-
         <div className="fc-progress-track">
           <div className="fc-progress-fill" style={{ width: `${progressPct()}%` }} />
         </div>
@@ -97,27 +105,32 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
               This helps us pick the right cards for you.
             </p>
             <div className="fc-confidence-grid">
-              {CONFIDENCE_OPTS.map(c => (
-                <button
-                  key={c.value}
-                  className={`fc-confidence-btn ${confidence === c.value ? 'fc-selected' : ''}`}
-                  onClick={() => setConf(c.value)}
-                >
-                  <span className="fc-confidence-emoji">{c.emoji}</span>
-                  <span className="fc-confidence-label">{c.label}</span>
-                </button>
-              ))}
+              {CONFIDENCE_OPTS.map(c => {
+                const Icon = c.icon;
+                return (
+                  <button
+                    key={c.value}
+                    className={`fc-confidence-btn ${confidence === c.value ? 'fc-selected' : ''}`}
+                    onClick={() => setConf(c.value)}
+                  >
+                    <span className="fc-confidence-icon">
+                      <Icon />
+                    </span>
+                    <span className="fc-confidence-label">{c.label}</span>
+                  </button>
+                );
+              })}
             </div>
             <div style={{ marginTop: '1.5rem', display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button className="fc-btn fc-btn-ghost" onClick={onBack}>
-                <i className="fa-solid fa-arrow-left"></i> Back
+                <FaArrowLeft /> Back
               </button>
               <button
                 className="fc-btn fc-btn-primary"
                 onClick={handleConfNext}
                 disabled={!confidence}
               >
-                Continue <i className="fa-solid fa-arrow-right"></i>
+                Continue <FaArrowRight />
               </button>
             </div>
           </div>
@@ -156,7 +169,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
               </div>
 
               <button className="fc-random-btn" onClick={handleRandom} disabled={!decks.length}>
-                <i className="fa-solid fa-shuffle"></i>
+                <FaRandom />
                 Let the system choose for me
               </button>
             </div>
@@ -170,7 +183,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
 
             {!loading && decks.length === 0 && (
               <div className="fc-empty">
-                <i className="fa-solid fa-layer-group"></i>
+                <FaLayerGroup />
                 No decks found for {state.selected_class} {state.selected_discipline} yet.
                 <br />
                 <span style={{ fontSize: 'var(--text-sm)', marginTop: '0.5rem', display: 'block' }}>
@@ -181,7 +194,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
 
             {!loading && decks.length > 0 && topic && visibleDecks.length === 0 && (
               <div className="fc-empty">
-                <i className="fa-solid fa-magnifying-glass"></i>
+                <FaSearch />
                 No decks match "{topic}" for your class.
                 <br />
                 <span style={{ fontSize: 'var(--text-sm)', marginTop: '0.5rem', display: 'block' }}>
@@ -203,7 +216,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
                       onClick={() => handleDeckSelect(deck)}
                     >
                       <div className="fc-deck-icon">
-                        <i className="fa-solid fa-layer-group"></i>
+                        <FaLayerGroup />
                       </div>
                       <div className="fc-deck-info">
                         <div className="fc-deck-title">{deck.title}</div>
@@ -213,7 +226,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
                           {deck.difficulty_confidence && ` · ${deck.difficulty_confidence}`}
                         </div>
                       </div>
-                      <i className="fa-solid fa-chevron-right fc-deck-arrow"></i>
+                      <FaChevronRight className="fc-deck-arrow" />
                     </button>
                   ))}
                 </div>
@@ -222,12 +235,11 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
 
             <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
               <button className="fc-btn fc-btn-ghost" onClick={() => setStep(0)}>
-                <i className="fa-solid fa-arrow-left"></i> Back
+                <FaArrowLeft /> Back
               </button>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
