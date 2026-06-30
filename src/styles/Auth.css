@@ -12,9 +12,7 @@
   padding: 4rem;
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top left, rgba(10,126,126,.08), transparent 45%),
-    radial-gradient(circle at bottom right, rgba(184,135,58,.08), transparent 45%);
+  background: rgba(59, 111, 212, 0.04);
 }
 
 .auth-brand-panel::before,
@@ -27,7 +25,7 @@
 .auth-brand-panel::before {
   width: 420px;
   height: 420px;
-  background: rgba(10,126,126,.05);
+  background: rgba(59, 111, 212, 0.05);
   top: -180px;
   left: -120px;
 }
@@ -35,7 +33,7 @@
 .auth-brand-panel::after {
   width: 320px;
   height: 320px;
-  background: rgba(184,135,58,.06);
+  background: rgba(184, 135, 58, 0.06);
   bottom: -120px;
   right: -80px;
 }
@@ -50,7 +48,7 @@
   font-size: var(--text-sm);
   font-weight: 800;
   letter-spacing: .2em;
-  color: var(--clr-magenta);
+  color: var(--clr-blue);
   margin-bottom: 1rem;
 }
 
@@ -87,7 +85,7 @@
 
 .auth-feature::before {
   content: "✓";
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   width: 16px;
   display: inline-flex;
   justify-content: center;
@@ -156,7 +154,7 @@
 }
 
 .auth-link {
-  color: var(--clr-magenta);
+  color: var(--clr-blue);
   font-weight: 700;
   text-decoration: none;
 }
@@ -165,8 +163,8 @@
   padding: .7rem .9rem;
   margin-bottom: 1rem;
   border-radius: 10px;
-  background: rgba(220,38,38,.08);
-  border: 1px solid rgba(220,38,38,.15);
+  background: rgba(220, 38, 38, .08);
+  border: 1px solid rgba(220, 38, 38, .15);
   color: #c62828;
   font-size: var(--text-xs);
 }
@@ -184,14 +182,14 @@
   border-radius: 14px;
   background: var(--clr-navy-card);
   border: 1px solid var(--clr-border-glow);
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   font-weight: 700;
   text-align: center;
   box-shadow: var(--shadow-card);
 }
 
 body.dark-mode .auth-card {
-  background: rgba(2,82,82,.42);
+  background: rgba(2, 82, 82, .42);
   backdrop-filter: blur(12px);
 }
 
@@ -199,7 +197,7 @@ body.dark-mode .auth-brand-description,
 body.dark-mode .auth-feature,
 body.dark-mode .auth-subtitle,
 body.dark-mode .auth-footer-text {
-  color: rgba(249,245,238,.75);
+  color: rgba(249, 245, 238, .75);
 }
 
 @media (max-width: 992px) {
