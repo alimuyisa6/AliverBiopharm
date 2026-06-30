@@ -38,7 +38,7 @@
 .legal-block h2 {
   margin-top: 2rem;
   margin-bottom: 0.75rem;
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   font-size: 1.2rem;
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
@@ -52,7 +52,7 @@
 }
 
 .legal-block a {
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   text-decoration: none;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .legal-link {
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   text-decoration: underline;
   word-break: break-all;
 }
@@ -82,7 +82,7 @@
 
 body.dark-mode .footer-fat {
   background: #011f1f;
-  border-top: 2px solid rgba(10, 181, 181, 0.3);
+  border-top: 2px solid rgba(59, 111, 212, 0.3);
 }
 
 .footer-inner {
@@ -122,11 +122,11 @@ body.dark-mode .footer-fat {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1.5px solid var(--clr-cyan);
+  border: 1.5px solid var(--clr-blue);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   font-size: 0.875rem;
   transition: all 180ms ease;
   text-decoration: none;
@@ -173,7 +173,7 @@ body.dark-mode .footer-fat {
 }
 
 .footer-col-link:hover {
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
 }
 
 .footer-bottom {
@@ -207,7 +207,7 @@ body.dark-mode .footer-fat {
 }
 
 .footer-bottom-nav a:hover {
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
 }
 
 .footer-fat p,
@@ -238,7 +238,7 @@ body.dark-mode .footer-fat {
 }
 
 .footer-fat a:hover {
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
 }
 
 .info-page-loading {
@@ -255,16 +255,16 @@ body.dark-mode .footer-fat {
 .info-page-spinner {
   width: 48px;
   height: 48px;
-  border: 3px solid rgba(10, 129, 129, 0.15);
-  border-top-color: #0a7e7e;
+  border: 3px solid rgba(59, 111, 212, 0.15);
+  border-top-color: var(--clr-blue);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 1rem;
 }
 
 body.dark-mode .info-page-spinner {
-  border: 3px solid rgba(10, 181, 181, 0.25);
-  border-top-color: #0ab5b5;
+  border: 3px solid rgba(91, 141, 239, 0.25);
+  border-top-color: var(--clr-blue);
 }
 
 @media (max-width: 1024px) {
@@ -339,4 +339,4 @@ body.dark-mode .info-page-spinner {
   text-decoration: none;
   transition: color 180ms ease;
   white-space: nowrap;
- }
+}
