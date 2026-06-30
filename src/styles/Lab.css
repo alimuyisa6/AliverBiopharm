@@ -24,7 +24,7 @@
   background: var(--clr-navy-card);
   border-radius: var(--radius-lg);
   padding: 32px 24px;
-  border-top: 4px solid var(--clr-cyan);
+  border-top: 4px solid var(--clr-blue);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,35 +43,35 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--clr-cyan), var(--clr-magenta), var(--clr-cyan));
+  background: var(--clr-blue);
   z-index: 2;
 }
 
 .lab-tool-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 16px 36px rgba(184, 135, 58, 0.16), 0 6px 16px rgba(10, 129, 129, 0.1);
+  box-shadow: 0 16px 36px rgba(59, 111, 212, 0.16), 0 6px 16px rgba(10, 129, 129, 0.1);
 }
 
 body.dark-mode .lab-tool-card {
-  background: linear-gradient(145deg, rgba(2, 82, 82, 0.6), rgba(2, 82, 82, 0.4));
+  background: rgba(2, 82, 82, 0.45);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .lab-tool-card:hover {
-  box-shadow: 0 16px 36px rgba(201, 168, 76, 0.2), 0 6px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 36px rgba(91, 141, 239, 0.2), 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .lab-tool-card-skeleton {
   height: 280px;
   position: relative;
   overflow: hidden;
-  border-top-color: rgba(10, 129, 129, 0.15);
+  border-top-color: rgba(59, 111, 212, 0.15);
 }
 
 .lab-tool-card-shimmer {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(10, 129, 129, 0.06), transparent);
+  background: rgba(59, 111, 212, 0.06);
   animation: lab-shimmer 1.5s infinite;
 }
 
@@ -109,6 +109,7 @@ body.dark-mode .lab-tool-card:hover {
   font-weight: 700;
   font-size: var(--text-base);
   color: #fff;
+  background: var(--clr-magenta);
   border: none;
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
@@ -159,17 +160,17 @@ body.dark-mode .lab-tool-card:hover {
   width: 110px;
   height: 110px;
   border-radius: 50%;
-  background: rgba(184, 135, 58, 0.1);
+  background: rgba(59, 111, 212, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 24px;
-  border: 2px solid rgba(184, 135, 58, 0.3);
+  border: 2px solid rgba(59, 111, 212, 0.3);
 }
 
 .lab-locked-icon {
   font-size: 2.8rem;
-  color: var(--clr-magenta);
+  color: var(--clr-blue);
 }
 
 .lab-locked-title {
@@ -197,7 +198,7 @@ body.dark-mode .lab-tool-card:hover {
   font-weight: 700;
   font-size: var(--text-base);
   color: #fff;
-  background: var(--gradient-cyan);
+  background: var(--clr-blue);
   border: none;
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
@@ -205,12 +206,12 @@ body.dark-mode .lab-tool-card:hover {
   align-items: center;
   gap: 8px;
   letter-spacing: 0.02em;
-  box-shadow: 0 6px 22px rgba(10, 181, 181, 0.3);
+  box-shadow: 0 6px 22px rgba(59, 111, 212, 0.3);
 }
 
 .lab-locked-btn:hover {
   transform: scale(1.025);
-  box-shadow: 0 10px 32px rgba(10, 181, 181, 0.4);
+  box-shadow: 0 10px 32px rgba(59, 111, 212, 0.4);
 }
 
 .lab-page-header {
@@ -245,7 +246,7 @@ body.dark-mode .lab-tool-card:hover {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   background: var(--clr-navy-light);
   border: 1px solid var(--clr-border-glow);
   cursor: pointer;
@@ -254,7 +255,7 @@ body.dark-mode .lab-tool-card:hover {
 }
 
 .lab-back-btn:hover {
-  background: rgba(10, 181, 181, 0.15);
+  background: rgba(59, 111, 212, 0.15);
 }
 
 .lab-tool-container {
@@ -320,7 +321,7 @@ body.dark-mode .lab-tool-card:hover {
 }
 
 .lab-level-select:focus {
-  border-color: var(--clr-cyan);
+  border-color: var(--clr-blue);
 }
 
 .lab-search-input {
@@ -341,7 +342,7 @@ body.dark-mode .lab-tool-card:hover {
 }
 
 .lab-search-input:focus {
-  border-color: var(--clr-cyan);
+  border-color: var(--clr-blue);
 }
 
 .lab-drug-selector {
@@ -381,7 +382,7 @@ body.dark-mode .lab-tool-card:hover {
 }
 
 .lab-drug-chip.active {
-  border-color: var(--clr-cyan);
+  border-color: var(--clr-blue);
   background: var(--clr-navy-light);
 }
 
@@ -447,7 +448,7 @@ body.dark-mode .lab-graph-container {
   background: var(--clr-navy-card);
   border-radius: var(--radius-lg);
   padding: 24px;
-  border-left: 4px solid var(--clr-magenta);
+  border-left: 4px solid var(--clr-blue);
   box-shadow: var(--shadow-card);
 }
 
@@ -574,7 +575,7 @@ body.dark-mode .lab-edge-panel {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #9c27b0, var(--clr-magenta), #9c27b0);
+  background: #9c27b0;
 }
 
 .lab-pathway-card:hover {
@@ -649,7 +650,7 @@ body.dark-mode .lab-edge-panel {
 
 .lab-progress-bar-fill {
   height: 100%;
-  background: var(--gradient-cyan);
+  background: var(--clr-blue);
   border-radius: 5px;
   transition: width 0.3s ease;
 }
@@ -731,7 +732,7 @@ body.dark-mode .lab-step-panel {
   font-weight: 700;
   font-size: var(--text-sm);
   color: #fff;
-  background: var(--gradient-cyan);
+  background: var(--clr-blue);
   border: none;
   cursor: pointer;
   display: flex;
@@ -739,7 +740,7 @@ body.dark-mode .lab-step-panel {
   gap: 8px;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   letter-spacing: 0.02em;
-  box-shadow: 0 4px 14px rgba(10, 181, 181, 0.2);
+  box-shadow: 0 4px 14px rgba(59, 111, 212, 0.2);
 }
 
 .lab-step-btn:disabled {
@@ -749,7 +750,7 @@ body.dark-mode .lab-step-panel {
 
 .lab-step-btn:hover:not(:disabled) {
   transform: scale(1.03);
-  box-shadow: 0 6px 20px rgba(10, 181, 181, 0.3);
+  box-shadow: 0 6px 20px rgba(59, 111, 212, 0.3);
 }
 
 .lab-cases-grid {
@@ -779,7 +780,7 @@ body.dark-mode .lab-step-panel {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--clr-magenta), #e91e63, var(--clr-magenta));
+  background: var(--clr-magenta);
 }
 
 .lab-case-card:hover {
@@ -813,8 +814,8 @@ body.dark-mode .lab-step-panel {
 }
 
 .lab-case-level {
-  background: rgba(10, 129, 129, 0.12);
-  color: var(--clr-cyan);
+  background: rgba(59, 111, 212, 0.12);
+  color: var(--clr-blue);
 }
 
 .lab-case-difficulty {
@@ -921,7 +922,7 @@ body.dark-mode .lab-patient-profile {
 .lab-vital {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   font-weight: 600;
   background: var(--clr-navy-light);
   padding: 8px 14px;
@@ -982,7 +983,7 @@ body.dark-mode .lab-stage-card {
 }
 
 .lab-lab-result strong {
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
 }
 
 .lab-stage-options {
@@ -1009,8 +1010,8 @@ body.dark-mode .lab-stage-card {
 }
 
 .lab-stage-option:hover:not(:disabled) {
-  border-color: var(--clr-cyan);
-  background: rgba(10, 181, 181, 0.08);
+  border-color: var(--clr-blue);
+  background: rgba(59, 111, 212, 0.08);
 }
 
 .lab-stage-option:disabled {
@@ -1087,7 +1088,7 @@ body.dark-mode .lab-stage-card {
 
 .lab-score-icon {
   font-size: 4rem;
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
 }
 
 .lab-score-title {
@@ -1111,10 +1112,7 @@ body.dark-mode .lab-stage-card {
   font-family: var(--font-display);
   font-size: 3.5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, var(--clr-cyan), var(--clr-magenta));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--clr-blue);
   margin-bottom: 20px;
   letter-spacing: var(--ls-snug);
 }
@@ -1133,6 +1131,7 @@ body.dark-mode .lab-stage-card {
 
 .lab-score-bar-fill {
   height: 100%;
+  background: var(--clr-blue);
   border-radius: 6px;
   transition: width 0.5s ease;
 }
@@ -1170,7 +1169,7 @@ body.dark-mode .lab-stage-card {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #ff9800, var(--clr-magenta), #ff9800);
+  background: #ff9800;
 }
 
 .lab-formula-card:hover {
@@ -1267,7 +1266,7 @@ body.dark-mode .lab-stage-card {
 }
 
 .lab-calc-input:focus {
-  border-color: var(--clr-cyan);
+  border-color: var(--clr-blue);
 }
 
 body.dark-mode .lab-calc-input {
@@ -1286,7 +1285,7 @@ body.dark-mode .lab-calc-input {
   font-weight: 700;
   font-size: var(--text-md);
   color: #fff;
-  background: var(--gradient-magenta);
+  background: var(--clr-magenta);
   border: none;
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
