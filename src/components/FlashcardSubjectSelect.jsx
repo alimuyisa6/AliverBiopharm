@@ -1,5 +1,5 @@
  import React, { useState, useEffect } from 'react';
-import { getAdaptiveFlashcardDecks } from '../../api/cachedClient';
+import { getAdaptiveFlashcardDecks } from '../api/cachedClient';
 import { 
   FaSeedling, 
   FaBookOpen, 
