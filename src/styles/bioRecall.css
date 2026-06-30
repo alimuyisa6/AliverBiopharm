@@ -1,4 +1,4 @@
- .theme-olevel  { --primary: var(--clr-cyan); }
+ .theme-olevel  { --primary: var(--clr-blue); }
 .theme-alevel  { --primary: var(--clr-magenta); }
 .theme-pharmacy { --primary: #9b59b6; }
 
@@ -56,7 +56,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--clr-cyan), var(--clr-magenta), var(--clr-cyan));
+  background: var(--primary);
 }
 
 .entrance-screen,
@@ -109,8 +109,8 @@
 }
 
 .level-input-area input:focus {
-  border-color: var(--clr-cyan);
-  box-shadow: 0 0 0 3px rgba(10, 181, 181, 0.12);
+  border-color: var(--clr-blue);
+  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.12);
 }
 
 .retry-level-btn,
@@ -124,7 +124,7 @@
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: all var(--transition-fast);
-  background: var(--gradient-magenta);
+  background: var(--clr-magenta);
   color: #fff;
   box-shadow: var(--shadow-magenta);
 }
@@ -164,7 +164,7 @@
   line-height: var(--lh-snug);
 }
 
-.user-message.info    { background: rgba(10, 181, 181, 0.1); color: var(--clr-cyan); border: 1px solid rgba(10, 181, 181, 0.25); }
+.user-message.info    { background: rgba(59, 111, 212, 0.1); color: var(--clr-blue); border: 1px solid rgba(59, 111, 212, 0.25); }
 .user-message.warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25); }
 .user-message.error   { background: rgba(239, 68, 68, 0.1);  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); }
 
@@ -186,7 +186,7 @@
 }
 
 .dashboard-card:hover {
-  border-color: var(--clr-cyan);
+  border-color: var(--clr-blue);
   transform: translateY(-2px);
 }
 
@@ -218,7 +218,7 @@
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--clr-cyan), var(--clr-magenta));
+  background: var(--clr-blue);
   border-radius: 999px;
   transition: width 0.4s ease;
 }
@@ -244,9 +244,9 @@
 .achievement-item:hover { transform: translateY(-2px); }
 
 .achievement-item.unlocked {
-  background: rgba(10, 181, 181, 0.1);
-  border: 1px solid rgba(10, 181, 181, 0.25);
-  color: var(--clr-cyan);
+  background: rgba(59, 111, 212, 0.1);
+  border: 1px solid rgba(59, 111, 212, 0.25);
+  color: var(--clr-blue);
 }
 
 .achievement-item.locked {
@@ -269,7 +269,7 @@
   display: flex;
   justify-content: center;
   padding: 8px 0;
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   font-size: var(--text-lg);
 }
 
@@ -357,8 +357,8 @@
 }
 
 .answer-input:focus {
-  border-color: var(--clr-cyan);
-  box-shadow: 0 0 0 3px rgba(10, 181, 181, 0.12);
+  border-color: var(--clr-blue);
+  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.12);
 }
 
 .answer-input:disabled { opacity: 0.5; }
@@ -371,7 +371,7 @@
   border: none;
   padding: 10px 24px;
   border-radius: 50px;
-  background: var(--gradient-magenta);
+  background: var(--clr-magenta);
   color: #fff;
   font-family: var(--font-body);
   font-weight: 700;
@@ -409,13 +409,13 @@
   display: inline-block;
   width: 6px;
   height: 6px;
-  background: var(--clr-cyan);
+  background: var(--clr-blue);
   border-radius: 50%;
   animation: dotBounce 1s infinite alternate;
 }
 
 .dot-spin:nth-child(2) { animation-delay: 0.2s; background: var(--clr-magenta); }
-.dot-spin:nth-child(3) { animation-delay: 0.4s; }
+.dot-spin:nth-child(3) { animation-delay: 0.4s; background: var(--clr-cyan); }
 
 @keyframes dotBounce {
   from { opacity: 0.3; transform: translateY(0); }
@@ -441,7 +441,7 @@
 }
 
 .strength-excellent  { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1.5px solid #10b981; }
-.strength-strong     { background: rgba(10, 181, 181, 0.12); color: var(--clr-cyan); border: 1.5px solid var(--clr-cyan); }
+.strength-strong     { background: rgba(59, 111, 212, 0.12); color: var(--clr-blue); border: 1.5px solid var(--clr-blue); }
 .strength-developing { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1.5px solid rgba(245, 158, 11, 0.4); }
 
 .feedback-section {
@@ -479,7 +479,7 @@
 
 .study-note {
   background: var(--clr-navy-light);
-  border-left: 3px solid var(--clr-cyan);
+  border-left: 3px solid var(--clr-blue);
   padding: 10px 14px;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   font-family: var(--font-body);
@@ -506,11 +506,11 @@
 }
 
 .next-btn {
-  border: 2px solid var(--clr-cyan);
+  border: 2px solid var(--clr-blue);
   padding: 8px 24px;
   border-radius: 50px;
   background: transparent;
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   font-family: var(--font-body);
   font-weight: 700;
   font-size: var(--text-sm);
@@ -520,10 +520,10 @@
 }
 
 .next-btn:hover {
-  background: var(--clr-cyan);
+  background: var(--clr-blue);
   color: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(10, 181, 181, 0.25);
+  box-shadow: 0 6px 18px rgba(59, 111, 212, 0.25);
 }
 
 .analytics-row {
@@ -548,7 +548,7 @@
   transition: border-color var(--transition-fast);
 }
 
-.stat-card:hover { border-color: var(--clr-cyan); }
+.stat-card:hover { border-color: var(--clr-blue); }
 
 .stat-card span { color: var(--primary); font-family: var(--font-mono); }
 
@@ -582,7 +582,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--clr-cyan), var(--clr-magenta), var(--clr-cyan));
+  background: var(--primary);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
@@ -604,8 +604,8 @@
 }
 
 .option-btn:hover {
-  border-color: var(--clr-cyan);
-  background: rgba(10, 181, 181, 0.08);
+  border-color: var(--clr-blue);
+  background: rgba(59, 111, 212, 0.08);
   transform: translateX(4px);
 }
 
@@ -660,7 +660,7 @@
   animation: dotBounce 1s infinite alternate;
 }
 
-.spinner-dot-color:nth-child(1) { background: var(--clr-cyan); }
+.spinner-dot-color:nth-child(1) { background: var(--clr-blue); }
 .spinner-dot-color:nth-child(2) { background: var(--clr-magenta); animation-delay: 0.15s; }
 .spinner-dot-color:nth-child(3) { background: #10b981; animation-delay: 0.3s; }
 .spinner-dot-color:nth-child(4) { background: #f59e0b; animation-delay: 0.45s; }
@@ -852,7 +852,7 @@
   padding: 10px 24px;
   border-radius: 50px;
   background: var(--clr-navy-light);
-  color: var(--clr-cyan);
+  color: var(--clr-blue);
   font-family: var(--font-body);
   font-weight: 700;
   font-size: var(--text-base);
@@ -862,8 +862,8 @@
 }
 
 .export-btn:hover {
-  background: var(--clr-cyan);
+  background: var(--clr-blue);
   color: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(10,181,181,0.25);
+  box-shadow: 0 6px 18px rgba(59, 111, 212, 0.25);
 }
