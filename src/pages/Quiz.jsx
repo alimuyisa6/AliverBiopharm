@@ -172,7 +172,7 @@ function Quiz() {
   const spinnerTimeout = useRef(null);
   const saveDebounceRef = useRef(null);
   const touchStartX = useRef(null);
-  const confettiContainerRef = useRef(null);
+  const confettiTimers = useRef([]);
   const MAX_TAB_SWITCHES = 3;
 
   const SPINNER_WORDS = [
@@ -253,6 +253,13 @@ function Quiz() {
     setResumeData(null);
     setShowResumeModal(false);
     sessionStorage.removeItem('quiz_resume');
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      confettiTimers.current.forEach(timer => clearTimeout(timer));
+      confettiTimers.current = [];
+    };
   }, []);
 
   useEffect(() => {
@@ -656,23 +663,24 @@ function Quiz() {
   }
 
   function showConfetti() {
-    const container = confettiContainerRef.current;
-    if (!container) return;
+    if (typeof document === 'undefined') return;
     const colors = ['#0ab5b5', '#b8873a', '#e2c06a', '#10b981', '#f59e0b'];
-    const fragment = document.createDocumentFragment();
+    const particles = [];
     for (let i = 0; i < 50; i++) {
       const p = document.createElement('div');
       p.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:-10px;border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ${2 + Math.random() * 3}s linear forwards`;
-      fragment.appendChild(p);
+      document.body.appendChild(p);
+      particles.push(p);
     }
-    container.appendChild(fragment);
-    setTimeout(() => {
-      if (container) {
-        while (container.firstChild) {
-          container.removeChild(container.firstChild);
+    const timer = setTimeout(() => {
+      particles.forEach(p => {
+        if (p && p.parentNode) {
+          p.parentNode.removeChild(p);
         }
-      }
+      });
+      confettiTimers.current = confettiTimers.current.filter(t => t !== timer);
     }, 4000);
+    confettiTimers.current.push(timer);
   }
 
   const currentYear = new Date().getFullYear();
@@ -701,7 +709,6 @@ function Quiz() {
 
   return (
     <div className="quiz-page">
-      <div ref={confettiContainerRef} style={{ position: 'fixed', top: 0, left: 0, width: 0, height: 0, overflow: 'visible', zIndex: 9999, pointerEvents: 'none' }} />
       <header className="site-header">
         <div className="header-container">
           <a href="/" className="logo-link" aria-label="AliverBiopharm Home">
