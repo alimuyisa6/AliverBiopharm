@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Auth.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
+import { FaEnvelope, FaLock, FaCheckCircle, FaArrowLeft, FaUserPlus } from "react-icons/fa6";
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
@@ -107,6 +108,7 @@ export default function Register() {
       <div className="auth-page">
         <div className="auth-form-panel">
           <div className="auth-card">
+            <FaCheckCircle style={{ color: '#10b981', fontSize: '3rem', marginBottom: '1rem' }} />
             <div className="auth-title">Success</div>
             <div className="auth-subtitle">
               Account created. Redirecting...
@@ -139,35 +141,47 @@ export default function Register() {
           {error && <div className="auth-error">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="form-input"
-              required
-              disabled={submitting}
-            />
+            <div className="input-wrapper">
+              <FaEnvelope style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="form-input"
+                style={{ paddingLeft: '44px' }}
+                required
+                disabled={submitting}
+              />
+            </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="form-input"
-              required
-              disabled={submitting}
-            />
+            <div className="input-wrapper">
+              <FaLock style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="form-input"
+                style={{ paddingLeft: '44px' }}
+                required
+                disabled={submitting}
+              />
+            </div>
 
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirm}
-              onChange={e => setConfirm(e.target.value)}
-              className="form-input"
-              required
-              disabled={submitting}
-            />
+            <div className="input-wrapper">
+              <FaLock style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                className="form-input"
+                style={{ paddingLeft: '44px' }}
+                required
+                disabled={submitting}
+              />
+            </div>
 
             <div ref={turnstileRef} className="auth-captcha"></div>
 
@@ -176,7 +190,7 @@ export default function Register() {
               className={`btn-primary auth-submit${submitting ? ' alv-btn-loading' : ''}`}
               disabled={submitting}
             >
-              {submitting ? <><InlineSpinner /> Creating account...</> : 'Create Account'}
+              {submitting ? <><InlineSpinner /> Creating account...</> : <><FaUserPlus style={{ marginRight: '8px' }} /> Create Account</>}
             </button>
           </form>
 
@@ -186,7 +200,7 @@ export default function Register() {
               to="/login"
               className="auth-link"
             >
-              Login
+              <FaArrowLeft style={{ marginRight: '4px', fontSize: '0.8rem' }} /> Login
             </Link>
           </div>
         </div>
