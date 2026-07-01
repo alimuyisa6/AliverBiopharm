@@ -5,7 +5,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
-import { FaEnvelope, FaLock, FaArrowRight, FaSignInAlt } from "react-icons/fa6";
+import { FaSignInAlt } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa6";
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
