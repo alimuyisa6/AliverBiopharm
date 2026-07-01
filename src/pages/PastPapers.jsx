@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   getAllSiteSections,
@@ -6,12 +6,10 @@ import {
   getPastPaperFilterOptions,
   getPastPaperDownloadUrl
 } from '../api/client';
-
 import { 
   FaSun, 
   FaMoon, 
   FaBars, 
-  FaXmark, 
   FaLock, 
   FaSearch, 
   FaFilter, 
@@ -23,10 +21,29 @@ import {
   FaChevronRight, 
   FaArrowUp 
 } from "react-icons/fa";
-
 import { 
-  FaRightFromBracket 
+  FaRightFromBracket,
+  FaXmark
 } from "react-icons/fa6";
+
+const ICON_COLORS = {
+  sun: '#f59e0b',
+  moon: '#94a3b8',
+  bars: '#ffffff',
+  rightFromBracket: '#ef4444',
+  xmark: '#94a3b8',
+  lock: '#b8873a',
+  search: '#10b981',
+  filter: '#8b5cf6',
+  chevronDown: '#94a3b8',
+  filePdf: '#ef4444',
+  download: '#3b82f6',
+  spinner: '#b8873a',
+  chevronLeft: '#94a3b8',
+  chevronRight: '#94a3b8',
+  arrowUp: '#b8873a',
+};
+ 
 export default function PastPapers() {
   const { user, logout } = useAuth();
   const [sections, setSections] = useState(null);
