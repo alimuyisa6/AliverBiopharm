@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { signup } from '../api/client';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Auth.css';
@@ -28,6 +28,7 @@ export default function Register() {
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
       script.async = true;
       script.defer = true;
+      script.crossOrigin = 'anonymous';
       document.head.appendChild(script);
     }
 
