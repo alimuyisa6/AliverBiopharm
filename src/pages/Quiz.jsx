@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
 import {
@@ -26,6 +26,7 @@ import QuizWeakAreas from '../components/quiz/QuizWeakAreas';
 import {
   FaHome,
   FaSearch,
+  FaCheckCircle,
 } from "react-icons/fa";
 
 import {
@@ -40,7 +41,6 @@ import {
   FaLock,
   FaCircleCheck,
   FaCircleXmark,
-  FaCheckCircle,
   FaTriangleExclamation,
   FaFire,
   FaLightbulb,
@@ -101,7 +101,7 @@ import {
   FaVolumeHigh,
   FaVolumeXmark,
 } from "react-icons/fa6";
-
+   
 class QuizErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
   static getDerivedStateFromError() { return { hasError: true }; }
