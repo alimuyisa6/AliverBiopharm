@@ -1,4 +1,4 @@
-import React from 'react';
+ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
@@ -9,273 +9,69 @@ import './loading/Loading.css';
 import './styles/notifications.css';
 import './styles/Info.css';
 import './styles/Lab.css';
- 
+
 import LoadingProvider from './loading/LoadingProvider';
 
-function displayError(errorInfo) {
-  const root = document.getElementById('root');
-  if (root) {
-    root.innerHTML = '';
-    const errorDiv = document.createElement('div');
-    errorDiv.innerHTML = errorInfo;
-    root.appendChild(errorDiv);
-  } else {
-    document.body.innerHTML = errorInfo;
-  }
-}
-
-function parseStackTrace(stack) {
-  if (!stack) return [];
-  const lines = stack.split('\n');
-  const parsed = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    const match = line.match(/at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)/) || 
-                  line.match(/at\s+(.+?):(\d+):(\d+)/) ||
-                  line.match(/at\s+(.+)/);
-    if (match) {
-      parsed.push({
-        functionName: match[1] || 'anonymous',
-        file: match[2] || 'unknown',
-        line: match[3] || '?',
-        column: match[4] || '?',
-        raw: line
-      });
-    }
-  }
-  return parsed;
-}
-
-function extractMeaningfulError(stack) {
-  const parsed = parseStackTrace(stack);
-  const appFiles = parsed.filter(p => 
-    p.file && !p.file.includes('node_modules') && 
-    (p.file.includes('.jsx') || p.file.includes('.tsx') || p.file.includes('.js') || p.file.includes('.ts'))
-  );
-  return appFiles.length > 0 ? appFiles : parsed;
-}
-
-window.onerror = function(message, source, lineno, colno, error) {
-  const stackTrace = error?.stack || '';
-  const parsedStack = parseStackTrace(stackTrace);
-  const meaningfulStack = extractMeaningfulError(stackTrace);
-  
-  displayError(`
-    <div style="background: #fff; padding: 24px; font-family: monospace; margin: 20px; border: 3px solid red; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-      <h1 style="color: red; margin-top: 0; font-size: 24px;">Runtime Error</h1>
-      
-      <div style="margin-bottom: 16px; padding: 16px; background: #ffe6e6; border-radius: 8px;">
-        <div style="margin-bottom: 12px; font-size: 14px;"><strong style="color: #d32f2f;">Message:</strong> ${message}</div>
-        <div style="margin-bottom: 8px; font-size: 14px;"><strong>Source:</strong> ${source || 'runtime'}</div>
-        <div style="margin-bottom: 8px; font-size: 14px;"><strong>Location:</strong> Line ${lineno || '?'}, Column ${colno || '?'}</div>
-        <div style="margin-bottom: 8px; font-size: 14px;"><strong>Error Type:</strong> ${error?.name || 'Error'}</div>
-      </div>
-
-      ${error?.code ? `
-        <div style="margin-bottom: 16px; padding: 12px; background: #e3f2fd; border-radius: 6px; font-size: 14px;">
-          <strong>Error Code:</strong> ${error.code}
-        </div>
-      ` : ''}
-
-      <div style="margin-bottom: 16px;">
-        <h3 style="color: #333; margin: 0 0 8px 0;">Complete Stack Trace:</h3>
-        <pre style="background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.5; max-height: 300px; overflow-y: auto;">${stackTrace || 'No stack available'}</pre>
-      </div>
-
-      <div style="margin-bottom: 16px;">
-        <h3 style="color: #333; margin: 0 0 8px 0;">Parsed Stack Frames:</h3>
-        <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; font-size: 13px;">
-          ${meaningfulStack.map((frame, index) => `
-            <div style="margin-bottom: ${index < meaningfulStack.length - 1 ? '12px' : '0'}; padding: 8px; background: white; border-radius: 4px; border-left: 3px solid ${index === 0 ? '#d32f2f' : '#2196f3'};">
-              <div><strong>${index === 0 ? '❌ ERROR AT' : '📍'}</strong> ${frame.functionName}</div>
-              <div style="color: #666; margin-top: 4px;">📁 ${frame.file}:${frame.line}:${frame.column}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <div style="margin-bottom: 16px; padding: 12px; background: #fff9c4; border-radius: 6px; font-size: 13px;">
-        <strong>💡 Debug Tip:</strong> Check if you're accessing a property (like .name) on an undefined variable. Look for objects that might be null/undefined when the component renders. Check your API responses or props.
-      </div>
-
-      <div style="margin-bottom: 16px; padding: 12px; background: #e8eaf6; border-radius: 6px; font-size: 13px;">
-        <strong>🔍 Source Maps:</strong> To see original source files, ensure source maps are enabled in your build. Add <code>devtool: 'source-map'</code> to your webpack/vite config.
-      </div>
-
-      ${parsedStack.length > 0 ? `
-        <div style="margin-bottom: 16px;">
-          <h3 style="color: #333; margin: 0 0 8px 0;">All Stack Frames:</h3>
-          <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-size: 12px;">
-            ${parsedStack.map(frame => `
-              <div style="margin-bottom: 4px; font-family: monospace;">
-                ${frame.functionName} @ ${frame.file}:${frame.line}
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
+function showFatalError(title, message, stack) {
+  const root = document.getElementById('root') || document.body;
+  root.innerHTML = `
+    <div style="padding:20px;font-family:monospace;color:#111;background:#fff;">
+      <h2 style="color:#c0392b;margin:0 0 8px;">${title}</h2>
+      <div style="margin-bottom:10px;">${message || 'Unknown error'}</div>
+      ${stack ? `<pre style="white-space:pre-wrap;background:#f5f5f5;padding:10px;border-radius:6px;font-size:12px;max-height:240px;overflow:auto;">${stack}</pre>` : ''}
+      <button onclick="window.location.reload()" style="margin-top:12px;padding:8px 16px;background:#c0392b;color:#fff;border:none;border-radius:6px;">Reload</button>
     </div>
-  `);
+  `;
+}
+
+window.onerror = function (message, source, lineno, colno, error) {
+  showFatalError('Runtime Error', message, error?.stack);
   return false;
 };
 
-window.addEventListener('unhandledrejection', function(event) {
+window.addEventListener('unhandledrejection', function (event) {
   const reason = event.reason;
-  const stackTrace = reason?.stack || '';
-  
-  displayError(`
-    <div style="background: #fff; padding: 24px; font-family: monospace; margin: 20px; border: 3px solid #ff9800; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-      <h1 style="color: #ff9800; margin-top: 0; font-size: 24px;">Unhandled Promise Rejection</h1>
-      <div style="margin-bottom: 16px; padding: 12px; background: #fff3e0; border-radius: 8px;">
-        <div style="font-size: 14px;"><strong>Reason:</strong> ${reason?.message || reason}</div>
-      </div>
-      <pre style="background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font-size: 13px;">${stackTrace || JSON.stringify(reason, null, 2)}</pre>
-    </div>
-  `);
+  showFatalError('Unhandled Promise Rejection', reason?.message || String(reason), reason?.stack);
 });
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    this.setState({ errorInfo });
+    console.error('Component error:', error, errorInfo);
+    this.setState({ error, errorInfo });
   }
 
   render() {
     if (this.state.hasError) {
-      const error = this.state.error;
-      const parsedStack = parseStackTrace(error?.stack || '');
-      const meaningfulStack = extractMeaningfulError(error?.stack || '');
-      
       return (
-        <div style={{
-          padding: 24,
-          fontFamily: 'monospace',
-          background: '#ffffff',
-          margin: 20,
-          border: '3px solid red',
-          borderRadius: 12,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-        }}>
-          <h1 style={{ color: 'red', marginTop: 0, fontSize: 24 }}>Component Error</h1>
-          
-          <div style={{ marginBottom: 16, padding: 16, background: '#ffe6e6', borderRadius: 8 }}>
-            <div style={{ fontSize: 14, lineHeight: 1.8 }}>
-              <div><strong>Name:</strong> {error?.name || 'Error'}</div>
-              <div><strong>Message:</strong> {error?.message || String(error)}</div>
-              <div><strong>Type:</strong> {error?.constructor?.name || 'Unknown'}</div>
-              {error?.fileName && <div><strong>File:</strong> {error.fileName}</div>}
-              {error?.lineNumber && <div><strong>Line:</strong> {error.lineNumber}</div>}
-              {error?.columnNumber && <div><strong>Column:</strong> {error.columnNumber}</div>}
-              {error?.code && <div><strong>Code:</strong> {error.code}</div>}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 16 }}>
-            <h3 style={{ color: '#333', margin: '0 0 8px 0', fontSize: 16 }}>Stack Trace</h3>
+        <div style={{ padding: 20, fontFamily: 'monospace', background: '#fff' }}>
+          <h2 style={{ color: '#c0392b', margin: '0 0 8px' }}>Something went wrong</h2>
+          <div style={{ marginBottom: 10 }}>{this.state.error?.message || 'Unknown error'}</div>
+          {this.state.error?.stack && (
             <pre style={{
-              background: '#1e1e1e',
-              color: '#d4d4d4',
-              padding: 16,
-              borderRadius: 8,
-              overflowX: 'auto',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              fontSize: 13,
-              lineHeight: 1.5,
-              maxHeight: 300,
-              overflowY: 'auto'
+              whiteSpace: 'pre-wrap', background: '#f5f5f5', padding: 10,
+              borderRadius: 6, fontSize: 12, maxHeight: 240, overflow: 'auto'
             }}>
-              {error?.stack || 'No stack trace available'}
+              {this.state.error.stack}
             </pre>
-          </div>
-
-          {meaningfulStack.length > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              <h3 style={{ color: '#333', margin: '0 0 8px 0', fontSize: 16 }}>Error Locations</h3>
-              <div style={{ background: '#f5f5f5', padding: 16, borderRadius: 8, fontSize: 13 }}>
-                {meaningfulStack.map((frame, index) => (
-                  <div key={index} style={{ 
-                    marginBottom: index < meaningfulStack.length - 1 ? '12px' : '0',
-                    padding: 8,
-                    background: 'white',
-                    borderRadius: 4,
-                    borderLeft: `3px solid ${index === 0 ? '#d32f2f' : '#2196f3'}`
-                  }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                      {index === 0 ? '❌ ' : '📍 '}{frame.functionName}
-                    </div>
-                    <div style={{ color: '#666' }}>
-                      📁 {frame.file}:{frame.line}:{frame.column}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           )}
-
-          {this.state.errorInfo?.componentStack && (
-            <div style={{ marginBottom: 16 }}>
-              <h3 style={{ color: '#333', margin: '0 0 8px 0', fontSize: 16 }}>Component Stack</h3>
-              <pre style={{
-                background: '#f5f5f5',
-                padding: 16,
-                borderRadius: 8,
-                overflowX: 'auto',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                fontSize: 12,
-                lineHeight: 1.6,
-                color: '#555',
-                maxHeight: 200,
-                overflowY: 'auto'
-              }}>
-                {this.state.errorInfo.componentStack}
-              </pre>
-            </div>
-          )}
-
-          <div style={{ marginBottom: 16, padding: 12, background: '#fff9c4', borderRadius: 6, fontSize: 13 }}>
-            <strong>💡 Common Cause:</strong> Trying to access <code>.name</code> property on an undefined object. Check:
-            <ul style={{ margin: '8px 0 0 0', paddingLeft: 20 }}>
-              <li>API data that hasn't loaded yet</li>
-              <li>Component props that might be undefined</li>
-              <li>Array/object destructuring of undefined values</li>
-              <li>State that's null during initial render</li>
-            </ul>
-          </div>
-
-          <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', borderRadius: 6, fontSize: 13 }}>
-            <strong>🕒 Timestamp:</strong> {new Date().toISOString()}
-          </div>
-
           <button
             onClick={() => window.location.reload()}
-            style={{
-              padding: '12px 24px',
-              background: '#d32f2f',
-              color: 'white',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 16,
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              marginRight: 10
-            }}
+            style={{ marginTop: 12, padding: '8px 16px', background: '#c0392b', color: '#fff', border: 'none', borderRadius: 6 }}
           >
-            Reload Page
+            Reload
           </button>
         </div>
       );
     }
-
     return this.props.children;
   }
 }
@@ -283,9 +79,7 @@ class ErrorBoundary extends React.Component {
 function initRevealObserver() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in');
-      }
+      if (entry.isIntersecting) entry.target.classList.add('in');
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
@@ -295,14 +89,8 @@ function initRevealObserver() {
 
   observeElements();
 
-  const mutationObserver = new MutationObserver(() => {
-    observeElements();
-  });
-
-  mutationObserver.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  const mutationObserver = new MutationObserver(observeElements);
+  mutationObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 if (document.readyState === 'loading') {
@@ -327,10 +115,5 @@ try {
     </React.StrictMode>
   );
 } catch (error) {
-  displayError(`
-    <div style="background: #fff; padding: 24px; font-family: monospace; margin: 20px; border: 3px solid red; border-radius: 12px;">
-      <h1 style="color: red; margin-top: 0;">Initialization Error</h1>
-      <pre style="background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; font-size: 13px;">${error.stack}</pre>
-    </div>
-  `);
-} 
+  showFatalError('Initialization Error', error.message, error.stack);
+}
