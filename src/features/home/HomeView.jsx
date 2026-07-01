@@ -1,5 +1,4 @@
- // features/home/HomeView.jsx
-import React from 'react';
+ import React from 'react';
 import { Header } from '../../common-layout/Header';
 import { Footer } from '../../common-layout/Footer';
 import { MobileMenu } from '../../common-layout/MobileMenu';
@@ -15,14 +14,14 @@ import { ContinueLearningSection } from './ContinueLearningSection';
 import { FlashcardSection } from '../flashcards/FlashcardSection';
 import { PdfLibrarySection } from '../pdfs/PdfLibrarySection';
 import { PdfPreviewModal } from '../pdfs/PdfPreviewModal';
-import { NotesSection } from '../Notes/NotesSection';
+import { NotesSection } from '../notes/NotesSection';
 import { MoodCheckSection } from '../mood/MoodCheckSection';
 import { CommunitySection } from '../community/CommunitySection';
 import { ContactSection } from '../contact/ContactSection';
 import { ChatWidget } from '../chat/ChatWidget';
-import { InteractiveShowcase } from '../lab/InteractiveShowcase';
-import { NotificationBell } from '../components/NotificationBell';
-import { InfoCards } from '../info/InfoCards';
+import NotificationBell from '../../components/NotificationBell';
+import InfoCards from '../../components/InfoCards';
+import InteractiveShowcase from '../../components/InteractiveShowcase';
 
 export default function HomeView({
   user,
