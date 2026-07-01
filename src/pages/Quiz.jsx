@@ -102,12 +102,111 @@ import {
 import {
   FaSearch,
   FaFilter as FaFilterOld,
-  FaChevronDown as FaChevronDownOld,
-  FaChevronLeft as FaChevronLeftOld,
-  FaChevronRight as FaChevronRightOld,
-  FaArrowUp as FaArrowUpOld,
-  FaSpinner as FaSpinnerOld,
+ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import DOMPurify from 'dompurify';
+import {
+  getQuizTopics,
+  getQuizBlock,
+  checkDailyRetry,
+  checkQuizAnswer,
+  submitQuizBlock,
+  recordDailyVisit,
+  getUserStreak,
+  getUserAchievements,
+  saveAchievement,
+  saveQuizState,
+  getQuizState,
+  trackEvent,
+  getLeaderboard
+} from '../api/cachedClient';
+import { getAllSiteSections } from '../api/client';
+import QuizHero from '../components/quiz/QuizHero';
+import QuizDashboard from '../components/quiz/QuizDashboard';
+import QuizChallenges from '../components/quiz/QuizChallenges';
+import QuizLearningPath from '../components/quiz/QuizLearningPath';
+import QuizWeakAreas from '../components/quiz/QuizWeakAreas';
+
+// From react-icons/fa (older version)
+import {
+  FaHome,
+  FaSearch,
 } from "react-icons/fa";
+
+// From react-icons/fa6
+import {
+  FaSun,
+  FaMoon,
+  FaBars,
+  FaXmark,
+  FaFilter,
+  FaChevronDown,
+  FaChevronUp,
+  FaTrophy,
+  FaLock,
+  FaCircleCheck,
+  FaCircleXmark,
+  FaCheckCircle,
+  FaTriangleExclamation,
+  FaFire,
+  FaLightbulb,
+  FaMagnifyingGlass,
+  FaBookOpen,
+  FaAward,
+  FaChartLine,
+  FaGraduationCap,
+  FaStar,
+  FaClock,
+  FaInfo,
+  FaExclamation,
+  FaLink,
+  FaArrowUp,
+  FaRocket,
+  FaUsers,
+  FaUser,
+  FaEnvelope,
+  FaRightFromBracket,
+  FaShieldHalved,
+  FaShareAlt,
+  FaStethoscope,
+  FaVial,
+  FaMicroscope,
+  FaHeartPulse,
+  FaDna,
+  FaCapsules,
+  FaSyringe,
+  FaPrescription,
+  FaStaffSnake,
+  FaVirus,
+  FaBiohazard,
+  FaRadiation,
+  FaTablets,
+  FaPrescriptionBottle,
+  FaBookMedical,
+  FaHospital,
+  FaBandage,
+  FaPumpMedical,
+  FaTruckMedical,
+  FaComment,
+  FaMessage,
+  FaEnvelopeCircleCheck,
+  FaUserPen,
+  FaUserPlus,
+  FaFilePdf,
+  FaDownload,
+  FaSpinner,
+  FaChevronLeft,
+  FaChevronRight,
+  FaArrowLeft,
+  FaArrowRight,
+  FaUnlock,
+  FaListCheck,
+  FaChartSimple,
+  FaFlask,
+  FaLeaf,
+  FaVolumeHigh,
+  FaVolumeXmark,
+} from "react-icons/fa6";
 
 class QuizErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
