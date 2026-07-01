@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
 import {
@@ -22,6 +22,92 @@ import QuizDashboard from '../components/quiz/QuizDashboard';
 import QuizChallenges from '../components/quiz/QuizChallenges';
 import QuizLearningPath from '../components/quiz/QuizLearningPath';
 import QuizWeakAreas from '../components/quiz/QuizWeakAreas';
+
+// Professional icon imports
+import {
+  FaSun,
+  FaMoon,
+  FaBars,
+  FaXmark,
+  FaFilter,
+  FaChevronDown,
+  FaChevronUp,
+  FaTrophy,
+  FaLock,
+  FaCircleCheck,
+  FaCircleXmark,
+  FaCheckCircle,
+  FaTriangleExclamation,
+  FaFire,
+  FaLightbulb,
+  FaMagnifyingGlass,
+  FaBookOpen,
+  FaAward,
+  FaChartLine,
+  FaGraduationCap,
+  FaStar,
+  FaClock,
+  FaInfo,
+  FaExclamation,
+  FaLink,
+  FaArrowUp,
+  FaRocket,
+  FaUsers,
+  FaUser,
+  FaEnvelope,
+  FaRightFromBracket,
+  FaShieldHalved,
+  FaShareAlt,
+  FaMedicalSymbol,
+  FaStethoscope,
+  FaVial,
+  FaMicroscope,
+  FaHeartPulse,
+  FaDna,
+  FaCapsules,
+  FaSyringe,
+  FaPrescription,
+  FaStaffSnake,
+  FaVirus,
+  FaBiohazard,
+  FaRadiation,
+  FaTablets,
+  FaPrescriptionBottle,
+  FaBookMedical,
+  FaHospital,
+  FaBandage,
+  FaPumpMedical,
+  FaTruckMedical,
+  FaComment,
+  FaMessage,
+  FaEnvelopeCircleCheck,
+  FaUserPen,
+  FaUserPlus,
+  FaFilePdf,
+  FaDownload,
+  FaSpinner,
+  FaChevronLeft,
+  FaChevronRight,
+  FaArrowLeft,
+  FaArrowRight,
+  FaHome,
+  FaUnlock,
+  FaListCheck,
+  FaChartSimple,
+  FaFlask,
+  FaLeaf
+} from "react-icons/fa6";
+
+// Some icons from fa (older version)
+import {
+  FaSearch,
+  FaFilter as FaFilterOld,
+  FaChevronDown as FaChevronDownOld,
+  FaChevronLeft as FaChevronLeftOld,
+  FaChevronRight as FaChevronRightOld,
+  FaArrowUp as FaArrowUpOld,
+  FaSpinner as FaSpinnerOld,
+} from "react-icons/fa";
 
 class QuizErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
@@ -485,12 +571,12 @@ function Quiz() {
           </nav>
           <div className="nav-actions">
             <button className="theme-toggle" title={soundEnabled ? 'Mute sounds' : 'Enable sounds'} onClick={() => { const next = !soundEnabled; setSoundEnabled(next); localStorage.setItem('quiz_sound', next ? 'on' : 'off'); }}>
-              <i className={`fa-solid ${soundEnabled ? 'fa-volume-high' : 'fa-volume-xmark'}`}></i>
+              {soundEnabled ? <FaVolumeHigh style={{ color: '#94a3b8' }} /> : <FaVolumeXmark style={{ color: '#ef4444' }} />}
             </button>
             <button className="theme-toggle" onClick={() => { const dark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', dark ? 'dark' : 'light'); setTheme(dark ? 'dark' : 'light'); }}>
-              <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
+              {theme === 'dark' ? <FaSun style={{ color: '#f59e0b' }} /> : <FaMoon style={{ color: '#94a3b8' }} />}
             </button>
-            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}><i className="fa-solid fa-bars"></i></button>
+            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}><FaBars style={{ color: '#ffffff' }} /></button>
           </div>
         </div>
       </header>
@@ -501,12 +587,12 @@ function Quiz() {
             <div className="mobile-nav-header-row">
               <div className="mobile-auth-top">
                 {user ? (
-                  <button className="mobile-signout-btn" onClick={logout}><i className="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+                  <button className="mobile-signout-btn" onClick={logout}><FaRightFromBracket style={{ color: '#ef4444', marginRight: '8px' }} /> Sign Out</button>
                 ) : (
                   <><a href="#" className="mobile-signin-btn" onClick={() => window.location.href = '/login'}>Sign In</a><a href="#" className="mobile-signup-btn" onClick={() => window.location.href = '/register'}>Create Account</a></>
                 )}
               </div>
-              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}><i className="fa-solid fa-xmark"></i></button>
+              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}><FaXmark style={{ color: '#94a3b8' }} /></button>
             </div>
           </div>
           <nav className="mobile-nav-links">
@@ -522,19 +608,19 @@ function Quiz() {
 
         {user && streak > 0 && (
           <div className="streak-badge">
-            <i className="fa-solid fa-fire"></i> {streak}-day streak
+            <FaFire style={{ color: '#f59e0b', marginRight: '6px' }} /> {streak}-day streak
           </div>
         )}
 
         <div className="breadcrumb">
-          <a href="/">Home</a><span>›</span><span>Quizzes</span>
+          <a href="/"><FaHome style={{ marginRight: '4px' }} /> Home</a><span>›</span><span>Quizzes</span>
           {currentTopic && (<><span>›</span><span>{currentTopic}</span></>)}
           {currentTopic && resultData && (<><span>›</span><span>Results</span></>)}
         </div>
 
         {tabWarning && quizQuestions.length > 0 && (
           <div className="tab-warning">
-            <i className="fa-solid fa-triangle-exclamation"></i>
+            <FaTriangleExclamation style={{ color: '#f59e0b', marginRight: '8px' }} />
             Tab switch detected ({tabSwitchCount}). Focus on your quiz!
           </div>
         )}
@@ -556,19 +642,19 @@ function Quiz() {
                 <input type="text" placeholder="Search topics..." value={topicSearch} onChange={e => setTopicSearch(e.target.value)} />
               </div>
               <button className="btn-secondary" onClick={() => { setShowLeaderboard(true); loadLeaderboard(); }}>
-                <i className="fa-solid fa-trophy" style={{ color: '#f59e0b' }}></i> Leaderboard
+                <FaTrophy style={{ color: '#f59e0b', marginRight: '6px' }} /> Leaderboard
               </button>
             </div>
 
             <div className="filter-bar">
               <button className={`filter-toggle-btn ${filterDropdownOpen ? 'open' : ''}`} onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}>
-                <i className="fa-solid fa-filter"></i> Filter <i className="fa-solid fa-chevron-down chevron"></i>
+                <FaFilter style={{ color: '#8b5cf6', marginRight: '6px' }} /> Filter <FaChevronDown style={{ fontSize: '0.75rem', transition: 'transform 0.3s', transform: filterDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
               </button>
               {filterDropdownOpen && (
                 <div className="filter-dropdown">
                   <div className="filter-accordion">
                     <button className={`filter-accordion-btn ${filterAccordions.level ? 'open' : ''}`} onClick={() => setFilterAccordions({ ...filterAccordions, level: !filterAccordions.level })}>
-                      <span>Level</span><span className="filter-selected">{currentLevel}</span><i className="fa-solid fa-chevron-down"></i>
+                      <span>Level</span><span className="filter-selected">{currentLevel}</span><FaChevronDown />
                     </button>
                     {filterAccordions.level && (
                       <div className="filter-options open">
@@ -585,7 +671,7 @@ function Quiz() {
             <div className="topic-grid">
               {allTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).length === 0 && (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--clr-text-muted)', fontSize: '1rem' }}>
-                  <i className="fa-solid fa-magnifying-glass" style={{ fontSize: '2rem', marginBottom: '1rem', display: 'block', opacity: 0.4 }}></i>
+                  <FaMagnifyingGlass style={{ fontSize: '2rem', marginBottom: '1rem', display: 'block', opacity: 0.4 }} />
                   No topics match your search.
                 </div>
               )}
@@ -615,28 +701,28 @@ function Quiz() {
         ) : resultData ? (
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <div className="question-card" style={{ textAlign: 'center' }}>
-              <i className={`fa-solid ${resultData.passed ? 'fa-trophy' : 'fa-book-open'} result-icon`} style={{ fontSize: '3rem', color: resultData.passed ? '#f59e0b' : '#6b7280' }}></i>
+              {resultData.passed ? <FaTrophy style={{ fontSize: '3rem', color: '#f59e0b' }} /> : <FaBookOpen style={{ fontSize: '3rem', color: '#6b7280' }} />}
               <h2 style={{ color: 'var(--clr-text-dim)' }}>{resultData.passed ? `Congratulations, ${user?.email?.split('@')[0] || 'Learner'}!` : 'Block Complete'}</h2>
               <div className="result-score">{resultData.percentage}%</div>
               <p style={{ fontSize: '1rem', color: 'var(--clr-text-dim)' }}>{resultData.score}/{resultData.total} correct</p>
               <p style={{ fontStyle: 'italic', fontSize: '0.95rem', color: 'var(--clr-text-dim)' }}>{resultData.passed ? 'Outstanding! You really know this!' : 'Keep studying! Every expert was once a beginner.'}</p>
-              <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`}>{resultData.passed ? '✓ Passed' : '✗ Not passed'}</span>
+              <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`}>{resultData.passed ? <FaCheckCircle style={{ marginRight: '4px' }} /> : <FaCircleXmark style={{ marginRight: '4px' }} />} {resultData.passed ? 'Passed' : 'Not passed'}</span>
               {tabSwitchCount > 0 && (
                 <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.5rem' }}>
-                  <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '4px' }}></i>
+                  <FaTriangleExclamation style={{ marginRight: '4px' }} />
                   {tabSwitchCount} tab switch{tabSwitchCount > 1 ? 'es' : ''} recorded
                 </p>
               )}
               <div className="share-buttons">
                 <button className="share-btn-sm" onClick={() => navigator.clipboard.writeText(`I scored ${resultData.percentage}% on ${currentTopic} Block ${currentBlock + 1} at AliverBiopharm!`)}>
-                  <i className="fa-solid fa-link" style={{ color: '#3b82f6' }}></i>
+                  <FaLink style={{ color: '#3b82f6' }} />
                 </button>
               </div>
             </div>
 
             {adaptivePath && (
               <div className="adaptive-path-card">
-                <div className="ap-icon"><i className="fa-solid fa-lightbulb" style={{ color: '#fbbf24' }}></i></div>
+                <div className="ap-icon"><FaLightbulb style={{ color: '#fbbf24' }} /></div>
                 <div>
                   <h4>{resultData.passed ? 'Great Progress!' : 'Keep Going!'}</h4>
                   <p>{adaptivePath.message}</p>
@@ -650,7 +736,7 @@ function Quiz() {
             {(resultData.answers || []).map((a, idx) => (
               <div key={idx} className="question-card" style={{ padding: '1.2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', fontSize: '0.95rem' }}>
-                  {a.isCorrect ? <i className="fa-solid fa-circle-check" style={{ color: '#10b981' }}></i> : <i className="fa-solid fa-circle-xmark" style={{ color: '#ef4444' }}></i>}
+                  {a.isCorrect ? <FaCircleCheck style={{ color: '#10b981' }} /> : <FaCircleXmark style={{ color: '#ef4444' }} />}
                   <p style={{ fontWeight: 600, color: 'var(--clr-text-dim)' }}>Q{idx + 1}</p>
                   {confidence[idx] && (
                     <span style={{ fontSize: '0.8rem', padding: '2px 8px', borderRadius: '10px', background: confidence[idx] === 'sure' ? '#10b98122' : '#f59e0b22', color: confidence[idx] === 'sure' ? '#10b981' : '#f59e0b', marginLeft: 'auto' }}>
@@ -721,8 +807,8 @@ function Quiz() {
                 const correctOpt = userAnswers[currentIndex]?.correct_option;
                 let cls = '', icon = null;
                 if (answered) {
-                  if (opt === correctOpt) { cls = ' correct'; icon = <i className="fa-solid fa-circle-check" style={{ color: '#10b981', marginLeft: 'auto', fontSize: '1rem' }}></i>; }
-                  else if (opt === selected) { cls = ' incorrect'; icon = <i className="fa-solid fa-circle-xmark" style={{ color: '#ef4444', marginLeft: 'auto', fontSize: '1rem' }}></i>; }
+                  if (opt === correctOpt) { cls = ' correct'; icon = <FaCircleCheck style={{ color: '#10b981', marginLeft: 'auto', fontSize: '1rem' }} />; }
+                  else if (opt === selected) { cls = ' incorrect'; icon = <FaCircleXmark style={{ color: '#ef4444', marginLeft: 'auto', fontSize: '1rem' }} />; }
                 }
                 return (
                   <button key={opt} className={`option-btn${cls}`} disabled={answered || answerSubmitting} onClick={() => selectAnswer(opt)}>
@@ -768,9 +854,9 @@ function Quiz() {
                   const locked = topicData?.locked_blocks?.includes(i);
                   const completed = topicData?.completed_blocks?.includes(i);
                   let icon = null, cls = '';
-                  if (locked) { cls = 'locked'; icon = <i className="fa-solid fa-lock" style={{ marginRight: '6px', color: '#ef4444' }}></i>; }
-                  else if (completed) { cls = 'completed'; icon = <i className="fa-solid fa-check-circle" style={{ marginRight: '6px', color: '#10b981' }}></i>; }
-                  else { icon = <i className="fa-regular fa-circle" style={{ marginRight: '6px', color: '#0ab5b5' }}></i>; }
+                  if (locked) { cls = 'locked'; icon = <FaLock style={{ marginRight: '6px', color: '#ef4444' }} />; }
+                  else if (completed) { cls = 'completed'; icon = <FaCheckCircle style={{ marginRight: '6px', color: '#10b981' }} />; }
+                  else { icon = <FaCircleCheck style={{ marginRight: '6px', color: '#0ab5b5' }} />; }
                   return (
                     <button key={i} className={`block-nav-btn ${cls}`} disabled={locked} onClick={() => startBlock(i)}>
                       {icon} Block {i + 1}
@@ -788,13 +874,13 @@ function Quiz() {
             <div onClick={e => e.stopPropagation()}>
               <h3>Quiz Rules</h3>
               <ul>
-                <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> 10 questions per block</li>
-                <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> 70% to pass</li>
-                <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> Immediate feedback per question</li>
-                <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> Full explanations on review</li>
-                <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> 10-minute time limit</li>
-                <li><i className="fa-solid fa-check-circle" style={{ color: '#10b981', marginRight: '8px' }}></i> Block locks for 24h after completion</li>
-                <li><i className="fa-solid fa-triangle-exclamation" style={{ color: '#f59e0b', marginRight: '8px' }}></i> Tab switches are recorded</li>
+                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> 10 questions per block</li>
+                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> 70% to pass</li>
+                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> Immediate feedback per question</li>
+                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> Full explanations on review</li>
+                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> 10-minute time limit</li>
+                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> Block locks for 24h after completion</li>
+                <li><FaTriangleExclamation style={{ color: '#f59e0b', marginRight: '8px' }} /> Tab switches are recorded</li>
               </ul>
               <button className="btn-primary" style={{ width: '100%' }} onClick={confirmStartBlock}>I understand, let's begin!</button>
             </div>
@@ -822,8 +908,8 @@ function Quiz() {
           <div className="modal-overlay" onClick={() => setShowLeaderboard(false)}>
             <div className="leaderboard-modal" onClick={e => e.stopPropagation()}>
               <div className="leaderboard-header">
-                <h3><i className="fa-solid fa-trophy" style={{ color: '#f59e0b', marginRight: '8px' }}></i>Leaderboard — {currentLevel}</h3>
-                <button className="leaderboard-close" onClick={() => setShowLeaderboard(false)}><i className="fa-solid fa-xmark"></i></button>
+                <h3><FaTrophy style={{ color: '#f59e0b', marginRight: '8px' }} />Leaderboard — {currentLevel}</h3>
+                <button className="leaderboard-close" onClick={() => setShowLeaderboard(false)}><FaXmark /></button>
               </div>
               {leaderboardLoading ? (
                 <p className="leaderboard-empty">Loading...</p>
@@ -880,8 +966,8 @@ function Quiz() {
         </div>
       </footer>
 
-      <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><i className="fa-solid fa-arrow-up"></i></button>
-      <a href="#pricing" className="sticky-cta"><i className="fa-solid fa-rocket"></i> Start Learning</a>
+      <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><FaArrowUp style={{ color: '#b8873a' }} /></button>
+      <a href="#pricing" className="sticky-cta"><FaRocket style={{ marginRight: '6px' }} /> Start Learning</a>
 
       {toast && (
         <div className={`toast toast-${toast.type}`}>
