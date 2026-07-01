@@ -24,8 +24,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body>
+ <body>
   <div id="root"></div>
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      document.body.innerHTML = '<pre style="white-space:pre-wrap;padding:16px;font-size:14px;background:#fff;color:#000;">' +
+        'MSG: ' + msg + '\nSRC: ' + src + '\nLINE: ' + line + '\nSTACK: ' + (err && err.stack || 'n/a') +
+        '</pre>';
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      document.body.innerHTML = '<pre style="white-space:pre-wrap;padding:16px;font-size:14px;background:#fff;color:#000;">' +
+        'UNHANDLED PROMISE REJECTION: ' + (e.reason && e.reason.stack || e.reason) +
+        '</pre>';
+    });
+  </script>
   <script type="module" src="/src/main.jsx"></script>
-</body>
+ </body>
 </html>
