@@ -6,23 +6,41 @@ import {
   getPastPaperFilterOptions,
   getPastPaperDownloadUrl
 } from '../api/client';
-import {
-  FaSun,
-  FaMoon,
-  FaBars,
-  FaRightFromBracket,
-  FaXmark,
-  FaLock,
-  FaSearch,
-  FaFilter,
-  FaChevronDown,
-  FaFilePdf,
-  FaDownload,
-  FaSpinner,
-  FaChevronLeft,
-  FaChevronRight,
-  FaArrowUp,
-} from '../components/icons/IconMap';
+import { 
+  FaSun, 
+  FaMoon, 
+  FaBars, 
+  FaRightFromBracket, 
+  FaXmark, 
+  FaLock, 
+  FaSearch, 
+  FaFilter, 
+  FaChevronDown, 
+  FaFilePdf, 
+  FaDownload, 
+  FaSpinner, 
+  FaChevronLeft, 
+  FaChevronRight, 
+  FaArrowUp 
+} from "react-icons/fa";
+
+const ICON_COLORS = {
+  sun: '#f59e0b',
+  moon: '#94a3b8',
+  bars: '#ffffff',
+  rightFromBracket: '#ef4444',
+  xmark: '#94a3b8',
+  lock: '#b8873a',
+  search: '#10b981',
+  filter: '#8b5cf6',
+  chevronDown: '#94a3b8',
+  filePdf: '#ef4444',
+  download: '#3b82f6',
+  spinner: '#b8873a',
+  chevronLeft: '#94a3b8',
+  chevronRight: '#94a3b8',
+  arrowUp: '#b8873a',
+};
 
 export default function PastPapers() {
   const { user, logout } = useAuth();
@@ -165,10 +183,10 @@ export default function PastPapers() {
               localStorage.setItem('theme', dark ? 'dark' : 'light');
               setTheme(dark ? 'dark' : 'light');
             }}>
-              {theme === 'dark' ? <FaSun /> : <FaMoon />}
+              {theme === 'dark' ? <FaSun style={{ color: ICON_COLORS.sun }} /> : <FaMoon style={{ color: ICON_COLORS.moon }} />}
             </button>
             <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <FaBars />
+              <FaBars style={{ color: ICON_COLORS.bars }} />
             </button>
           </div>
         </div>
@@ -180,7 +198,9 @@ export default function PastPapers() {
             <div className="mobile-nav-header-row">
               <div className="mobile-auth-top">
                 {user ? (
-                  <button className="mobile-signout-btn" onClick={logout}><FaRightFromBracket /> Sign Out</button>
+                  <button className="mobile-signout-btn" onClick={logout}>
+                    <FaRightFromBracket style={{ color: ICON_COLORS.rightFromBracket, marginRight: '8px' }} /> Sign Out
+                  </button>
                 ) : (
                   <>
                     <a href="#" className="mobile-signin-btn" onClick={() => window.location.href = '/login'}>Sign In</a>
@@ -188,7 +208,9 @@ export default function PastPapers() {
                   </>
                 )}
               </div>
-              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}><FaXmark /></button>
+              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}>
+                <FaXmark style={{ color: ICON_COLORS.xmark }} />
+              </button>
             </div>
           </div>
           <nav className="mobile-nav-links">
@@ -211,7 +233,7 @@ export default function PastPapers() {
 
         {!user && (
           <div style={{ background: 'linear-gradient(135deg, rgba(184,135,58,0.15), rgba(10,181,181,0.1))', border: '1px solid var(--clr-magenta)', borderRadius: 'var(--radius-lg)', padding: '1.2rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <FaLock style={{ color: 'var(--clr-magenta)', fontSize: '1.4rem' }} />
+            <FaLock style={{ color: ICON_COLORS.lock, fontSize: '1.4rem' }} />
             <div style={{ flex: 1 }}>
               <p style={{ fontWeight: 700, color: 'var(--clr-white)', marginBottom: '0.2rem' }}>Sign in to download papers</p>
               <p style={{ fontSize: 'var(--text-sm)', color: 'var(--clr-text-dim)' }}>You can browse all papers freely. Create a free account to download.</p>
@@ -241,15 +263,15 @@ export default function PastPapers() {
               style={{ flex: 1, padding: '0.7rem 1rem', borderRadius: '60px', border: '1px solid var(--clr-border-glow)', background: 'var(--clr-navy-light)', color: 'var(--clr-white)', fontFamily: 'var(--font-body)', fontSize: 'var(--text-base)' }}
             />
             <button type="submit" className="btn-primary" style={{ padding: '0.7rem 1.2rem', borderRadius: '60px' }}>
-              <FaSearch />
+              <FaSearch style={{ color: '#ffffff' }} />
             </button>
           </form>
 
           <div style={{ position: 'relative' }}>
             <button className={`filter-toggle-btn ${filterDropdownOpen ? 'open' : ''}`} onClick={() => setFilterDropdownOpen(!filterDropdownOpen)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.7rem 1.2rem', background: 'var(--clr-navy-card)', border: '1px solid var(--clr-border-glow)', borderRadius: '60px', color: 'var(--clr-white)', fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-              <FaFilter style={{ color: 'var(--clr-magenta)' }} />
+              <FaFilter style={{ color: ICON_COLORS.filter }} />
               Filters {activeFilterCount > 0 && <span style={{ background: 'var(--clr-magenta)', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>{activeFilterCount}</span>}
-              <FaChevronDown style={{ fontSize: '0.75rem', transition: 'transform 0.3s', transform: filterDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+              <FaChevronDown style={{ color: ICON_COLORS.chevronDown, fontSize: '0.75rem', transition: 'transform 0.3s', transform: filterDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
             </button>
 
             {filterDropdownOpen && (
@@ -264,7 +286,7 @@ export default function PastPapers() {
                     <button className={`filter-accordion-btn ${filterAccordions[key] ? 'open' : ''}`} onClick={() => setFilterAccordions(prev => ({ ...prev, [key]: !prev[key] }))}>
                       <span>{label}</span>
                       <span className="filter-selected">{filters[key] || 'All'}</span>
-                      <FaChevronDown />
+                      <FaChevronDown style={{ color: ICON_COLORS.chevronDown }} />
                     </button>
                     {filterAccordions[key] && (
                       <div className="filter-options open">
@@ -282,7 +304,7 @@ export default function PastPapers() {
                 ))}
                 {activeFilterCount > 0 && (
                   <button className="filter-clear-btn" onClick={() => { clearFilters(); setFilterDropdownOpen(false); }}>
-                    <FaXmark style={{ marginRight: '6px' }} /> Clear all filters
+                    <FaXmark style={{ color: ICON_COLORS.xmark, marginRight: '6px' }} /> Clear all filters
                   </button>
                 )}
               </div>
@@ -296,7 +318,7 @@ export default function PastPapers() {
           </p>
           {activeFilterCount > 0 && (
             <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: 'var(--clr-magenta)', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', fontWeight: 600, cursor: 'pointer' }}>
-              <FaXmark style={{ marginRight: '4px' }} /> Clear filters
+              <FaXmark style={{ color: ICON_COLORS.xmark, marginRight: '4px' }} /> Clear filters
             </button>
           )}
         </div>
@@ -311,7 +333,7 @@ export default function PastPapers() {
           </div>
         ) : papers.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--clr-navy-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--clr-border-glow)' }}>
-            <FaFilePdf style={{ fontSize: '3rem', color: 'var(--clr-text-muted)', marginBottom: '1rem', display: 'block' }} />
+            <FaFilePdf style={{ color: ICON_COLORS.filePdf, fontSize: '3rem', marginBottom: '1rem', display: 'block' }} />
             <p style={{ fontWeight: 700, color: 'var(--clr-white)', marginBottom: '0.5rem' }}>No papers found</p>
             <p style={{ color: 'var(--clr-text-dim)', fontSize: 'var(--text-sm)' }}>Try adjusting your filters or search term.</p>
             <button onClick={clearFilters} className="btn-secondary" style={{ marginTop: '1rem' }}>Clear filters</button>
@@ -343,18 +365,18 @@ export default function PastPapers() {
 
                 {paper.download_count > 0 && (
                   <p style={{ fontSize: '0.7rem', color: 'var(--clr-text-muted)', fontFamily: 'var(--font-mono)' }}>
-                    <FaDownload style={{ marginRight: '4px' }} />{paper.download_count} downloads
+                    <FaDownload style={{ color: ICON_COLORS.download, marginRight: '4px' }} />{paper.download_count} downloads
                   </p>
                 )}
 
                 <div style={{ marginTop: 'auto', display: 'flex', gap: '0.5rem' }}>
                   <button onClick={() => handleDownload(paper)} disabled={downloadingId === paper.id} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.65rem', borderRadius: '40px', border: 'none', background: user ? 'var(--gradient-cyan)' : 'var(--clr-navy-light)', color: user ? '#fff' : 'var(--clr-text-muted)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-sm)', cursor: 'pointer', transition: 'all 0.2s ease', opacity: downloadingId === paper.id ? 0.7 : 1 }}>
                     {downloadingId === paper.id ? (
-                      <><FaSpinner className="icon-spin" /> Downloading...</>
+                      <><FaSpinner className="icon-spin" style={{ color: ICON_COLORS.spinner }} /> Downloading...</>
                     ) : user ? (
-                      <><FaDownload /> Download</>
+                      <><FaDownload style={{ color: '#ffffff' }} /> Download</>
                     ) : (
-                      <><FaLock /> Sign in to Download</>
+                      <><FaLock style={{ color: ICON_COLORS.lock }} /> Sign in to Download</>
                     )}
                   </button>
                 </div>
@@ -366,7 +388,7 @@ export default function PastPapers() {
         {totalPages > 1 && (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '2.5rem', flexWrap: 'wrap' }}>
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary" style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', opacity: page === 1 ? 0.4 : 1 }}>
-              <FaChevronLeft />
+              <FaChevronLeft style={{ color: ICON_COLORS.chevronLeft }} />
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2).reduce((acc, p, idx, arr) => {
               if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
@@ -378,7 +400,7 @@ export default function PastPapers() {
               <button key={p} onClick={() => setPage(p)} style={{ width: '36px', height: '36px', borderRadius: '50%', border: p === page ? 'none' : '1px solid var(--clr-border-glow)', background: p === page ? 'var(--gradient-magenta)' : 'transparent', color: p === page ? '#fff' : 'var(--clr-white)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 'var(--text-sm)', cursor: 'pointer', transition: 'all 0.2s' }}>{p}</button>
             ))}
             <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="btn-secondary" style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', opacity: page === totalPages ? 0.4 : 1 }}>
-              <FaChevronRight />
+              <FaChevronRight style={{ color: ICON_COLORS.chevronRight }} />
             </button>
           </div>
         )}
@@ -387,7 +409,7 @@ export default function PastPapers() {
       {authPrompt && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setAuthPrompt(false)}>
           <div style={{ background: 'var(--clr-navy-card)', padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '400px', width: '90%', textAlign: 'center', border: '1px solid var(--clr-magenta)' }} onClick={e => e.stopPropagation()}>
-            <FaLock style={{ fontSize: '2.5rem', color: 'var(--clr-magenta)', marginBottom: '1rem', display: 'block' }} />
+            <FaLock style={{ color: ICON_COLORS.lock, fontSize: '2.5rem', marginBottom: '1rem', display: 'block' }} />
             <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--clr-white)', marginBottom: '0.5rem' }}>Sign in to Download</h3>
             <p style={{ color: 'var(--clr-text-dim)', fontSize: 'var(--text-sm)', marginBottom: '1.5rem' }}>Create a free account to download past papers and track your progress.</p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
@@ -434,7 +456,9 @@ export default function PastPapers() {
         </div>
       </footer>
 
-      <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><FaArrowUp /></button>
+      <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        <FaArrowUp style={{ color: ICON_COLORS.arrowUp }} />
+      </button>
     </div>
   );
 }
