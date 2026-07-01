@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import FlashcardOnboarding from '../components/FlashcardOnboarding';
@@ -12,7 +12,8 @@ import {
   completeFlashcardSession,
   getKnownFlashcards,
 } from '../api/cachedClient';
-import { FaSpinner, FaTriangleExclamation } from "react-icons/fa";
+import { FaSpinner } from "react-icons/fa";
+import { FaTriangleExclamation } from "react-icons/fa6";
 
 const STAGE = {
   LOADING: 'loading',
@@ -22,8 +23,7 @@ const STAGE = {
   STUDY: 'study',
   COMPLETE: 'complete',
 };
-
-const COLORS = {
+ const COLORS = {
   primary: '#b8873a',
   secondary: '#0ab5b5',
   accent: '#10b981',
