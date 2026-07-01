@@ -1,4 +1,4 @@
- import React from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
@@ -24,14 +24,35 @@ function showFatalError(title, message, stack) {
   `;
 }
 
+function isCrossOriginScriptError(message, source, error) {
+  if (message !== 'Script error.') return false;
+  if (error && error.stack) return false;
+  try {
+    if (!source) return true;
+    const srcUrl = new URL(source, location.href);
+    return srcUrl.origin !== location.origin;
+  } catch {
+    return true;
+  }
+}
+
 window.onerror = function (message, source, lineno, colno, error) {
+  if (isCrossOriginScriptError(message, source, error)) {
+    console.warn('Cross-origin script error', source || 'unknown');
+    return true;
+  }
   showFatalError('Runtime Error', message, error?.stack);
   return false;
 };
 
 window.addEventListener('unhandledrejection', function (event) {
   const reason = event.reason;
-  showFatalError('Unhandled Promise Rejection', reason?.message || String(reason), reason?.stack);
+  const message = (reason && reason.message) || String(reason);
+  if (isCrossOriginScriptError(message, null, reason)) {
+    console.warn('Cross-origin promise rejection', reason);
+    return;
+  }
+  showFatalError('Unhandled Promise Rejection', message, reason?.stack);
 });
 
 class ErrorBoundary extends React.Component {
@@ -77,20 +98,24 @@ class ErrorBoundary extends React.Component {
 }
 
 function initRevealObserver() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) entry.target.classList.add('in');
-    });
-  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  try {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('in');
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-  const observeElements = () => {
-    document.querySelectorAll('.reveal:not(.in)').forEach(el => observer.observe(el));
-  };
+    const observeElements = () => {
+      document.querySelectorAll('.reveal:not(.in)').forEach(el => observer.observe(el));
+    };
 
-  observeElements();
+    observeElements();
 
-  const mutationObserver = new MutationObserver(observeElements);
-  mutationObserver.observe(document.body, { childList: true, subtree: true });
+    const mutationObserver = new MutationObserver(observeElements);
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+  } catch (e) {
+    console.warn('Reveal observer init failed', e);
+  }
 }
 
 if (document.readyState === 'loading') {
