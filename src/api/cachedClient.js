@@ -1,4 +1,4 @@
-import { getCached, setCache, invalidateCache } from '../utils/cache';
+ import { getCached, setCache, invalidateCache } from '../utils/cache';
 import * as api from './client';
 
 function withCache(key, fetcher, cacheEnabled = true) {
@@ -78,7 +78,7 @@ export const getInfoSection = (section) =>
 export const getInfoSectionsList = () =>
   withCache('info_sections_list', api.getInfoSectionsList)();
 
- export const getFlashcards = (filters = {}) =>
+export const getFlashcards = (filters = {}) =>
   withArgsCache((f) => `flashcards_list_${JSON.stringify(f)}`, api.getFlashcards)(filters);
 
 export const getFlashcardDecks = (filters = {}) =>
@@ -143,6 +143,18 @@ export const getChatMessages = (roomId) =>
 
 export const checkAdminOnline = () =>
   withCache('admin_online', api.checkAdminOnline, false)();
+
+export const startQuizSession = (level, topic, blockNumber, state = {}) =>
+  api.startQuizSession(level, topic, blockNumber, state);
+
+export const trackTabSwitch = (level, topic, blockNumber) =>
+  api.trackTabSwitch(level, topic, blockNumber);
+
+export const submitQuizWithSession = (level, topic, blockNumber, answers, timeTaken) =>
+  api.submitQuizWithSession(level, topic, blockNumber, answers, timeTaken);
+
+export const getQuizSessionStatus = () =>
+  api.getQuizSessionStatus();
 
 export function invalidateNoteCache(id) { invalidateCache(`note_${id}`); }
 export function invalidateChatCache(roomId) { invalidateCache(`chat_${roomId}`); }
@@ -230,20 +242,20 @@ export {
   adminGetActiveChats,
   submitWeeklyChallenge,
   getWeeklyChallengeStatus,
-   createFlashcardDeck,
-updateFlashcardDeck,
-deleteFlashcardDeck,
-addFlashcardCards,
-removeFlashcardCard,
-toggleFlashcardKnown,
-rateFlashcard,
-checkFlashcardAnswer,
-toggleFlashcardBookmark,
-saveFlashcardOnboarding,
-resetFlashcardOnboarding,
-startFlashcardSession,
-updateFlashcardSession,
-completeFlashcardSession,
+  createFlashcardDeck,
+  updateFlashcardDeck,
+  deleteFlashcardDeck,
+  addFlashcardCards,
+  removeFlashcardCard,
+  toggleFlashcardKnown,
+  rateFlashcard,
+  checkFlashcardAnswer,
+  toggleFlashcardBookmark,
+  saveFlashcardOnboarding,
+  resetFlashcardOnboarding,
+  startFlashcardSession,
+  updateFlashcardSession,
+  completeFlashcardSession,
   uploadFile,
   getRecallSession,
   checkRecallSession,
@@ -260,4 +272,13 @@ completeFlashcardSession,
   updateNotificationPreferences,
   getGlossaryTerm,
   updateInfoSection,
+  fetchLabTools,
+  fetchLabDrugs,
+  fetchLabInteraction,
+  fetchLabPathways,
+  fetchLabPathway,
+  fetchLabCases,
+  fetchLabCase,
+  submitLabScore,
+  fetchLabFormulas,
 } from './client';
