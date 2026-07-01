@@ -128,12 +128,12 @@ export default function HomeView({
 
       <InfoCards />
 
-      <StatsGrid stats={{
-        resources_count: sections?.public_stats?.resources_count || 0,
-        users_count: sections?.public_stats?.users_count || 0,
-        downloads_count: sections?.public_stats?.downloads_count || 0,
-        quiz_attempts: sections?.public_stats?.quiz_attempts || 0,
-      }} />
+       <StatsGrid stats={{
+  resources_count: publicStats?.resources_count || 0,
+  users_count: publicStats?.users_count || 0,
+  downloads_count: publicStats?.downloads_count || 0,
+  quiz_attempts: publicStats?.quiz_attempts || 0,
+}} />
 
       <ContinueLearningSection
         continueLearning={continueLearning}
