@@ -14,7 +14,11 @@ import {
   saveQuizState,
   getQuizState,
   trackEvent,
-  getLeaderboard
+  getLeaderboard,
+  startQuizSession,
+  trackTabSwitch,
+  submitQuizWithSession,
+  getQuizSessionStatus
 } from '../api/cachedClient';
 import { getAllSiteSections } from '../api/client';
 import QuizHero from '../components/quiz/QuizHero';
@@ -101,7 +105,7 @@ import {
   FaVolumeHigh,
   FaVolumeXmark,
 } from "react-icons/fa6";
-   
+
 class QuizErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false }; }
   static getDerivedStateFromError() { return { hasError: true }; }
@@ -163,9 +167,12 @@ function Quiz() {
   const [tabWarning, setTabWarning] = useState(false);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [answerSubmitting, setAnswerSubmitting] = useState(false);
+  const [sessionActive, setSessionActive] = useState(true);
+  const [blockTabSwitch, setBlockTabSwitch] = useState(false);
   const spinnerTimeout = useRef(null);
   const saveDebounceRef = useRef(null);
   const touchStartX = useRef(null);
+  const MAX_TAB_SWITCHES = 3;
 
   const SPINNER_WORDS = [
     'Reviewing your selection...', 'Checking your answer...', 'Analyzing...',
@@ -316,21 +323,50 @@ function Quiz() {
   }, [quizQuestions, currentIndex, userAnswers, answerSubmitting]);
 
   useEffect(() => {
-    if (!quizQuestions.length) return;
-    const handleVisibility = () => {
+    if (!quizQuestions.length || !sessionActive) return;
+    
+    let warningTimeout = null;
+    
+    const handleVisibility = async () => {
       if (document.hidden) {
-        setTabSwitchCount(prev => {
-          const next = prev + 1;
-          setTabWarning(true);
-          setTimeout(() => setTabWarning(false), 4000);
-          trackEvent('tab_switch', { topic: currentTopic, block: currentBlock, count: next });
-          return next;
-        });
+        try {
+          const result = await trackTabSwitch(currentLevel, currentTopic, currentBlock);
+          
+          if (!result.success && result.auto_submitted) {
+            setSessionActive(false);
+            setTabWarning(true);
+            showToast(result.message || 'Quiz auto-submitted due to tab switching', 'warning');
+            setTimeout(() => {
+              submitBlockWithSession();
+            }, 1500);
+            return;
+          }
+          
+          if (result.success) {
+            setTabSwitchCount(result.tab_switches);
+            setTabWarning(true);
+            setBlockTabSwitch(true);
+            warningTimeout = setTimeout(() => {
+              setTabWarning(false);
+              setBlockTabSwitch(false);
+            }, 4000);
+            
+            if (result.remaining <= 1) {
+              showToast(`Warning: ${result.remaining} tab switch${result.remaining > 1 ? 'es' : ''} remaining!`, 'warning');
+            }
+          }
+        } catch (error) {
+          console.error('Failed to track tab switch:', error);
+        }
       }
     };
+    
     document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [quizQuestions.length, currentTopic, currentBlock]);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (warningTimeout) clearTimeout(warningTimeout);
+    };
+  }, [quizQuestions.length, currentLevel, currentTopic, currentBlock, sessionActive]);
 
   useEffect(() => {
     if (quizStartTime && quizQuestions.length) {
@@ -341,7 +377,7 @@ function Quiz() {
         if (remaining === 0) {
           clearInterval(interval);
           showToast('Time is up! Submitting your answers.', 'warning');
-          submitBlock();
+          submitBlockWithSession();
         }
       }, 1000);
       return () => clearInterval(interval);
@@ -416,9 +452,33 @@ function Quiz() {
     const blockNum = pendingBlock;
     setCurrentBlock(blockNum);
     setLoading(true);
+    
     try {
+      const sessionResult = await startQuizSession(currentLevel, currentTopic, blockNum);
+      
+      if (!sessionResult.success) {
+        if (sessionResult.auto_submitted) {
+          showToast(sessionResult.message || 'Quiz auto-submitted. Please start a new block.', 'warning');
+          setCurrentTopic('');
+          setQuizQuestions([]);
+          setLoading(false);
+          return;
+        }
+        showToast('Failed to start quiz session', 'error');
+        setLoading(false);
+        return;
+      }
+      
+      setTabSwitchCount(sessionResult.tab_switches || 0);
+      setSessionActive(true);
+      
       const data = await getQuizBlock({ level: currentLevel, topic: currentTopic, block_number: blockNum });
-      if (!data || !data.questions || !data.questions.length) { showToast('No questions available.', 'error'); setLoading(false); return; }
+      if (!data || !data.questions || !data.questions.length) {
+        showToast('No questions available.', 'error');
+        setLoading(false);
+        return;
+      }
+      
       setQuizQuestions(data.questions);
       setUserAnswers(new Array(data.questions.length).fill(null));
       setConfidence(new Array(data.questions.length).fill(null));
@@ -426,10 +486,12 @@ function Quiz() {
       setQuizStartTime(new Date());
       setResultData(null);
       setTimeLeft(600);
-      setTabSwitchCount(0);
       trackEvent('quiz_start', { level: currentLevel, topic: currentTopic, block: blockNum });
       setLoading(false);
-    } catch (err) { showToast('Failed to load quiz: ' + err.message, 'error'); setLoading(false); }
+    } catch (err) {
+      showToast('Failed to load quiz: ' + err.message, 'error');
+      setLoading(false);
+    }
   }
 
   async function selectAnswer(optionLetter) {
@@ -472,6 +534,86 @@ function Quiz() {
   }
 
   function prevQuestion() { if (currentIndex > 0) navigateTo(currentIndex - 1); }
+
+  async function submitBlockWithSession() {
+    if (quizQuestions.length === 0) return;
+    
+    const allAnswered = userAnswers.every(a => a !== null);
+    if (!allAnswered) {
+      showToast('Please answer all questions before submitting.', 'warning');
+      return;
+    }
+    
+    const answersPayload = quizQuestions.map((q, idx) => ({
+      id: q.id,
+      selectedOption: userAnswers[idx]?.selected || 'X'
+    }));
+    
+    const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
+    setLoading(true);
+    
+    try {
+      const result = await submitQuizWithSession(
+        currentLevel,
+        currentTopic,
+        currentBlock,
+        answersPayload,
+        timeTaken
+      );
+      
+      if (!result.success) {
+        if (result.auto_submitted) {
+          showToast(result.message || 'Quiz auto-submitted due to tab switching', 'warning');
+          if (result.score !== undefined) {
+            setResultData(result);
+          }
+          setLoading(false);
+          return;
+        }
+        showToast('Submission failed: ' + (result.message || 'Unknown error'), 'error');
+        setLoading(false);
+        return;
+      }
+      
+      setResultData(result);
+      trackEvent('quiz_complete', {
+        level: currentLevel,
+        topic: currentTopic,
+        block: currentBlock,
+        score: result.percentage,
+        passed: result.passed,
+        tab_switches: result.tab_switches || 0
+      });
+      
+      const newBadges = [];
+      if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) {
+        newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
+      }
+      if (!earnedBadges.includes('first_block')) {
+        newBadges.push({ id: 'first_block', label: 'First Block Done' });
+      }
+      for (let b of newBadges) await saveAchievement({ id: b.id, label: b.label });
+      setEarnedBadges(prev => [...prev, ...newBadges.map(b => b.id)]);
+      if (streak >= 10 && !earnedBadges.includes('streak_10')) {
+        await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
+        setEarnedBadges(prev => [...prev, 'streak_10']);
+      }
+      
+      let rule = null;
+      if (result.percentage >= 90) {
+        rule = { message: "Excellent! You're ready for more advanced material.", action: null };
+      } else if (result.percentage < 70) {
+        rule = { message: 'Review key concepts from this block before moving on.', action: 'review_block' };
+      }
+      setAdaptivePath(rule);
+      await loadTopics(currentLevel);
+      setLoading(false);
+      if (result.passed && result.percentage >= 90) showConfetti();
+    } catch (err) {
+      showToast('Submission failed: ' + err.message, 'error');
+      setLoading(false);
+    }
+  }
 
   async function submitBlock() {
     if (quizQuestions.length === 0) return;
@@ -614,7 +756,14 @@ function Quiz() {
         {tabWarning && quizQuestions.length > 0 && (
           <div className="tab-warning">
             <FaTriangleExclamation style={{ color: '#f59e0b', marginRight: '8px' }} />
-            Tab switch detected ({tabSwitchCount}). Focus on your quiz!
+            Tab switch detected ({tabSwitchCount}/{MAX_TAB_SWITCHES}). {tabSwitchCount >= MAX_TAB_SWITCHES ? 'Quiz will auto-submit!' : 'Stay focused!'}
+          </div>
+        )}
+
+        {blockTabSwitch && quizQuestions.length > 0 && tabSwitchCount < MAX_TAB_SWITCHES && (
+          <div className="tab-warning" style={{ background: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef4444' }}>
+            <FaTriangleExclamation style={{ color: '#ef4444', marginRight: '8px' }} />
+            Warning: Tab switching is not allowed during the quiz. ({tabSwitchCount}/{MAX_TAB_SWITCHES})
           </div>
         )}
 
@@ -829,7 +978,7 @@ function Quiz() {
                 ) : currentIndex < quizQuestions.length - 1 && userAnswers[currentIndex] !== null ? (
                   <button className="btn-primary" onClick={nextQuestion}>Next →</button>
                 ) : allAnswered ? (
-                  <button className="btn-primary" onClick={submitBlock}>Submit Block</button>
+                  <button className="btn-primary" onClick={submitBlockWithSession}>Submit Block</button>
                 ) : null
               )}
             </div>
@@ -874,6 +1023,7 @@ function Quiz() {
                 <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> 10-minute time limit</li>
                 <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> Block locks for 24h after completion</li>
                 <li><FaTriangleExclamation style={{ color: '#f59e0b', marginRight: '8px' }} /> Tab switches are recorded</li>
+                <li><FaTriangleExclamation style={{ color: '#ef4444', marginRight: '8px' }} /> {MAX_TAB_SWITCHES} tab switches = auto-submit</li>
               </ul>
               <button className="btn-primary" style={{ width: '100%' }} onClick={confirmStartBlock}>I understand, let's begin!</button>
             </div>
