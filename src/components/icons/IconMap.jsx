@@ -77,7 +77,14 @@
   FaVolumeXmark,
   FaXmark,
   FaXTwitter,
-} from "react-icons/fa6";
+FaArrowUp,
+  FaChevronDown,
+  FaChevronLeft,
+  FaChevronRight,
+  FaFilter,
+  FaSearch,
+  FaSpinner,
+ } from "react-icons/fa6";
 
 export {
   FaArrowLeft as FaArrowLeftV5,
