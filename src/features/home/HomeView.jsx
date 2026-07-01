@@ -1,4 +1,4 @@
-// features/home/HomeView.jsx
+ // features/home/HomeView.jsx
 import React from 'react';
 import { Header } from '../../common-layout/Header';
 import { Footer } from '../../common-layout/Footer';
@@ -15,12 +15,14 @@ import { ContinueLearningSection } from './ContinueLearningSection';
 import { FlashcardSection } from '../flashcards/FlashcardSection';
 import { PdfLibrarySection } from '../pdfs/PdfLibrarySection';
 import { PdfPreviewModal } from '../pdfs/PdfPreviewModal';
-import { NotesSection } from '../Notes/NotesSection';
+import { NotesSection } from '../notes/NotesSection';
 import { MoodCheckSection } from '../mood/MoodCheckSection';
 import { CommunitySection } from '../community/CommunitySection';
 import { ContactSection } from '../contact/ContactSection';
 import { ChatWidget } from '../chat/ChatWidget';
 import { InteractiveShowcase } from '../lab/InteractiveShowcase';
+import { NotificationBell } from '../notifications/NotificationBell';
+import { InfoCards } from '../info/InfoCards';
 
 export default function HomeView({
   user,
@@ -105,7 +107,9 @@ export default function HomeView({
           setTheme(dark ? 'dark' : 'light');
         }}
         onToggleMobile={() => setMobileMenuOpen(!mobileMenuOpen)}
-      />
+      >
+        <NotificationBell user={user} />
+      </Header>
 
       <MobileMenu
         open={mobileMenuOpen}
@@ -122,6 +126,8 @@ export default function HomeView({
       />
 
       <InteractiveShowcase />
+
+      <InfoCards />
 
       <StatsGrid stats={{
         resources_count: sections?.public_stats?.resources_count || 0,
@@ -229,7 +235,7 @@ export default function HomeView({
         chatMessages={chatMessages}
         chatInput={chatInput}
         adminOnline={adminOnline}
-        onToggle={requestChatRoom}
+        onToggle={() => setChatOpen(!chatOpen)}
         onSend={sendChat}
         onInputChange={setChatInput}
         onDeleteMsg={deleteChatMsg}
