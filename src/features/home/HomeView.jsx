@@ -21,7 +21,7 @@ import { CommunitySection } from '../community/CommunitySection';
 import { ContactSection } from '../contact/ContactSection';
 import { ChatWidget } from '../chat/ChatWidget';
 import { InteractiveShowcase } from '../lab/InteractiveShowcase';
-import { NotificationBell } from '../notifications/NotificationBell';
+import { NotificationBell } from '../components/NotificationBell';
 import { InfoCards } from '../info/InfoCards';
 
 export default function HomeView({
