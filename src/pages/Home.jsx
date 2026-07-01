@@ -1,6 +1,6 @@
   import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HomeView from './HomeView';
+ import HomeView from '../features/home/HomeView';
 import { getSections } from '../api/sections';
 import { useAuth } from '../contexts/AuthContext';
 import {
