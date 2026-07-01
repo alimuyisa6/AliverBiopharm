@@ -14,6 +14,14 @@ import {
 } from '../api/cachedClient';
 import { FaSpinner } from "react-icons/fa";
 import { FaTriangleExclamation } from "react-icons/fa6";
+import { getAllSiteSections } from '../api/client';
+
+const [sections, setSections] = useState(null);
+
+useEffect(() => {
+  getAllSiteSections().then(setSections);
+}, []);
+
 
 const STAGE = {
   LOADING: 'loading',
