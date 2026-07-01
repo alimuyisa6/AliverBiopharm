@@ -3,6 +3,7 @@
   FaChevronDown,
   FaChevronLeft,
   FaChevronRight,
+  FaBalanceScale,  // ← Move this here from fa6
   FaFilter,
   FaSearch,
   FaSpinner,
@@ -107,7 +108,6 @@ import {
 import {
   FaAddressBook,
   FaAward,
-  FaBalanceScale,
   FaBandAid,
   FaBiohazard,
   FaBolt,
