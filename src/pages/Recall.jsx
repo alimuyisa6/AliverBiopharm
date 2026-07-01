@@ -579,7 +579,7 @@ function BioRecall() {
   const exportStudyNotes = () => {
     if (!userAnswersRecord.length) return;
     const totalTime = sessionReport?.total_time_formatted || '0s';
-    let content = `BioRecall Study Notes – ${currentLevel}\nSession Date: ${new Date().toLocaleDateString()}\nTotal Questions: ${userAnswersRecord.length}\nTotal Time: ${totalTime}\n\n`;
+    let content = `BioRecall Study Notes \u2013 ${currentLevel}\nSession Date: ${new Date().toLocaleDateString()}\nTotal Questions: ${userAnswersRecord.length}\nTotal Time: ${totalTime}\n\n`;
     userAnswersRecord.forEach((item, idx) => {
       content += `Q${idx + 1}: ${item.question}\nYour answer: ${item.userAnswer}\nCorrect answer: ${item.correctAnswer}\nStrength: ${item.strength} (XP: ${item.xp})\nTime: ${item.timeTakenFormatted || '0s'}\n`;
       if (item.feedback?.answer_explanation) content += `Explanation: ${item.feedback.answer_explanation}\n`;
@@ -592,9 +592,15 @@ function BioRecall() {
     const a = document.createElement('a');
     a.href = url;
     a.download = `BioRecall_notes_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    setTimeout(() => { try { document.body.removeChild(a); } catch (e) {} URL.revokeObjectURL(url); }, 100);
+    setTimeout(() => {
+      if (a.parentNode) {
+        a.parentNode.removeChild(a);
+      }
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
   const renderWeakTopicAlert = () => {
@@ -1034,8 +1040,8 @@ function BioRecall() {
                   <button className="mobile-signout-btn" onClick={handleLogout}><FaRightFromBracket /> Sign Out</button>
                 ) : (
                   <>
-                    <a href="#" className="mobile-signin-btn" onClick={() => window.location.href = '/login'}>Sign In</a>
-                    <a href="#" className="mobile-signup-btn" onClick={() => window.location.href = '/register'}>Create Account</a>
+                    <a href="/login" className="mobile-signin-btn">Sign In</a>
+                    <a href="/register" className="mobile-signup-btn">Create Account</a>
                   </>
                 )}
               </div>
