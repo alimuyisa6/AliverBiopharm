@@ -172,6 +172,7 @@ function Quiz() {
   const spinnerTimeout = useRef(null);
   const saveDebounceRef = useRef(null);
   const touchStartX = useRef(null);
+  const confettiContainerRef = useRef(null);
   const MAX_TAB_SWITCHES = 3;
 
   const SPINNER_WORDS = [
@@ -655,13 +656,23 @@ function Quiz() {
   }
 
   function showConfetti() {
+    const container = confettiContainerRef.current;
+    if (!container) return;
     const colors = ['#0ab5b5', '#b8873a', '#e2c06a', '#10b981', '#f59e0b'];
+    const fragment = document.createDocumentFragment();
     for (let i = 0; i < 50; i++) {
       const p = document.createElement('div');
       p.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:-10px;border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ${2 + Math.random() * 3}s linear forwards`;
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 4000);
+      fragment.appendChild(p);
     }
+    container.appendChild(fragment);
+    setTimeout(() => {
+      if (container) {
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
+      }
+    }, 4000);
   }
 
   const currentYear = new Date().getFullYear();
@@ -690,6 +701,7 @@ function Quiz() {
 
   return (
     <div className="quiz-page">
+      <div ref={confettiContainerRef} style={{ position: 'fixed', top: 0, left: 0, width: 0, height: 0, overflow: 'visible', zIndex: 9999, pointerEvents: 'none' }} />
       <header className="site-header">
         <div className="header-container">
           <a href="/" className="logo-link" aria-label="AliverBiopharm Home">
@@ -724,7 +736,7 @@ function Quiz() {
                 {user ? (
                   <button className="mobile-signout-btn" onClick={logout}><FaRightFromBracket style={{ color: '#ef4444', marginRight: '8px' }} /> Sign Out</button>
                 ) : (
-                  <><a href="#" className="mobile-signin-btn" onClick={() => window.location.href = '/login'}>Sign In</a><a href="#" className="mobile-signup-btn" onClick={() => window.location.href = '/register'}>Create Account</a></>
+                  <><a href="/login" className="mobile-signin-btn">Sign In</a><a href="/register" className="mobile-signup-btn">Create Account</a></>
                 )}
               </div>
               <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}><FaXmark style={{ color: '#94a3b8' }} /></button>
