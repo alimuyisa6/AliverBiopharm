@@ -12,10 +12,8 @@ import {
   completeFlashcardSession,
   getKnownFlashcards,
 } from '../api/cachedClient';
-import { getAllSiteSections } from '../api/client';
 import { FaSpinner } from "react-icons/fa";
 import { FaTriangleExclamation } from "react-icons/fa6";
-import { PageLayout } from '../common-layout/PageLayout';
 
 const STAGE = {
   LOADING: 'loading',
@@ -25,8 +23,7 @@ const STAGE = {
   STUDY: 'study',
   COMPLETE: 'complete',
 };
-
-const COLORS = {
+ const COLORS = {
   primary: '#b8873a',
   secondary: '#0ab5b5',
   accent: '#10b981',
@@ -46,17 +43,12 @@ export default function FlashcardsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [sections, setSections] = useState(null);
   const [stage, setStage] = useState(STAGE.LOADING);
   const [fcState, setFcState] = useState(null);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [sessionResult, setSessionResult] = useState(null);
   const [knownIds, setKnownIds] = useState([]);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    getAllSiteSections().then(setSections).catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -146,9 +138,9 @@ export default function FlashcardsPage() {
     setStage(STAGE.ONBOARDING);
   }
 
-  const renderContent = () => {
-    if (error) {
-      return (
+  if (error) {
+    return (
+      <div className="fc-page">
         <div className="fc-page-inner">
           <div className="fc-empty">
             <FaTriangleExclamation style={{ color: COLORS.red, fontSize: '3rem', marginBottom: '1rem' }} />
@@ -158,75 +150,69 @@ export default function FlashcardsPage() {
             </button>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    if (stage === STAGE.LOADING) {
-      return (
+  if (stage === STAGE.LOADING) {
+    return (
+      <div className="fc-page">
         <div className="fc-page-inner">
           <div className="fc-loading">
             <FaSpinner className="icon-spin" style={{ color: COLORS.primary, fontSize: '2rem' }} />
             <p style={{ color: COLORS.dim, marginTop: '1rem' }}>Loading your flashcards…</p>
           </div>
         </div>
-      );
-    }
-
-    if (stage === STAGE.ONBOARDING) {
-      return <FlashcardOnboarding onComplete={handleOnboardingComplete} />;
-    }
-
-    if (stage === STAGE.WELCOME) {
-      return (
-        <FlashcardWelcome
-          user={user}
-          level={fcState?.selected_level}
-          discipline={fcState?.selected_discipline}
-          cls={fcState?.selected_class}
-          onDone={handleWelcomeDone}
-        />
-      );
-    }
-
-    if (stage === STAGE.SUBJECT) {
-      return (
-        <FlashcardSubjectSelect
-          state={fcState}
-          onStart={handleSubjectStart}
-          onBack={handleResetOnboarding}
-        />
-      );
-    }
-
-    if (stage === STAGE.STUDY && selectedDeck) {
-      return (
-        <FlashcardDeckView
-          deck={selectedDeck}
-          knownIds={knownIds}
-          mode={fcState?.last_mode || 'flip'}
-          onComplete={handleStudyComplete}
-        />
-      );
-    }
-
-    if (stage === STAGE.COMPLETE) {
-      return (
-        <FlashcardProgress
-          result={sessionResult}
-          onRestart={handleRestart}
-          onHome={() => navigate('/')}
-        />
-      );
-    }
-
-    return null;
-  };
-
-  return (
-    <PageLayout sections={sections}>
-      <div className="fc-page">
-        {renderContent()}
       </div>
-    </PageLayout>
-  );
+    );
+  }
+
+  if (stage === STAGE.ONBOARDING) {
+    return <FlashcardOnboarding onComplete={handleOnboardingComplete} />;
+  }
+
+  if (stage === STAGE.WELCOME) {
+    return (
+      <FlashcardWelcome
+        user={user}
+        level={fcState?.selected_level}
+        discipline={fcState?.selected_discipline}
+        cls={fcState?.selected_class}
+        onDone={handleWelcomeDone}
+      />
+    );
+  }
+
+  if (stage === STAGE.SUBJECT) {
+    return (
+      <FlashcardSubjectSelect
+        state={fcState}
+        onStart={handleSubjectStart}
+        onBack={handleResetOnboarding}
+      />
+    );
+  }
+
+  if (stage === STAGE.STUDY && selectedDeck) {
+    return (
+      <FlashcardDeckView
+        deck={selectedDeck}
+        knownIds={knownIds}
+        mode={fcState?.last_mode || 'flip'}
+        onComplete={handleStudyComplete}
+      />
+    );
+  }
+
+  if (stage === STAGE.COMPLETE) {
+    return (
+      <FlashcardProgress
+        result={sessionResult}
+        onRestart={handleRestart}
+        onHome={() => navigate('/')}
+      />
+    );
+  }
+
+  return null;
 }
