@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
+import { FaEnvelope, FaLock, FaArrowRight, FaSignInAlt } from "react-icons/fa6";
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
@@ -102,38 +103,46 @@ export default function Login() {
           {error && <div className="auth-error">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="form-input"
-              required
-              disabled={submitting}
-            />
+            <div className="input-wrapper">
+              <FaEnvelope style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="form-input"
+                style={{ paddingLeft: '44px' }}
+                required
+                disabled={submitting}
+              />
+            </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="form-input"
-              required
-              disabled={submitting}
-            />
+            <div className="input-wrapper">
+              <FaLock style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="form-input"
+                style={{ paddingLeft: '44px' }}
+                required
+                disabled={submitting}
+              />
+            </div>
 
             <div ref={turnstileRef} className="auth-captcha"></div>
 
             <button type="submit" className={`btn-primary auth-submit${submitting ? ' alv-btn-loading' : ''}`} disabled={submitting}>
-              {submitting ? <><InlineSpinner /> Signing in...</> : 'Sign in'}
+              {submitting ? <><InlineSpinner /> Signing in...</> : <><FaSignInAlt style={{ marginRight: '8px' }} /> Sign in</>}
             </button>
           </form>
 
           <div className="auth-footer-text">
-            No account? <Link to="/register" className="auth-link">Register</Link>
+            No account? <Link to="/register" className="auth-link"><FaArrowRight style={{ marginRight: '4px', fontSize: '0.8rem' }} /> Register</Link>
           </div>
         </div>
       </div>
     </div>
   );
-}
+} 
