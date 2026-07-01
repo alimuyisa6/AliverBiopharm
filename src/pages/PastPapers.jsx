@@ -22,7 +22,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaArrowUp,
-} from '../icons/IconMap';
+} from '..components/icons/IconMap';
 
 export default function PastPapers() {
   const { user, logout } = useAuth();
