@@ -4,7 +4,8 @@
   FaChevronLeft,
   FaChevronRight,
   FaBalanceScale,
-  FaBandAid,  // ← Add this
+  FaBandAid,
+  FaFeatherAlt,  // ← Add this
   FaFilter,
   FaSearch,
   FaSpinner,
@@ -126,7 +127,6 @@ import {
   FaEye,
   FaEyeDropper,
   FaFeather,
-  FaFeatherAlt,
   FaFingerprint,
   FaFish,
   FaFrog,
