@@ -382,3 +382,19 @@ export async function fetchLabFormulas(level, drug) {
   if (drug) params.drug = drug;
   return getRequest('lab', 'formulas', params);
 }
+export async function startQuizSession(level, topic, blockNumber, state = {}) {
+  return apiCall('quiz', 'quiz_start_session', { level, topic, block_number: blockNumber, state });
+}
+
+export async function trackTabSwitch(level, topic, blockNumber) {
+  return apiCall('quiz', 'quiz_tab_switch', { level, topic, block_number: blockNumber });
+}
+
+export async function submitQuizWithSession(level, topic, blockNumber, answers, timeTaken) {
+  return apiCall('quiz', 'quiz_submit_with_session', { level, topic, block_number: blockNumber, answers, time_taken: timeTaken });
+}
+
+export async function getQuizSessionStatus() {
+  return getRequest('quiz', 'quiz_session_status');
+}
+
