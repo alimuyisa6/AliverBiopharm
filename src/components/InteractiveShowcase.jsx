@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   FaDna, FaFileAlt, FaBrain, FaLayerGroup, FaTrophy,
   FaBookOpen, FaChartLine, FaSignal, FaWifi,
@@ -78,6 +78,7 @@ const CURSOR_MOVE_MS = 600;
 const CLICK_PAUSE_MS = 350;
 const DWELL_MS = 3200;
 const SCROLL_DURATION_MS = 450;
+const MODE_TRANSITION_MS = 450;
 
 const InteractiveShowcase = () => {
   const [notesData, setNotesData] = useState([]);
@@ -87,13 +88,14 @@ const InteractiveShowcase = () => {
   const [continueReadingData, setContinueReadingData] = useState([]);
   const [publicStats, setPublicStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [expandedFeature, setExpandedFeature] = useState(null);
   const [previewData, setPreviewData] = useState(null);
   const [isAutoDemoActive, setIsAutoDemoActive] = useState(false);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isCursorVisible, setIsCursorVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
+  const [menuMode, setMenuMode] = useState('list');
 
   const menuItemsRef = useRef({});
   const menuListRef = useRef(null);
@@ -104,6 +106,7 @@ const InteractiveShowcase = () => {
   const cursorPositionRef = useRef({ x: 0, y: 0 });
   const isMountedRef = useRef(true);
   const isAutoDemoActiveRef = useRef(false);
+  const menuModeRef = useRef('list');
 
   const menuItems = useMemo(() => [
     { key: 'Biology Notes', icon: FaDna },
@@ -115,11 +118,15 @@ const InteractiveShowcase = () => {
     { key: 'Platform Statistics', icon: FaChartLine }
   ], []);
 
+  const updateMenuMode = useCallback((mode) => {
+    menuModeRef.current = mode;
+    setMenuMode(mode);
+  }, []);
+
   useEffect(() => {
     isAutoDemoActiveRef.current = isAutoDemoActive;
   }, [isAutoDemoActive]);
 
-  // Clock
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -132,7 +139,6 @@ const InteractiveShowcase = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Real auth check via /api/auth?path=get_user (cookie-based session)
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -147,10 +153,8 @@ const InteractiveShowcase = () => {
     return () => { isMountedRef.current = false; };
   }, []);
 
-  // Content fetch — public endpoints always load; Continue Reading is
-  // only meaningful once authenticated (it legitimately returns [] otherwise).
   useEffect(() => {
-    if (isAuthenticated === null) return; // wait for auth check
+    if (isAuthenticated === null) return;
 
     const fetchAllData = async () => {
       const haveCorePublicData = apiCache.notes && apiCache.papers && apiCache.quiz && apiCache.flashcards && apiCache.stats;
@@ -214,7 +218,6 @@ const InteractiveShowcase = () => {
     cursorPositionRef.current = cursorPosition;
   }, [cursorPosition]);
 
-  // Every branch returns something renderable — no dead "Unable to load" states.
   const buildPreviewFor = useCallback((featureKey) => {
     switch (featureKey) {
       case 'Biology Notes':
@@ -254,8 +257,11 @@ const InteractiveShowcase = () => {
     setPreviewData(buildPreviewFor(featureKey));
   }, [buildPreviewFor]);
 
-  // Scrolls the menu list (not the phone frame) so the target item is visible.
-  const scrollItemIntoView = useCallback((targetElement) => {
+  const sleep = (ms) => new Promise((resolve) => {
+    autoDemoTimeoutRef.current = setTimeout(resolve, ms);
+  });
+
+  const scrollItemIntoView = useCallback((targetElement, mode) => {
     return new Promise((resolve) => {
       const list = menuListRef.current;
       if (!list || !targetElement) {
@@ -265,26 +271,53 @@ const InteractiveShowcase = () => {
 
       const listRect = list.getBoundingClientRect();
       const itemRect = targetElement.getBoundingClientRect();
+      const margin = 8;
+
+      if (mode === 'compact') {
+        let delta = 0;
+        if (itemRect.right > listRect.right - margin) {
+          delta = itemRect.right - (listRect.right - margin);
+        } else if (itemRect.left < listRect.left + margin) {
+          delta = itemRect.left - (listRect.left + margin);
+        }
+        if (Math.abs(delta) < 1) {
+          resolve();
+          return;
+        }
+        if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
+        const startScroll = list.scrollLeft;
+        const targetScroll = Math.max(0, Math.min(startScroll + delta, list.scrollWidth - list.clientWidth));
+        const startTime = performance.now();
+        const animateScroll = (now) => {
+          const elapsed = now - startTime;
+          const t = Math.min(1, elapsed / SCROLL_DURATION_MS);
+          const ease = 1 - Math.pow(1 - t, 3);
+          list.scrollLeft = startScroll + (targetScroll - startScroll) * ease;
+          if (t < 1) {
+            scrollAnimationRef.current = requestAnimationFrame(animateScroll);
+          } else {
+            scrollAnimationRef.current = null;
+            resolve();
+          }
+        };
+        scrollAnimationRef.current = requestAnimationFrame(animateScroll);
+        return;
+      }
 
       let delta = 0;
-      const margin = 8;
       if (itemRect.bottom > listRect.bottom - margin) {
         delta = itemRect.bottom - (listRect.bottom - margin);
       } else if (itemRect.top < listRect.top + margin) {
         delta = itemRect.top - (listRect.top + margin);
       }
-
       if (Math.abs(delta) < 1) {
         resolve();
         return;
       }
-
       if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
-
       const startScroll = list.scrollTop;
       const targetScroll = Math.max(0, Math.min(startScroll + delta, list.scrollHeight - list.clientHeight));
       const startTime = performance.now();
-
       const animateScroll = (now) => {
         const elapsed = now - startTime;
         const t = Math.min(1, elapsed / SCROLL_DURATION_MS);
@@ -351,17 +384,24 @@ const InteractiveShowcase = () => {
     setTimeout(() => pulseDiv.remove(), 400);
   }, []);
 
-  const sleep = (ms) => new Promise((resolve) => {
-    autoDemoTimeoutRef.current = setTimeout(resolve, ms);
-  });
-
-  // Demo loop: scroll item into view -> glide cursor -> click pulse ->
-  // show preview -> dwell -> next item. Cursor is the only actor; taps
-  // on menu items are disabled entirely (no onClick handlers on items).
   const startAutoDemo = useCallback(async () => {
     let currentIndex = 0;
 
     while (isAutoDemoActiveRef.current && isMountedRef.current) {
+      const isCycleStart = currentIndex > 0 && currentIndex % menuItems.length === 0;
+
+      if (isCycleStart) {
+        updateMenuMode('list');
+        setExpandedFeature(null);
+        setPreviewData(null);
+        if (menuListRef.current) {
+          menuListRef.current.scrollTop = 0;
+          menuListRef.current.scrollLeft = 0;
+        }
+        await sleep(MODE_TRANSITION_MS + 200);
+        if (!isAutoDemoActiveRef.current || !isMountedRef.current) break;
+      }
+
       const item = menuItems[currentIndex % menuItems.length];
       const targetElement = menuItemsRef.current[item.key];
 
@@ -372,7 +412,7 @@ const InteractiveShowcase = () => {
         continue;
       }
 
-      await scrollItemIntoView(targetElement);
+      await scrollItemIntoView(targetElement, menuModeRef.current);
       if (!isAutoDemoActiveRef.current || !isMountedRef.current) break;
 
       await moveCursorToElement(targetElement);
@@ -384,22 +424,32 @@ const InteractiveShowcase = () => {
       pulseClick(targetElement);
       handleFeatureClick(item.key);
 
+      if (menuModeRef.current === 'list') {
+        await sleep(300);
+        if (!isAutoDemoActiveRef.current || !isMountedRef.current) break;
+        updateMenuMode('compact');
+        await sleep(MODE_TRANSITION_MS);
+        if (!isAutoDemoActiveRef.current || !isMountedRef.current) break;
+      }
+
       await sleep(DWELL_MS);
       if (!isAutoDemoActiveRef.current || !isMountedRef.current) break;
 
       currentIndex++;
     }
-  }, [menuItems, scrollItemIntoView, moveCursorToElement, pulseClick, handleFeatureClick]);
+  }, [menuItems, scrollItemIntoView, moveCursorToElement, pulseClick, handleFeatureClick, updateMenuMode]);
 
-  // Demo starts (and stays paused) based purely on auth state + content readiness.
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       setIsAutoDemoActive(true);
     } else {
       setIsAutoDemoActive(false);
       setIsCursorVisible(false);
+      updateMenuMode('list');
+      setExpandedFeature(null);
+      setPreviewData(null);
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, updateMenuMode]);
 
   useEffect(() => {
     if (isAutoDemoActive) {
@@ -417,10 +467,14 @@ const InteractiveShowcase = () => {
     if (cursorAnimationRef.current) cancelAnimationFrame(cursorAnimationRef.current);
     if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
     if (autoDemoTimeoutRef.current) clearTimeout(autoDemoTimeoutRef.current);
+    updateMenuMode('list');
     setExpandedFeature(null);
     setPreviewData(null);
     setCursorPosition({ x: 0, y: 0 });
-    if (menuListRef.current) menuListRef.current.scrollTop = 0;
+    if (menuListRef.current) {
+      menuListRef.current.scrollTop = 0;
+      menuListRef.current.scrollLeft = 0;
+    }
     setIsAutoDemoActive(false);
     setTimeout(() => setIsAutoDemoActive(true), 0);
   };
@@ -532,12 +586,15 @@ const InteractiveShowcase = () => {
             </div>
 
             <div className="phone-viewport">
-              <div className="menu-container" ref={menuListRef}>
+              <div
+                className={`menu-container ${menuMode === 'compact' ? 'menu-container-compact' : ''}`}
+                ref={menuListRef}
+              >
                 {menuItems.map((item) => (
                   <div
                     key={item.key}
                     ref={el => menuItemsRef.current[item.key] = el}
-                    className={`menu-item ${expandedFeature === item.key ? 'active' : ''}`}
+                    className={`menu-item ${expandedFeature === item.key ? 'active' : ''} ${menuMode === 'compact' ? 'menu-item-compact' : ''}`}
                   >
                     <MenuIcon itemKey={item.key} icon={item.icon} />
                     <span className="menu-label">{item.key}</span>
@@ -545,7 +602,7 @@ const InteractiveShowcase = () => {
                 ))}
               </div>
 
-              <div className="preview-screen">
+              <div className={`preview-screen ${menuMode === 'compact' ? 'preview-screen-expanded' : ''}`}>
                 <div className="preview-screen-inner">
                   {previewContent}
                 </div>
