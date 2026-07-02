@@ -1,7 +1,7 @@
 // pages/ClassroomRoom.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageLayout } from '../common-layout/PageLayout';
+ 
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
 
