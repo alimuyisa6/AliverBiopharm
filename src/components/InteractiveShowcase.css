@@ -165,7 +165,6 @@ html, body {
 
 .menu-item.active {
   background: rgba(59, 111, 212, 0.1);
-  border-color: rgba(59, 111, 212, 0.35);
   color: var(--clr-blue);
   font-weight: 600;
 }
