@@ -11,6 +11,9 @@
   --clr-text-dim: #2d5c5c;
   --clr-text-muted: #4a6f6f;
   --clr-border-glow: rgba(10, 129, 129, 0.15);
+  --clr-success: #27ae60;
+--clr-warning: #f39c12;
+--clr-error: #e74c3c;
   --shadow-card: 0 4px 16px rgba(10, 110, 110, 0.06);
   --shadow-magenta: 0 6px 18px rgba(184, 135, 58, 0.15);
   --shadow-blue: 0 6px 18px rgba(59, 111, 212, 0.18);
