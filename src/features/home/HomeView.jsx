@@ -30,7 +30,7 @@ export default function HomeView({
   currentYear,
   sections,
   publicStats,
- communityActivity
+ communityActivity,
  theme,
   currentSlide,
   mobileMenuOpen,
