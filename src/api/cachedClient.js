@@ -304,7 +304,7 @@ export {
   fetchLabCase,
   submitLabScore,
   fetchLabFormulas,
-  getClassroomTopics,
+  
   listClassrooms,
   getClassroomRoom,
   getClassroomMessages,
