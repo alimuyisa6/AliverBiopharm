@@ -1,9 +1,8 @@
- // pages/TutorApply.jsx
+// pages/TutorApply.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
- 
 
 export default function TutorApply() {
   const { user } = useAuth();
@@ -119,169 +118,157 @@ export default function TutorApply() {
   if (existingApplication) {
     const status = statusLabels[existingApplication.status] || statusLabels.pending;
     return (
-      <>
-        <Header sections={sections} />
-        <div className="tutor-apply-page">
-          <div className="application-status-card">
-            <div className="status-icon" style={{ color: status.color }}>
-              <i className={`fa-solid ${status.icon}`}></i>
-            </div>
-            <h2>Application Status: {status.label}</h2>
-            <div className="status-details">
-              <p><strong>Level:</strong> {existingApplication.level}</p>
-              <p><strong>Class:</strong> {existingApplication.class_name}</p>
-              <p><strong>Subjects:</strong> {(existingApplication.subjects || []).join(', ')}</p>
-              {existingApplication.rejection_reason && (
-                <div className="rejection-reason">
-                  <strong>Reason:</strong> {existingApplication.rejection_reason}
-                </div>
-              )}
-              {existingApplication.interview_scheduled_at && (
-                <div className="interview-info">
-                  <strong>Interview:</strong> {new Date(existingApplication.interview_scheduled_at).toLocaleString()}
-                </div>
-              )}
-            </div>
-            {existingApplication.status === 'rejected' && (
-              <button className="btn-primary" onClick={() => navigate('/classroom/complaint')}>
-                <i className="fa-solid fa-flag"></i> File Appeal
-              </button>
+      <div className="tutor-apply-page">
+        <div className="application-status-card">
+          <div className="status-icon" style={{ color: status.color }}>
+            <i className={`fa-solid ${status.icon}`}></i>
+          </div>
+          <h2>Application Status: {status.label}</h2>
+          <div className="status-details">
+            <p><strong>Level:</strong> {existingApplication.level}</p>
+            <p><strong>Class:</strong> {existingApplication.class_name}</p>
+            <p><strong>Subjects:</strong> {(existingApplication.subjects || []).join(', ')}</p>
+            {existingApplication.rejection_reason && (
+              <div className="rejection-reason">
+                <strong>Reason:</strong> {existingApplication.rejection_reason}
+              </div>
+            )}
+            {existingApplication.interview_scheduled_at && (
+              <div className="interview-info">
+                <strong>Interview:</strong> {new Date(existingApplication.interview_scheduled_at).toLocaleString()}
+              </div>
             )}
           </div>
+          {existingApplication.status === 'rejected' && (
+            <button className="btn-primary" onClick={() => navigate('/classroom/complaint')}>
+              <i className="fa-solid fa-flag"></i> File Appeal
+            </button>
+          )}
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   if (submitted) {
     return (
-      <>
-        <Header sections={sections} />
-        <div className="tutor-apply-page">
-          <div className="application-success">
-            <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
-            <h2>Application Submitted</h2>
-            <p>Your tutor application has been received. An admin will review it and schedule an interview if approved.</p>
-            <button className="btn-primary" onClick={() => navigate('/classroom')}>
-              <i className="fa-solid fa-users"></i> Back to Classrooms
-            </button>
-          </div>
+      <div className="tutor-apply-page">
+        <div className="application-success">
+          <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
+          <h2>Application Submitted</h2>
+          <p>Your tutor application has been received. An admin will review it and schedule an interview if approved.</p>
+          <button className="btn-primary" onClick={() => navigate('/classroom')}>
+            <i className="fa-solid fa-users"></i> Back to Classrooms
+          </button>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <Header sections={sections} />
-      <div className="tutor-apply-page">
-        <div className="tutor-apply-header">
-          <span className="sec-label">Teaching</span>
-          <h1 className="section-title">Become a Tutor</h1>
-          <p className="section-subtitle">
-            Share your knowledge with fellow students. Verified tutors can lead classroom discussions and help learners succeed.
-          </p>
-        </div>
-
-        <div className="apply-steps">
-          <div className={`apply-step ${step >= 1 ? 'active' : ''}`}>
-            <span className="step-num">1</span> Level & Class
-          </div>
-          <div className={`apply-step ${step >= 2 ? 'active' : ''}`}>
-            <span className="step-num">2</span> Subjects
-          </div>
-          <div className={`apply-step ${step >= 3 ? 'active' : ''}`}>
-            <span className="step-num">3</span> Details
-          </div>
-        </div>
-
-        {step === 1 && (
-          <div className="apply-form-section">
-            <h3>What level do you want to teach?</h3>
-            <div className="apply-grid">
-              {Object.entries(LEVELS).map(([key, data]) => (
-                <button
-                  key={key}
-                  className={`apply-card ${form.level === key ? 'selected' : ''}`}
-                  style={{ borderColor: form.level === key ? data.color : 'transparent' }}
-                  onClick={() => { setForm(prev => ({ ...prev, level: key, class_name: '' })); setStep(2); }}
-                >
-                  <i className={`fa-solid ${data.icon}`} style={{ color: data.color, fontSize: '2rem' }}></i>
-                  <span>{key}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="apply-form-section">
-            <button className="apply-back" onClick={() => setStep(1)}>
-              <i className="fa-solid fa-arrow-left"></i> Back
-            </button>
-            <h3>Select your class</h3>
-            <div className="apply-grid">
-              {(LEVELS[form.level]?.classes || []).map(cls => (
-                <button
-                  key={cls}
-                  className={`apply-card ${form.class_name === cls ? 'selected' : ''}`}
-                  style={{ borderColor: form.class_name === cls ? LEVELS[form.level].color : 'transparent' }}
-                  onClick={() => { setForm(prev => ({ ...prev, class_name: cls, subjects: [] })); setStep(3); }}
-                >
-                  <span>{cls}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="apply-form-section">
-            <button className="apply-back" onClick={() => setStep(2)}>
-              <i className="fa-solid fa-arrow-left"></i> Back
-            </button>
-            <h3>Select topics you can teach</h3>
-            <div className="apply-topics-grid">
-              {getAvailableTopics().map(topic => (
-                <button
-                  key={topic}
-                  className={`apply-topic-card ${form.subjects.includes(topic) ? 'selected' : ''}`}
-                  onClick={() => handleSubjectToggle(topic)}
-                >
-                  <i className={`fa-solid ${form.subjects.includes(topic) ? 'fa-check-square' : 'fa-square'}`}></i>
-                  {topic}
-                </button>
-              ))}
-            </div>
-
-            <div className="apply-details">
-              <h3>Tell us about your qualifications</h3>
-              <textarea
-                className="apply-textarea"
-                placeholder="Describe your qualifications, teaching experience, and why you want to be a tutor..."
-                value={form.qualifications}
-                onChange={e => setForm(prev => ({ ...prev, qualifications: e.target.value }))}
-                rows={5}
-              />
-            </div>
-
-            {error && <div className="apply-error">{error}</div>}
-
-            <div className="apply-actions">
-              <button className="btn-primary" onClick={handleSubmit} disabled={submitting}>
-                {submitting ? (
-                  <><i className="fa-solid fa-spinner fa-spin"></i> Submitting...</>
-                ) : (
-                  <><i className="fa-solid fa-paper-plane"></i> Submit Application</>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
+    <div className="tutor-apply-page">
+      <div className="tutor-apply-header">
+        <span className="sec-label">Teaching</span>
+        <h1 className="section-title">Become a Tutor</h1>
+        <p className="section-subtitle">
+          Share your knowledge with fellow students. Verified tutors can lead classroom discussions and help learners succeed.
+        </p>
       </div>
-      <Footer />
-    </>
+
+      <div className="apply-steps">
+        <div className={`apply-step ${step >= 1 ? 'active' : ''}`}>
+          <span className="step-num">1</span> Level & Class
+        </div>
+        <div className={`apply-step ${step >= 2 ? 'active' : ''}`}>
+          <span className="step-num">2</span> Subjects
+        </div>
+        <div className={`apply-step ${step >= 3 ? 'active' : ''}`}>
+          <span className="step-num">3</span> Details
+        </div>
+      </div>
+
+      {step === 1 && (
+        <div className="apply-form-section">
+          <h3>What level do you want to teach?</h3>
+          <div className="apply-grid">
+            {Object.entries(LEVELS).map(([key, data]) => (
+              <button
+                key={key}
+                className={`apply-card ${form.level === key ? 'selected' : ''}`}
+                style={{ borderColor: form.level === key ? data.color : 'transparent' }}
+                onClick={() => { setForm(prev => ({ ...prev, level: key, class_name: '' })); setStep(2); }}
+              >
+                <i className={`fa-solid ${data.icon}`} style={{ color: data.color, fontSize: '2rem' }}></i>
+                <span>{key}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="apply-form-section">
+          <button className="apply-back" onClick={() => setStep(1)}>
+            <i className="fa-solid fa-arrow-left"></i> Back
+          </button>
+          <h3>Select your class</h3>
+          <div className="apply-grid">
+            {(LEVELS[form.level]?.classes || []).map(cls => (
+              <button
+                key={cls}
+                className={`apply-card ${form.class_name === cls ? 'selected' : ''}`}
+                style={{ borderColor: form.class_name === cls ? LEVELS[form.level].color : 'transparent' }}
+                onClick={() => { setForm(prev => ({ ...prev, class_name: cls, subjects: [] })); setStep(3); }}
+              >
+                <span>{cls}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="apply-form-section">
+          <button className="apply-back" onClick={() => setStep(2)}>
+            <i className="fa-solid fa-arrow-left"></i> Back
+          </button>
+          <h3>Select topics you can teach</h3>
+          <div className="apply-topics-grid">
+            {getAvailableTopics().map(topic => (
+              <button
+                key={topic}
+                className={`apply-topic-card ${form.subjects.includes(topic) ? 'selected' : ''}`}
+                onClick={() => handleSubjectToggle(topic)}
+              >
+                <i className={`fa-solid ${form.subjects.includes(topic) ? 'fa-check-square' : 'fa-square'}`}></i>
+                {topic}
+              </button>
+            ))}
+          </div>
+
+          <div className="apply-details">
+            <h3>Tell us about your qualifications</h3>
+            <textarea
+              className="apply-textarea"
+              placeholder="Describe your qualifications, teaching experience, and why you want to be a tutor..."
+              value={form.qualifications}
+              onChange={e => setForm(prev => ({ ...prev, qualifications: e.target.value }))}
+              rows={5}
+            />
+          </div>
+
+          {error && <div className="apply-error">{error}</div>}
+
+          <div className="apply-actions">
+            <button className="btn-primary" onClick={handleSubmit} disabled={submitting}>
+              {submitting ? (
+                <><i className="fa-solid fa-spinner fa-spin"></i> Submitting...</>
+              ) : (
+                <><i className="fa-solid fa-paper-plane"></i> Submit Application</>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
-}
+} 
