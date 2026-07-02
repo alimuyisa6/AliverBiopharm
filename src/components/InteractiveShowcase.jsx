@@ -394,6 +394,7 @@ const InteractiveShowcase = () => {
         updateMenuMode('list');
         setExpandedFeature(null);
         setPreviewData(null);
+        setIsCursorVisible(false);
         if (menuListRef.current) {
           menuListRef.current.scrollTop = 0;
           menuListRef.current.scrollLeft = 0;
@@ -423,6 +424,7 @@ const InteractiveShowcase = () => {
 
       pulseClick(targetElement);
       handleFeatureClick(item.key);
+      setIsCursorVisible(false);
 
       if (menuModeRef.current === 'list') {
         await sleep(300);
@@ -471,6 +473,7 @@ const InteractiveShowcase = () => {
     setExpandedFeature(null);
     setPreviewData(null);
     setCursorPosition({ x: 0, y: 0 });
+    setIsCursorVisible(false);
     if (menuListRef.current) {
       menuListRef.current.scrollTop = 0;
       menuListRef.current.scrollLeft = 0;
