@@ -30,6 +30,7 @@ export default function HomeView({
   currentYear,
   sections,
   publicStats,
+ communityActivity
  theme,
   currentSlide,
   mobileMenuOpen,
@@ -177,12 +178,12 @@ export default function HomeView({
         onCommentInputChange={setNotesCommentInput}
       />
 
-      <CommunitySection
-        activity={[]}
-        weeklyChallenge={sections?.weekly_challenge}
-        weeklyChallengeAnswer={weeklyChallengeAnswer}
-        onWeeklySubmit={handleWeeklyChallengeSubmit}
-      />
+       <CommunitySection
+  activity={communityActivity}
+  weeklyChallenge={sections?.weekly_challenge}
+  weeklyChallengeAnswer={weeklyChallengeAnswer}
+  onWeeklySubmit={handleWeeklyChallengeSubmit}
+/>
 
       <MoodCheckSection
         moodSelected={moodSelected}
