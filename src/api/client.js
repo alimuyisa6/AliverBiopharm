@@ -398,3 +398,63 @@ export async function getQuizSessionStatus() {
   return getRequest('quiz', 'quiz_session_status');
 }
 
+
+export async function getClassroomTopics(level, class_name) {
+  return getRequest('classroom', 'topics', { level, class_name });
+}
+
+export async function listClassrooms(level, class_name, topic_id) {
+  return getRequest('classroom', 'list', { level, class_name, topic_id });
+}
+
+export async function getClassroomRoom(room_id) {
+  return getRequest('classroom', 'room', { room_id });
+}
+
+export async function getClassroomMessages(room_id) {
+  return getRequest('classroom', 'messages', { room_id });
+}
+
+export async function getClassroomParticipants(room_id) {
+  return getRequest('classroom', 'participants', { room_id });
+}
+
+export async function getTutorStatus() {
+  return getRequest('classroom', 'tutor_status');
+}
+
+export async function joinClassroom(room_id) {
+  return apiCall('classroom', 'join', { room_id });
+}
+
+export async function leaveClassroom(room_id) {
+  return apiCall('classroom', 'leave', { room_id });
+}
+
+export async function sendClassroomMessage(room_id, message) {
+  return apiCall('classroom', 'send_message', { room_id, message });
+}
+
+export async function raiseHand(room_id, raise) {
+  return apiCall('classroom', 'raise_hand', { room_id, raise });
+}
+
+export async function applyAsTutor(level, class_name, subjects, qualifications, experience) {
+  return apiCall('classroom', 'tutor_apply', { level, class_name, subjects, qualifications, experience });
+}
+
+export async function toggleClassroomMute(room_id, target_user_id, mute) {
+  return apiCall('classroom', 'toggle_mute', { room_id, target_user_id, mute });
+}
+
+export async function endClassroom(room_id) {
+  return apiCall('classroom', 'end_room', { room_id });
+}
+
+export async function shareClassroomResource(room_id, file_url, file_name, file_size) {
+  return apiCall('classroom', 'share_resource', { room_id, file_url, file_name, file_size });
+}
+
+export async function fileClassroomComplaint(room_id, complaint_type, description) {
+  return apiCall('classroom', 'file_complaint', { room_id, complaint_type, description });
+}
