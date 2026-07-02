@@ -170,6 +170,32 @@ export function invalidateUserCache() {
   invalidateCache('user_favorites');
 }
 
+// Add to cachedClient.js
+
+export const getClassroomTopics = (level, class_name) =>
+  withCache(`classroom_topics_${level}_${class_name}`, () => api.getClassroomTopics(level, class_name))();
+
+export const listClassrooms = (level, class_name, topic_id) =>
+  withArgsCache((l, c, t) => `classroom_list_${l}_${c}_${t || ''}`, api.listClassrooms)(level, class_name, topic_id);
+
+export const getClassroomRoom = (room_id) =>
+  withCache(`classroom_room_${room_id}`, () => api.getClassroomRoom(room_id), false)();
+
+export const getClassroomMessages = (room_id) =>
+  withCache(`classroom_messages_${room_id}`, () => api.getClassroomMessages(room_id), false)();
+
+export const getClassroomParticipants = (room_id) =>
+  withCache(`classroom_participants_${room_id}`, () => api.getClassroomParticipants(room_id), false)();
+
+export const getTutorStatus = () =>
+  api.getTutorStatus();
+
+export function invalidateClassroomCache(room_id) {
+  invalidateCache(`classroom_room_${room_id}`);
+  invalidateCache(`classroom_messages_${room_id}`);
+  invalidateCache(`classroom_participants_${room_id}`);
+}
+
 export {
   signup,
   signin,
