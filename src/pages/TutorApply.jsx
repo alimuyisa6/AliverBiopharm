@@ -1,9 +1,10 @@
-// pages/TutorApply.jsx
+ // pages/TutorApply.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageLayout } from '../common-layout/PageLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
+import Header from '../common-layout/Header';
+import Footer from '../common-layout/Footer';
 
 export default function TutorApply() {
   const { user } = useAuth();
@@ -119,7 +120,8 @@ export default function TutorApply() {
   if (existingApplication) {
     const status = statusLabels[existingApplication.status] || statusLabels.pending;
     return (
-      <PageLayout sections={sections}>
+      <>
+        <Header sections={sections} />
         <div className="tutor-apply-page">
           <div className="application-status-card">
             <div className="status-icon" style={{ color: status.color }}>
@@ -148,13 +150,15 @@ export default function TutorApply() {
             )}
           </div>
         </div>
-      </PageLayout>
+        <Footer />
+      </>
     );
   }
 
   if (submitted) {
     return (
-      <PageLayout sections={sections}>
+      <>
+        <Header sections={sections} />
         <div className="tutor-apply-page">
           <div className="application-success">
             <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
@@ -165,12 +169,14 @@ export default function TutorApply() {
             </button>
           </div>
         </div>
-      </PageLayout>
+        <Footer />
+      </>
     );
   }
 
   return (
-    <PageLayout sections={sections}>
+    <>
+      <Header sections={sections} />
       <div className="tutor-apply-page">
         <div className="tutor-apply-header">
           <span className="sec-label">Teaching</span>
@@ -276,6 +282,7 @@ export default function TutorApply() {
           </div>
         )}
       </div>
-    </PageLayout>
+      <Footer />
+    </>
   );
 }
