@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
-import Header from '../common-layout/Header';
-import Footer from '../common-layout/Footer';
+ 
 
 export default function TutorApply() {
   const { user } = useAuth();
