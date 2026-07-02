@@ -1,7 +1,7 @@
 // pages/Classroom.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageLayout } from '../common-layout/PageLayout';
+ 
 import { ClassroomOnboarding } from '../features/classroom/ClassroomOnboarding';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
