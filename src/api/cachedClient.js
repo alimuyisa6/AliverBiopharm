@@ -144,34 +144,6 @@ export const getChatMessages = (roomId) =>
 export const checkAdminOnline = () =>
   withCache('admin_online', api.checkAdminOnline, false)();
 
-export const startQuizSession = (level, topic, blockNumber, state = {}) =>
-  api.startQuizSession(level, topic, blockNumber, state);
-
-export const trackTabSwitch = (level, topic, blockNumber) =>
-  api.trackTabSwitch(level, topic, blockNumber);
-
-export const submitQuizWithSession = (level, topic, blockNumber, answers, timeTaken) =>
-  api.submitQuizWithSession(level, topic, blockNumber, answers, timeTaken);
-
-export const getQuizSessionStatus = () =>
-  api.getQuizSessionStatus();
-
-export function invalidateNoteCache(id) { invalidateCache(`note_${id}`); }
-export function invalidateChatCache(roomId) { invalidateCache(`chat_${roomId}`); }
-export function invalidateRecallCache() {
-  invalidateCache('recall_stats');
-  invalidateCache('recall_achievements');
-  invalidateCache('recall_dashboard');
-  invalidateCache('recall_selected_level');
-}
-export function invalidateUserCache() {
-  invalidateCache('user_streak');
-  invalidateCache('user_achievements');
-  invalidateCache('user_favorites');
-}
-
-// Add to cachedClient.js
-
 export const getClassroomTopics = (level, class_name) =>
   withCache(`classroom_topics_${level}_${class_name}`, () => api.getClassroomTopics(level, class_name))();
 
@@ -190,10 +162,35 @@ export const getClassroomParticipants = (room_id) =>
 export const getTutorStatus = () =>
   api.getTutorStatus();
 
+export const startQuizSession = (level, topic, blockNumber, state = {}) =>
+  api.startQuizSession(level, topic, blockNumber, state);
+
+export const trackTabSwitch = (level, topic, blockNumber) =>
+  api.trackTabSwitch(level, topic, blockNumber);
+
+export const submitQuizWithSession = (level, topic, blockNumber, answers, timeTaken) =>
+  api.submitQuizWithSession(level, topic, blockNumber, answers, timeTaken);
+
+export const getQuizSessionStatus = () =>
+  api.getQuizSessionStatus();
+
+export function invalidateNoteCache(id) { invalidateCache(`note_${id}`); }
+export function invalidateChatCache(roomId) { invalidateCache(`chat_${roomId}`); }
 export function invalidateClassroomCache(room_id) {
   invalidateCache(`classroom_room_${room_id}`);
   invalidateCache(`classroom_messages_${room_id}`);
   invalidateCache(`classroom_participants_${room_id}`);
+}
+export function invalidateRecallCache() {
+  invalidateCache('recall_stats');
+  invalidateCache('recall_achievements');
+  invalidateCache('recall_dashboard');
+  invalidateCache('recall_selected_level');
+}
+export function invalidateUserCache() {
+  invalidateCache('user_streak');
+  invalidateCache('user_achievements');
+  invalidateCache('user_favorites');
 }
 
 export {
@@ -307,4 +304,19 @@ export {
   fetchLabCase,
   submitLabScore,
   fetchLabFormulas,
+  getClassroomTopics,
+  listClassrooms,
+  getClassroomRoom,
+  getClassroomMessages,
+  getClassroomParticipants,
+  getTutorStatus,
+  joinClassroom,
+  leaveClassroom,
+  sendClassroomMessage,
+  raiseHand,
+  applyAsTutor,
+  toggleClassroomMute,
+  endClassroom,
+  shareClassroomResource,
+  fileClassroomComplaint,
 } from './client';
