@@ -1,5 +1,5 @@
  :root {
-  --clr-deep-space: #eef7f7;
+  --clr-deep-space: #f0f7f4;
   --clr-cyan: #0a7e7e;
   --clr-magenta: #b8873a;
   --clr-blue: #3b6fd4;
@@ -64,6 +64,8 @@ html {
 
 body {
   background: var(--clr-deep-space);
+  background-image: radial-gradient(rgba(10, 129, 129, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
   color: var(--clr-white);
   font-family: var(--font-body);
   font-size: var(--text-md);
@@ -93,10 +95,14 @@ body.dark-mode {
   --clr-text-muted: rgba(249, 245, 238, 0.45);
   --clr-border-glow: rgba(10, 181, 181, 0.25);
   --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
-  background-image: radial-gradient(ellipse 80% 50% at 20% -10%, rgba(10,181,181,0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 110%, rgba(201,168,76,0.06) 0%, transparent 60%);
+  background-image: radial-gradient(rgba(10, 181, 181, 0.09) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-body.light-mode { background-image: none; }
+body.light-mode {
+  background-image: radial-gradient(rgba(10, 129, 129, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
 
 img { max-width: 100%; height: auto; }
 
@@ -123,7 +129,7 @@ img { max-width: 100%; height: auto; }
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 100;
-  background: rgba(238, 247, 247, 0.92);
+  background: rgba(240, 247, 244, 0.92);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   border-bottom: 3px solid var(--clr-magenta);
@@ -228,7 +234,7 @@ body.dark-mode .site-header { background: rgba(1, 44, 44, 0.85); }
   gap: 0.25rem;
   align-items: center;
   flex-shrink: 0;
-  background: rgba(238, 247, 247, 0.85);
+  background: rgba(240, 247, 244, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--clr-border-glow);
@@ -314,7 +320,7 @@ body.dark-mode .mobile-toggle:hover {
   width: auto;
   height: auto;
   max-width: none;
-  background: #d4fafa;
+  background: #e3f3ee;
   z-index: 200;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
   transform: translateX(100%);
@@ -521,7 +527,7 @@ body.dark-mode .mobile-nav-panel {
 .sticky-cta:hover { transform: translateY(-3px); box-shadow: 0 0 28px rgba(184, 135, 58, 0.45); }
 
 .footer-fat {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(224, 240, 233, 0.7);
   border-top: 1px solid var(--clr-border-glow);
   padding: 2.5rem 1.5rem 1.5rem;
   margin-top: auto;
@@ -529,7 +535,7 @@ body.dark-mode .mobile-nav-panel {
 }
 
 body.dark-mode .footer-fat {
-  background: #011f1f;
+  background: #013030;
   border-top: 2px solid rgba(10, 181, 181, 0.3);
 }
 
