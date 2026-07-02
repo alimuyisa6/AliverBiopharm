@@ -22,7 +22,7 @@ import { ChatWidget } from '../chat/ChatWidget';
 import NotificationBell from '../../components/NotificationBell';
 import InfoCards from '../../components/InfoCards';
 import InteractiveShowcase from '../../components/InteractiveShowcase';
-
+import { ClassroomSection } from '../classroom/ClassroomSection';
 export default function HomeView({
   user,
   logout,
@@ -130,7 +130,9 @@ export default function HomeView({
 
       <InfoCards />
 
-       <StatsGrid stats={{
+     <ClassroomSection user={user} />
+       
+     <StatsGrid stats={{
   resources_count: publicStats?.resources_count || 0,
   users_count: publicStats?.users_count || 0,
   downloads_count: publicStats?.downloads_count || 0,
