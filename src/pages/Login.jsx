@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { signin } from '../api/client';
 import { useNavigate, Link } from 'react-router-dom';
@@ -22,6 +22,8 @@ export default function Login() {
   const { show, hide } = useLoading();
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!document.querySelector('script[src*="turnstile"]')) {
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
@@ -34,9 +36,21 @@ export default function Login() {
     let attempts = 0;
     const interval = setInterval(() => {
       attempts++;
+      if (cancelled) return;
       if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-          sitekey: TURNSTILE_SITE_KEY
+          sitekey: TURNSTILE_SITE_KEY,
+          'expired-callback': () => {
+            if (window.turnstile && widgetIdRef.current) {
+              window.turnstile.reset(widgetIdRef.current);
+            }
+          },
+          'error-callback': () => {
+            if (window.turnstile && widgetIdRef.current) {
+              window.turnstile.reset(widgetIdRef.current);
+            }
+            return false;
+          }
         });
         clearInterval(interval);
       }
@@ -44,6 +58,7 @@ export default function Login() {
     }, 100);
 
     return () => {
+      cancelled = true;
       clearInterval(interval);
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.remove(widgetIdRef.current);
@@ -147,4 +162,4 @@ export default function Login() {
       </div>
     </div>
   );
-} 
+}
