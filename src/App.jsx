@@ -14,6 +14,10 @@ import AboutPage from './pages/AboutPage';
 import InfoPage from './pages/PageInfo';
 import LearningLab from './pages/LearningLab';
 import FlashcardsPage from './pages/FlashcardsPage';
+import Classroom from './pages/Classroom';
+import ClassroomRoom from './pages/ClassroomRoom';
+import TutorApply from './pages/TutorApply';
+
 
 const scrollPositions = {};
 
@@ -97,7 +101,10 @@ function App() {
            <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
          <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
-          <Route path="/info/:slug" element={<InfoPage />} />
+          <Route path="/classroom" element={<ProtectedRoute><Classroom /></ProtectedRoute>} />
+<Route path="/classroom/:roomId" element={<ProtectedRoute><ClassroomRoom /></ProtectedRoute>} />
+<Route path="/tutor/apply" element={<ProtectedRoute><TutorApply /></ProtectedRoute>} />
+         <Route path="/info/:slug" element={<InfoPage />} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
