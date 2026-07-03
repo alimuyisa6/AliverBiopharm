@@ -1,49 +1,21 @@
- // features/classroom/ClassroomOnboarding.jsx
-import React, { useState } from 'react';
+ import React, { useState, useEffect } from 'react';
+import { getClassroomLevels, getClassroomTopics } from '../../api/cachedClient';
 
-const LEVELS = {
-  'O-Level': {
-    classes: ['Form 1', 'Form 2', 'Form 3', 'Form 4'],
-    color: '#0ab5b5',
-    icon: 'fa-microscope',
-  },
-  'A-Level': {
-    classes: ['Form 5', 'Form 6'],
-    color: '#b8873a',
-    icon: 'fa-dna',
-  },
-  'Pharmacy': {
-    classes: ['Certificate', 'Diploma', 'Degree'],
-    color: '#10b981',
-    icon: 'fa-capsules',
-  },
-};
-
-const biologyTopics = {
-  'O-Level': ['Cell Biology', 'Nutrition', 'Transport in Plants', 'Transport in Animals', 'Respiration', 'Excretion', 'Homeostasis', 'Genetics', 'Evolution', 'Ecology', 'Reproduction', 'Growth and Development'],
-  'A-Level': ['Biochemistry', 'Molecular Biology', 'Microbiology', 'Biotechnology', 'Immunology', 'Research Methods', 'Cell Signaling', 'Gene Expression', 'Metabolism', 'Enzymology'],
-};
-
-const pharmacyTopics = {
-  'Certificate': ['Pharmacology I', 'Pharmaceutics I', 'Pharmacognosy', 'Anatomy & Physiology', 'Pharmaceutical Chemistry'],
-  'Diploma': ['Clinical Pharmacy', 'Industrial Pharmacy', 'Biostatistics', 'Pharmaceutical Microbiology', 'Pharmacy Management'],
-  'Degree': ['Advanced Therapeutics', 'Drug Design & Discovery', 'Regulatory Affairs', 'Pharmacokinetics', 'Research Methodology'],
-};
-
-const hardTopics = ['Genetics', 'Molecular Biology', 'Biotechnology', 'Immunology', 'Advanced Therapeutics', 'Pharmacokinetics'];
-
-function getTopics(level, className) {
-  if (level === 'Pharmacy') {
-    return (pharmacyTopics[className] || []).map(name => ({ topic_name: name, is_hard_topic: hardTopics.includes(name) }));
-  }
-  return (biologyTopics[level] || []).map(name => ({ topic_name: name, is_hard_topic: hardTopics.includes(name) }));
-}
+const CARD_COLOR_CLASS = ['level-card-cyan', 'level-card-magenta', 'level-card-blue'];
 
 export function ClassroomOnboarding({ onComplete }) {
   const [step, setStep] = useState(1);
+  const [levels, setLevels] = useState([]);
+  const [loadingLevels, setLoadingLevels] = useState(true);
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [topics, setTopics] = useState([]);
+  const [loadingTopics, setLoadingTopics] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(null);
+
+  useEffect(() => {
+    getClassroomLevels().then(setLevels).finally(() => setLoadingLevels(false));
+  }, []);
 
   const handleLevelSelect = (level) => {
     setSelectedLevel(level);
@@ -52,113 +24,106 @@ export function ClassroomOnboarding({ onComplete }) {
     setStep(2);
   };
 
-  const handleClassSelect = (cls) => {
+  const handleClassSelect = async (cls) => {
+    const className = typeof cls === 'string' ? cls : cls.id;
     setSelectedClass(cls);
     setSelectedTopic(null);
     setStep(3);
-  };
-
-  const handleTopicSelect = (topic) => {
-    setSelectedTopic(topic);
-  };
-
-  const handleJoin = () => {
-    if (onComplete) {
-      onComplete({ level: selectedLevel, class_name: selectedClass, topic: selectedTopic });
+    setLoadingTopics(true);
+    try {
+      const data = await getClassroomTopics(selectedLevel.key, className);
+      setTopics(data || []);
+    } finally {
+      setLoadingTopics(false);
     }
   };
 
   const handleBack = () => {
-    if (step === 3) {
-      setSelectedClass(null);
-      setSelectedTopic(null);
-      setStep(2);
-    } else if (step === 2) {
-      setSelectedLevel(null);
-      setSelectedClass(null);
-      setSelectedTopic(null);
-      setStep(1);
+    if (step === 3) { setSelectedClass(null); setSelectedTopic(null); setTopics([]); setStep(2); }
+    else if (step === 2) { setSelectedLevel(null); setSelectedClass(null); setSelectedTopic(null); setStep(1); }
+  };
+
+  const handleJoin = () => {
+    if (onComplete) {
+      onComplete({
+        level: selectedLevel.key,
+        class_name: typeof selectedClass === 'string' ? selectedClass : selectedClass.id,
+        topic: selectedTopic,
+      });
     }
   };
 
-  const currentLevel = LEVELS[selectedLevel];
-  const topics = selectedLevel && selectedClass ? getTopics(selectedLevel, selectedClass) : [];
+  if (loadingLevels) {
+    return <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>;
+  }
 
   return (
     <div className="classroom-onboarding">
       <div className="onboarding-steps">
-        <div className={`onboarding-step ${step >= 1 ? 'active' : ''}`}>
-          <span className="step-number">1</span>
-          <span className="step-label">Level</span>
-        </div>
+        <div className={`onboarding-step ${step >= 1 ? 'active' : ''}`}><span className="step-number">1</span><span className="step-label">Level</span></div>
         <div className="step-line"></div>
-        <div className={`onboarding-step ${step >= 2 ? 'active' : ''}`}>
-          <span className="step-number">2</span>
-          <span className="step-label">Class</span>
-        </div>
+        <div className={`onboarding-step ${step >= 2 ? 'active' : ''}`}><span className="step-number">2</span><span className="step-label">Class</span></div>
         <div className="step-line"></div>
-        <div className={`onboarding-step ${step >= 3 ? 'active' : ''}`}>
-          <span className="step-number">3</span>
-          <span className="step-label">Topic</span>
-        </div>
+        <div className={`onboarding-step ${step >= 3 ? 'active' : ''}`}><span className="step-number">3</span><span className="step-label">Topic</span></div>
       </div>
 
       {step === 1 && (
         <div className="onboarding-body">
           <h3>Select Your Level</h3>
           <div className="onboarding-grid">
-            {Object.entries(LEVELS).map(([key, data]) => (
+            {levels.map((lvl, i) => (
               <button
-                key={key}
-                className={`onboarding-card ${selectedLevel === key ? 'selected' : ''}`}
-                style={{ borderColor: selectedLevel === key ? data.color : 'transparent' }}
-                onClick={() => handleLevelSelect(key)}
+                key={lvl.key}
+                className={`onboarding-card ${CARD_COLOR_CLASS[i % 3]} ${selectedLevel?.key === lvl.key ? 'selected' : ''}`}
+                onClick={() => handleLevelSelect(lvl)}
               >
-                <i className={`fa-solid ${data.icon}`} style={{ color: data.color, fontSize: '2rem' }}></i>
-                <span>{key}</span>
+                <i className={`fa-solid ${lvl.icon}`}></i>
+                <span>{lvl.key}</span>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {step === 2 && currentLevel && (
+      {step === 2 && selectedLevel && (
         <div className="onboarding-body">
-          <button className="onboarding-back" onClick={handleBack}>
-            <i className="fa-solid fa-arrow-left"></i> Back
-          </button>
+          <button className="onboarding-back" onClick={handleBack}><i className="fa-solid fa-arrow-left"></i> Back</button>
           <h3>Select Your Class</h3>
           <div className="onboarding-grid">
-            {currentLevel.classes.map(cls => (
-              <button
-                key={cls}
-                className={`onboarding-card ${selectedClass === cls ? 'selected' : ''}`}
-                style={{ borderColor: selectedClass === cls ? currentLevel.color : 'transparent' }}
-                onClick={() => handleClassSelect(cls)}
-              >
-                <i className={`fa-solid ${currentLevel.icon}`} style={{ color: currentLevel.color, fontSize: '2rem' }}></i>
-                <span>{cls}</span>
-              </button>
-            ))}
+            {selectedLevel.classes.map((cls) => {
+              const isObj = typeof cls !== 'string';
+              const key = isObj ? cls.id : cls;
+              const label = isObj ? cls.name : cls;
+              return (
+                <button
+                  key={key}
+                  className={`onboarding-card level-card-cyan ${selectedClass === cls ? 'selected' : ''}`}
+                  onClick={() => handleClassSelect(cls)}
+                >
+                  <i className={`fa-solid ${isObj ? cls.icon || 'fa-mortar-pestle' : selectedLevel.icon}`}></i>
+                  <span>{label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
       {step === 3 && (
         <div className="onboarding-body">
-          <button className="onboarding-back" onClick={handleBack}>
-            <i className="fa-solid fa-arrow-left"></i> Back
-          </button>
+          <button className="onboarding-back" onClick={handleBack}><i className="fa-solid fa-arrow-left"></i> Back</button>
           <h3>Select a Topic</h3>
-          {topics.length === 0 ? (
+          {loadingTopics ? (
+            <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>
+          ) : topics.length === 0 ? (
             <div className="onboarding-empty">No topics available for this class.</div>
           ) : (
             <div className="onboarding-topic-list">
-              {topics.map((topic, index) => (
+              {topics.map((topic) => (
                 <button
-                  key={topic.topic_name || index}
-                  className={`onboarding-topic-card ${selectedTopic?.topic_name === topic.topic_name ? 'selected' : ''}`}
-                  onClick={() => handleTopicSelect(topic)}
+                  key={topic.id}
+                  className={`onboarding-topic-card ${selectedTopic?.id === topic.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedTopic(topic)}
                 >
                   <div className="topic-card-content">
                     <span className="topic-name">{topic.topic_name}</span>
@@ -174,8 +139,7 @@ export function ClassroomOnboarding({ onComplete }) {
       {selectedTopic && (
         <div className="onboarding-footer">
           <button className="btn-primary" onClick={handleJoin}>
-            <i className="fa-solid fa-door-open"></i>
-            Find Classrooms
+            <i className="fa-solid fa-door-open"></i> Find Classrooms
           </button>
         </div>
       )}
