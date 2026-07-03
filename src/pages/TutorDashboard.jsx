@@ -1,8 +1,9 @@
-// pages/TutorDashboard.jsx
+ // pages/TutorDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getClassroomLevels, getClassroomTopics } from '../api/client';
+import '../styles/tutor-dashboard.css';
 
 export default function TutorDashboard() {
   const { user } = useAuth();
@@ -12,6 +13,8 @@ export default function TutorDashboard() {
   const [activeRooms, setActiveRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [statusError, setStatusError] = useState(null);
+  const [roomsError, setRoomsError] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [form, setForm] = useState({
     title: '',
@@ -29,35 +32,81 @@ export default function TutorDashboard() {
   const [createSuccess, setCreateSuccess] = useState(null);
 
   useEffect(() => {
+    if (!user) {
+      setError('You must be logged in to access the tutor dashboard.');
+      setLoading(false);
+      return;
+    }
     fetchDashboard();
-  }, []);
+  }, [user]);
 
   const fetchDashboard = async () => {
     setLoading(true);
     setError(null);
+    setStatusError(null);
+
     try {
-      const [statusRes, levelsData] = await Promise.all([
-        fetch('/api/server?module=classroom&path=tutor_status', { credentials: 'include' }).then(r => r.json()),
-        getClassroomLevels(),
-      ]);
-      setTutorStatus(statusRes?.application || null);
-      setLevels(levelsData || []);
-      if (statusRes?.application?.status === 'approved') {
+      const statusRes = await fetch('/api/server?module=classroom&path=tutor_status', {
+        credentials: 'include',
+      });
+
+      if (!statusRes.ok) {
+        const errData = await statusRes.json().catch(() => ({}));
+        if (statusRes.status === 401) {
+          setStatusError('Your session has expired. Please log in again.');
+        } else if (statusRes.status === 403) {
+          setStatusError('Access denied. Please log in again.');
+        } else if (statusRes.status === 404) {
+          setStatusError('Tutor service not available. Please try again later.');
+        } else {
+          setStatusError(errData.error || `Server error (${statusRes.status}). Please try again.`);
+        }
+        setLoading(false);
+        return;
+      }
+
+      const statusData = await statusRes.json();
+      setTutorStatus(statusData?.application || null);
+
+      try {
+        const levelsData = await getClassroomLevels();
+        setLevels(levelsData || []);
+      } catch {
+        setLevels([]);
+      }
+
+      if (statusData?.application?.status === 'approved') {
         fetchActiveRooms();
       }
-    } catch {
-      setError('Failed to load dashboard. Please try again.');
+    } catch (err) {
+      if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+        setError('Network error. Please check your internet connection and try again.');
+      } else {
+        setError('Failed to load dashboard. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const fetchActiveRooms = async () => {
+    setRoomsError(null);
     try {
-      const res = await fetch('/api/server?module=classroom&path=tutor_rooms', { credentials: 'include' });
+      const res = await fetch('/api/server?module=classroom&path=tutor_rooms', {
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setRoomsError(errData.error || 'Failed to load your rooms.');
+        return;
+      }
+
       const data = await res.json();
       setActiveRooms(data?.rooms || data || []);
-    } catch {}
+    } catch {
+      setRoomsError('Network error while loading rooms.');
+    }
   };
 
   const fetchTopics = async (level, className) => {
@@ -74,25 +123,37 @@ export default function TutorDashboard() {
 
   const handleCreateRoom = async () => {
     if (!form.title || !form.level || !form.class_name || !form.topic_id || !form.topic_name) {
-      setCreateError('Please fill all required fields');
+      setCreateError('Please fill all required fields.');
       return;
     }
     if ((form.room_type === 'hard_topic' || form.room_type === 'premium') && !form.scheduled_at) {
-      setCreateError('Scheduled date and time is required for this room type');
+      setCreateError('Scheduled date and time is required for this room type.');
       return;
     }
     setSubmitting(true);
     setCreateError(null);
     setCreateSuccess(null);
     try {
-      const res = await fetch('/api/server', {
+      const res = await fetch(`/api/server?module=classroom&path=create`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ module: 'classroom', path: 'create', ...form }),
+        body: JSON.stringify(form),
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create room');
+
+      if (!res.ok) {
+        if (res.status === 403) {
+          setCreateError(data.error || 'You are not authorized to create rooms.');
+        } else if (res.status === 401) {
+          setCreateError('Your session has expired. Please log in again.');
+        } else {
+          setCreateError(data.error || 'Failed to create room.');
+        }
+        return;
+      }
+
       setCreateSuccess('Classroom created successfully!');
       setShowCreateForm(false);
       setForm({
@@ -106,9 +167,9 @@ export default function TutorDashboard() {
       });
       setTopics([]);
       fetchActiveRooms();
-      setTimeout(() => setCreateSuccess(null), 4000);
-    } catch (err) {
-      setCreateError(err.message);
+      setTimeout(() => setCreateSuccess(null), 5000);
+    } catch {
+      setCreateError('Network error. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -116,14 +177,23 @@ export default function TutorDashboard() {
 
   const handleEndRoom = async (roomId) => {
     try {
-      await fetch('/api/server', {
+      const res = await fetch(`/api/server?module=classroom&path=end_room`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ module: 'classroom', path: 'end_room', room_id: roomId }),
+        body: JSON.stringify({ room_id: roomId }),
       });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setRoomsError(errData.error || 'Failed to end room.');
+        return;
+      }
+
       fetchActiveRooms();
-    } catch {}
+    } catch {
+      setRoomsError('Network error while ending room.');
+    }
   };
 
   const statusLabels = {
@@ -160,10 +230,38 @@ export default function TutorDashboard() {
           <div className="tutor-error-icon">
             <i className="fa-solid fa-triangle-exclamation"></i>
           </div>
+          <h2>Something went wrong</h2>
           <p className="tutor-error-text">{error}</p>
-          <button className="tutor-btn tutor-btn-secondary" onClick={fetchDashboard}>
-            <i className="fa-solid fa-rotate"></i> Retry
-          </button>
+          <div className="tutor-error-actions">
+            <button className="tutor-btn tutor-btn-primary" onClick={fetchDashboard}>
+              <i className="fa-solid fa-rotate"></i> Try Again
+            </button>
+            <button className="tutor-btn tutor-btn-secondary" onClick={() => navigate('/classroom')}>
+              <i className="fa-solid fa-users"></i> Back to Classrooms
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (statusError) {
+    return (
+      <div className="tutor-dashboard-page">
+        <div className="tutor-dashboard-error">
+          <div className="tutor-error-icon">
+            <i className="fa-solid fa-lock"></i>
+          </div>
+          <h2>Unable to Load Tutor Status</h2>
+          <p className="tutor-error-text">{statusError}</p>
+          <div className="tutor-error-actions">
+            <button className="tutor-btn tutor-btn-primary" onClick={() => navigate('/login')}>
+              <i className="fa-solid fa-right-to-bracket"></i> Log In
+            </button>
+            <button className="tutor-btn tutor-btn-secondary" onClick={fetchDashboard}>
+              <i className="fa-solid fa-rotate"></i> Retry
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -194,13 +292,15 @@ export default function TutorDashboard() {
             <div className="tutor-empty-icon">
               <i className="fa-solid fa-graduation-cap"></i>
             </div>
-            <h2 className="tutor-empty-title">Become a Tutor</h2>
+            <h2 className="tutor-empty-title">No Application Found</h2>
             <p className="tutor-empty-text">
-              Share your knowledge with students across Uganda. Apply now to start leading classroom discussions and make an impact.
+              You haven't applied to become a tutor yet. Apply now to start leading classroom discussions and make an impact.
             </p>
-            <button className="tutor-btn tutor-btn-primary" onClick={() => navigate('/tutor/apply')}>
-              <i className="fa-solid fa-paper-plane"></i> Start Application
-            </button>
+            <div className="tutor-empty-actions">
+              <button className="tutor-btn tutor-btn-primary" onClick={() => navigate('/tutor/apply')}>
+                <i className="fa-solid fa-paper-plane"></i> Start Application
+              </button>
+            </div>
           </div>
         )}
 
@@ -443,30 +543,6 @@ export default function TutorDashboard() {
                   )}
                 </div>
 
-                <div className="tutor-form-room-types">
-                  <div className={`tutor-room-type-info ${form.room_type === 'free' ? 'tutor-room-type-info--active' : ''}`}>
-                    <i className="fa-solid fa-users"></i>
-                    <div>
-                      <strong>Open Floor</strong>
-                      <p>Instant room, anyone can join immediately.</p>
-                    </div>
-                  </div>
-                  <div className={`tutor-room-type-info ${form.room_type === 'hard_topic' ? 'tutor-room-type-info--active' : ''}`}>
-                    <i className="fa-solid fa-brain"></i>
-                    <div>
-                      <strong>Hard Topic</strong>
-                      <p>Scheduled session for difficult subjects.</p>
-                    </div>
-                  </div>
-                  <div className={`tutor-room-type-info ${form.room_type === 'premium' ? 'tutor-room-type-info--active' : ''}`}>
-                    <i className="fa-solid fa-crown"></i>
-                    <div>
-                      <strong>Premium</strong>
-                      <p>Exclusive scheduled session with limited seats.</p>
-                    </div>
-                  </div>
-                </div>
-
                 {createError && (
                   <div className="tutor-alert tutor-alert--error">
                     <i className="fa-solid fa-circle-exclamation"></i>
@@ -503,7 +579,17 @@ export default function TutorDashboard() {
                 </h3>
               </div>
 
-              {activeRooms.length === 0 ? (
+              {roomsError && (
+                <div className="tutor-alert tutor-alert--error">
+                  <i className="fa-solid fa-circle-exclamation"></i>
+                  <span>{roomsError}</span>
+                  <button className="tutor-btn tutor-btn-sm tutor-btn-secondary" onClick={fetchActiveRooms}>
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {!roomsError && activeRooms.length === 0 && (
                 <div className="tutor-rooms-empty">
                   <div className="tutor-rooms-empty-icon">
                     <i className="fa-solid fa-door-closed"></i>
@@ -513,7 +599,9 @@ export default function TutorDashboard() {
                     You haven't created any classrooms yet. Click "Create Classroom" to get started.
                   </p>
                 </div>
-              ) : (
+              )}
+
+              {!roomsError && activeRooms.length > 0 && (
                 <div className="tutor-rooms-grid">
                   {activeRooms.map(room => {
                     const roomStatus = roomStatusIcons[room.status] || roomStatusIcons.upcoming;
