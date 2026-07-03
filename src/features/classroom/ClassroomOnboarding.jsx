@@ -1,5 +1,5 @@
-// features/classroom/ClassroomOnboarding.jsx
-import React, { useState, useEffect } from 'react';
+ // features/classroom/ClassroomOnboarding.jsx
+import React, { useState } from 'react';
 
 const LEVELS = {
   'O-Level': {
@@ -19,31 +19,31 @@ const LEVELS = {
   },
 };
 
+const biologyTopics = {
+  'O-Level': ['Cell Biology', 'Nutrition', 'Transport in Plants', 'Transport in Animals', 'Respiration', 'Excretion', 'Homeostasis', 'Genetics', 'Evolution', 'Ecology', 'Reproduction', 'Growth and Development'],
+  'A-Level': ['Biochemistry', 'Molecular Biology', 'Microbiology', 'Biotechnology', 'Immunology', 'Research Methods', 'Cell Signaling', 'Gene Expression', 'Metabolism', 'Enzymology'],
+};
+
+const pharmacyTopics = {
+  'Certificate': ['Pharmacology I', 'Pharmaceutics I', 'Pharmacognosy', 'Anatomy & Physiology', 'Pharmaceutical Chemistry'],
+  'Diploma': ['Clinical Pharmacy', 'Industrial Pharmacy', 'Biostatistics', 'Pharmaceutical Microbiology', 'Pharmacy Management'],
+  'Degree': ['Advanced Therapeutics', 'Drug Design & Discovery', 'Regulatory Affairs', 'Pharmacokinetics', 'Research Methodology'],
+};
+
+const hardTopics = ['Genetics', 'Molecular Biology', 'Biotechnology', 'Immunology', 'Advanced Therapeutics', 'Pharmacokinetics'];
+
+function getTopics(level, className) {
+  if (level === 'Pharmacy') {
+    return (pharmacyTopics[className] || []).map(name => ({ topic_name: name, is_hard_topic: hardTopics.includes(name) }));
+  }
+  return (biologyTopics[level] || []).map(name => ({ topic_name: name, is_hard_topic: hardTopics.includes(name) }));
+}
+
 export function ClassroomOnboarding({ onComplete }) {
   const [step, setStep] = useState(1);
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState(null);
-  const [topics, setTopics] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (selectedLevel && selectedClass) {
-      setLoading(true);
-      setError(null);
-      fetch(`/api/server?module=classroom&path=topics&level=${encodeURIComponent(selectedLevel)}&class_name=${encodeURIComponent(selectedClass)}`, { credentials: 'include' })
-        .then(res => res.json())
-        .then(data => {
-          setTopics(data.data || data || []);
-          setLoading(false);
-        })
-        .catch(() => {
-          setError('Failed to load topics');
-          setLoading(false);
-        });
-    }
-  }, [selectedLevel, selectedClass]);
 
   const handleLevelSelect = (level) => {
     setSelectedLevel(level);
@@ -82,6 +82,7 @@ export function ClassroomOnboarding({ onComplete }) {
   };
 
   const currentLevel = LEVELS[selectedLevel];
+  const topics = selectedLevel && selectedClass ? getTopics(selectedLevel, selectedClass) : [];
 
   return (
     <div className="classroom-onboarding">
@@ -149,24 +150,20 @@ export function ClassroomOnboarding({ onComplete }) {
             <i className="fa-solid fa-arrow-left"></i> Back
           </button>
           <h3>Select a Topic</h3>
-          {loading && <div className="onboarding-loading">Loading topics...</div>}
-          {error && <div className="onboarding-error">{error}</div>}
-          {!loading && !error && topics.length === 0 && (
+          {topics.length === 0 ? (
             <div className="onboarding-empty">No topics available for this class.</div>
-          )}
-          {!loading && !error && topics.length > 0 && (
+          ) : (
             <div className="onboarding-topic-list">
-              {topics.map(topic => (
+              {topics.map((topic, index) => (
                 <button
-                  key={topic.id || topic.topic_name || topic.unit_name}
-                  className={`onboarding-topic-card ${selectedTopic?.id === topic.id || selectedTopic?.topic_name === topic.topic_name ? 'selected' : ''}`}
+                  key={topic.topic_name || index}
+                  className={`onboarding-topic-card ${selectedTopic?.topic_name === topic.topic_name ? 'selected' : ''}`}
                   onClick={() => handleTopicSelect(topic)}
                 >
                   <div className="topic-card-content">
-                    <span className="topic-name">{topic.topic_name || topic.unit_name || topic.name}</span>
+                    <span className="topic-name">{topic.topic_name}</span>
                     {topic.is_hard_topic && <span className="topic-badge hard">Hard Topic</span>}
                   </div>
-                  {topic.unit_code && <span className="topic-code">{topic.unit_code}</span>}
                 </button>
               ))}
             </div>
