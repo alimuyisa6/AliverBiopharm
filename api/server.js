@@ -12,10 +12,11 @@ import {
   SecurityError
 } from '../lib/security-middleware.js';
 
-const MODULE_MAP = {
+ const MODULE_MAP = {
   auth:               new URL('../lib/auth.js', import.meta.url).href,
   admin:              new URL('../lib/admin.js', import.meta.url).href,
   chat:               new URL('../lib/chat.js', import.meta.url).href,
+  classroom:          new URL('../lib/classroom.js', import.meta.url).href,
   community:          new URL('../lib/community.js', import.meta.url).href,
   contact:            new URL('../lib/contact.js', import.meta.url).href,
   flashcards:         new URL('../lib/flashcards.js', import.meta.url).href,
