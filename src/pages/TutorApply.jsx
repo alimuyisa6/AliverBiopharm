@@ -1,8 +1,8 @@
-// pages/TutorApply.jsx
+ // pages/TutorApply.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getAllSiteSections } from '../api/client';
+import { getAllSiteSections, getClassroomLevels, getClassroomTopics } from '../api/client';
 
 export default function TutorApply() {
   const { user } = useAuth();
@@ -20,10 +20,14 @@ export default function TutorApply() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
+  const [levels, setLevels] = useState([]);
+  const [topics, setTopics] = useState([]);
+  const [loadingTopics, setLoadingTopics] = useState(false);
 
   useEffect(() => {
     getAllSiteSections().then(setSections).catch(() => {});
     checkExistingApplication();
+    fetchLevels();
   }, []);
 
   const checkExistingApplication = async () => {
@@ -36,49 +40,43 @@ export default function TutorApply() {
     } catch {}
   };
 
-  const LEVELS = {
-    'O-Level': {
-      classes: ['Form 1', 'Form 2', 'Form 3', 'Form 4'],
-      color: '#0ab5b5',
-      icon: 'fa-microscope',
-    },
-    'A-Level': {
-      classes: ['Form 5', 'Form 6'],
-      color: '#b8873a',
-      icon: 'fa-dna',
-    },
-    'Pharmacy': {
-      classes: ['Certificate', 'Diploma', 'Degree'],
-      color: '#10b981',
-      icon: 'fa-capsules',
-    },
+  const fetchLevels = async () => {
+    try {
+      const data = await getClassroomLevels();
+      setLevels(data || []);
+    } catch {}
   };
 
-  const biologyTopics = {
-    'O-Level': ['Cell Biology', 'Nutrition', 'Transport in Plants', 'Transport in Animals', 'Respiration', 'Excretion', 'Homeostasis', 'Genetics', 'Evolution', 'Ecology', 'Reproduction', 'Growth and Development'],
-    'A-Level': ['Biochemistry', 'Molecular Biology', 'Microbiology', 'Biotechnology', 'Immunology', 'Research Methods', 'Cell Signaling', 'Gene Expression', 'Metabolism', 'Enzymology'],
-  };
-
-  const pharmacyTopics = {
-    'Certificate': ['Pharmacology I', 'Pharmaceutics I', 'Pharmacognosy', 'Anatomy & Physiology', 'Pharmaceutical Chemistry'],
-    'Diploma': ['Clinical Pharmacy', 'Industrial Pharmacy', 'Biostatistics', 'Pharmaceutical Microbiology', 'Pharmacy Management'],
-    'Degree': ['Advanced Therapeutics', 'Drug Design & Discovery', 'Regulatory Affairs', 'Pharmacokinetics', 'Research Methodology'],
-  };
-
-  const getAvailableTopics = () => {
-    if (!form.level || !form.class_name) return [];
-    if (form.level === 'Pharmacy') {
-      return pharmacyTopics[form.class_name] || [];
+  const fetchTopics = async (level, className) => {
+    setLoadingTopics(true);
+    try {
+      const data = await getClassroomTopics(level, className);
+      setTopics(data || []);
+    } catch {
+      setTopics([]);
+    } finally {
+      setLoadingTopics(false);
     }
-    return biologyTopics[form.level] || [];
   };
 
-  const handleSubjectToggle = (subject) => {
+  const handleLevelSelect = (level) => {
+    setForm(prev => ({ ...prev, level: level.key, class_name: '', subjects: [] }));
+    setStep(2);
+  };
+
+  const handleClassSelect = (cls) => {
+    const className = typeof cls === 'string' ? cls : cls.id;
+    setForm(prev => ({ ...prev, class_name: className, subjects: [] }));
+    fetchTopics(form.level, className);
+    setStep(3);
+  };
+
+  const handleSubjectToggle = (topic) => {
     setForm(prev => ({
       ...prev,
-      subjects: prev.subjects.includes(subject)
-        ? prev.subjects.filter(s => s !== subject)
-        : [...prev.subjects, subject],
+      subjects: prev.subjects.includes(topic.topic_name)
+        ? prev.subjects.filter(s => s !== topic.topic_name)
+        : [...prev.subjects, topic.topic_name],
     }));
   };
 
@@ -114,6 +112,9 @@ export default function TutorApply() {
     approved: { label: 'Approved', color: '#10b981', icon: 'fa-circle-check' },
     rejected: { label: 'Rejected', color: '#ef4444', icon: 'fa-circle-xmark' },
   };
+
+  const LEVEL_COLORS = ['#0ab5b5', '#b8873a', '#10b981'];
+  const CARD_COLOR_CLASS = ['level-card-cyan', 'level-card-magenta', 'level-card-blue'];
 
   if (existingApplication) {
     const status = statusLabels[existingApplication.status] || statusLabels.pending;
@@ -190,15 +191,14 @@ export default function TutorApply() {
         <div className="apply-form-section">
           <h3>What level do you want to teach?</h3>
           <div className="apply-grid">
-            {Object.entries(LEVELS).map(([key, data]) => (
+            {levels.map((lvl, i) => (
               <button
-                key={key}
-                className={`apply-card ${form.level === key ? 'selected' : ''}`}
-                style={{ borderColor: form.level === key ? data.color : 'transparent' }}
-                onClick={() => { setForm(prev => ({ ...prev, level: key, class_name: '' })); setStep(2); }}
+                key={lvl.key}
+                className={`apply-card ${CARD_COLOR_CLASS[i % 3]} ${form.level === lvl.key ? 'selected' : ''}`}
+                onClick={() => handleLevelSelect(lvl)}
               >
-                <i className={`fa-solid ${data.icon}`} style={{ color: data.color, fontSize: '2rem' }}></i>
-                <span>{key}</span>
+                <i className={`fa-solid ${lvl.icon}`} style={{ fontSize: '2rem' }}></i>
+                <span>{lvl.key}</span>
               </button>
             ))}
           </div>
@@ -212,16 +212,22 @@ export default function TutorApply() {
           </button>
           <h3>Select your class</h3>
           <div className="apply-grid">
-            {(LEVELS[form.level]?.classes || []).map(cls => (
-              <button
-                key={cls}
-                className={`apply-card ${form.class_name === cls ? 'selected' : ''}`}
-                style={{ borderColor: form.class_name === cls ? LEVELS[form.level].color : 'transparent' }}
-                onClick={() => { setForm(prev => ({ ...prev, class_name: cls, subjects: [] })); setStep(3); }}
-              >
-                <span>{cls}</span>
-              </button>
-            ))}
+            {(levels.find(l => l.key === form.level)?.classes || []).map((cls, i) => {
+              const isObj = typeof cls !== 'string';
+              const key = isObj ? cls.id : cls;
+              const label = isObj ? cls.name : cls;
+              const icon = isObj ? cls.icon || 'fa-mortar-pestle' : levels.find(l => l.key === form.level)?.icon;
+              return (
+                <button
+                  key={key}
+                  className={`apply-card ${CARD_COLOR_CLASS[i % 3]} ${form.class_name === key ? 'selected' : ''}`}
+                  onClick={() => handleClassSelect(cls)}
+                >
+                  <i className={`fa-solid ${icon}`}></i>
+                  <span>{label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -232,18 +238,25 @@ export default function TutorApply() {
             <i className="fa-solid fa-arrow-left"></i> Back
           </button>
           <h3>Select topics you can teach</h3>
-          <div className="apply-topics-grid">
-            {getAvailableTopics().map(topic => (
-              <button
-                key={topic}
-                className={`apply-topic-card ${form.subjects.includes(topic) ? 'selected' : ''}`}
-                onClick={() => handleSubjectToggle(topic)}
-              >
-                <i className={`fa-solid ${form.subjects.includes(topic) ? 'fa-check-square' : 'fa-square'}`}></i>
-                {topic}
-              </button>
-            ))}
-          </div>
+          {loadingTopics ? (
+            <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>
+          ) : topics.length === 0 ? (
+            <div className="onboarding-empty">No topics available for this class.</div>
+          ) : (
+            <div className="apply-topics-grid">
+              {topics.map(topic => (
+                <button
+                  key={topic.id}
+                  className={`apply-topic-card ${form.subjects.includes(topic.topic_name) ? 'selected' : ''}`}
+                  onClick={() => handleSubjectToggle(topic)}
+                >
+                  <i className={`fa-solid ${form.subjects.includes(topic.topic_name) ? 'fa-check-square' : 'fa-square'}`}></i>
+                  {topic.topic_name}
+                  {topic.is_hard_topic && <span className="topic-badge hard">Hard</span>}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="apply-details">
             <h3>Tell us about your qualifications</h3>
@@ -253,6 +266,17 @@ export default function TutorApply() {
               value={form.qualifications}
               onChange={e => setForm(prev => ({ ...prev, qualifications: e.target.value }))}
               rows={5}
+            />
+          </div>
+
+          <div className="apply-details">
+            <h3>Teaching Experience</h3>
+            <textarea
+              className="apply-textarea"
+              placeholder="Describe your teaching or tutoring experience..."
+              value={form.experience}
+              onChange={e => setForm(prev => ({ ...prev, experience: e.target.value }))}
+              rows={4}
             />
           </div>
 
@@ -271,4 +295,4 @@ export default function TutorApply() {
       )}
     </div>
   );
-} 
+}
