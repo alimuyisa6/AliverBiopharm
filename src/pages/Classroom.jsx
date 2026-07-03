@@ -59,19 +59,18 @@ export default function Classroom() {
   };
 
   const handleOnboardingComplete = async (data) => {
-   const handleOnboardingComplete = async (data) => {
-  setOnboarding(data);
-  setShowOnboarding(false);
-  try {
-    await fetch(`/api/server?module=classroom&path=save_onboarding`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-  } catch {}
-  fetchRooms(data);
-};
+    setOnboarding(data);
+    setShowOnboarding(false);
+    try {
+      await fetch(`/api/server?module=classroom&path=save_onboarding`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } catch {}
+    fetchRooms(data);
+  };
 
   const handleResetOnboarding = () => {
     setShowOnboarding(true);
