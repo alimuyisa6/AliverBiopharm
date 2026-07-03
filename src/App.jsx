@@ -19,7 +19,7 @@ import ClassroomRoom from './pages/ClassroomRoom';
 import TutorApply from './pages/TutorApply';
 import TutorDashboard from './pages/TutorDashboard';
 
- const scrollPositions = {};
+const scrollPositions = {};
 
 function ScrollManager() {
   const location = useLocation();
@@ -98,13 +98,14 @@ function App() {
           <Route path="/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
           <Route path="/lab" element={<ProtectedRoute><LearningLab /></ProtectedRoute>} />
           <Route path="/about" element={<AboutPage />} />
-           <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
-         <Route path="/terms" element={<LegalPage type="terms" />} />
+          <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
+          <Route path="/terms" element={<LegalPage type="terms" />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
           <Route path="/classroom" element={<ProtectedRoute><Classroom /></ProtectedRoute>} />
-<Route path="/classroom/:roomId" element={<ProtectedRoute><ClassroomRoom /></ProtectedRoute>} />
-<Route path="/tutor/apply" element={<ProtectedRoute><TutorApply /></ProtectedRoute>} />
-         <Route path="/info/:slug" element={<InfoPage />} />
+          <Route path="/classroom/:roomId" element={<ProtectedRoute><ClassroomRoom /></ProtectedRoute>} />
+          <Route path="/tutor/apply" element={<ProtectedRoute><TutorApply /></ProtectedRoute>} />
+          <Route path="/tutor/dashboard" element={<ProtectedRoute><TutorDashboard /></ProtectedRoute>} />
+          <Route path="/info/:slug" element={<InfoPage />} />
           <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
