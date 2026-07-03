@@ -88,15 +88,11 @@ export default function TutorApply() {
     setSubmitting(true);
     setError(null);
     try {
-      await fetch('/api/server', {
+      await fetch(`/api/server?module=classroom&path=tutor_apply`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          module: 'classroom',
-          path: 'tutor_apply',
-          ...form,
-        }),
+        body: JSON.stringify(form),
       });
       setSubmitted(true);
     } catch {
@@ -113,67 +109,66 @@ export default function TutorApply() {
     rejected: { label: 'Rejected', color: '#ef4444', icon: 'fa-circle-xmark' },
   };
 
-  const LEVEL_COLORS = ['#0ab5b5', '#b8873a', '#10b981'];
   const CARD_COLOR_CLASS = ['level-card-cyan', 'level-card-magenta', 'level-card-blue'];
 
-   if (existingApplication) {
-  const status = statusLabels[existingApplication.status] || statusLabels.pending;
-  return (
-    <div className="tutor-apply-page">
-      <div className="application-status-card">
-        <div className="status-icon" style={{ color: status.color }}>
-          <i className={`fa-solid ${status.icon}`}></i>
-        </div>
-        <h2>Application Status: {status.label}</h2>
-        <div className="status-details">
-          <p><strong>Level:</strong> {existingApplication.level}</p>
-          <p><strong>Class:</strong> {existingApplication.class_name}</p>
-          <p><strong>Subjects:</strong> {(existingApplication.subjects || []).join(', ')}</p>
-          {existingApplication.rejection_reason && (
-            <div className="rejection-reason">
-              <strong>Reason:</strong> {existingApplication.rejection_reason}
-            </div>
-          )}
-          {existingApplication.interview_scheduled_at && (
-            <div className="interview-info">
-              <strong>Interview:</strong> {new Date(existingApplication.interview_scheduled_at).toLocaleString()}
-            </div>
-          )}
-        </div>
-        <div className="status-actions">
-          <button className="btn-primary" onClick={() => navigate('/tutor/dashboard')}>
-            <i className="fa-solid fa-gauge"></i> Tutor Dashboard
-          </button>
-          {existingApplication.status === 'rejected' && (
-            <button className="btn-secondary" onClick={() => navigate('/classroom/complaint')}>
-              <i className="fa-solid fa-flag"></i> File Appeal
+  if (existingApplication) {
+    const status = statusLabels[existingApplication.status] || statusLabels.pending;
+    return (
+      <div className="tutor-apply-page">
+        <div className="application-status-card">
+          <div className="status-icon" style={{ color: status.color }}>
+            <i className={`fa-solid ${status.icon}`}></i>
+          </div>
+          <h2>Application Status: {status.label}</h2>
+          <div className="status-details">
+            <p><strong>Level:</strong> {existingApplication.level}</p>
+            <p><strong>Class:</strong> {existingApplication.class_name}</p>
+            <p><strong>Subjects:</strong> {(existingApplication.subjects || []).join(', ')}</p>
+            {existingApplication.rejection_reason && (
+              <div className="rejection-reason">
+                <strong>Reason:</strong> {existingApplication.rejection_reason}
+              </div>
+            )}
+            {existingApplication.interview_scheduled_at && (
+              <div className="interview-info">
+                <strong>Interview:</strong> {new Date(existingApplication.interview_scheduled_at).toLocaleString()}
+              </div>
+            )}
+          </div>
+          <div className="status-actions">
+            <button className="btn-primary" onClick={() => navigate('/tutor/dashboard')}>
+              <i className="fa-solid fa-gauge"></i> Tutor Dashboard
             </button>
-          )}
+            {existingApplication.status === 'rejected' && (
+              <button className="btn-secondary" onClick={() => navigate('/classroom/complaint')}>
+                <i className="fa-solid fa-flag"></i> File Appeal
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-            }
+    );
+  }
 
-   if (submitted) {
-  return (
-    <div className="tutor-apply-page">
-      <div className="application-success">
-        <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
-        <h2>Application Submitted</h2>
-        <p>Your tutor application has been received. An admin will review it and schedule an interview if approved.</p>
-        <div className="tutor-success-actions">
-          <button className="btn-primary" onClick={() => navigate('/tutor/dashboard')}>
-            <i className="fa-solid fa-gauge"></i> Go to Tutor Dashboard
-          </button>
-          <button className="btn-secondary" onClick={() => navigate('/classroom')}>
-            <i className="fa-solid fa-users"></i> Back to Classrooms
-          </button>
+  if (submitted) {
+    return (
+      <div className="tutor-apply-page">
+        <div className="application-success">
+          <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
+          <h2>Application Submitted</h2>
+          <p>Your tutor application has been received. An admin will review it and schedule an interview if approved.</p>
+          <div className="tutor-success-actions">
+            <button className="btn-primary" onClick={() => navigate('/tutor/dashboard')}>
+              <i className="fa-solid fa-gauge"></i> Go to Tutor Dashboard
+            </button>
+            <button className="btn-secondary" onClick={() => navigate('/classroom')}>
+              <i className="fa-solid fa-users"></i> Back to Classrooms
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
-   }
+    );
+  }
 
   return (
     <div className="tutor-apply-page">
