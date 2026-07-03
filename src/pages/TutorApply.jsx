@@ -1,8 +1,8 @@
- // pages/TutorApply.jsx
+// pages/TutorApply.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getAllSiteSections, getClassroomLevels, getClassroomTopics } from '../api/client';
+import { getAllSiteSections, getClassroomLevels, getClassroomTopics, applyAsTutor } from '../api/client';
 
 export default function TutorApply() {
   const { user } = useAuth();
@@ -88,15 +88,10 @@ export default function TutorApply() {
     setSubmitting(true);
     setError(null);
     try {
-      await fetch(`/api/server?module=classroom&path=tutor_apply`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
+      await applyAsTutor(form.level, form.class_name, form.subjects, form.qualifications, form.experience);
       setSubmitted(true);
-    } catch {
-      setError('Failed to submit application. Please try again.');
+    } catch (err) {
+      setError(err.message || 'Failed to submit application. Please try again.');
     }
     setSubmitting(false);
   };
