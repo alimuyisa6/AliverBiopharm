@@ -150,20 +150,25 @@ export default function TutorApply() {
     );
   }
 
-  if (submitted) {
-    return (
-      <div className="tutor-apply-page">
-        <div className="application-success">
-          <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
-          <h2>Application Submitted</h2>
-          <p>Your tutor application has been received. An admin will review it and schedule an interview if approved.</p>
-          <button className="btn-primary" onClick={() => navigate('/classroom')}>
+   if (submitted) {
+  return (
+    <div className="tutor-apply-page">
+      <div className="application-success">
+        <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
+        <h2>Application Submitted</h2>
+        <p>Your tutor application has been received. An admin will review it and schedule an interview if approved.</p>
+        <div className="tutor-success-actions">
+          <button className="btn-primary" onClick={() => navigate('/tutor/dashboard')}>
+            <i className="fa-solid fa-gauge"></i> Go to Tutor Dashboard
+          </button>
+          <button className="btn-secondary" onClick={() => navigate('/classroom')}>
             <i className="fa-solid fa-users"></i> Back to Classrooms
           </button>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+   }
 
   return (
     <div className="tutor-apply-page">
