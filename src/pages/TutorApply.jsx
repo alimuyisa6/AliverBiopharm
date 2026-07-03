@@ -116,39 +116,44 @@ export default function TutorApply() {
   const LEVEL_COLORS = ['#0ab5b5', '#b8873a', '#10b981'];
   const CARD_COLOR_CLASS = ['level-card-cyan', 'level-card-magenta', 'level-card-blue'];
 
-  if (existingApplication) {
-    const status = statusLabels[existingApplication.status] || statusLabels.pending;
-    return (
-      <div className="tutor-apply-page">
-        <div className="application-status-card">
-          <div className="status-icon" style={{ color: status.color }}>
-            <i className={`fa-solid ${status.icon}`}></i>
-          </div>
-          <h2>Application Status: {status.label}</h2>
-          <div className="status-details">
-            <p><strong>Level:</strong> {existingApplication.level}</p>
-            <p><strong>Class:</strong> {existingApplication.class_name}</p>
-            <p><strong>Subjects:</strong> {(existingApplication.subjects || []).join(', ')}</p>
-            {existingApplication.rejection_reason && (
-              <div className="rejection-reason">
-                <strong>Reason:</strong> {existingApplication.rejection_reason}
-              </div>
-            )}
-            {existingApplication.interview_scheduled_at && (
-              <div className="interview-info">
-                <strong>Interview:</strong> {new Date(existingApplication.interview_scheduled_at).toLocaleString()}
-              </div>
-            )}
-          </div>
+   if (existingApplication) {
+  const status = statusLabels[existingApplication.status] || statusLabels.pending;
+  return (
+    <div className="tutor-apply-page">
+      <div className="application-status-card">
+        <div className="status-icon" style={{ color: status.color }}>
+          <i className={`fa-solid ${status.icon}`}></i>
+        </div>
+        <h2>Application Status: {status.label}</h2>
+        <div className="status-details">
+          <p><strong>Level:</strong> {existingApplication.level}</p>
+          <p><strong>Class:</strong> {existingApplication.class_name}</p>
+          <p><strong>Subjects:</strong> {(existingApplication.subjects || []).join(', ')}</p>
+          {existingApplication.rejection_reason && (
+            <div className="rejection-reason">
+              <strong>Reason:</strong> {existingApplication.rejection_reason}
+            </div>
+          )}
+          {existingApplication.interview_scheduled_at && (
+            <div className="interview-info">
+              <strong>Interview:</strong> {new Date(existingApplication.interview_scheduled_at).toLocaleString()}
+            </div>
+          )}
+        </div>
+        <div className="status-actions">
+          <button className="btn-primary" onClick={() => navigate('/tutor/dashboard')}>
+            <i className="fa-solid fa-gauge"></i> Tutor Dashboard
+          </button>
           {existingApplication.status === 'rejected' && (
-            <button className="btn-primary" onClick={() => navigate('/classroom/complaint')}>
+            <button className="btn-secondary" onClick={() => navigate('/classroom/complaint')}>
               <i className="fa-solid fa-flag"></i> File Appeal
             </button>
           )}
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+            }
 
    if (submitted) {
   return (
