@@ -419,6 +419,10 @@ export async function getClassroomParticipants(room_id) {
   return getRequest('classroom', 'participants', { room_id });
 }
 
+export async function getLiveClassroomFeed() {
+  return getRequest('classroom', 'live_feed');
+}
+
 export async function getTutorStatus() {
   return getRequest('classroom', 'tutor_status');
 }
