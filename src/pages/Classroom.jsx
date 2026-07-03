@@ -14,21 +14,31 @@ export default function Classroom() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   useEffect(() => {
     getAllSiteSections().then(setSections).catch(() => {});
-    const saved = localStorage.getItem('classroom_onboarding');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setOnboarding(parsed);
-        setShowOnboarding(false);
-        fetchRooms(parsed);
-      } catch {
-        localStorage.removeItem('classroom_onboarding');
-      }
-    }
+    checkOnboardingStatus();
   }, []);
+
+  const checkOnboardingStatus = async () => {
+    try {
+      const res = await fetch('/api/server?module=classroom&path=onboarding_status', { credentials: 'include' });
+      const data = await res.json();
+      if (data?.onboarding?.has_completed_onboarding) {
+        const saved = {
+          level: data.onboarding.level,
+          class_name: data.onboarding.class_name,
+          topic: { topic_name: data.onboarding.selected_topic },
+        };
+        setOnboarding(saved);
+        setShowOnboarding(false);
+        fetchRooms(saved);
+      }
+    } catch {} finally {
+      setCheckingOnboarding(false);
+    }
+  };
 
   const fetchRooms = async (onboardData) => {
     setLoading(true);
@@ -37,7 +47,7 @@ export default function Classroom() {
       const params = new URLSearchParams({
         level: onboardData.level,
         class_name: onboardData.class_name,
-        topic_id: onboardData.topic?.id || onboardData.topic?.topic_name || onboardData.topic?.unit_name || '',
+        topic_id: onboardData.topic?.id || onboardData.topic?.topic_name || onboardData.topic?.unit_name || onboardData.topic?.name || '',
       });
       const res = await fetch(`/api/server?module=classroom&path=list&${params}`, { credentials: 'include' });
       const data = await res.json();
@@ -48,10 +58,21 @@ export default function Classroom() {
     setLoading(false);
   };
 
-  const handleOnboardingComplete = (data) => {
+  const handleOnboardingComplete = async (data) => {
     setOnboarding(data);
     setShowOnboarding(false);
-    localStorage.setItem('classroom_onboarding', JSON.stringify(data));
+    try {
+      await fetch('/api/server', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          module: 'classroom',
+          path: 'save_onboarding',
+          ...data,
+        }),
+      });
+    } catch {}
     fetchRooms(data);
   };
 
@@ -59,7 +80,6 @@ export default function Classroom() {
     setShowOnboarding(true);
     setRooms([]);
     setOnboarding(null);
-    localStorage.removeItem('classroom_onboarding');
   };
 
   const handleJoinRoom = (roomId) => {
@@ -73,6 +93,15 @@ export default function Classroom() {
     ended: { icon: 'fa-circle-check', color: '#94a3b8', label: 'Ended' },
     offline: { icon: 'fa-circle', color: '#64748b', label: 'Offline' },
   };
+
+  if (checkingOnboarding) {
+    return (
+      <div className="classroom-loading">
+        <i className="fa-solid fa-spinner fa-spin"></i>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="classroom-page">
