@@ -153,6 +153,9 @@ export const listClassrooms = (level, class_name, topic_id) =>
 export const getLiveClassroomFeed = () =>
   withCache('classroom_live_feed', api.getLiveClassroomFeed)();
 
+export const getClassroomLevels = () =>
+  withCache('classroom_levels', api.getClassroomLevels)();
+
 export const getClassroomRoom = (room_id) =>
   withCache(`classroom_room_${room_id}`, () => api.getClassroomRoom(room_id), false)();
 
