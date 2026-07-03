@@ -423,6 +423,10 @@ export async function getLiveClassroomFeed() {
   return getRequest('classroom', 'live_feed');
 }
 
+export async function getClassroomLevels() {
+  return getRequest('classroom', 'levels');
+}
+
 export async function getTutorStatus() {
   return getRequest('classroom', 'tutor_status');
 }
