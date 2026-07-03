@@ -12,7 +12,7 @@ import {
   SecurityError
 } from '../lib/security-middleware.js';
 
- const MODULE_MAP = {
+const MODULE_MAP = {
   auth:               new URL('../lib/auth.js', import.meta.url).href,
   admin:              new URL('../lib/admin.js', import.meta.url).href,
   chat:               new URL('../lib/chat.js', import.meta.url).href,
@@ -34,7 +34,22 @@ import {
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const AUTH_ATTEMPT_PATHS = new Set(['signup', 'signin']);
 const CSRF_EXEMPT_PATHS = new Set([
-  'signup', 'signin', 'submit_contact', 'subscribe_newsletter', 'set_selected_level'
+  'signup',
+  'signin',
+  'submit_contact',
+  'subscribe_newsletter',
+  'set_selected_level',
+  'save_onboarding',
+  'join',
+  'leave',
+  'send_message',
+  'raise_hand',
+  'tutor_apply',
+  'create',
+  'end_room',
+  'toggle_mute',
+  'share_resource',
+  'file_complaint',
 ]);
 
 export default async function handler(req, res) {
