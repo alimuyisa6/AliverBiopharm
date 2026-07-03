@@ -21,6 +21,7 @@ export default function ClassroomRoom() {
 
   useEffect(() => {
     getAllSiteSections().then(setSections).catch(() => {});
+    joinRoom();
     fetchRoom();
     fetchMessages();
     fetchParticipants();
@@ -31,6 +32,7 @@ export default function ClassroomRoom() {
     return () => {
       clearInterval(msgInterval);
       clearInterval(partInterval);
+      leaveRoomSilent();
     };
   }, [roomId]);
 
@@ -39,6 +41,28 @@ export default function ClassroomRoom() {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const joinRoom = async () => {
+    try {
+      await fetch(`/api/server?module=classroom&path=join`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room_id: roomId }),
+      });
+    } catch {}
+  };
+
+  const leaveRoomSilent = async () => {
+    try {
+      await fetch(`/api/server?module=classroom&path=leave`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room_id: roomId }),
+      });
+    } catch {}
+  };
 
   const fetchRoom = async () => {
     try {
@@ -71,11 +95,11 @@ export default function ClassroomRoom() {
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
     try {
-      await fetch('/api/server', {
+      await fetch(`/api/server?module=classroom&path=send_message`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ module: 'classroom', path: 'send_message', room_id: roomId, message: chatInput.trim() }),
+        body: JSON.stringify({ room_id: roomId, message: chatInput.trim() }),
       });
       setChatInput('');
       fetchMessages();
@@ -84,11 +108,11 @@ export default function ClassroomRoom() {
 
   const handleRaiseHand = async () => {
     try {
-      await fetch('/api/server', {
+      await fetch(`/api/server?module=classroom&path=raise_hand`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ module: 'classroom', path: 'raise_hand', room_id: roomId, raise: !handRaised }),
+        body: JSON.stringify({ room_id: roomId, raise: !handRaised }),
       });
       setHandRaised(!handRaised);
     } catch {}
@@ -96,11 +120,11 @@ export default function ClassroomRoom() {
 
   const handleLeaveRoom = async () => {
     try {
-      await fetch('/api/server', {
+      await fetch(`/api/server?module=classroom&path=leave`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ module: 'classroom', path: 'leave', room_id: roomId }),
+        body: JSON.stringify({ room_id: roomId }),
       });
       navigate('/classroom');
     } catch {
