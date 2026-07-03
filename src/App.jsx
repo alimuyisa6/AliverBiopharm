@@ -17,9 +17,9 @@ import FlashcardsPage from './pages/FlashcardsPage';
 import Classroom from './pages/Classroom';
 import ClassroomRoom from './pages/ClassroomRoom';
 import TutorApply from './pages/TutorApply';
+import TutorDashboard from './pages/TutorDashboard';
 
-
-const scrollPositions = {};
+ const scrollPositions = {};
 
 function ScrollManager() {
   const location = useLocation();
