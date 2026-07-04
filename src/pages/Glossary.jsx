@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+ import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import GlossaryView from './GlossaryView';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -9,6 +10,26 @@ import {
 } from '../api/client';
 import { getSections } from '../api/sections';
 
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    y: 20,
+  },
+  in: {
+    opacity: 1,
+    y: 0,
+  },
+  out: {
+    opacity: 0,
+    y: -20,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 export default function Glossary() {
   const { user } = useAuth();
@@ -89,26 +110,34 @@ export default function Glossary() {
   });
 
   return (
-    <GlossaryView
-      user={user}
-      selectedLevel={selectedLevel}
-      terms={terms}
-      categories={categories}
-      selectedCategory={selectedCategory}
-      searchQuery={searchQuery}
-      activeTerm={activeTerm}
-      termContent={termContent}
-      loading={loading}
-      termLoading={termLoading}
-      sidebarOpen={sidebarOpen}
-      groupedTerms={groupedTerms}
-      getLevelColor={getLevelColor}
-      onLevelChange={handleLevelChange}
-      onCategoryChange={setSelectedCategory}
-      onSearchChange={setSearchQuery}
-      onTermClick={handleTermClick}
-      onToggleSidebar={() => setSidebarOpen(prev => !prev)}
-      onClearSearch={() => { setSearchQuery(''); setSelectedCategory(''); }}
-    />
+    <motion.div
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
+      <GlossaryView
+        user={user}
+        selectedLevel={selectedLevel}
+        terms={terms}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        searchQuery={searchQuery}
+        activeTerm={activeTerm}
+        termContent={termContent}
+        loading={loading}
+        termLoading={termLoading}
+        sidebarOpen={sidebarOpen}
+        groupedTerms={groupedTerms}
+        getLevelColor={getLevelColor}
+        onLevelChange={handleLevelChange}
+        onCategoryChange={setSelectedCategory}
+        onSearchChange={setSearchQuery}
+        onTermClick={handleTermClick}
+        onToggleSidebar={() => setSidebarOpen(prev => !prev)}
+        onClearSearch={() => { setSearchQuery(''); setSelectedCategory(''); }}
+      />
+    </motion.div>
   );
 }
