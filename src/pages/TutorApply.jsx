@@ -1,8 +1,21 @@
-// pages/TutorApply.jsx
+ // pages/TutorApply.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections, getClassroomLevels, getClassroomTopics, applyAsTutor } from '../api/client';
+
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -20 }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 export default function TutorApply() {
   const { user } = useAuth();
@@ -109,7 +122,14 @@ export default function TutorApply() {
   if (existingApplication) {
     const status = statusLabels[existingApplication.status] || statusLabels.pending;
     return (
-      <div className="tutor-apply-page">
+      <motion.div
+        className="tutor-apply-page"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         <div className="application-status-card">
           <div className="status-icon" style={{ color: status.color }}>
             <i className={`fa-solid ${status.icon}`}></i>
@@ -141,13 +161,20 @@ export default function TutorApply() {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (submitted) {
     return (
-      <div className="tutor-apply-page">
+      <motion.div
+        className="tutor-apply-page"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         <div className="application-success">
           <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
           <h2>Application Submitted</h2>
@@ -161,12 +188,19 @@ export default function TutorApply() {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="tutor-apply-page">
+    <motion.div
+      className="tutor-apply-page"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <div className="tutor-apply-header">
         <span className="sec-label">Teaching</span>
         <h1 className="section-title">Become a Tutor</h1>
@@ -293,6 +327,6 @@ export default function TutorApply() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
