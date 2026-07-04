@@ -1,7 +1,29 @@
  import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { getNoteContent, saveReadingProgress, getReadingProgress } from '../api/client';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    y: 20,
+  },
+  in: {
+    opacity: 1,
+    y: 0,
+  },
+  out: {
+    opacity: 0,
+    y: -20,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 export default function NoteDetail() {
   const { id } = useParams();
@@ -85,11 +107,39 @@ export default function NoteDetail() {
     }
   }, [note, user]);
 
-  if (loading) return <div className="section" style={{ textAlign: 'center', padding: '2rem' }}>Loading note...</div>;
-  if (!note) return <div className="section" style={{ textAlign: 'center', padding: '2rem' }}>Note not found.</div>;
+  if (loading) return (
+    <motion.div
+      className="section"
+      style={{ textAlign: 'center', padding: '2rem' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      Loading note...
+    </motion.div>
+  );
+
+  if (!note) return (
+    <motion.div
+      className="section"
+      style={{ textAlign: 'center', padding: '2rem' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      Note not found.
+    </motion.div>
+  );
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
+    <motion.div
+      style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <Link to="/" className="btn-secondary" style={{ display: 'inline-block', marginBottom: '1rem' }}>← Back to Home</Link>
       <article ref={contentRef}>
         <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{note.title}</h1>
@@ -100,6 +150,6 @@ export default function NoteDetail() {
           📖 You've read {savedProgress}% of this note.
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
