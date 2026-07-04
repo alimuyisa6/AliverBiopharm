@@ -1,6 +1,7 @@
  import React, { useState, useEffect, useRef } from 'react';
 import { signup } from '../api/client';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import '../styles/Auth.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
@@ -8,6 +9,27 @@ import { FaCheckCircle } from "react-icons/fa";
 import { FaEnvelope, FaLock, FaArrowLeft, FaUserPlus } from "react-icons/fa6";
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    x: 60,
+  },
+  in: {
+    opacity: 1,
+    x: 0,
+  },
+  out: {
+    opacity: 0,
+    x: -60,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -122,7 +144,13 @@ export default function Register() {
 
   if (success) {
     return (
-      <div className="auth-page">
+      <motion.div
+        className="auth-page"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <div className="auth-form-panel">
           <div className="auth-card">
             <FaCheckCircle style={{ color: '#10b981', fontSize: '3rem', marginBottom: '1rem' }} />
@@ -132,12 +160,19 @@ export default function Register() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="auth-page">
+    <motion.div
+      className="auth-page"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <div className="auth-brand-panel">
         <div className="auth-brand-content">
           <div className="auth-label">ALIVER BIOPHARM</div>
@@ -222,6 +257,6 @@ export default function Register() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
