@@ -1,8 +1,31 @@
  import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getSections } from '../api/sections';
 import { FaEnvelope, FaLocationDot, FaLinkedinIn, FaXTwitter, FaInstagram, FaGlobe } from 'react-icons/fa6';
 import '../styles/About.css';
+
+// Page transition variants
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    y: 30,
+  },
+  in: {
+    opacity: 1,
+    y: 0,
+  },
+  out: {
+    opacity: 0,
+    y: -30,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 function RichText({ text }) {
   const TOKEN_RE = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})|((https?:\/\/)[^\s<>"']+)/g;
@@ -97,14 +120,30 @@ export default function AboutPage() {
     getSections().then(setSections);
   }, []);
 
-  if (!sections) return <div className="homepage">Loading...</div>;
+  if (!sections) return (
+    <motion.div
+      className="homepage"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      Loading...
+    </motion.div>
+  );
 
   const page = sections.about;
   const currentYear = new Date().getFullYear();
   const navLinks = sections?.navigation?.links || [{ href: '/', label: 'Home' }];
 
   return (
-    <div className="homepage">
+    <motion.div
+      className="homepage"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <header className="site-header" id="site-header">
         <div className="header-container">
           <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
@@ -433,6 +472,6 @@ export default function AboutPage() {
           </nav>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 }
