@@ -1,5 +1,6 @@
-import React from 'react';
+ import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './styles/global.css';
 import './styles/component-bundle.css';
@@ -134,9 +135,11 @@ try {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <ErrorBoundary>
-        <LoadingProvider>
-          <App />
-        </LoadingProvider>
+        <BrowserRouter>
+          <LoadingProvider>
+            <App />
+          </LoadingProvider>
+        </BrowserRouter>
       </ErrorBoundary>
     </React.StrictMode>
   );
