@@ -1,11 +1,36 @@
  import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import LabHome from '../components/lab/LabHome';
 import InteractionMatrix from '../components/lab/InteractionMatrix';
 import BioPathways from '../components/lab/BioPathways';
 import ClinicalRounds from '../components/lab/ClinicalRounds';
 import RxCalc from '../components/lab/RxCalc';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    scale: 0.98,
+    y: 10,
+  },
+  in: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+  },
+  out: {
+    opacity: 0,
+    scale: 0.98,
+    y: -10,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.25
+};
 
 export default function LearningLab() {
   const { user, loading: authLoading } = useAuth();
@@ -15,15 +40,27 @@ export default function LearningLab() {
 
   if (authLoading) {
     return (
-      <div className="learning-lab">
+      <motion.div
+        className="learning-lab"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         <div className="lab-loading">Loading...</div>
-      </div>
+      </motion.div>
     );
   }
 
   if (!user) {
     return (
-      <div className="learning-lab">
+      <motion.div
+        className="learning-lab"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         <div className="lab-locked-screen">
           <div className="lab-locked-icon-wrap">
             <i className="fa-solid fa-lock lab-locked-icon"></i>
@@ -40,13 +77,20 @@ export default function LearningLab() {
             <i className="fa-solid fa-right-to-bracket"></i> Sign In
           </button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (!tool) {
     return (
-      <div className="learning-lab">
+      <motion.div
+        className="learning-lab"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         <div className="lab-page-header">
           <button
             className="lab-back-btn"
@@ -58,7 +102,7 @@ export default function LearningLab() {
           <p className="lab-page-subtitle">Select a tool to begin your interactive learning session.</p>
         </div>
         <LabHome user={user} navigate={navigate} />
-      </div>
+      </motion.div>
     );
   }
 
@@ -89,7 +133,14 @@ export default function LearningLab() {
   };
 
   return (
-    <div className="learning-lab">
+    <motion.div
+      className="learning-lab"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <div className="lab-page-header">
         <button
           className="lab-back-btn"
@@ -99,6 +150,6 @@ export default function LearningLab() {
         </button>
       </div>
       {renderTool()}
-    </div>
+    </motion.div>
   );
 }
