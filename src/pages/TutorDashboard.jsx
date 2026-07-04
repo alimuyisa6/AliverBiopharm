@@ -1,9 +1,7 @@
- // pages/TutorDashboard.jsx
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getClassroomLevels, getClassroomTopics } from '../api/client';
- 
 
 export default function TutorDashboard() {
   const { user } = useAuth();
@@ -197,17 +195,17 @@ export default function TutorDashboard() {
   };
 
   const statusLabels = {
-    pending: { label: 'Pending Review', icon: 'fa-clock' },
-    scheduled: { label: 'Interview Scheduled', icon: 'fa-calendar-check' },
-    interviewed: { label: 'Interview Completed', icon: 'fa-check-double' },
-    approved: { label: 'Approved Tutor', icon: 'fa-circle-check' },
-    rejected: { label: 'Application Rejected', icon: 'fa-circle-xmark' },
+    pending: { label: 'Pending Review', className: 'status-pending', icon: 'fa-clock' },
+    scheduled: { label: 'Interview Scheduled', className: 'status-scheduled', icon: 'fa-calendar-check' },
+    interviewed: { label: 'Interview Completed', className: 'status-interviewed', icon: 'fa-check-double' },
+    approved: { label: 'Approved Tutor', className: 'status-approved', icon: 'fa-circle-check' },
+    rejected: { label: 'Application Rejected', className: 'status-rejected', icon: 'fa-circle-xmark' },
   };
 
   const roomStatusIcons = {
-    live: { icon: 'fa-tower-broadcast', label: 'Live' },
-    open_floor: { icon: 'fa-users', label: 'Open Floor' },
-    upcoming: { icon: 'fa-clock', label: 'Upcoming' },
+    live: { icon: 'fa-tower-broadcast', className: 'status-live-bar', label: 'Live' },
+    open_floor: { icon: 'fa-users', className: 'status-open-floor-bar', label: 'Open Floor' },
+    upcoming: { icon: 'fa-clock', className: 'status-upcoming-bar', label: 'Upcoming' },
   };
 
   if (loading) {
@@ -307,11 +305,11 @@ export default function TutorDashboard() {
         {application && !isApproved && status && (
           <div className="tutor-application-card">
             <div className={`tutor-app-status tutor-app-status--${application.status}`}>
-              <div className="tutor-app-status-icon">
+              <div className={`tutor-app-status-icon ${status.className}`}>
                 <i className={`fa-solid ${status.icon}`}></i>
               </div>
               <div className="tutor-app-status-info">
-                <span className="tutor-app-status-label">{status.label}</span>
+                <span className={`tutor-app-status-label ${status.className}`}>{status.label}</span>
                 <span className="tutor-app-status-date">
                   Applied {new Date(application.created_at).toLocaleDateString('en-US', {
                     year: 'numeric', month: 'long', day: 'numeric',
@@ -322,21 +320,21 @@ export default function TutorDashboard() {
 
             <div className="tutor-app-details">
               <div className="tutor-app-detail">
-                <i className="fa-solid fa-layer-group"></i>
+                <i className="fa-solid fa-layer-group tutor-detail-icon-muted"></i>
                 <div>
                   <span className="tutor-detail-label">Level</span>
                   <span className="tutor-detail-value">{application.level}</span>
                 </div>
               </div>
               <div className="tutor-app-detail">
-                <i className="fa-solid fa-users"></i>
+                <i className="fa-solid fa-users tutor-detail-icon-muted"></i>
                 <div>
                   <span className="tutor-detail-label">Class</span>
                   <span className="tutor-detail-value">{application.class_name}</span>
                 </div>
               </div>
               <div className="tutor-app-detail">
-                <i className="fa-solid fa-book-open"></i>
+                <i className="fa-solid fa-book-open tutor-detail-icon-muted"></i>
                 <div>
                   <span className="tutor-detail-label">Subjects</span>
                   <span className="tutor-detail-value">
@@ -348,7 +346,7 @@ export default function TutorDashboard() {
 
             {application.status === 'scheduled' && application.interview_scheduled_at && (
               <div className="tutor-interview-card">
-                <i className="fa-solid fa-calendar-check"></i>
+                <i className={`fa-solid fa-calendar-check ${status.className}`}></i>
                 <div>
                   <span className="tutor-interview-label">Interview Scheduled</span>
                   <span className="tutor-interview-date">
@@ -364,7 +362,7 @@ export default function TutorDashboard() {
             {application.status === 'rejected' && application.rejection_reason && (
               <div className="tutor-rejection-card">
                 <div className="tutor-rejection-header">
-                  <i className="fa-solid fa-circle-info"></i>
+                  <i className={`fa-solid fa-circle-info ${status.className}`}></i>
                   <span>Reason for Rejection</span>
                 </div>
                 <p className="tutor-rejection-text">{application.rejection_reason}</p>
@@ -377,7 +375,7 @@ export default function TutorDashboard() {
           <div className="tutor-approved-panel">
             <div className="tutor-approved-banner">
               <div className="tutor-approved-badge">
-                <i className="fa-solid fa-circle-check"></i>
+                <i className="fa-solid fa-circle-check status-approved"></i>
                 <span>Approved Tutor</span>
               </div>
               <div className="tutor-approved-info">
@@ -571,7 +569,7 @@ export default function TutorDashboard() {
             <div className="tutor-rooms-section">
               <div className="tutor-rooms-header">
                 <h3 className="tutor-rooms-title">
-                  <i className="fa-solid fa-broadcast-tower"></i>
+                  <i className="fa-solid fa-broadcast-tower tutor-rooms-title-icon"></i>
                   Your Active Classrooms
                   {activeRooms.length > 0 && (
                     <span className="tutor-rooms-count">{activeRooms.length}</span>
@@ -608,7 +606,7 @@ export default function TutorDashboard() {
                     return (
                       <div key={room.id} className={`tutor-room-card tutor-room-card--${room.status}`}>
                         <div className="tutor-room-card-header">
-                          <div className={`tutor-room-status tutor-room-status--${room.status}`}>
+                          <div className={`tutor-room-status tutor-room-status--${room.status} ${roomStatus.className}`}>
                             <i className={`fa-solid ${roomStatus.icon}`}></i>
                             <span>{roomStatus.label}</span>
                           </div>
@@ -621,15 +619,15 @@ export default function TutorDashboard() {
                           <h4 className="tutor-room-title">{room.title}</h4>
                           <div className="tutor-room-meta">
                             <span>
-                              <i className="fa-solid fa-book"></i> {room.topic_name}
+                              <i className="fa-solid fa-book tutor-room-meta-icon"></i> {room.topic_name}
                             </span>
                             <span>
-                              <i className="fa-solid fa-user-graduate"></i> {room.class_name}
+                              <i className="fa-solid fa-user-graduate tutor-room-meta-icon"></i> {room.class_name}
                             </span>
                           </div>
                           {room.scheduled_at && (
                             <div className="tutor-room-schedule">
-                              <i className="fa-solid fa-calendar"></i>
+                              <i className="fa-solid fa-calendar tutor-room-schedule-icon"></i>
                               <span>
                                 {new Date(room.scheduled_at).toLocaleString('en-US', {
                                   weekday: 'short', month: 'short', day: 'numeric',
