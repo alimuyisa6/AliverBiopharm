@@ -130,7 +130,8 @@ export default async function handler(req, res) {
     }
   } catch (err) {
     if (err instanceof SecurityError) {
-      return res.status(err.statusCode).json({ error: err.message });
+      console.error(`[403 DEBUG] ${moduleName}/${path}:`, err.message);
+     return res.status(err.statusCode).json({ error: err.message });
     }
     if (!res.writableEnded) {
       const statusCode = err.statusCode || 500;
