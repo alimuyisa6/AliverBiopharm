@@ -1,4 +1,6 @@
  import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   FaBrain, FaLock, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
   FaPencil, FaCircleInfo, FaMicroscope, FaDna, FaCapsules, FaBook,
@@ -6,7 +8,7 @@ import {
   FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck, FaLink,
   FaTriangleExclamation, FaExclamation, FaDownload, FaClock,
   FaVolumeHigh, FaVolumeXmark, FaRotate, FaBars, FaSun, FaMoon,
-  FaRightFromBracket, FaXmark
+  FaRightFromBracket, FaXmark, FaArrowUp
 } from 'react-icons/fa6';
 import {
   getUser, getRecallSession, checkRecallSession, getRecallStats,
@@ -19,6 +21,18 @@ import '../styles/bioRecall.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
 import '../api/sections.js';
+
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -20 }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 const strengthIcons = {
   excellent: FaStar,
@@ -958,18 +972,18 @@ function BioRecall() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <motion.div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
         <header className="site-header">
           <div className="header-container">
-            <a href="/" className="logo-link" aria-label="AliverBiopharm Home">
+            <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
               {sections?.site_config?.logo_url ? (
                 <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
               ) : 'AliverBiopharm'}
-            </a>
+            </Link>
             <nav aria-label="Main navigation">
               <ul className="main-nav">
-                <li><a href="/">Home</a></li>
-                <li><a href="/recall" className="active">BioRecall</a></li>
+                <li><Link to="/">Home</Link></li>
+                <li><Link to="/recall" className="active">BioRecall</Link></li>
               </ul>
             </nav>
             <div className="nav-actions">
@@ -989,19 +1003,26 @@ function BioRecall() {
           </div>
           <div style={{ fontWeight: 600, color: 'var(--primary)' }}>Preparing your session...</div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <motion.div
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <header className="site-header">
         <div className="header-container">
-          <a href="/" className="logo-link" aria-label="AliverBiopharm Home">
+          <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
             {sections?.site_config?.logo_url ? (
               <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
             ) : 'AliverBiopharm'}
-          </a>
+          </Link>
           <nav aria-label="Main navigation">
             <ul className="main-nav">
               {(sections?.navigation?.links || [
@@ -1011,7 +1032,11 @@ function BioRecall() {
                 { href: '#contact', label: 'Contact' }
               ]).filter(Boolean).map(link => (
                 <li key={link.href}>
-                  <a href={link.href} className={link.href === '/recall' ? 'active' : ''}>{link.label}</a>
+                  {link.href.startsWith('#') || link.href.startsWith('http') ? (
+                    <a href={link.href} className={link.href === '/recall' ? 'active' : ''}>{link.label}</a>
+                  ) : (
+                    <Link to={link.href} className={link.href === '/recall' ? 'active' : ''}>{link.label}</Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -1040,8 +1065,8 @@ function BioRecall() {
                   <button className="mobile-signout-btn" onClick={handleLogout}><FaRightFromBracket /> Sign Out</button>
                 ) : (
                   <>
-                    <a href="/login" className="mobile-signin-btn">Sign In</a>
-                    <a href="/register" className="mobile-signup-btn">Create Account</a>
+                    <Link to="/login" className="mobile-signin-btn">Sign In</Link>
+                    <Link to="/register" className="mobile-signup-btn">Create Account</Link>
                   </>
                 )}
               </div>
@@ -1050,7 +1075,11 @@ function BioRecall() {
           </div>
           <nav className="mobile-nav-links">
             {(sections?.navigation?.links || []).filter(Boolean).map(link => (
-              <a key={link.href} href={link.href}>{link.label}</a>
+              link.href.startsWith('#') || link.href.startsWith('http') ? (
+                <a key={link.href} href={link.href}>{link.label}</a>
+              ) : (
+                <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
+              )
             ))}
           </nav>
         </div>
@@ -1072,7 +1101,7 @@ function BioRecall() {
                     <FaBrain size="3rem" color="var(--primary)" />
                     {!currentUser ? (
                       <p style={{ marginTop: '0.5rem', color: 'var(--primary)' }}>
-                        <a href="/" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Sign in or Create an account</a> to start your recall journey.
+                        <Link to="/" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Sign in or Create an account</Link> to start your recall journey.
                       </p>
                     ) : showLevelInput ? renderLevelInput() : (
                       <>
@@ -1119,9 +1148,9 @@ function BioRecall() {
       <footer className="footer-fat">
         <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
           <div style={{ maxWidth: '260px' }}>
-            <a href="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
+            <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
               {sections?.site_config?.logo_url ? <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} /> : 'AliverBiopharm'}
-            </a>
+            </Link>
             <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>Advancing biology and pharmacy education for every learner.</p>
             <div className="footer-social">
               {(sections?.footer?.social_links || []).map(s => (
@@ -1135,7 +1164,19 @@ function BioRecall() {
                 <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>{col.heading}</h4>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {col.items?.map(item => (
-                    <li key={item.label}><a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</a></li>
+                    <li key={item.label}>
+                      {item.href.startsWith('#') || item.href.startsWith('http') ? (
+                        <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </Link>
+                      )}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -1145,15 +1186,15 @@ function BioRecall() {
         <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
           <nav style={{ display: 'flex', gap: '22px' }}>
-            <a href="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</a>
-            <a href="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</a>
-            <a href="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</a>
+            <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
+            <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
+            <Link to="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</Link>
           </nav>
         </div>
       </footer>
 
-      <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><i className="fa-solid fa-arrow-up"></i></button>
-    </div>
+      <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><FaArrowUp /></button>
+    </motion.div>
   );
 }
 
