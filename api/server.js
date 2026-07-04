@@ -38,18 +38,6 @@ const CSRF_EXEMPT_PATHS = new Set([
   'signin',
   'submit_contact',
   'subscribe_newsletter',
-  'set_selected_level',
-  'save_onboarding',
-  'join',
-  'leave',
-  'send_message',
-  'raise_hand',
-  'tutor_apply',
-  'create',
-  'end_room',
-  'toggle_mute',
-  'share_resource',
-  'file_complaint',
 ]);
 
 export default async function handler(req, res) {
