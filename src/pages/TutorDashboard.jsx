@@ -1,7 +1,20 @@
  import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { getClassroomLevels, getClassroomTopics } from '../api/client';
+
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -20 }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 export default function TutorDashboard() {
   const { user } = useAuth();
@@ -210,20 +223,32 @@ export default function TutorDashboard() {
 
   if (loading) {
     return (
-      <div className="tutor-dashboard-page">
+      <motion.div
+        className="tutor-dashboard-page"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         <div className="tutor-dashboard-loading">
           <div className="tutor-loading-spinner">
             <i className="fa-solid fa-spinner fa-spin"></i>
           </div>
           <p className="tutor-loading-text">Loading your dashboard...</p>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (error) {
     return (
-      <div className="tutor-dashboard-page">
+      <motion.div
+        className="tutor-dashboard-page"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         <div className="tutor-dashboard-error">
           <div className="tutor-error-icon">
             <i className="fa-solid fa-triangle-exclamation"></i>
@@ -239,13 +264,20 @@ export default function TutorDashboard() {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (statusError) {
     return (
-      <div className="tutor-dashboard-page">
+      <motion.div
+        className="tutor-dashboard-page"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         <div className="tutor-dashboard-error">
           <div className="tutor-error-icon">
             <i className="fa-solid fa-lock"></i>
@@ -261,7 +293,7 @@ export default function TutorDashboard() {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -270,7 +302,14 @@ export default function TutorDashboard() {
   const status = application ? statusLabels[application.status] : null;
 
   return (
-    <div className="tutor-dashboard-page">
+    <motion.div
+      className="tutor-dashboard-page"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <div className="tutor-dashboard-container">
         <div className="tutor-dashboard-hero">
           <div className="tutor-hero-content">
@@ -661,6 +700,6 @@ export default function TutorDashboard() {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
