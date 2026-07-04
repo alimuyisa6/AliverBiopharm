@@ -1,5 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import FlashcardOnboarding from '../components/FlashcardOnboarding';
 import FlashcardWelcome from '../components/FlashcardWelcome';
@@ -39,6 +40,27 @@ const COLORS = {
   blue: '#3b82f6',
   white: '#ffffff',
   dim: '#94a3b8',
+};
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    y: 30,
+  },
+  in: {
+    opacity: 1,
+    y: 0,
+  },
+  out: {
+    opacity: 0,
+    y: -30,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
 };
 
 export default function FlashcardsPage() {
@@ -278,7 +300,14 @@ export default function FlashcardsPage() {
 
   if (error) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {renderHeader()}
         {renderMobileNav()}
         <div className="fc-page">
@@ -293,13 +322,20 @@ export default function FlashcardsPage() {
           </div>
         </div>
         {renderFooter()}
-      </div>
+      </motion.div>
     );
   }
 
   if (stage === STAGE.LOADING) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {renderHeader()}
         {renderMobileNav()}
         <div className="fc-page">
@@ -311,24 +347,38 @@ export default function FlashcardsPage() {
           </div>
         </div>
         {renderFooter()}
-      </div>
+      </motion.div>
     );
   }
 
   if (stage === STAGE.ONBOARDING) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {renderHeader()}
         {renderMobileNav()}
         <FlashcardOnboarding onComplete={handleOnboardingComplete} />
         {renderFooter()}
-      </div>
+      </motion.div>
     );
   }
 
   if (stage === STAGE.WELCOME) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {renderHeader()}
         {renderMobileNav()}
         <FlashcardWelcome
@@ -339,13 +389,20 @@ export default function FlashcardsPage() {
           onDone={handleWelcomeDone}
         />
         {renderFooter()}
-      </div>
+      </motion.div>
     );
   }
 
   if (stage === STAGE.SUBJECT) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {renderHeader()}
         {renderMobileNav()}
         <FlashcardSubjectSelect
@@ -354,13 +411,20 @@ export default function FlashcardsPage() {
           onBack={handleResetOnboarding}
         />
         {renderFooter()}
-      </div>
+      </motion.div>
     );
   }
 
   if (stage === STAGE.STUDY && selectedDeck) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {renderHeader()}
         {renderMobileNav()}
         <FlashcardDeckView
@@ -370,13 +434,20 @@ export default function FlashcardsPage() {
           onComplete={handleStudyComplete}
         />
         {renderFooter()}
-      </div>
+      </motion.div>
     );
   }
 
   if (stage === STAGE.COMPLETE) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {renderHeader()}
         {renderMobileNav()}
         <FlashcardProgress
@@ -385,7 +456,7 @@ export default function FlashcardsPage() {
           onHome={() => navigate('/')}
         />
         {renderFooter()}
-      </div>
+      </motion.div>
     );
   }
 
