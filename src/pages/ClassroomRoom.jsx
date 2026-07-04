@@ -1,8 +1,33 @@
  // pages/ClassroomRoom.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    scale: 0.95,
+    y: 20,
+  },
+  in: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+  },
+  out: {
+    opacity: 0,
+    scale: 0.95,
+    y: -20,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.25
+};
 
 export default function ClassroomRoom() {
   const { roomId } = useParams();
@@ -141,25 +166,42 @@ export default function ClassroomRoom() {
 
   if (loading) {
     return (
-      <div className="classroom-loading">
+      <motion.div
+        className="classroom-loading"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         <i className="fa-solid fa-spinner fa-spin"></i>
         <p>Entering classroom...</p>
-      </div>
+      </motion.div>
     );
   }
 
   if (error || !room) {
     return (
-      <div className="classroom-error">
+      <motion.div
+        className="classroom-error"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0 }}
+      >
         <i className="fa-solid fa-triangle-exclamation"></i>
         <p>{error || 'Room not found'}</p>
         <button className="btn-secondary" onClick={() => navigate('/classroom')}>Back to Classrooms</button>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="classroom-room">
+    <motion.div
+      className="classroom-room"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <div className="room-topbar">
         <button className="room-back-btn" onClick={handleLeaveRoom}>
           <i className="fa-solid fa-arrow-left"></i>
@@ -288,6 +330,6 @@ export default function ClassroomRoom() {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
