@@ -1,4 +1,6 @@
  import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
 import {
@@ -122,6 +124,18 @@ class QuizErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -20 }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 const SOUND_CORRECT = typeof window !== 'undefined' ? (() => { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); return () => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.setValueAtTime(520, ctx.currentTime); o.frequency.setValueAtTime(660, ctx.currentTime + 0.1); g.gain.setValueAtTime(0.15, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.3); }; } catch { return () => {}; } })() : () => {};
 
@@ -527,384 +541,408 @@ function Quiz() {
     }
   }
 
-  function setConfidenceForCurrent(level) {
-    const next = [...confidence];
-    next[currentIndex] = level;
-    setConfidence(next);
+function setConfidenceForCurrent(level) {
+  const next = [...confidence];
+  next[currentIndex] = level;
+  setConfidence(next);
+}
+
+function nextQuestion() {
+  const first = getFirstUnansweredIndex(userAnswers);
+  if (first !== -1 && first !== currentIndex) navigateTo(first);
+  else if (currentIndex < quizQuestions.length - 1 && userAnswers[currentIndex] !== null) {
+    if (canNavigateTo(currentIndex + 1, userAnswers)) navigateTo(currentIndex + 1);
   }
+}
 
-  function nextQuestion() {
-    const first = getFirstUnansweredIndex(userAnswers);
-    if (first !== -1 && first !== currentIndex) navigateTo(first);
-    else if (currentIndex < quizQuestions.length - 1 && userAnswers[currentIndex] !== null) {
-      if (canNavigateTo(currentIndex + 1, userAnswers)) navigateTo(currentIndex + 1);
-    }
+function prevQuestion() { if (currentIndex > 0) navigateTo(currentIndex - 1); }
+
+async function submitBlockWithSession() {
+  if (quizQuestions.length === 0) return;
+  
+  const allAnswered = userAnswers.every(a => a !== null);
+  if (!allAnswered) {
+    showToast('Please answer all questions before submitting.', 'warning');
+    return;
   }
-
-  function prevQuestion() { if (currentIndex > 0) navigateTo(currentIndex - 1); }
-
-  async function submitBlockWithSession() {
-    if (quizQuestions.length === 0) return;
+  
+  const answersPayload = quizQuestions.map((q, idx) => ({
+    id: q.id,
+    selectedOption: userAnswers[idx]?.selected || 'X'
+  }));
+  
+  const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
+  setLoading(true);
+  
+  try {
+    const result = await submitQuizWithSession(
+      currentLevel,
+      currentTopic,
+      currentBlock,
+      answersPayload,
+      timeTaken
+    );
     
-    const allAnswered = userAnswers.every(a => a !== null);
-    if (!allAnswered) {
-      showToast('Please answer all questions before submitting.', 'warning');
-      return;
-    }
-    
-    const answersPayload = quizQuestions.map((q, idx) => ({
-      id: q.id,
-      selectedOption: userAnswers[idx]?.selected || 'X'
-    }));
-    
-    const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
-    setLoading(true);
-    
-    try {
-      const result = await submitQuizWithSession(
-        currentLevel,
-        currentTopic,
-        currentBlock,
-        answersPayload,
-        timeTaken
-      );
-      
-      if (!result.success) {
-        if (result.auto_submitted) {
-          showToast(result.message || 'Quiz auto-submitted due to tab switching', 'warning');
-          if (result.score !== undefined) {
-            setResultData(result);
-          }
-          setLoading(false);
-          return;
+    if (!result.success) {
+      if (result.auto_submitted) {
+        showToast(result.message || 'Quiz auto-submitted due to tab switching', 'warning');
+        if (result.score !== undefined) {
+          setResultData(result);
         }
-        showToast('Submission failed: ' + (result.message || 'Unknown error'), 'error');
         setLoading(false);
         return;
       }
-      
-      setResultData(result);
-      trackEvent('quiz_complete', {
-        level: currentLevel,
-        topic: currentTopic,
-        block: currentBlock,
-        score: result.percentage,
-        passed: result.passed,
-        tab_switches: result.tab_switches || 0
-      });
-      
-      const newBadges = [];
-      if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) {
-        newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
-      }
-      if (!earnedBadges.includes('first_block')) {
-        newBadges.push({ id: 'first_block', label: 'First Block Done' });
-      }
-      for (let b of newBadges) await saveAchievement({ id: b.id, label: b.label });
-      setEarnedBadges(prev => [...prev, ...newBadges.map(b => b.id)]);
-      if (streak >= 10 && !earnedBadges.includes('streak_10')) {
-        await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
-        setEarnedBadges(prev => [...prev, 'streak_10']);
-      }
-      
-      let rule = null;
-      if (result.percentage >= 90) {
-        rule = { message: "Excellent! You're ready for more advanced material.", action: null };
-      } else if (result.percentage < 70) {
-        rule = { message: 'Review key concepts from this block before moving on.', action: 'review_block' };
-      }
-      setAdaptivePath(rule);
-      await loadTopics(currentLevel);
+      showToast('Submission failed: ' + (result.message || 'Unknown error'), 'error');
       setLoading(false);
-      if (result.passed && result.percentage >= 90) showConfetti();
-    } catch (err) {
-      showToast('Submission failed: ' + err.message, 'error');
-      setLoading(false);
+      return;
     }
-  }
-
-  async function submitBlock() {
-    if (quizQuestions.length === 0) return;
-    const allAnswered = userAnswers.every(a => a !== null);
-    if (!allAnswered) { showToast('Please answer all questions before submitting.', 'warning'); return; }
-    const answersPayload = quizQuestions.map((q, idx) => ({ id: q.id, selectedOption: userAnswers[idx]?.selected || 'X' }));
-    const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
-    setLoading(true);
-    try {
-      const result = await submitQuizBlock({ level: currentLevel, topic: currentTopic, block_number: currentBlock, answers: answersPayload, time_taken: timeTaken });
-      setResultData(result);
-      trackEvent('quiz_complete', { level: currentLevel, topic: currentTopic, block: currentBlock, score: result.percentage, passed: result.passed, tab_switches: tabSwitchCount });
-      const newBadges = [];
-      if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
-      if (!earnedBadges.includes('first_block')) newBadges.push({ id: 'first_block', label: 'First Block Done' });
-      for (let b of newBadges) await saveAchievement({ id: b.id, label: b.label });
-      setEarnedBadges(prev => [...prev, ...newBadges.map(b => b.id)]);
-      if (streak >= 10 && !earnedBadges.includes('streak_10')) {
-        await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
-        setEarnedBadges(prev => [...prev, 'streak_10']);
-      }
-      let rule = null;
-      if (result.percentage >= 90) rule = { message: "Excellent! You're ready for more advanced material.", action: null };
-      else if (result.percentage < 70) rule = { message: 'Review key concepts from this block before moving on.', action: 'review_block' };
-      setAdaptivePath(rule);
-      await loadTopics(currentLevel);
-      setLoading(false);
-      if (result.passed && result.percentage >= 90) showConfetti();
-    } catch (err) { showToast('Submission failed: ' + err.message, 'error'); setLoading(false); }
-  }
-
-  async function loadLeaderboard() {
-    setLeaderboardLoading(true);
-    try {
-      const data = await getLeaderboard(currentLevel, 10);
-      setLeaderboard(Array.isArray(data) ? data : []);
-    } catch { setLeaderboard([]); }
-    setLeaderboardLoading(false);
-  }
-
-  function showConfetti() {
-    if (typeof document === 'undefined') return;
-    const colors = ['#0ab5b5', '#b8873a', '#e2c06a', '#10b981', '#f59e0b'];
-    const particles = [];
-    for (let i = 0; i < 50; i++) {
-      const p = document.createElement('div');
-      p.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:-10px;border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ${2 + Math.random() * 3}s linear forwards`;
-      document.body.appendChild(p);
-      particles.push(p);
+    
+    setResultData(result);
+    trackEvent('quiz_complete', {
+      level: currentLevel,
+      topic: currentTopic,
+      block: currentBlock,
+      score: result.percentage,
+      passed: result.passed,
+      tab_switches: result.tab_switches || 0
+    });
+    
+    const newBadges = [];
+    if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) {
+      newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
     }
-    const timer = setTimeout(() => {
-      particles.forEach(p => {
-        if (p && p.parentNode) {
-          p.parentNode.removeChild(p);
-        }
-      });
-      confettiTimers.current = confettiTimers.current.filter(t => t !== timer);
-    }, 4000);
-    confettiTimers.current.push(timer);
+    if (!earnedBadges.includes('first_block')) {
+      newBadges.push({ id: 'first_block', label: 'First Block Done' });
+    }
+    for (let b of newBadges) await saveAchievement({ id: b.id, label: b.label });
+    setEarnedBadges(prev => [...prev, ...newBadges.map(b => b.id)]);
+    if (streak >= 10 && !earnedBadges.includes('streak_10')) {
+      await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
+      setEarnedBadges(prev => [...prev, 'streak_10']);
+    }
+    
+    let rule = null;
+    if (result.percentage >= 90) {
+      rule = { message: "Excellent! You're ready for more advanced material.", action: null };
+    } else if (result.percentage < 70) {
+      rule = { message: 'Review key concepts from this block before moving on.', action: 'review_block' };
+    }
+    setAdaptivePath(rule);
+    await loadTopics(currentLevel);
+    setLoading(false);
+    if (result.passed && result.percentage >= 90) showConfetti();
+  } catch (err) {
+    showToast('Submission failed: ' + err.message, 'error');
+    setLoading(false);
   }
+}
 
-  const currentYear = new Date().getFullYear();
+async function submitBlock() {
+  if (quizQuestions.length === 0) return;
+  const allAnswered = userAnswers.every(a => a !== null);
+  if (!allAnswered) { showToast('Please answer all questions before submitting.', 'warning'); return; }
+  const answersPayload = quizQuestions.map((q, idx) => ({ id: q.id, selectedOption: userAnswers[idx]?.selected || 'X' }));
+  const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
+  setLoading(true);
+  try {
+    const result = await submitQuizBlock({ level: currentLevel, topic: currentTopic, block_number: currentBlock, answers: answersPayload, time_taken: timeTaken });
+    setResultData(result);
+    trackEvent('quiz_complete', { level: currentLevel, topic: currentTopic, block: currentBlock, score: result.percentage, passed: result.passed, tab_switches: tabSwitchCount });
+    const newBadges = [];
+    if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
+    if (!earnedBadges.includes('first_block')) newBadges.push({ id: 'first_block', label: 'First Block Done' });
+    for (let b of newBadges) await saveAchievement({ id: b.id, label: b.label });
+    setEarnedBadges(prev => [...prev, ...newBadges.map(b => b.id)]);
+    if (streak >= 10 && !earnedBadges.includes('streak_10')) {
+      await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
+      setEarnedBadges(prev => [...prev, 'streak_10']);
+    }
+    let rule = null;
+    if (result.percentage >= 90) rule = { message: "Excellent! You're ready for more advanced material.", action: null };
+    else if (result.percentage < 70) rule = { message: 'Review key concepts from this block before moving on.', action: 'review_block' };
+    setAdaptivePath(rule);
+    await loadTopics(currentLevel);
+    setLoading(false);
+    if (result.passed && result.percentage >= 90) showConfetti();
+  } catch (err) { showToast('Submission failed: ' + err.message, 'error'); setLoading(false); }
+}
 
-  if (loading && !quizQuestions.length && !resultData && !currentTopic) {
-    return (
-      <div className="quiz-page">
-        <div className="section">
-          <div style={{ maxWidth: '800px', margin: '0 auto', padding: '3rem 0' }}>
-            {[1,2,3,4].map(i => (
-              <div key={i} style={{ background: 'var(--clr-navy-card)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', animation: 'pulse 1.5s ease-in-out infinite' }}>
-                <div style={{ height: '20px', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', marginBottom: '0.75rem', width: `${60 + i * 10}%` }}></div>
-                <div style={{ height: '14px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', width: '40%' }}></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+async function loadLeaderboard() {
+  setLeaderboardLoading(true);
+  try {
+    const data = await getLeaderboard(currentLevel, 10);
+    setLeaderboard(Array.isArray(data) ? data : []);
+  } catch { setLeaderboard([]); }
+  setLeaderboardLoading(false);
+}
+
+function showConfetti() {
+  if (typeof document === 'undefined') return;
+  const colors = ['#0ab5b5', '#b8873a', '#e2c06a', '#10b981', '#f59e0b'];
+  const particles = [];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:-10px;border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ${2 + Math.random() * 3}s linear forwards`;
+    document.body.appendChild(p);
+    particles.push(p);
   }
+  const timer = setTimeout(() => {
+    particles.forEach(p => {
+      if (p && p.parentNode) {
+        p.parentNode.removeChild(p);
+      }
+    });
+    confettiTimers.current = confettiTimers.current.filter(t => t !== timer);
+  }, 4000);
+  confettiTimers.current.push(timer);
+}
 
-  const firstUnanswered = getFirstUnansweredIndex(userAnswers);
-  const allAnswered = userAnswers.length > 0 && userAnswers.every(a => a !== null);
-  const timerPercent = timeLeft !== null ? (timeLeft / 600) * 100 : 100;
-  const timerColor = timerPercent > 50 ? '#10b981' : timerPercent > 20 ? '#f59e0b' : '#ef4444';
+const currentYear = new Date().getFullYear();
 
+if (loading && !quizQuestions.length && !resultData && !currentTopic) {
   return (
-    <div className="quiz-page">
-      <header className="site-header">
-        <div className="header-container">
-          <a href="/" className="logo-link" aria-label="AliverBiopharm Home">
-            {sections?.site_config?.logo_url ? (
-              <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
-            ) : 'AliverBiopharm'}
-          </a>
-          <nav aria-label="Main navigation">
-            <ul className="main-nav">
-              {sections?.navigation?.links?.map(link => (
-                <li key={link.href}><a href={link.href}>{link.label}</a></li>
-              ))}
-            </ul>
-          </nav>
-          <div className="nav-actions">
-            <button className="theme-toggle" title={soundEnabled ? 'Mute sounds' : 'Enable sounds'} onClick={() => { const next = !soundEnabled; setSoundEnabled(next); localStorage.setItem('quiz_sound', next ? 'on' : 'off'); }}>
-              {soundEnabled ? <FaVolumeHigh style={{ color: '#94a3b8' }} /> : <FaVolumeXmark style={{ color: '#ef4444' }} />}
-            </button>
-            <button className="theme-toggle" onClick={() => { const dark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', dark ? 'dark' : 'light'); setTheme(dark ? 'dark' : 'light'); }}>
-              {theme === 'dark' ? <FaSun style={{ color: '#f59e0b' }} /> : <FaMoon style={{ color: '#94a3b8' }} />}
-            </button>
-            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}><FaBars style={{ color: '#ffffff' }} /></button>
-          </div>
-        </div>
-      </header>
-
-      <div className={`mobile-nav-panel ${mobileMenuOpen ? 'active' : ''}`}>
-        <div className="mobile-nav-panel-inner">
-          <div className="mobile-nav-header">
-            <div className="mobile-nav-header-row">
-              <div className="mobile-auth-top">
-                {user ? (
-                  <button className="mobile-signout-btn" onClick={logout}><FaRightFromBracket style={{ color: '#ef4444', marginRight: '8px' }} /> Sign Out</button>
-                ) : (
-                  <><a href="/login" className="mobile-signin-btn">Sign In</a><a href="/register" className="mobile-signup-btn">Create Account</a></>
-                )}
-              </div>
-              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}><FaXmark style={{ color: '#94a3b8' }} /></button>
+    <motion.div
+      className="quiz-page"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <div className="section">
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '3rem 0' }}>
+          {[1,2,3,4].map(i => (
+            <div key={i} style={{ background: 'var(--clr-navy-card)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', animation: 'pulse 1.5s ease-in-out infinite' }}>
+              <div style={{ height: '20px', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', marginBottom: '0.75rem', width: `${60 + i * 10}%` }}></div>
+              <div style={{ height: '14px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', width: '40%' }}></div>
             </div>
-          </div>
-          <nav className="mobile-nav-links">
-            {(sections?.navigation?.links || []).map(link => (<a key={link.href} href={link.href}>{link.label}</a>))}
-          </nav>
+          ))}
         </div>
       </div>
-      <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
+    </motion.div>
+  );
+}
 
-      <main className="section">
-        <span className="sec-label">ASSESSMENTS</span>
-        <h1 className="section-title">Knowledge Quizzes</h1>
+const firstUnanswered = getFirstUnansweredIndex(userAnswers);
+const allAnswered = userAnswers.length > 0 && userAnswers.every(a => a !== null);
+const timerPercent = timeLeft !== null ? (timeLeft / 600) * 100 : 100;
+const timerColor = timerPercent > 50 ? '#10b981' : timerPercent > 20 ? '#f59e0b' : '#ef4444';
 
-        {user && streak > 0 && (
-          <div className="streak-badge">
-            <FaFire style={{ color: '#f59e0b', marginRight: '6px' }} /> {streak}-day streak
-          </div>
-        )}
-
-        <div className="breadcrumb">
-          <a href="/"><FaHome style={{ marginRight: '4px' }} /> Home</a><span>›</span><span>Quizzes</span>
-          {currentTopic && (<><span>›</span><span>{currentTopic}</span></>)}
-          {currentTopic && resultData && (<><span>›</span><span>Results</span></>)}
+return (
+  <motion.div
+    className="quiz-page"
+    initial="initial"
+    animate="in"
+    exit="out"
+    variants={pageVariants}
+    transition={pageTransition}
+  >
+    <header className="site-header">
+      <div className="header-container">
+        <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
+          {sections?.site_config?.logo_url ? (
+            <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
+          ) : 'AliverBiopharm'}
+        </Link>
+        <nav aria-label="Main navigation">
+          <ul className="main-nav">
+            {sections?.navigation?.links?.map(link => (
+              <li key={link.href}>
+                {link.href.startsWith('#') || link.href.startsWith('http') ? (
+                  <a href={link.href}>{link.label}</a>
+                ) : (
+                  <Link to={link.href}>{link.label}</Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="nav-actions">
+          <button className="theme-toggle" title={soundEnabled ? 'Mute sounds' : 'Enable sounds'} onClick={() => { const next = !soundEnabled; setSoundEnabled(next); localStorage.setItem('quiz_sound', next ? 'on' : 'off'); }}>
+            {soundEnabled ? <FaVolumeHigh style={{ color: '#94a3b8' }} /> : <FaVolumeXmark style={{ color: '#ef4444' }} />}
+          </button>
+          <button className="theme-toggle" onClick={() => { const dark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', dark ? 'dark' : 'light'); setTheme(dark ? 'dark' : 'light'); }}>
+            {theme === 'dark' ? <FaSun style={{ color: '#f59e0b' }} /> : <FaMoon style={{ color: '#94a3b8' }} />}
+          </button>
+          <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}><FaBars style={{ color: '#ffffff' }} /></button>
         </div>
+      </div>
+    </header>
 
-        {tabWarning && quizQuestions.length > 0 && (
-          <div className="tab-warning">
-            <FaTriangleExclamation style={{ color: '#f59e0b', marginRight: '8px' }} />
-            Tab switch detected ({tabSwitchCount}/{MAX_TAB_SWITCHES}). {tabSwitchCount >= MAX_TAB_SWITCHES ? 'Quiz will auto-submit!' : 'Stay focused!'}
+    <div className={`mobile-nav-panel ${mobileMenuOpen ? 'active' : ''}`}>
+      <div className="mobile-nav-panel-inner">
+        <div className="mobile-nav-header">
+          <div className="mobile-nav-header-row">
+            <div className="mobile-auth-top">
+              {user ? (
+                <button className="mobile-signout-btn" onClick={logout}><FaRightFromBracket style={{ color: '#ef4444', marginRight: '8px' }} /> Sign Out</button>
+              ) : (
+                <><Link to="/login" className="mobile-signin-btn">Sign In</Link><Link to="/register" className="mobile-signup-btn">Create Account</Link></>
+              )}
+            </div>
+            <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}><FaXmark style={{ color: '#94a3b8' }} /></button>
           </div>
-        )}
+        </div>
+        <nav className="mobile-nav-links">
+          {(sections?.navigation?.links || []).map(link => (
+            link.href.startsWith('#') || link.href.startsWith('http') ? (
+              <a key={link.href} href={link.href}>{link.label}</a>
+            ) : (
+              <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
+            )
+          ))}
+        </nav>
+      </div>
+    </div>
+    <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
 
-        {blockTabSwitch && quizQuestions.length > 0 && tabSwitchCount < MAX_TAB_SWITCHES && (
-          <div className="tab-warning" style={{ background: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef4444' }}>
-            <FaTriangleExclamation style={{ color: '#ef4444', marginRight: '8px' }} />
-            Warning: Tab switching is not allowed during the quiz. ({tabSwitchCount}/{MAX_TAB_SWITCHES})
+    <main className="section">
+      <span className="sec-label">ASSESSMENTS</span>
+      <h1 className="section-title">Knowledge Quizzes</h1>
+
+      {user && streak > 0 && (
+        <div className="streak-badge">
+          <FaFire style={{ color: '#f59e0b', marginRight: '6px' }} /> {streak}-day streak
+        </div>
+      )}
+
+      <div className="breadcrumb">
+        <Link to="/"><FaHome style={{ marginRight: '4px' }} /> Home</Link><span>›</span><span>Quizzes</span>
+        {currentTopic && (<><span>›</span><span>{currentTopic}</span></>)}
+        {currentTopic && resultData && (<><span>›</span><span>Results</span></>)}
+      </div>
+
+      {tabWarning && quizQuestions.length > 0 && (
+        <div className="tab-warning">
+          <FaTriangleExclamation style={{ color: '#f59e0b', marginRight: '8px' }} />
+          Tab switch detected ({tabSwitchCount}/{MAX_TAB_SWITCHES}). {tabSwitchCount >= MAX_TAB_SWITCHES ? 'Quiz will auto-submit!' : 'Stay focused!'}
+        </div>
+      )}
+
+      {blockTabSwitch && quizQuestions.length > 0 && tabSwitchCount < MAX_TAB_SWITCHES && (
+        <div className="tab-warning" style={{ background: 'rgba(239, 68, 68, 0.15)', borderColor: '#ef4444' }}>
+          <FaTriangleExclamation style={{ color: '#ef4444', marginRight: '8px' }} />
+          Warning: Tab switching is not allowed during the quiz. ({tabSwitchCount}/{MAX_TAB_SWITCHES})
+        </div>
+      )}
+
+      {!currentTopic && (
+        <>
+          <QuizHero />
+          {user && <QuizDashboard user={user} />}
+          {user && <QuizChallenges user={user} />}
+          <QuizLearningPath level={currentLevel} />
+          <QuizWeakAreas user={user} onRecommend={(topic, block) => { setCurrentTopic(topic); startBlock(block); }} />
+        </>
+      )}
+
+      {!currentTopic ? (
+        <>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
+            <div className="topic-search" style={{ flex: 1 }}>
+              <input type="text" placeholder="Search topics..." value={topicSearch} onChange={e => setTopicSearch(e.target.value)} />
+            </div>
+            <button className="btn-secondary" onClick={() => { setShowLeaderboard(true); loadLeaderboard(); }}>
+              <FaTrophy style={{ color: '#f59e0b', marginRight: '6px' }} /> Leaderboard
+            </button>
           </div>
-        )}
 
-        {!currentTopic && (
-          <>
-            <QuizHero />
-            {user && <QuizDashboard user={user} />}
-            {user && <QuizChallenges user={user} />}
-            <QuizLearningPath level={currentLevel} />
-            <QuizWeakAreas user={user} onRecommend={(topic, block) => { setCurrentTopic(topic); startBlock(block); }} />
-          </>
-        )}
-
-        {!currentTopic ? (
-          <>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
-              <div className="topic-search" style={{ flex: 1 }}>
-                <input type="text" placeholder="Search topics..." value={topicSearch} onChange={e => setTopicSearch(e.target.value)} />
-              </div>
-              <button className="btn-secondary" onClick={() => { setShowLeaderboard(true); loadLeaderboard(); }}>
-                <FaTrophy style={{ color: '#f59e0b', marginRight: '6px' }} /> Leaderboard
-              </button>
-            </div>
-
-            <div className="filter-bar">
-              <button className={`filter-toggle-btn ${filterDropdownOpen ? 'open' : ''}`} onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}>
-                <FaFilter style={{ color: '#8b5cf6', marginRight: '6px' }} /> Filter <FaChevronDown style={{ fontSize: '0.75rem', transition: 'transform 0.3s', transform: filterDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
-              </button>
-              {filterDropdownOpen && (
-                <div className="filter-dropdown">
-                  <div className="filter-accordion">
-                    <button className={`filter-accordion-btn ${filterAccordions.level ? 'open' : ''}`} onClick={() => setFilterAccordions({ ...filterAccordions, level: !filterAccordions.level })}>
-                      <span>Level</span><span className="filter-selected">{currentLevel}</span><FaChevronDown />
-                    </button>
-                    {filterAccordions.level && (
-                      <div className="filter-options open">
-                        <label className="filter-option"><input type="radio" name="level" value="O-Level" checked={currentLevel === 'O-Level'} onChange={() => setCurrentLevel('O-Level')} /> O-Level</label>
-                        <label className="filter-option"><input type="radio" name="level" value="A-Level" checked={currentLevel === 'A-Level'} onChange={() => setCurrentLevel('A-Level')} /> A-Level</label>
-                        <label className="filter-option"><input type="radio" name="level" value="Pharmacy" checked={currentLevel === 'Pharmacy'} onChange={() => setCurrentLevel('Pharmacy')} /> Pharmacy</label>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="topic-grid">
-              {allTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).length === 0 && (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--clr-text-muted)', fontSize: '1rem' }}>
-                  <FaMagnifyingGlass style={{ fontSize: '2rem', marginBottom: '1rem', display: 'block', opacity: 0.4 }} />
-                  No topics match your search.
-                </div>
-              )}
-              {allTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).map(topic => {
-                const hasQuestions = (topic.question_count || 0) > 0 && (topic.total_blocks || 0) > 0;
-                const allDone = hasQuestions && topic.completed_blocks?.length === topic.total_blocks;
-                if (hasQuestions && !allDone) {
-                  return (
-                    <div key={topic.topic_name} className="topic-card clickable" onClick={() => openTopicBlocks(topic.topic_name, topic.total_blocks)}>
-                      <h3>{topic.topic_name}</h3>
-                      <span className="q-count ready">{topic.question_count} questions • {topic.total_blocks} blocks</span>
-                      <small>Tap to start →</small>
+          <div className="filter-bar">
+            <button className={`filter-toggle-btn ${filterDropdownOpen ? 'open' : ''}`} onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}>
+              <FaFilter style={{ color: '#8b5cf6', marginRight: '6px' }} /> Filter <FaChevronDown style={{ fontSize: '0.75rem', transition: 'transform 0.3s', transform: filterDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+            </button>
+            {filterDropdownOpen && (
+              <div className="filter-dropdown">
+                <div className="filter-accordion">
+                  <button className={`filter-accordion-btn ${filterAccordions.level ? 'open' : ''}`} onClick={() => setFilterAccordions({ ...filterAccordions, level: !filterAccordions.level })}>
+                    <span>Level</span><span className="filter-selected">{currentLevel}</span><FaChevronDown />
+                  </button>
+                  {filterAccordions.level && (
+                    <div className="filter-options open">
+                      <label className="filter-option"><input type="radio" name="level" value="O-Level" checked={currentLevel === 'O-Level'} onChange={() => setCurrentLevel('O-Level')} /> O-Level</label>
+                      <label className="filter-option"><input type="radio" name="level" value="A-Level" checked={currentLevel === 'A-Level'} onChange={() => setCurrentLevel('A-Level')} /> A-Level</label>
+                      <label className="filter-option"><input type="radio" name="level" value="Pharmacy" checked={currentLevel === 'Pharmacy'} onChange={() => setCurrentLevel('Pharmacy')} /> Pharmacy</label>
                     </div>
-                  );
-                } else {
-                  return (
-                    <div key={topic.topic_name} className="topic-card">
-                      <h3>{topic.topic_name}</h3>
-                      <span className="q-count">{topic.question_count} questions</span>
-                      <small>{allDone ? 'All blocks done!' : 'Questions being added'}</small>
-                    </div>
-                  );
-                }
-              })}
-            </div>
-          </>
-        ) : resultData ? (
-          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <div className="question-card" style={{ textAlign: 'center' }}>
-              {resultData.passed ? <FaTrophy style={{ fontSize: '3rem', color: '#f59e0b' }} /> : <FaBookOpen style={{ fontSize: '3rem', color: '#6b7280' }} />}
-              <h2 style={{ color: 'var(--clr-text-dim)' }}>{resultData.passed ? `Congratulations, ${user?.email?.split('@')[0] || 'Learner'}!` : 'Block Complete'}</h2>
-              <div className="result-score">{resultData.percentage}%</div>
-              <p style={{ fontSize: '1rem', color: 'var(--clr-text-dim)' }}>{resultData.score}/{resultData.total} correct</p>
-              <p style={{ fontStyle: 'italic', fontSize: '0.95rem', color: 'var(--clr-text-dim)' }}>{resultData.passed ? 'Outstanding! You really know this!' : 'Keep studying! Every expert was once a beginner.'}</p>
-              <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`}>{resultData.passed ? <FaCheckCircle style={{ marginRight: '4px' }} /> : <FaCircleXmark style={{ marginRight: '4px' }} />} {resultData.passed ? 'Passed' : 'Not passed'}</span>
-              {tabSwitchCount > 0 && (
-                <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.5rem' }}>
-                  <FaTriangleExclamation style={{ marginRight: '4px' }} />
-                  {tabSwitchCount} tab switch{tabSwitchCount > 1 ? 'es' : ''} recorded
-                </p>
-              )}
-              <div className="share-buttons">
-                <button className="share-btn-sm" onClick={() => navigator.clipboard.writeText(`I scored ${resultData.percentage}% on ${currentTopic} Block ${currentBlock + 1} at AliverBiopharm!`)}>
-                  <FaLink style={{ color: '#3b82f6' }} />
-                </button>
-              </div>
-            </div>
-
-            {adaptivePath && (
-              <div className="adaptive-path-card">
-                <div className="ap-icon"><FaLightbulb style={{ color: '#fbbf24' }} /></div>
-                <div>
-                  <h4>{resultData.passed ? 'Great Progress!' : 'Keep Going!'}</h4>
-                  <p>{adaptivePath.message}</p>
+                  )}
                 </div>
               </div>
             )}
+          </div>
 
-            <div className="quiz-result-review">
-              <h3>Block {currentBlock + 1} Review</h3>
+          <div className="topic-grid">
+            {allTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).length === 0 && (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--clr-text-muted)', fontSize: '1rem' }}>
+                <FaMagnifyingGlass style={{ fontSize: '2rem', marginBottom: '1rem', display: 'block', opacity: 0.4 }} />
+                No topics match your search.
+              </div>
+            )}
+            {allTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).map(topic => {
+              const hasQuestions = (topic.question_count || 0) > 0 && (topic.total_blocks || 0) > 0;
+              const allDone = hasQuestions && topic.completed_blocks?.length === topic.total_blocks;
+              if (hasQuestions && !allDone) {
+                return (
+                  <div key={topic.topic_name} className="topic-card clickable" onClick={() => openTopicBlocks(topic.topic_name, topic.total_blocks)}>
+                    <h3>{topic.topic_name}</h3>
+                    <span className="q-count ready">{topic.question_count} questions • {topic.total_blocks} blocks</span>
+                    <small>Tap to start →</small>
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={topic.topic_name} className="topic-card">
+                    <h3>{topic.topic_name}</h3>
+                    <span className="q-count">{topic.question_count} questions</span>
+                    <small>{allDone ? 'All blocks done!' : 'Questions being added'}</small>
+                  </div>
+                );
+              }
+            })}
+          </div>
+        </>
+      ) : resultData ? (
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div className="question-card" style={{ textAlign: 'center' }}>
+            {resultData.passed ? <FaTrophy style={{ fontSize: '3rem', color: '#f59e0b' }} /> : <FaBookOpen style={{ fontSize: '3rem', color: '#6b7280' }} />}
+            <h2 style={{ color: 'var(--clr-text-dim)' }}>{resultData.passed ? `Congratulations, ${user?.email?.split('@')[0] || 'Learner'}!` : 'Block Complete'}</h2>
+            <div className="result-score">{resultData.percentage}%</div>
+            <p style={{ fontSize: '1rem', color: 'var(--clr-text-dim)' }}>{resultData.score}/{resultData.total} correct</p>
+            <p style={{ fontStyle: 'italic', fontSize: '0.95rem', color: 'var(--clr-text-dim)' }}>{resultData.passed ? 'Outstanding! You really know this!' : 'Keep studying! Every expert was once a beginner.'}</p>
+            <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`}>{resultData.passed ? <FaCheckCircle style={{ marginRight: '4px' }} /> : <FaCircleXmark style={{ marginRight: '4px' }} />} {resultData.passed ? 'Passed' : 'Not passed'}</span>
+            {tabSwitchCount > 0 && (
+              <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.5rem' }}>
+                <FaTriangleExclamation style={{ marginRight: '4px' }} />
+                {tabSwitchCount} tab switch{tabSwitchCount > 1 ? 'es' : ''} recorded
+              </p>
+            )}
+            <div className="share-buttons">
+              <button className="share-btn-sm" onClick={() => navigator.clipboard.writeText(`I scored ${resultData.percentage}% on ${currentTopic} Block ${currentBlock + 1} at AliverBiopharm!`)}>
+                <FaLink style={{ color: '#3b82f6' }} />
+              </button>
             </div>
-            {(resultData.answers || []).map((a, idx) => (
-              <div key={idx} className="question-card" style={{ padding: '1.2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', fontSize: '0.95rem' }}>
-                  {a.isCorrect ? <FaCircleCheck style={{ color: '#10b981' }} /> : <FaCircleXmark style={{ color: '#ef4444' }} />}
-                  <p style={{ fontWeight: 600, color: 'var(--clr-text-dim)' }}>Q{idx + 1}</p>
-                  {confidence[idx] && (
-                    <span style={{ fontSize: '0.8rem', padding: '2px 8px', borderRadius: '10px', background: confidence[idx] === 'sure' ? '#10b98122' : '#f59e0b22', color: confidence[idx] === 'sure' ? '#10b981' : '#f59e0b', marginLeft: 'auto' }}>
-                      {confidence[idx] === 'sure' ? 'Was sure' : 'Was unsure'}
-                    </span>
-                  )}
-                </div>
+          </div>
+
+          {adaptivePath && (
+            <div className="adaptive-path-card">
+              <div className="ap-icon"><FaLightbulb style={{ color: '#fbbf24' }} /></div>
+              <div>
+                <h4>{resultData.passed ? 'Great Progress!' : 'Keep Going!'}</h4>
+                <p>{adaptivePath.message}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="quiz-result-review">
+            <h3>Block {currentBlock + 1} Review</h3>
+          </div>
+          {(resultData.answers || []).map((a, idx) => (
+            <div key={idx} className="question-card" style={{ padding: '1.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', fontSize: '0.95rem' }}>
+                {a.isCorrect ? <FaCircleCheck style={{ color: '#10b981' }} /> : <FaCircleXmark style={{ color: '#ef4444' }} />}
+                <p style={{ fontWeight: 600, color: 'var(--clr-text-dim)' }}>Q{idx + 1}</p>
+                {confidence[idx] && (
+                  <span style={{ fontSize: '0.8rem', padding: '2px 8px', borderRadius: '10px', background: confidence[idx] === 'sure' ? '#10b98122' : '#f59e0b22', color: confidence[idx] === 'sure' ? '#10b981' : '#f59e0b', marginLeft: 'auto' }}>
+                    {confidence[idx] === 'sure' ? 'Was sure' : 'Was unsure'}
+                  </span>
+                )}
+             </div>
                 <p style={{ color: 'var(--clr-text-dim)', marginBottom: '0.75rem', fontSize: '0.95rem' }} dangerouslySetInnerHTML={{ __html: renderGlossary(a.question) }} />
                 <p style={{ fontSize: '0.9rem', color: 'var(--clr-text-dim)' }}>Your answer: <span style={{ color: a.isCorrect ? '#10b981' : '#ef4444', fontWeight: 600 }}>{a.userAnswerText}</span></p>
                 {!a.isCorrect && <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--clr-text-dim)' }}>Correct: <span style={{ color: '#10b981', fontWeight: 600 }}>{a.correctAnswerText}</span></p>}
@@ -917,7 +955,8 @@ function Quiz() {
               <button className="btn-secondary" onClick={() => { setCurrentTopic(''); setResultData(null); }}>← All Topics</button>
             </div>
           </div>
-        ) : quizQuestions.length > 0 ? (
+
+               ) : quizQuestions.length > 0 ? (
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <div className="question-palette">
               {quizQuestions.map((_, idx) => {
@@ -1095,9 +1134,9 @@ function Quiz() {
       <footer className="footer-fat">
         <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
           <div style={{ maxWidth: '260px' }}>
-            <a href="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
+            <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
               {sections?.site_config?.logo_url ? <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} /> : 'AliverBiopharm'}
-            </a>
+            </Link>
             <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>Advancing biology and pharmacy education for every learner.</p>
             <div className="footer-social">
               {(sections?.footer?.social_links || []).map(s => (
@@ -1111,7 +1150,19 @@ function Quiz() {
                 <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>{col.heading}</h4>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {col.items?.map(item => (
-                    <li key={item.label}><a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</a></li>
+                    <li key={item.label}>
+                      {item.href.startsWith('#') || item.href.startsWith('http') ? (
+                        <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </Link>
+                      )}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -1121,22 +1172,22 @@ function Quiz() {
         <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
           <nav style={{ display: 'flex', gap: '22px' }}>
-            <a href="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</a>
-            <a href="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</a>
-            <a href="/accessibility" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Accessibility</a>
+            <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
+            <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
+            <Link to="/accessibility" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Accessibility</Link>
           </nav>
         </div>
       </footer>
 
       <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><FaArrowUp style={{ color: '#b8873a' }} /></button>
-      <a href="#pricing" className="sticky-cta"><FaRocket style={{ marginRight: '6px' }} /> Start Learning</a>
+      <Link to="#pricing" className="sticky-cta"><FaRocket style={{ marginRight: '6px' }} /> Start Learning</Link>
 
       {toast && (
         <div className={`toast toast-${toast.type}`}>
           {toast.message}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
