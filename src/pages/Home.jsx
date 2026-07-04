@@ -1,6 +1,7 @@
-  import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
- import HomeView from '../features/home/HomeView';
+import { motion } from 'framer-motion';
+import HomeView from '../features/home/HomeView';
 import { getSections } from '../api/sections';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -33,6 +34,24 @@ import {
   checkFlashcardAnswer as apiCheckFlashcardAnswer,
   toggleFlashcardBookmark as apiToggleFlashcardBookmark
 } from '../api/cachedClient';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+  },
+  in: {
+    opacity: 1,
+  },
+  out: {
+    opacity: 0,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.2
+};
 
 function shuffleArray(arr) {
   const a = [...arr];
@@ -325,100 +344,108 @@ export default function Home() {
     } catch (e) { console.error(e); }
   }
 
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
-    <HomeView
-      sections={sections}
-      flashcards={flashcards}
-      flashcardDecks={flashcardDecks}
-      flashcardShuffled={flashcardShuffled}
-      knownFlashcardIds={knownFlashcardIds}
-      flashcardMode={flashcardMode}
-      flashcardCurrentDeck={flashcardCurrentDeck}
-      flashcardCurrentIndex={flashcardCurrentIndex}
-      flippedCards={flippedCards}
-      flashcardSelectedLevel={flashcardSelectedLevel}
-      flashcardDeckProgress={flashcardDeckProgress}
-      pdfs={pdfs}
-      pdfLevel={pdfLevel}
-      pdfSelectedTopic={pdfSelectedTopic}
-      notesStructure={notesStructure}
-      notesSelectedLevel={notesSelectedLevel}
-      notesSelectedTopic={notesSelectedTopic}
-      notesFilterVisible={notesFilterVisible}
-      publicStats={publicStats}
-      communityActivity={communityActivity}
-      weeklyChallengeAnswer={weeklyChallengeAnswer}
-      moodSelected={moodSelected}
-      setMoodSelected={setMoodSelected}
-      moodMessage={moodMessage}
-      setMoodMessage={setMoodMessage}
-      moodSubmitted={moodSubmitted}
-      continueLearning={continueLearning}
-      chatRoomId={chatRoomId}
-      chatMessages={chatMessages}
-      chatOpen={chatOpen}
-      chatInput={chatInput}
-      adminOnline={adminOnline}
-      theme={theme}
-      currentSlide={currentSlide}
-      mobileMenuOpen={mobileMenuOpen}
-      contactForm={contactForm}
-      contactStatus={contactStatus}
-      newsletterEmail={newsletterEmail}
-      newsletterStatus={newsletterStatus}
-      pdfPreviewOpen={pdfPreviewOpen}
-      previewPdf={previewPdf}
-      notesContent={notesContent}
-      notesReactions={notesReactions}
-      notesComments={notesComments}
-      notesCommentInput={notesCommentInput}
-      groupedNotes={groupedNotes}
-      getLevelColor={getLevelColor}
-      user={user}
-      logout={logout}
-      navigate={navigate}
-      currentYear={currentYear}
-      handleWeeklyChallengeSubmit={handleWeeklyChallengeSubmit}
-      handleContactSubmit={handleContactSubmit}
-      handleNewsletterSubmit={handleNewsletterSubmit}
-      handleMoodSubmit={handleMoodSubmit}
-      shuffleFlashcards={shuffleFlashcards}
-      setFlashcardMode={setFlashcardMode}
-      setFlashcardCurrentDeck={setFlashcardCurrentDeck}
-      setFlashcardCurrentIndex={setFlashcardCurrentIndex}
-      toggleCardFlip={toggleCardFlip}
-      setFlashcardSelectedLevel={setFlashcardSelectedLevel}
-      fetchPdfsByLevel={fetchPdfsByLevel}
-      handlePdfPreview={handlePdfPreview}
-      handlePdfDownload={handlePdfDownload}
-      loadNoteContent={loadNoteContent}
-      handleNoteReaction={handleNoteReaction}
-      handleNoteComment={handleNoteComment}
-      toggleKnown={toggleKnown}
-      rateFlashcard={rateFlashcard}
-      checkFlashcardAnswer={checkFlashcardAnswer}
-      toggleFlashcardBookmark={toggleFlashcardBookmark}
-      speakText={speakText}
-      requestChatRoom={requestChatRoom}
-      sendChat={sendChat}
-      deleteChatMsg={deleteChatMsg}
-      setChatOpen={setChatOpen}
-      setChatInput={setChatInput}
-      setMobileMenuOpen={setMobileMenuOpen}
-      setTheme={setTheme}
-      setContactForm={setContactForm}
-      setNewsletterEmail={setNewsletterEmail}
-      setPdfPreviewOpen={setPdfPreviewOpen}
-      setPdfLevel={setPdfLevel}
-      setPdfSelectedTopic={setPdfSelectedTopic}
-      setNotesSelectedLevel={setNotesSelectedLevel}
-      setNotesSelectedTopic={setNotesSelectedTopic}
-      setNotesFilterVisible={setNotesFilterVisible}
-      setNotesContent={setNotesContent}
-      setNotesCommentInput={setNotesCommentInput}
-      chatBodyRef={chatBodyRef}
-    />
+    <motion.div
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
+      <HomeView
+        sections={sections}
+        flashcards={flashcards}
+        flashcardDecks={flashcardDecks}
+        flashcardShuffled={flashcardShuffled}
+        knownFlashcardIds={knownFlashcardIds}
+        flashcardMode={flashcardMode}
+        flashcardCurrentDeck={flashcardCurrentDeck}
+        flashcardCurrentIndex={flashcardCurrentIndex}
+        flippedCards={flippedCards}
+        flashcardSelectedLevel={flashcardSelectedLevel}
+        flashcardDeckProgress={flashcardDeckProgress}
+        pdfs={pdfs}
+        pdfLevel={pdfLevel}
+        pdfSelectedTopic={pdfSelectedTopic}
+        notesStructure={notesStructure}
+        notesSelectedLevel={notesSelectedLevel}
+        notesSelectedTopic={notesSelectedTopic}
+        notesFilterVisible={notesFilterVisible}
+        publicStats={publicStats}
+        communityActivity={communityActivity}
+        weeklyChallengeAnswer={weeklyChallengeAnswer}
+        moodSelected={moodSelected}
+        setMoodSelected={setMoodSelected}
+        moodMessage={moodMessage}
+        setMoodMessage={setMoodMessage}
+        moodSubmitted={moodSubmitted}
+        continueLearning={continueLearning}
+        chatRoomId={chatRoomId}
+        chatMessages={chatMessages}
+        chatOpen={chatOpen}
+        chatInput={chatInput}
+        adminOnline={adminOnline}
+        theme={theme}
+        currentSlide={currentSlide}
+        mobileMenuOpen={mobileMenuOpen}
+        contactForm={contactForm}
+        contactStatus={contactStatus}
+        newsletterEmail={newsletterEmail}
+        newsletterStatus={newsletterStatus}
+        pdfPreviewOpen={pdfPreviewOpen}
+        previewPdf={previewPdf}
+        notesContent={notesContent}
+        notesReactions={notesReactions}
+        notesComments={notesComments}
+        notesCommentInput={notesCommentInput}
+        groupedNotes={groupedNotes}
+        getLevelColor={getLevelColor}
+        user={user}
+        logout={logout}
+        navigate={navigate}
+        currentYear={currentYear}
+        handleWeeklyChallengeSubmit={handleWeeklyChallengeSubmit}
+        handleContactSubmit={handleContactSubmit}
+        handleNewsletterSubmit={handleNewsletterSubmit}
+        handleMoodSubmit={handleMoodSubmit}
+        shuffleFlashcards={shuffleFlashcards}
+        setFlashcardMode={setFlashcardMode}
+        setFlashcardCurrentDeck={setFlashcardCurrentDeck}
+        setFlashcardCurrentIndex={setFlashcardCurrentIndex}
+        toggleCardFlip={toggleCardFlip}
+        setFlashcardSelectedLevel={setFlashcardSelectedLevel}
+        fetchPdfsByLevel={fetchPdfsByLevel}
+        handlePdfPreview={handlePdfPreview}
+        handlePdfDownload={handlePdfDownload}
+        loadNoteContent={loadNoteContent}
+        handleNoteReaction={handleNoteReaction}
+        handleNoteComment={handleNoteComment}
+        toggleKnown={toggleKnown}
+        rateFlashcard={rateFlashcard}
+        checkFlashcardAnswer={checkFlashcardAnswer}
+        toggleFlashcardBookmark={toggleFlashcardBookmark}
+        speakText={speakText}
+        requestChatRoom={requestChatRoom}
+        sendChat={sendChat}
+        deleteChatMsg={deleteChatMsg}
+        setChatOpen={setChatOpen}
+        setChatInput={setChatInput}
+        setMobileMenuOpen={setMobileMenuOpen}
+        setTheme={setTheme}
+        setContactForm={setContactForm}
+        setNewsletterEmail={setNewsletterEmail}
+        setPdfPreviewOpen={setPdfPreviewOpen}
+        setPdfLevel={setPdfLevel}
+        setPdfSelectedTopic={setPdfSelectedTopic}
+        setNotesSelectedLevel={setNotesSelectedLevel}
+        setNotesSelectedTopic={setNotesSelectedTopic}
+        setNotesFilterVisible={setNotesFilterVisible}
+        setNotesContent={setNotesContent}
+        setNotesCommentInput={setNotesCommentInput}
+        chatBodyRef={chatBodyRef}
+      />
+    </motion.div>
   );
 }
