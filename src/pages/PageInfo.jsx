@@ -1,6 +1,28 @@
  import React, { useState, useEffect } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getInfoSection, getAllSiteSections } from '../api/client';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    y: 20,
+  },
+  in: {
+    opacity: 1,
+    y: 0,
+  },
+  out: {
+    opacity: 0,
+    y: -20,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -197,7 +219,12 @@ export default function InfoPage() {
 
   if (loading) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         {header}
         {mobileNav}
         <div className="info-page-loading">
@@ -205,13 +232,20 @@ export default function InfoPage() {
           <p>Loading content...</p>
         </div>
         {footer}
-      </div>
+      </motion.div>
     );
   }
 
   if (error === 'not_found' || !section || !section.title) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {header}
         {mobileNav}
         <div className="info-page-error">
@@ -221,13 +255,20 @@ export default function InfoPage() {
           <Link to="/" className="btn-primary"><i className="fa-solid fa-house" aria-hidden="true" /> Back to Home</Link>
         </div>
         {footer}
-      </div>
+      </motion.div>
     );
   }
 
   if (error) {
     return (
-      <div className="homepage">
+      <motion.div
+        className="homepage"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         {header}
         {mobileNav}
         <div className="info-page-error">
@@ -237,12 +278,19 @@ export default function InfoPage() {
           <Link to="/" className="btn-primary"><i className="fa-solid fa-rotate-right" aria-hidden="true" /> Try Again</Link>
         </div>
         {footer}
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="homepage">
+    <motion.div
+      className="homepage"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       {header}
       {mobileNav}
       <article className="info-page">
@@ -273,7 +321,7 @@ export default function InfoPage() {
         </div>
       </article>
       {footer}
-    </div>
+    </motion.div>
   );
 }
 
