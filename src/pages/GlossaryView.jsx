@@ -1,5 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import {
   getAllSiteSections,
@@ -7,6 +8,27 @@ import {
   getGlossaryCategories,
   getGlossaryTerm
 } from '../api/client';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    y: 20,
+  },
+  in: {
+    opacity: 1,
+    y: 0,
+  },
+  out: {
+    opacity: 0,
+    y: -20,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 export default function Glossary() {
   const { user, logout } = useAuth();
@@ -82,25 +104,37 @@ export default function Glossary() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <motion.div
+        style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         <div className="pdf-loading-spinner">
           <div className="spinner-dot dot-magenta"></div>
           <div className="spinner-dot dot-cyan"></div>
           <div className="spinner-dot dot-orange"></div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <motion.div
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <header className="site-header">
         <div className="header-container">
-          <a href="/" className="logo-link" aria-label="AliverBiopharm Home">
+          <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
             {sections?.site_config?.logo_url ? (
               <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
             ) : 'AliverBiopharm'}
-          </a>
+          </Link>
           <nav aria-label="Main navigation">
             <ul className="main-nav">
               {(sections?.navigation?.links || [
@@ -113,7 +147,7 @@ export default function Glossary() {
                   {link.href.startsWith('#') || link.href.startsWith('http') ? (
                     <a href={link.href}>{link.label}</a>
                   ) : (
-                    <a href={link.href}>{link.label}</a>
+                    <Link to={link.href}>{link.label}</Link>
                   )}
                 </li>
               ))}
@@ -145,8 +179,8 @@ export default function Glossary() {
                   <button className="mobile-signout-btn" onClick={logout}><i className="fa-solid fa-right-from-bracket"></i> Sign Out</button>
                 ) : (
                   <>
-                    <a href="#" className="mobile-signin-btn" onClick={() => window.location.href = '/login'}>Sign In</a>
-                    <a href="#" className="mobile-signup-btn" onClick={() => window.location.href = '/register'}>Create Account</a>
+                    <Link to="/login" className="mobile-signin-btn">Sign In</Link>
+                    <Link to="/register" className="mobile-signup-btn">Create Account</Link>
                   </>
                 )}
               </div>
@@ -155,7 +189,11 @@ export default function Glossary() {
           </div>
           <nav className="mobile-nav-links">
             {(sections?.navigation?.links || []).filter(Boolean).map(link => (
-              <a key={link.href} href={link.href}>{link.label}</a>
+              link.href.startsWith('#') || link.href.startsWith('http') ? (
+                <a key={link.href} href={link.href}>{link.label}</a>
+              ) : (
+                <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
+              )
             ))}
           </nav>
         </div>
@@ -592,9 +630,9 @@ export default function Glossary() {
       <footer className="footer-fat">
         <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
           <div style={{ maxWidth: '260px' }}>
-            <a href="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
+            <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
               {sections?.site_config?.logo_url ? <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} /> : 'AliverBiopharm'}
-            </a>
+            </Link>
             <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>Advancing biology and pharmacy education for every learner.</p>
             <div className="footer-social">
               {(sections?.footer?.social_links || []).map(s => (
@@ -608,7 +646,19 @@ export default function Glossary() {
                 <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>{col.heading}</h4>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {col.items?.map(item => (
-                    <li key={item.label}><a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>{item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}{item.label}</a></li>
+                    <li key={item.label}>
+                      {item.href.startsWith('#') || item.href.startsWith('http') ? (
+                        <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </Link>
+                      )}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -618,14 +668,14 @@ export default function Glossary() {
         <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
           <nav style={{ display: 'flex', gap: '22px' }}>
-            <a href="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</a>
-            <a href="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</a>
-            <a href="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</a>
+            <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
+            <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
+            <Link to="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</Link>
           </nav>
         </div>
       </footer>
 
       <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><i className="fa-solid fa-arrow-up"></i></button>
-    </div>
+    </motion.div>
   );
 }
