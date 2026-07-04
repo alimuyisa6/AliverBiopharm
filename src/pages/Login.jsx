@@ -2,6 +2,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { signin } from '../api/client';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import '../styles/Auth.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
@@ -9,6 +10,27 @@ import { FaSignInAlt } from "react-icons/fa";
 import { FaEnvelope, FaLock, FaArrowRight } from "react-icons/fa6";
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    x: 60,
+  },
+  in: {
+    opacity: 1,
+    x: 0,
+  },
+  out: {
+    opacity: 0,
+    x: -60,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3
+};
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -101,7 +123,14 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-page">
+    <motion.div
+      className="auth-page"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <div className="auth-brand-panel">
         <div className="auth-brand-content">
           <div className="auth-label">ALIVER BIOPHARM</div>
@@ -160,6 +189,6 @@ export default function Login() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
