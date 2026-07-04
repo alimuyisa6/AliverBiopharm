@@ -1,9 +1,31 @@
  // pages/Classroom.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ClassroomOnboarding } from '../features/classroom/ClassroomOnboarding';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
+
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    x: 40,
+  },
+  in: {
+    opacity: 1,
+    x: 0,
+  },
+  out: {
+    opacity: 0,
+    x: -40,
+  }
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.25
+};
 
 export default function Classroom() {
   const { user } = useAuth();
@@ -92,15 +114,27 @@ export default function Classroom() {
 
   if (checkingOnboarding) {
     return (
-      <div className="classroom-loading">
+      <motion.div
+        className="classroom-loading"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         <i className="fa-solid fa-spinner fa-spin"></i>
         <p>Loading...</p>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="classroom-page">
+    <motion.div
+      className="classroom-page"
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <div className="classroom-header">
         <span className="sec-label">Live Learning</span>
         <h1 className="section-title">Classrooms</h1>
@@ -208,6 +242,6 @@ export default function Classroom() {
           })}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
