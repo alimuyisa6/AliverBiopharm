@@ -12,8 +12,10 @@ export default function AdminLauncher() {
     try {
       setLoading(true);
       const { token } = await requestHandoff();
+      alert('Got token: ' + (token ? token.substring(0, 12) + '...' : 'MISSING'));
       window.location.href = `https://aliver-biopharma-admindashboard.vercel.app/sso?token=${token}`;
     } catch (e) {
+      alert('handoff_create failed: ' + e.message);
       setLoading(false);
     }
   }
