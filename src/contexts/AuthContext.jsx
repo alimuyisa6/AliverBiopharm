@@ -1,8 +1,9 @@
  import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getUser, signout } from '../api/client';
 import { Navigate } from 'react-router-dom';
- import { LoadingContext } from '../loading/LoadingProvider';
-const AuthContext = createContext();
+import { LoadingContext } from '../loading/LoadingProvider';
+
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -34,28 +35,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
-export function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
-  const { show, hide } = useContext(LoadingContext);
-
-  useEffect(() => {
-    if (loading) {
-      show('page', 'Loading...');
-    } else {
-      hide();
-    }
-  }, [loading, show, hide]);
-
-  if (loading) return null;
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-   }
