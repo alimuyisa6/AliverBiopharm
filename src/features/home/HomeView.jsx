@@ -1,5 +1,8 @@
  import React from 'react';
- import { HeroCarousel } from './HeroCarousel';
+ import Header from '../../components/Header';
+import MobileMenu from '../../components/MobileMenu';
+import Footer from '../../components/Footer';
+import { HeroCarousel } from './HeroCarousel';
 import { StatsGrid } from './StatsGrid';
 import { TeamScroll } from './TeamScroll';
 import { TestimonialSlider } from './TestimonialSlider';
