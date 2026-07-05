@@ -468,3 +468,6 @@ export async function shareClassroomResource(room_id, file_url, file_name, file_
 export async function fileClassroomComplaint(room_id, complaint_type, description) {
   return apiCall('classroom', 'file_complaint', { room_id, complaint_type, description });
 }
+
+export async function requestHandoff() { return apiCall('auth', 'handoff_create', {}); }
+export async function exchangeHandoff(token) { return apiCall('auth', 'handoff_exchange', { token }); }
