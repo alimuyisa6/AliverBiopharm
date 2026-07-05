@@ -112,6 +112,7 @@ export async function getContinueReading(limit = 10) { return getRequest('resour
 export async function submitResource(payload) { return apiCall('resources', 'submit_resource', { payload }); }
 export async function approveResource(submissionId, action) { return apiCall('resources', 'approve', { submissionId, action }); }
 export async function getResourceSubmissions() { return getRequest('resources', 'submissions'); }
+export async function getAllRatings() { return getRequest('resources', 'get_all_ratings'); }
 
 export async function getQuizTopics({ level }) { return getRequest('quiz', 'get_quiz_topics', { level }); }
 export async function getQuizBlock({ level, topic, block_number }) { return getRequest('quiz', 'get_quiz_block', { level, topic, block_number }); }
