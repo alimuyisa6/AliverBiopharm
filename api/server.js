@@ -38,6 +38,7 @@ const CSRF_EXEMPT_PATHS = new Set([
   'signin',
   'submit_contact',
   'subscribe_newsletter',
+  'handoff_exchange',
 ]);
 
 export default async function handler(req, res) {
