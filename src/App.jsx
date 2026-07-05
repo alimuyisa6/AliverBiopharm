@@ -2,6 +2,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
+import AdminLauncher from './components/AdminLauncher';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -118,6 +119,7 @@ function App() {
   return (
     <AuthProvider>
       <AnimatedRoutes />
+      <AdminLauncher />
     </AuthProvider>
   );
 }
