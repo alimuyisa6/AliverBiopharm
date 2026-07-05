@@ -1,7 +1,5 @@
  import React from 'react';
- import Header from '../../components/Header';
-import MobileMenu from '../../components/MobileMenu';
-import Footer from '../../components/Footer';
+import { Link } from 'react-router-dom';
 import { HeroCarousel } from './HeroCarousel';
 import { StatsGrid } from './StatsGrid';
 import { TeamScroll } from './TeamScroll';
@@ -23,6 +21,7 @@ import NotificationBell from '../../components/NotificationBell';
 import InfoCards from '../../components/InfoCards';
 import InteractiveShowcase from '../../components/InteractiveShowcase';
 import { ClassroomSection } from '../classroom/ClassroomSection';
+
 export default function HomeView({
   user,
   logout,
@@ -30,8 +29,8 @@ export default function HomeView({
   currentYear,
   sections,
   publicStats,
- communityActivity,
- theme,
+  communityActivity,
+  theme,
   currentSlide,
   mobileMenuOpen,
   contactForm,
@@ -91,35 +90,77 @@ export default function HomeView({
   sendChat,
   deleteChatMsg,
 }) {
+  const navLinks = sections?.navigation?.links || [
+    { href: '/', label: 'Home' },
+    { href: '#courses', label: 'Courses' },
+    { href: '#contact', label: 'Contact' },
+  ];
+
   return (
     <div className="homepage">
-      <Header
-        user={user}
-        logoUrl={sections?.site_config?.logo_url}
-        navLinks={sections?.navigation?.links || [
-          { href: '/', label: 'Home' },
-          { href: '#courses', label: 'Courses' },
-          { href: '#contact', label: 'Contact' },
-        ]}
-        theme={theme}
-        onToggleTheme={() => {
-          const dark = document.body.classList.toggle('dark-mode');
-          localStorage.setItem('theme', dark ? 'dark' : 'light');
-          setTheme(dark ? 'dark' : 'light');
-        }}
-        onToggleMobile={() => setMobileMenuOpen(!mobileMenuOpen)}
-      >
-        <NotificationBell user={user} />
-      </Header>
+      <header className="site-header" id="site-header">
+        <div className="header-container">
+          <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
+            {sections?.site_config?.logo_url ? (
+              <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
+            ) : (
+              'AliverBiopharm'
+            )}
+          </Link>
+          <nav aria-label="Main navigation">
+            <ul className="main-nav" id="main-nav">
+              {navLinks.map(link => (
+                <li key={link.href}>
+                  {link.href.startsWith('#') || link.href.startsWith('http') ? (
+                    <a href={link.href}>{link.label}</a>
+                  ) : (
+                    <Link to={link.href}>{link.label}</Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="nav-actions">
+            <NotificationBell user={user} />
+            <button
+              className="theme-toggle"
+              onClick={() => {
+                const dark = document.body.classList.toggle('dark-mode');
+                localStorage.setItem('theme', dark ? 'dark' : 'light');
+                setTheme(dark ? 'dark' : 'light');
+              }}
+              aria-label="Toggle dark mode"
+            >
+              <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
+            </button>
+            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open menu">
+              <i className="fa-solid fa-bars"></i>
+            </button>
+          </div>
+        </div>
+      </header>
 
-      <MobileMenu
-        open={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        user={user}
-        onLogout={logout}
-        navLinks={sections?.navigation?.links || []}
-        onNavigate={navigate}
-      />
+      <div className={`mobile-nav-panel ${mobileMenuOpen ? 'active' : ''}`}>
+        <div className="mobile-nav-panel-inner">
+          <div className="mobile-nav-header">
+            <div className="mobile-nav-header-row">
+              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+          <nav className="mobile-nav-links">
+            {navLinks.map(link =>
+              link.href.startsWith('#') || link.href.startsWith('http') ? (
+                <a key={link.href} href={link.href}>{link.label}</a>
+              ) : (
+                <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
+              )
+            )}
+          </nav>
+        </div>
+      </div>
+      <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
 
       <HeroCarousel
         slides={sections?.hero?.slides || []}
@@ -130,14 +171,14 @@ export default function HomeView({
 
       <InfoCards />
 
-     <ClassroomSection user={user} />
-       
-     <StatsGrid stats={{
-  resources_count: publicStats?.resources_count || 0,
-  users_count: publicStats?.users_count || 0,
-  downloads_count: publicStats?.downloads_count || 0,
-  quiz_attempts: publicStats?.quiz_attempts || 0,
-}} />
+      <ClassroomSection user={user} />
+
+      <StatsGrid stats={{
+        resources_count: publicStats?.resources_count || 0,
+        users_count: publicStats?.users_count || 0,
+        downloads_count: publicStats?.downloads_count || 0,
+        quiz_attempts: publicStats?.quiz_attempts || 0,
+      }} />
 
       <ContinueLearningSection
         continueLearning={continueLearning}
@@ -180,12 +221,12 @@ export default function HomeView({
         onCommentInputChange={setNotesCommentInput}
       />
 
-       <CommunitySection
-  activity={communityActivity}
-  weeklyChallenge={sections?.weekly_challenge}
-  weeklyChallengeAnswer={weeklyChallengeAnswer}
-  onWeeklySubmit={handleWeeklyChallengeSubmit}
-/>
+      <CommunitySection
+        activity={communityActivity}
+        weeklyChallenge={sections?.weekly_challenge}
+        weeklyChallengeAnswer={weeklyChallengeAnswer}
+        onWeeklySubmit={handleWeeklyChallengeSubmit}
+      />
 
       <MoodCheckSection
         moodSelected={moodSelected}
@@ -221,13 +262,63 @@ export default function HomeView({
         onSubmit={handleNewsletterSubmit}
       />
 
-      <Footer
-        logoUrl={sections?.site_config?.logo_url}
-        tagline="Advancing Biology and Pharmacy education for every learner."
-        socialLinks={sections?.footer?.social_links || []}
-        columns={sections?.footer?.columns || []}
-        currentYear={currentYear}
-      />
+      <footer className="footer-fat">
+        <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
+          <div style={{ maxWidth: '260px' }}>
+            <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
+              {sections?.site_config?.logo_url ? (
+                <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} />
+              ) : (
+                'AliverBiopharm'
+              )}
+            </Link>
+            <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>
+              Advancing biology and pharmacy education for every learner.
+            </p>
+            <div className="footer-social">
+              {(sections?.footer?.social_links || []).map(s => (
+                <a key={s.platform} href={s.url} target="_blank" rel="noreferrer">
+                  <i className={s.icon}></i>
+                </a>
+              ))}
+            </div>
+          </div>
+          <div className="footer-grid">
+            {(sections?.footer?.columns || []).map(col => (
+              <div key={col.heading}>
+                <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                  {col.heading}
+                </h4>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {col.items?.map(item => (
+                    <li key={item.label}>
+                      {item.href.startsWith('#') || item.href.startsWith('http') ? (
+                        <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
+                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
+                          {item.label}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
+          <nav style={{ display: 'flex', gap: '22px' }}>
+            <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
+            <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
+            <Link to="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</Link>
+          </nav>
+        </div>
+      </footer>
 
       <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
         <i className="fa-solid fa-arrow-up"></i>
