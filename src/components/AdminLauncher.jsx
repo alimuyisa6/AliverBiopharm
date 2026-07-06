@@ -1,17 +1,19 @@
- import React, { useContext, useState } from 'react';
+ import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { requestHandoff } from '../api/client';
 
 export default function AdminLauncher() {
+  useEffect(() => {
+    alert('AdminLauncher mounted - version CHECK123');
+  }, []);
+
   const { user, loading } = useContext(AuthContext);
   const [status, setStatus] = useState(null);
 
-  if (loading) {
-    return <div style={{ position: 'fixed', bottom: 20, right: 20, background: '#fff', padding: 8, zIndex: 1000 }}>Auth loading...</div>;
-  }
+  if (loading) return null;
 
   return (
-    <div style={{ position: 'fixed', bottom: 20, right: 20, background: '#fff', padding: 8, zIndex: 1000, fontSize: 11, maxWidth: 260, border: '1px solid #000' }}>
+    <div style={{ position: 'fixed', bottom: 20, right: 20, background: '#fff', padding: 8, zIndex: 9999, fontSize: 11, maxWidth: 260, border: '2px solid red' }}>
       <div>user: {user ? JSON.stringify(user) : 'null'}</div>
       {user?.is_admin && (
         <button onClick={async () => {
