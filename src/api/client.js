@@ -170,6 +170,7 @@ export async function updateUserRestriction(userId, restriction_type, reason, du
 export async function updateAppFeature(feature_key, settings, is_enabled) { return apiCall('admin', 'update_app_feature', { feature_key, settings, is_enabled }); }
 export async function getAppFeatures(pageId = 'all') { return getRequest('admin', 'get_app_features', { page_id: pageId }); }
 export async function deleteQuizTopic(topic, level) { return apiCall('admin', 'delete_quiz_topic', { topic, level }); }
+export async function listAllUsers() { return getRequest('admin', 'list_users'); }
 
 export async function submitContact(formData) { return apiCall('contact', 'submit_contact', { formData }); }
 export async function subscribeNewsletter(email) { return apiCall('contact', 'subscribe_newsletter', { formData: { email } }); }
