@@ -7,6 +7,21 @@ let processingQueue = false;
 const MAX_CONCURRENT = 3;
 let activeRequests = 0;
 
+function handleRestrictionResponse(errorData) {
+  pendingRequests.clear();
+  requestQueue.length = 0;
+  
+  localStorage.setItem('login_message', errorData.error || 'Account restricted');
+  localStorage.removeItem('user');
+  sessionStorage.clear();
+  
+  csrfToken = null;
+  
+  window.location.replace('/login');
+  
+  throw new Error('Account restricted - redirecting to login');
+}
+
 async function processQueue() {
   if (processingQueue) return;
   processingQueue = true;
@@ -59,12 +74,18 @@ async function apiCall(module, path, body = {}, method = 'POST') {
 
     const json = await res.json();
     if (json.csrf_token) csrfToken = json.csrf_token;
+    
     if (!res.ok) {
+      if (res.status === 403 && json.restricted) {
+        handleRestrictionResponse(json);
+      }
+      
       console.error(`API Error ${res.status}: ${module}/${path}`, json.error);
       const err = new Error(json.error || 'Request failed');
       err.status = res.status;
       throw err;
     }
+    
     return json.data !== undefined ? json.data : json;
   });
 }
@@ -78,12 +99,18 @@ async function getRequest(module, path, params = {}) {
     const res = await fetch(url, { credentials: 'include' });
     const json = await res.json();
     if (json.csrf_token) csrfToken = json.csrf_token;
+    
     if (!res.ok) {
+      if (res.status === 403 && json.restricted) {
+        handleRestrictionResponse(json);
+      }
+      
       console.error(`API Error ${res.status}: ${module}/${path}`, json.error);
       const err = new Error(json.error || 'Request failed');
       err.status = res.status;
       throw err;
     }
+    
     return json.data !== undefined ? json.data : json;
   });
 }
