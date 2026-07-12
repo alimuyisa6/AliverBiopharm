@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+ import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaSun, FaMoon, FaBars, FaXmark, FaUser, FaChevronDown,
-  FaSignInAlt, FaUserPlus, FaSignOutAlt, FaSpinner,
+  FaRightToBracket, FaUserPlus, FaRightFromBracket, FaSpinner,
   FaGaugeHigh, FaGear, FaArrowUp,
 } from 'react-icons/fa6';
-import { useLayout } from '../contexts/LayoutContext';
+import { useLayout } from '../context/LayoutContext';
 import { signout } from '../api/client';
 
 const pageVariants = {
@@ -49,7 +49,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     toggleTheme,
     isAuthenticated,
     refreshUser,
-    user,
   } = useLayout();
 
   const location = useLocation();
@@ -189,7 +188,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                     {signingOut ? (
                       <FaSpinner className="icon-spin" />
                     ) : (
-                      <FaSignOutAlt />
+                      <FaRightFromBracket />
                     )}
                     {signingOut ? 'Signing out...' : 'Sign Out'}
                   </button>
@@ -198,7 +197,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             ) : (
               <>
                 <Link to="/login" className="btn-primary" style={{ padding: '0.35rem 0.9rem', fontSize: '0.8rem' }}>
-                  <FaSignInAlt /> Sign In
+                  <FaRightToBracket /> Sign In
                 </Link>
                 <Link
                   to="/register"
@@ -258,7 +257,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                           {signingOut ? (
                             <FaSpinner className="icon-spin" />
                           ) : (
-                            <FaSignOutAlt />
+                            <FaRightFromBracket />
                           )}
                           {signingOut ? 'Signing out...' : 'Sign Out'}
                         </button>
@@ -269,7 +268,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                             className="mobile-signin-btn"
                             onClick={() => setMobileMenuOpen(false)}
                           >
-                            <FaSignInAlt /> Sign In
+                            <FaRightToBracket /> Sign In
                           </Link>
                           <Link
                             to="/register"
@@ -326,7 +325,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
       {showFooter && (
         <footer className="footer-fat">
-          <div className="footer-inner" style={{
+          <div style={{
             maxWidth: 'var(--max-width)',
             margin: '0 auto',
             display: 'grid',
@@ -372,14 +371,11 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               </p>
               {footer.social_links?.length > 0 && (
                 <div className="footer-social">
-                  {footer.social_links.filter(Boolean).map((s, idx) => {
-                    const IconComponent = iconMap[s.icon] || null;
-                    return (
-                      <a key={s.platform || idx} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
-                        {IconComponent && <IconComponent />}
-                      </a>
-                    );
-                  })}
+                  {footer.social_links.filter(Boolean).map((s, idx) => (
+                    <a key={s.platform || idx} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
+                      <i className={s.icon} />
+                    </a>
+                  ))}
                 </div>
               )}
             </div>
@@ -426,7 +422,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             )}
           </div>
 
-          <div className="footer-bottom" style={{
+          <div style={{
             maxWidth: 'var(--max-width)',
             margin: '0 auto',
             padding: '1.5rem 1.5rem 1rem',
@@ -437,13 +433,40 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             flexWrap: 'wrap',
             gap: '0.75rem',
           }}>
-            <p>&copy; {currentYear} {siteName}. All rights reserved.</p>
-            <nav className="footer-bottom-nav">
-              <Link to="/privacy">Privacy Policy</Link>
-              <span className="footer-separator">•</span>
-              <Link to="/terms">Terms of Use</Link>
-              <span className="footer-separator">•</span>
-              <Link to="/about">About Us</Link>
+            <p style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--text-sm)',
+              color: 'var(--clr-text-muted)',
+            }}>
+              &copy; {currentYear} {siteName}. All rights reserved.
+            </p>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} aria-label="Legal links">
+              <Link to="/privacy" style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--text-sm)',
+                color: 'var(--clr-text-dim)',
+                textDecoration: 'none',
+              }}>
+                Privacy Policy
+              </Link>
+              <span style={{ color: 'var(--clr-text-muted)', fontSize: 'var(--text-xs)' }}>•</span>
+              <Link to="/terms" style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--text-sm)',
+                color: 'var(--clr-text-dim)',
+                textDecoration: 'none',
+              }}>
+                Terms of Use
+              </Link>
+              <span style={{ color: 'var(--clr-text-muted)', fontSize: 'var(--text-xs)' }}>•</span>
+              <Link to="/about" style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--text-sm)',
+                color: 'var(--clr-text-dim)',
+                textDecoration: 'none',
+              }}>
+                About Us
+              </Link>
             </nav>
           </div>
         </footer>
