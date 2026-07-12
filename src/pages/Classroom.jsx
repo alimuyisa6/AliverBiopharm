@@ -1,24 +1,15 @@
- // pages/Classroom.jsx
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ClassroomOnboarding } from '../features/classroom/ClassroomOnboarding';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
+import { getClassroomOnboardingStatus, saveClassroomOnboarding, listClassrooms } from '../api/client';
 
 const pageVariants = {
-  initial: {
-    opacity: 0,
-    x: 40,
-  },
-  in: {
-    opacity: 1,
-    x: 0,
-  },
-  out: {
-    opacity: 0,
-    x: -40,
-  }
+  initial: { opacity: 0, x: 40 },
+  in: { opacity: 1, x: 0 },
+  out: { opacity: 0, x: -40 }
 };
 
 const pageTransition = {
@@ -45,8 +36,7 @@ export default function Classroom() {
 
   const checkOnboardingStatus = async () => {
     try {
-      const res = await fetch('/api/server?module=classroom&path=onboarding_status', { credentials: 'include' });
-      const data = await res.json();
+      const data = await getClassroomOnboardingStatus();
       if (data?.onboarding?.has_completed_onboarding) {
         const saved = {
           level: data.onboarding.level,
@@ -66,14 +56,9 @@ export default function Classroom() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({
-        level: onboardData.level,
-        class_name: onboardData.class_name,
-        topic_id: onboardData.topic?.id || onboardData.topic?.topic_name || onboardData.topic?.unit_name || onboardData.topic?.name || '',
-      });
-      const res = await fetch(`/api/server?module=classroom&path=list&${params}`, { credentials: 'include' });
-      const data = await res.json();
-      setRooms(data.data || data || []);
+      const topicId = onboardData.topic?.id || onboardData.topic?.topic_name || onboardData.topic?.unit_name || onboardData.topic?.name || '';
+      const data = await listClassrooms(onboardData.level, onboardData.class_name, topicId);
+      setRooms(data || []);
     } catch {
       setError('Failed to load classrooms');
     }
@@ -84,12 +69,7 @@ export default function Classroom() {
     setOnboarding(data);
     setShowOnboarding(false);
     try {
-      await fetch(`/api/server?module=classroom&path=save_onboarding`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      await saveClassroomOnboarding(data);
     } catch {}
     fetchRooms(data);
   };
