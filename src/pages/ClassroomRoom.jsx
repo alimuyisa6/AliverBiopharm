@@ -1,26 +1,22 @@
- // pages/ClassroomRoom.jsx
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllSiteSections } from '../api/client';
+import {
+  joinClassroom,
+  leaveClassroom,
+  getClassroomRoom,
+  getClassroomMessages,
+  getClassroomParticipants,
+  sendClassroomMessage,
+  raiseHand,
+} from '../api/client';
 
 const pageVariants = {
-  initial: {
-    opacity: 0,
-    scale: 0.95,
-    y: 20,
-  },
-  in: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-  },
-  out: {
-    opacity: 0,
-    scale: 0.95,
-    y: -20,
-  }
+  initial: { opacity: 0, scale: 0.95, y: 20 },
+  in: { opacity: 1, scale: 1, y: 0 },
+  out: { opacity: 0, scale: 0.95, y: -20 }
 };
 
 const pageTransition = {
@@ -46,7 +42,7 @@ export default function ClassroomRoom() {
 
   useEffect(() => {
     getAllSiteSections().then(setSections).catch(() => {});
-    joinRoom();
+    doJoinRoom();
     fetchRoom();
     fetchMessages();
     fetchParticipants();
@@ -67,33 +63,22 @@ export default function ClassroomRoom() {
     }
   }, [messages]);
 
-  const joinRoom = async () => {
+  const doJoinRoom = async () => {
     try {
-      await fetch(`/api/server?module=classroom&path=join`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_id: roomId }),
-      });
+      await joinClassroom(roomId);
     } catch {}
   };
 
   const leaveRoomSilent = async () => {
     try {
-      await fetch(`/api/server?module=classroom&path=leave`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_id: roomId }),
-      });
+      await leaveClassroom(roomId);
     } catch {}
   };
 
   const fetchRoom = async () => {
     try {
-      const res = await fetch(`/api/server?module=classroom&path=room&room_id=${roomId}`, { credentials: 'include' });
-      const data = await res.json();
-      setRoom(data.data || data);
+      const data = await getClassroomRoom(roomId);
+      setRoom(data);
       setLoading(false);
     } catch {
       setError('Failed to load room');
@@ -103,54 +88,38 @@ export default function ClassroomRoom() {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`/api/server?module=classroom&path=messages&room_id=${roomId}`, { credentials: 'include' });
-      const data = await res.json();
-      setMessages(data.data || data || []);
+      const data = await getClassroomMessages(roomId);
+      setMessages(data || []);
     } catch {}
   };
 
   const fetchParticipants = async () => {
     try {
-      const res = await fetch(`/api/server?module=classroom&path=participants&room_id=${roomId}`, { credentials: 'include' });
-      const data = await res.json();
-      setParticipants(data.data || data || []);
+      const data = await getClassroomParticipants(roomId);
+      setParticipants(data || []);
     } catch {}
   };
 
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
+    const text = chatInput.trim();
+    setChatInput('');
     try {
-      await fetch(`/api/server?module=classroom&path=send_message`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_id: roomId, message: chatInput.trim() }),
-      });
-      setChatInput('');
+      await sendClassroomMessage(roomId, text);
       fetchMessages();
     } catch {}
   };
 
   const handleRaiseHand = async () => {
     try {
-      await fetch(`/api/server?module=classroom&path=raise_hand`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_id: roomId, raise: !handRaised }),
-      });
+      await raiseHand(roomId, !handRaised);
       setHandRaised(!handRaised);
     } catch {}
   };
 
   const handleLeaveRoom = async () => {
     try {
-      await fetch(`/api/server?module=classroom&path=leave`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_id: roomId }),
-      });
+      await leaveClassroom(roomId);
       navigate('/classroom');
     } catch {
       navigate('/classroom');
