@@ -2,7 +2,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
-import { LayoutProvider } from './context/LayoutContext';
+import { LayoutProvider } from './contexts/LayoutContext';
 import Layout from './components/Layout';
 import NotificationBell from './components/NotificationBell';
 import AdminLauncher from './components/AdminLauncher';
