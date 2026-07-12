@@ -6,7 +6,7 @@ import {
   FaSignInAlt, FaUserPlus, FaSignOutAlt, FaSpinner,
   FaGaugeHigh, FaGear, FaArrowUp,
 } from 'react-icons/fa6';
-import { useLayout } from '../context/LayoutContext';
+import { useLayout } from '../contexts/LayoutContext';
 import { signout } from '../api/client';
 
 const pageVariants = {
