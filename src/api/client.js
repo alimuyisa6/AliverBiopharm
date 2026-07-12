@@ -169,6 +169,7 @@ export async function updateUserLock(userId, lock, reason) { return apiCall('adm
 export async function updateUserRestriction(userId, restriction_type, reason, duration_hours) { return apiCall('admin', 'update_user_restriction', { userId, restriction_type, reason, duration_hours }); }
 export async function updateAppFeature(feature_key, settings, is_enabled) { return apiCall('admin', 'update_app_feature', { feature_key, settings, is_enabled }); }
 export async function getAppFeatures(pageId = 'all') { return getRequest('admin', 'get_app_features', { page_id: pageId }); }
+export async function getUserActivityTrace() { return getRequest('admin', 'get_user_activity_trace'); }
 export async function deleteQuizTopic(topic, level) { return apiCall('admin', 'delete_quiz_topic', { topic, level }); }
 export async function listAllUsers() { return getRequest('admin', 'list_users'); }
 
