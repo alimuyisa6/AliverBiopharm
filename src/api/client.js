@@ -61,7 +61,9 @@ async function apiCall(module, path, body = {}, method = 'POST') {
     if (json.csrf_token) csrfToken = json.csrf_token;
     if (!res.ok) {
       console.error(`API Error ${res.status}: ${module}/${path}`, json.error);
-      throw new Error(json.error || 'Request failed');
+      const err = new Error(json.error || 'Request failed');
+      err.status = res.status;
+      throw err;
     }
     return json.data !== undefined ? json.data : json;
   });
@@ -78,7 +80,9 @@ async function getRequest(module, path, params = {}) {
     if (json.csrf_token) csrfToken = json.csrf_token;
     if (!res.ok) {
       console.error(`API Error ${res.status}: ${module}/${path}`, json.error);
-      throw new Error(json.error || 'Request failed');
+      const err = new Error(json.error || 'Request failed');
+      err.status = res.status;
+      throw err;
     }
     return json.data !== undefined ? json.data : json;
   });
@@ -431,6 +435,18 @@ export async function getTutorStatus() {
   return getRequest('classroom', 'tutor_status');
 }
 
+export async function getTutorRooms() {
+  return getRequest('classroom', 'tutor_rooms');
+}
+
+export async function getClassroomOnboardingStatus() {
+  return getRequest('classroom', 'onboarding_status');
+}
+
+export async function saveClassroomOnboarding(payload) {
+  return apiCall('classroom', 'save_onboarding', payload);
+}
+
 export async function joinClassroom(room_id) {
   return apiCall('classroom', 'join', { room_id });
 }
@@ -447,6 +463,10 @@ export async function raiseHand(room_id, raise) {
   return apiCall('classroom', 'raise_hand', { room_id, raise });
 }
 
+export async function createClassroom(payload) {
+  return apiCall('classroom', 'create', payload);
+}
+
 export async function applyAsTutor(level, class_name, subjects, qualifications, experience) {
   return apiCall('classroom', 'tutor_apply', { level, class_name, subjects, qualifications, experience });
 }
@@ -459,15 +479,7 @@ export async function endClassroom(room_id) {
   return apiCall('classroom', 'end_room', { room_id });
 }
 
-export async function getClassroomOnboardingStatus() {
-  return getRequest('classroom', 'onboarding_status');
-}
-
-export async function saveClassroomOnboarding(payload) {
-  return apiCall('classroom', 'save_onboarding', payload);
-}
-
-   export async function shareClassroomResource(room_id, file_url, file_name, file_size) {
+export async function shareClassroomResource(room_id, file_url, file_name, file_size) {
   return apiCall('classroom', 'share_resource', { room_id, file_url, file_name, file_size });
 }
 
