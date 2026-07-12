@@ -6,7 +6,7 @@ import {
   FaRightToBracket, FaUserPlus, FaRightFromBracket, FaSpinner,
   FaGaugeHigh, FaGear, FaArrowUp,
 } from 'react-icons/fa6';
-import { useLayout } from '../contexts/LayoutContext';
+import { useLayout } from '../context/LayoutContext';
 import { signout } from '../api/client';
 
 const pageVariants = {
@@ -194,25 +194,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                   </button>
                 </div>
               </div>
-            ) : (
-              <>
-                <Link to="/login" className="btn-primary" style={{ padding: '0.35rem 0.9rem', fontSize: '0.8rem' }}>
-                  <FaRightToBracket /> Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="btn-primary"
-                  style={{
-                    padding: '0.35rem 0.9rem',
-                    fontSize: '0.8rem',
-                    background: 'var(--clr-blue)',
-                    boxShadow: 'var(--shadow-blue)',
-                  }}
-                >
-                  <FaUserPlus /> Sign Up
-                </Link>
-              </>
-            )}
+            ) : null}
 
             <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
               {theme === 'dark' ? <FaSun /> : <FaMoon />}
@@ -325,48 +307,16 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
       {showFooter && (
         <footer className="footer-fat">
-          <div style={{
-            maxWidth: 'var(--max-width)',
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: '280px 1fr',
-            gap: '2rem',
-            padding: '0 1.5rem 2rem',
-          }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div className="footer-inner">
+            <div className="footer-brand">
               <Link to="/" className="logo-link">
                 {logo ? (
-                  <img
-                    src={logo}
-                    alt={siteName}
-                    style={{
-                      height: 100,
-                      maxHeight: 100,
-                      width: 'auto',
-                      maxWidth: 240,
-                      objectFit: 'contain',
-                      margin: '-30px 0',
-                    }}
-                  />
+                  <img src={logo} alt={siteName} className="footer-logo" />
                 ) : (
-                  <span style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '1.25rem',
-                    fontWeight: 700,
-                    letterSpacing: 'var(--ls-snug)',
-                    color: 'var(--clr-white)',
-                  }}>
-                    {siteName}
-                  </span>
+                  <span className="logo-text">{siteName}</span>
                 )}
               </Link>
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--text-sm)',
-                lineHeight: 'var(--lh-relaxed)',
-                color: 'var(--clr-text-dim)',
-                maxWidth: 240,
-              }}>
+              <p className="footer-tagline">
                 Advancing biology and pharmacy education for every learner.
               </p>
               {footer.social_links?.length > 0 && (
@@ -384,16 +334,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               <div className="footer-grid">
                 {footer.columns.filter(Boolean).map((col, idx) => (
                   <div key={col.heading || idx}>
-                    <h4 style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: 'var(--text-xl)',
-                      fontWeight: 700,
-                      letterSpacing: 'var(--ls-snug)',
-                      color: 'var(--clr-white)',
-                      marginBottom: '0.75rem',
-                    }}>
-                      {col.heading}
-                    </h4>
+                    <h4 className="footer-heading">{col.heading}</h4>
                     <ul className="footer-col-list">
                       {(col.items || []).filter(Boolean).map((item, itemIdx) => (
                         <li key={item.label || itemIdx}>
@@ -422,51 +363,14 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             )}
           </div>
 
-          <div style={{
-            maxWidth: 'var(--max-width)',
-            margin: '0 auto',
-            padding: '1.5rem 1.5rem 1rem',
-            borderTop: '1px solid var(--clr-border-glow)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-          }}>
-            <p style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 'var(--text-sm)',
-              color: 'var(--clr-text-muted)',
-            }}>
-              &copy; {currentYear} {siteName}. All rights reserved.
-            </p>
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} aria-label="Legal links">
-              <Link to="/privacy" style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--clr-text-dim)',
-                textDecoration: 'none',
-              }}>
-                Privacy Policy
-              </Link>
-              <span style={{ color: 'var(--clr-text-muted)', fontSize: 'var(--text-xs)' }}>•</span>
-              <Link to="/terms" style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--clr-text-dim)',
-                textDecoration: 'none',
-              }}>
-                Terms of Use
-              </Link>
-              <span style={{ color: 'var(--clr-text-muted)', fontSize: 'var(--text-xs)' }}>•</span>
-              <Link to="/about" style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--clr-text-dim)',
-                textDecoration: 'none',
-              }}>
-                About Us
-              </Link>
+          <div className="footer-bottom">
+            <p>&copy; {currentYear} {siteName}. All rights reserved.</p>
+            <nav className="footer-bottom-nav">
+              <Link to="/privacy">Privacy Policy</Link>
+              <span className="footer-separator">•</span>
+              <Link to="/terms">Terms of Use</Link>
+              <span className="footer-separator">•</span>
+              <Link to="/about">About Us</Link>
             </nav>
           </div>
         </footer>
