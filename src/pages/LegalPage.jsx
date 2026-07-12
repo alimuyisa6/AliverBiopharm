@@ -1,5 +1,5 @@
  import { useState, useEffect } from 'react';
-import { useLayout } from '../context/LayoutContext';
+import { useLayout } from '../contexts/LayoutContext';
 
 function RichText({ text }) {
   const TOKEN_RE = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})|((https?:\/\/)[^\s<>"']+)/g;
