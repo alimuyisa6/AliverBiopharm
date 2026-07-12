@@ -1,8 +1,6 @@
- import React, { useState, useEffect, useRef } from 'react';
+  import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { getAllSiteSections } from '../api/client';
 import {
   joinClassroom,
   leaveClassroom,
@@ -13,24 +11,11 @@ import {
   raiseHand,
 } from '../api/client';
 
-const pageVariants = {
-  initial: { opacity: 0, scale: 0.95, y: 20 },
-  in: { opacity: 1, scale: 1, y: 0 },
-  out: { opacity: 0, scale: 0.95, y: -20 }
-};
-
-const pageTransition = {
-  type: 'tween',
-  ease: 'easeInOut',
-  duration: 0.25
-};
-
 export default function ClassroomRoom() {
   const { roomId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const chatBodyRef = useRef(null);
-  const [sections, setSections] = useState(null);
   const [room, setRoom] = useState(null);
   const [messages, setMessages] = useState([]);
   const [participants, setParticipants] = useState([]);
@@ -41,7 +26,6 @@ export default function ClassroomRoom() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    getAllSiteSections().then(setSections).catch(() => {});
     doJoinRoom();
     fetchRoom();
     fetchMessages();
@@ -135,42 +119,25 @@ export default function ClassroomRoom() {
 
   if (loading) {
     return (
-      <motion.div
-        className="classroom-loading"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
+      <div className="classroom-loading">
         <i className="fa-solid fa-spinner fa-spin"></i>
         <p>Entering classroom...</p>
-      </motion.div>
+      </div>
     );
   }
 
   if (error || !room) {
     return (
-      <motion.div
-        className="classroom-error"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
-      >
+      <div className="classroom-error">
         <i className="fa-solid fa-triangle-exclamation"></i>
         <p>{error || 'Room not found'}</p>
         <button className="btn-secondary" onClick={() => navigate('/classroom')}>Back to Classrooms</button>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      className="classroom-room"
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <>
       <div className="room-topbar">
         <button className="room-back-btn" onClick={handleLeaveRoom}>
           <i className="fa-solid fa-arrow-left"></i>
@@ -299,6 +266,6 @@ export default function ClassroomRoom() {
           </button>
         </div>
       </div>
-    </motion.div>
+    </>
   );
 }
