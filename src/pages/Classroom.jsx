@@ -1,27 +1,12 @@
- import React, { useState, useEffect } from 'react';
+ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ClassroomOnboarding } from '../features/classroom/ClassroomOnboarding';
 import { useAuth } from '../contexts/AuthContext';
-import { getAllSiteSections } from '../api/client';
 import { getClassroomOnboardingStatus, saveClassroomOnboarding, listClassrooms } from '../api/client';
-
-const pageVariants = {
-  initial: { opacity: 0, x: 40 },
-  in: { opacity: 1, x: 0 },
-  out: { opacity: 0, x: -40 }
-};
-
-const pageTransition = {
-  type: 'tween',
-  ease: 'easeInOut',
-  duration: 0.25
-};
 
 export default function Classroom() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [sections, setSections] = useState(null);
   const [onboarding, setOnboarding] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -30,7 +15,6 @@ export default function Classroom() {
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   useEffect(() => {
-    getAllSiteSections().then(setSections).catch(() => {});
     checkOnboardingStatus();
   }, []);
 
@@ -94,27 +78,15 @@ export default function Classroom() {
 
   if (checkingOnboarding) {
     return (
-      <motion.div
-        className="classroom-loading"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
+      <div className="classroom-loading">
         <i className="fa-solid fa-spinner fa-spin"></i>
         <p>Loading...</p>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      className="classroom-page"
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <>
       <div className="classroom-header">
         <span className="sec-label">Live Learning</span>
         <h1 className="section-title">Classrooms</h1>
@@ -222,6 +194,6 @@ export default function Classroom() {
           })}
         </div>
       )}
-    </motion.div>
+    </>
   );
 }
