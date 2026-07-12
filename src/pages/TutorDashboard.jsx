@@ -2,7 +2,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { getClassroomLevels, getClassroomTopics } from '../api/client';
+import { getClassroomLevels, getClassroomTopics, getTutorStatus, getTutorRooms, createClassroom, endClassroom } from '../api/client';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -57,26 +57,23 @@ export default function TutorDashboard() {
     setStatusError(null);
 
     try {
-      const statusRes = await fetch('/api/server?module=classroom&path=tutor_status', {
-        credentials: 'include',
-      });
-
-      if (!statusRes.ok) {
-        const errData = await statusRes.json().catch(() => ({}));
-        if (statusRes.status === 401) {
+      let statusData;
+      try {
+        statusData = await getTutorStatus();
+      } catch (err) {
+        if (err.status === 401) {
           setStatusError('Your session has expired. Please log in again.');
-        } else if (statusRes.status === 403) {
+        } else if (err.status === 403) {
           setStatusError('Access denied. Please log in again.');
-        } else if (statusRes.status === 404) {
+        } else if (err.status === 404) {
           setStatusError('Tutor service not available. Please try again later.');
         } else {
-          setStatusError(errData.error || `Server error (${statusRes.status}). Please try again.`);
+          setStatusError(err.message || 'Server error. Please try again.');
         }
         setLoading(false);
         return;
       }
 
-      const statusData = await statusRes.json();
       setTutorStatus(statusData?.application || null);
 
       try {
@@ -103,20 +100,10 @@ export default function TutorDashboard() {
   const fetchActiveRooms = async () => {
     setRoomsError(null);
     try {
-      const res = await fetch('/api/server?module=classroom&path=tutor_rooms', {
-        credentials: 'include',
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        setRoomsError(errData.error || 'Failed to load your rooms.');
-        return;
-      }
-
-      const data = await res.json();
+      const data = await getTutorRooms();
       setActiveRooms(data?.rooms || data || []);
-    } catch {
-      setRoomsError('Network error while loading rooms.');
+    } catch (err) {
+      setRoomsError(err.message || 'Failed to load your rooms.');
     }
   };
 
@@ -145,25 +132,7 @@ export default function TutorDashboard() {
     setCreateError(null);
     setCreateSuccess(null);
     try {
-      const res = await fetch(`/api/server?module=classroom&path=create`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (res.status === 403) {
-          setCreateError(data.error || 'You are not authorized to create rooms.');
-        } else if (res.status === 401) {
-          setCreateError('Your session has expired. Please log in again.');
-        } else {
-          setCreateError(data.error || 'Failed to create room.');
-        }
-        return;
-      }
+      await createClassroom(form);
 
       setCreateSuccess('Classroom created successfully!');
       setShowCreateForm(false);
@@ -179,8 +148,14 @@ export default function TutorDashboard() {
       setTopics([]);
       fetchActiveRooms();
       setTimeout(() => setCreateSuccess(null), 5000);
-    } catch {
-      setCreateError('Network error. Please try again.');
+    } catch (err) {
+      if (err.status === 403) {
+        setCreateError(err.message || 'You are not authorized to create rooms.');
+      } else if (err.status === 401) {
+        setCreateError('Your session has expired. Please log in again.');
+      } else {
+        setCreateError(err.message || 'Failed to create room.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -188,22 +163,10 @@ export default function TutorDashboard() {
 
   const handleEndRoom = async (roomId) => {
     try {
-      const res = await fetch(`/api/server?module=classroom&path=end_room`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_id: roomId }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        setRoomsError(errData.error || 'Failed to end room.');
-        return;
-      }
-
+      await endClassroom(roomId);
       fetchActiveRooms();
-    } catch {
-      setRoomsError('Network error while ending room.');
+    } catch (err) {
+      setRoomsError(err.message || 'Failed to end room.');
     }
   };
 
