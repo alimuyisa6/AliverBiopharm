@@ -459,7 +459,15 @@ export async function endClassroom(room_id) {
   return apiCall('classroom', 'end_room', { room_id });
 }
 
-export async function shareClassroomResource(room_id, file_url, file_name, file_size) {
+export async function getClassroomOnboardingStatus() {
+  return getRequest('classroom', 'onboarding_status');
+}
+
+export async function saveClassroomOnboarding(payload) {
+  return apiCall('classroom', 'save_onboarding', payload);
+}
+
+   export async function shareClassroomResource(room_id, file_url, file_name, file_size) {
   return apiCall('classroom', 'share_resource', { room_id, file_url, file_name, file_size });
 }
 
