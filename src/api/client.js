@@ -190,8 +190,6 @@ export async function adminGetActiveChats() { return getRequest('chat', 'admin_g
 export async function submitWeeklyChallenge(weekStart, selectedOption) { return apiCall('weekly-challenge', 'submit', { week_start: weekStart, selected_option: selectedOption }); }
 export async function getWeeklyChallengeStatus(weekStart) { return getRequest('weekly-challenge', 'status', { week_start: weekStart }); }
 
- 
-
 export async function getFlashcards(filters = {}) {
   const params = {};
   if (filters.level)           params.level           = filters.level;
@@ -302,7 +300,7 @@ export async function toggleFlashcardBookmark(flashcardId) {
 
 export async function getFlashcardProgress() {
   return getRequest('flashcards', 'progress');
-                    }
+}
 
 export async function getCommunityActivity() { return getRequest('community', 'activity'); }
 
@@ -357,8 +355,7 @@ export async function updateInfoSection(section, data) {
   return apiCall('site', 'update_info_section', { section, ...data });
 }
 
-
- export async function fetchLabTools() { return getRequest('lab', 'tools'); }
+export async function fetchLabTools() { return getRequest('lab', 'tools'); }
 export async function fetchLabDrugs(level) {
   const params = {};
   if (level) params.level = level;
@@ -400,7 +397,6 @@ export async function submitQuizWithSession(level, topic, blockNumber, answers, 
 export async function getQuizSessionStatus() {
   return getRequest('quiz', 'quiz_session_status');
 }
-
 
 export async function getClassroomTopics(level, class_name) {
   return getRequest('classroom', 'topics', { level, class_name });
@@ -468,6 +464,30 @@ export async function shareClassroomResource(room_id, file_url, file_name, file_
 
 export async function fileClassroomComplaint(room_id, complaint_type, description) {
   return apiCall('classroom', 'file_complaint', { room_id, complaint_type, description });
+}
+
+export async function reviewTutorApplication(application_id, action, extra = {}) {
+  return apiCall('classroom', 'tutor_review', { application_id, action, ...extra });
+}
+
+export async function adminListRooms(filters = {}) {
+  return getRequest('classroom', 'admin_list_rooms', filters);
+}
+
+export async function adminListApplications(status) {
+  return getRequest('classroom', 'admin_list_applications', status ? { status } : {});
+}
+
+export async function adminListComplaints(status) {
+  return getRequest('classroom', 'admin_list_complaints', status ? { status } : {});
+}
+
+export async function adminResolveComplaint(complaint_id, status, resolution) {
+  return apiCall('classroom', 'admin_resolve_complaint', { complaint_id, status, resolution });
+}
+
+export async function adminEndClassroom(room_id) {
+  return apiCall('classroom', 'end_room', { room_id });
 }
 
 export async function requestHandoff() { return apiCall('auth', 'handoff_create', {}); }
