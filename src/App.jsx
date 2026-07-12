@@ -1,7 +1,10 @@
- import React, { useEffect, useRef } from 'react';
+ import { useEffect, useRef } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
+import { LayoutProvider } from './context/LayoutContext';
+import Layout from './components/Layout';
+import NotificationBell from './components/NotificationBell';
 import AdminLauncher from './components/AdminLauncher';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -91,25 +94,26 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <ScrollManager />
       <Routes location={location} key={location.pathname}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
-        <Route path="/past-papers" element={<PastPapers />} />
-        <Route path="/recall" element={<ProtectedRoute><BioRecall /></ProtectedRoute>} />
-        <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
-        <Route path="/glossary/:slug" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
-        <Route path="/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
-        <Route path="/lab" element={<ProtectedRoute><LearningLab /></ProtectedRoute>} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
-        <Route path="/terms" element={<LegalPage type="terms" />} />
-        <Route path="/privacy" element={<LegalPage type="privacy" />} />
-        <Route path="/classroom" element={<ProtectedRoute><Classroom /></ProtectedRoute>} />
-        <Route path="/classroom/:roomId" element={<ProtectedRoute><ClassroomRoom /></ProtectedRoute>} />
-        <Route path="/tutor/apply" element={<ProtectedRoute><TutorApply /></ProtectedRoute>} />
-        <Route path="/tutor/dashboard" element={<ProtectedRoute><TutorDashboard /></ProtectedRoute>} />
-        <Route path="/info/:slug" element={<InfoPage />} />
-        <Route path="*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/" element={<Layout headerExtras={<NotificationBell />}><Home /></Layout>} />
+        <Route path="/login" element={<Layout><Login /></Layout>} />
+        <Route path="/register" element={<Layout><Register /></Layout>} />
+        <Route path="/quiz" element={<Layout><ProtectedRoute><Quiz /></ProtectedRoute></Layout>} />
+        <Route path="/past-papers" element={<Layout><PastPapers /></Layout>} />
+        <Route path="/recall" element={<Layout><ProtectedRoute><BioRecall /></ProtectedRoute></Layout>} />
+        <Route path="/notes/read" element={<Layout><ProtectedRoute><NoteDetail /></ProtectedRoute></Layout>} />
+        <Route path="/glossary/:slug" element={<Layout><ProtectedRoute><Glossary /></ProtectedRoute></Layout>} />
+        <Route path="/glossary" element={<Layout><ProtectedRoute><Glossary /></ProtectedRoute></Layout>} />
+        <Route path="/lab" element={<Layout><ProtectedRoute><LearningLab /></ProtectedRoute></Layout>} />
+        <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+        <Route path="/flashcards" element={<Layout><ProtectedRoute><FlashcardsPage /></ProtectedRoute></Layout>} />
+        <Route path="/terms" element={<Layout><LegalPage type="terms" /></Layout>} />
+        <Route path="/privacy" element={<Layout><LegalPage type="privacy" /></Layout>} />
+        <Route path="/classroom" element={<Layout><ProtectedRoute><Classroom /></ProtectedRoute></Layout>} />
+        <Route path="/classroom/:roomId" element={<Layout><ProtectedRoute><ClassroomRoom /></ProtectedRoute></Layout>} />
+        <Route path="/tutor/apply" element={<Layout><ProtectedRoute><TutorApply /></ProtectedRoute></Layout>} />
+        <Route path="/tutor/dashboard" element={<Layout headerExtras={<NotificationBell />}><ProtectedRoute><TutorDashboard /></ProtectedRoute></Layout>} />
+        <Route path="/info/:slug" element={<Layout><InfoPage /></Layout>} />
+        <Route path="*" element={<Layout><div className="section" style={{ textAlign: 'center', paddingTop: '6rem' }}><h1 className="section-title">404</h1><p className="section-subtitle">Page not found</p></div></Layout>} />
       </Routes>
     </AnimatePresence>
   );
@@ -118,8 +122,10 @@ function AnimatedRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <AnimatedRoutes />
-      <AdminLauncher />
+      <LayoutProvider>
+        <AnimatedRoutes />
+        <AdminLauncher />
+      </LayoutProvider>
     </AuthProvider>
   );
 }
