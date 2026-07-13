@@ -683,13 +683,13 @@
 }
 
 .flashcard-icon {
-  background: rgba(184, 135, 58, 0.12);
+  background: var(--clr-magenta-light);
   color: var(--clr-magenta);
 }
 
 .paper-icon {
-  background: rgba(142, 68, 173, 0.12);
-  color: #8e44ad;
+  background: var(--clr-cyan-light);
+  color: var(--clr-cyan);
 }
 
 .recall-icon {
