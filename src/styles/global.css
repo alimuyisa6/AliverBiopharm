@@ -1,7 +1,9 @@
  :root {
   --clr-deep-space: #f0f7f4;
   --clr-cyan: #0a7e7e;
+  --clr-cyan-light: rgba(10, 126, 126, 0.12);
   --clr-magenta: #b8873a;
+  --clr-magenta-light: rgba(184, 135, 58, 0.12);
   --clr-blue: #3b6fd4;
   --clr-blue-light: rgba(59, 111, 212, 0.12);
   --clr-blue-dark: #2a52a8;
@@ -61,7 +63,8 @@
   --space-lg: 1.25rem;
   --space-xl: 2rem;
   --space-2xl: 3rem;
-}
+ }
+
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
