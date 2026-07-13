@@ -1,4 +1,4 @@
-/* ===== Tutor Dashboard ===== */
+ /* ===== Tutor Dashboard ===== */
 .tutor-dashboard-page {
   min-height: 100vh;
   background: var(--clr-deep-space);
@@ -183,7 +183,7 @@
 
 .tutor-app-status--pending { background: var(--clr-warning-light); }
 .tutor-app-status--scheduled { background: var(--clr-blue-light); }
-.tutor-app-status--interviewed { background: rgba(142, 68, 173, 0.08); }
+.tutor-app-status--interviewed { background: var(--clr-cyan-light); }
 .tutor-app-status--approved { background: var(--clr-success-light); }
 .tutor-app-status--rejected { background: var(--clr-error-light); }
 
@@ -199,7 +199,7 @@
 
 .tutor-app-status--pending .tutor-app-status-icon { color: var(--clr-warning); background: rgba(243, 156, 18, 0.15); }
 .tutor-app-status--scheduled .tutor-app-status-icon { color: var(--clr-blue); background: var(--clr-blue-light); }
-.tutor-app-status--interviewed .tutor-app-status-icon { color: #8b5cf6; background: rgba(142, 68, 173, 0.15); }
+.tutor-app-status--interviewed .tutor-app-status-icon { color: var(--clr-cyan); background: var(--clr-cyan-light); }
 .tutor-app-status--approved .tutor-app-status-icon { color: var(--clr-success); background: var(--clr-success-light); }
 .tutor-app-status--rejected .tutor-app-status-icon { color: var(--clr-error); background: var(--clr-error-light); }
 
