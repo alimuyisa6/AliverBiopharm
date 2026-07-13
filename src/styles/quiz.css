@@ -1,4 +1,4 @@
- .quiz-page {
+.quiz-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -1313,7 +1313,7 @@ body.dark-mode .topic-card.clickable:hover {
 }
 
 .leaderboard-rank.gold { background: var(--clr-warning); color: #000; }
-.leaderboard-rank.silver { background: #9ca3af; color: #000; }
+.leaderboard-rank.silver { background: var(--clr-blue-dark); color: #fff; }
 .leaderboard-rank.bronze { background: var(--clr-magenta); color: #000; }
 .leaderboard-rank.other { background: var(--clr-navy-light); color: var(--clr-text-muted); }
 
@@ -1483,3 +1483,4 @@ body.dark-mode .topic-card.clickable:hover {
   .quiz-hero { padding: 1.5rem 1rem; }
   .weak-areas-card { flex-direction: column; }
 }
+ 
