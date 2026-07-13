@@ -855,7 +855,7 @@ body.dark-mode .lab-step-panel {
 }
 
 .lab-case-difficulty {
-  background: rgba(184, 135, 58, 0.12);
+  background: var(--clr-magenta-light);
   color: var(--clr-magenta);
 }
 
@@ -991,7 +991,7 @@ body.dark-mode .lab-stage-card {
   font-size: var(--text-xs);
   font-weight: 700;
   text-transform: uppercase;
-  background: rgba(184, 135, 58, 0.12);
+  background: var(--clr-magenta-light);
   color: var(--clr-magenta);
   margin-bottom: 18px;
   letter-spacing: var(--ls-wider);
@@ -1416,7 +1416,7 @@ body.dark-mode .lab-calc-result {
 
 .lab-calc-result-high {
   color: var(--clr-magenta);
-  background: rgba(184, 135, 58, 0.08);
+  background: var(--clr-magenta-light);
 }
 
 .lab-calc-result-ok {
