@@ -65,6 +65,49 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const currentYear = new Date().getFullYear();
   const isHomepage = location.pathname === '/';
 
+  // Dynamic favicon from Supabase logo
+  useEffect(() => {
+    if (logo) {
+      // Remove all existing favicon links
+      const existingLinks = document.querySelectorAll('link[rel*="icon"]');
+      existingLinks.forEach(link => link.remove());
+
+      // Create and append favicon link
+      const faviconLink = document.createElement('link');
+      faviconLink.rel = 'icon';
+      faviconLink.type = 'image/png';
+      faviconLink.href = logo;
+      document.head.appendChild(faviconLink);
+
+      // Create and append shortcut icon
+      const shortcutLink = document.createElement('link');
+      shortcutLink.rel = 'shortcut icon';
+      shortcutLink.type = 'image/png';
+      shortcutLink.href = logo;
+      document.head.appendChild(shortcutLink);
+
+      // Create and append apple-touch-icon
+      const appleTouchLink = document.createElement('link');
+      appleTouchLink.rel = 'apple-touch-icon';
+      appleTouchLink.sizes = '180x180';
+      appleTouchLink.href = logo;
+      document.head.appendChild(appleTouchLink);
+
+      // Create and append apple-touch-icon-precomposed
+      const applePrecomposedLink = document.createElement('link');
+      applePrecomposedLink.rel = 'apple-touch-icon-precomposed';
+      applePrecomposedLink.href = logo;
+      document.head.appendChild(applePrecomposedLink);
+    }
+
+    return () => {
+      if (isMounted.current) {
+        const links = document.querySelectorAll('link[rel*="icon"]');
+        links.forEach(link => link.remove());
+      }
+    };
+  }, [logo]);
+
   useEffect(() => {
     return () => {
       isMounted.current = false;
