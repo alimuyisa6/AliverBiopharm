@@ -65,45 +65,88 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const currentYear = new Date().getFullYear();
   const isHomepage = location.pathname === '/';
 
-  // Dynamic favicon from Supabase logo
+  // Dynamic favicon from Supabase logo - with canvas fallback
   useEffect(() => {
+    const setFavicon = async (logoUrl) => {
+      try {
+        // Remove all existing favicon links
+        document.querySelectorAll('link[rel*="icon"]').forEach(link => link.remove());
+
+        // Try to create a proper favicon using canvas (resizes and converts to ICO-compatible format)
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const size = 32; // Standard favicon size
+          canvas.width = size;
+          canvas.height = size;
+          
+          const ctx = canvas.getContext('2d');
+          // Fill background if image might have transparency
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, size, size);
+          
+          // Draw image maintaining aspect ratio
+          const scale = Math.min(size / img.width, size / img.height);
+          const x = (size - img.width * scale) / 2;
+          const y = (size - img.height * scale) / 2;
+          ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+          
+          const faviconUrl = canvas.toDataURL('image/png');
+          
+          // Create favicon link
+          const faviconLink = document.createElement('link');
+          faviconLink.rel = 'icon';
+          faviconLink.type = 'image/png';
+          faviconLink.href = faviconUrl;
+          document.head.appendChild(faviconLink);
+          
+          // Create apple-touch-icon (larger size)
+          const appleCanvas = document.createElement('canvas');
+          appleCanvas.width = 180;
+          appleCanvas.height = 180;
+          const appleCtx = appleCanvas.getContext('2d');
+          appleCtx.fillStyle = '#ffffff';
+          appleCtx.fillRect(0, 0, 180, 180);
+          const appleScale = Math.min(180 / img.width, 180 / img.height);
+          const appleX = (180 - img.width * appleScale) / 2;
+          const appleY = (180 - img.height * appleScale) / 2;
+          appleCtx.drawImage(img, appleX, appleY, img.width * appleScale, img.height * appleScale);
+          
+          const appleTouchLink = document.createElement('link');
+          appleTouchLink.rel = 'apple-touch-icon';
+          appleTouchLink.href = appleCanvas.toDataURL('image/png');
+          document.head.appendChild(appleTouchLink);
+        };
+        
+        img.onerror = () => {
+          // Fallback: try direct link as favicon
+          const faviconLink = document.createElement('link');
+          faviconLink.rel = 'icon';
+          faviconLink.type = 'image/png';
+          faviconLink.href = logoUrl;
+          document.head.appendChild(faviconLink);
+        };
+        
+        img.src = logoUrl;
+      } catch (error) {
+        console.error('Failed to set favicon:', error);
+        // Fallback to direct link
+        const faviconLink = document.createElement('link');
+        faviconLink.rel = 'icon';
+        faviconLink.href = logoUrl;
+        document.head.appendChild(faviconLink);
+      }
+    };
+
     if (logo) {
-      // Remove all existing favicon links
-      const existingLinks = document.querySelectorAll('link[rel*="icon"]');
-      existingLinks.forEach(link => link.remove());
-
-      // Create and append favicon link
-      const faviconLink = document.createElement('link');
-      faviconLink.rel = 'icon';
-      faviconLink.type = 'image/png';
-      faviconLink.href = logo;
-      document.head.appendChild(faviconLink);
-
-      // Create and append shortcut icon
-      const shortcutLink = document.createElement('link');
-      shortcutLink.rel = 'shortcut icon';
-      shortcutLink.type = 'image/png';
-      shortcutLink.href = logo;
-      document.head.appendChild(shortcutLink);
-
-      // Create and append apple-touch-icon
-      const appleTouchLink = document.createElement('link');
-      appleTouchLink.rel = 'apple-touch-icon';
-      appleTouchLink.sizes = '180x180';
-      appleTouchLink.href = logo;
-      document.head.appendChild(appleTouchLink);
-
-      // Create and append apple-touch-icon-precomposed
-      const applePrecomposedLink = document.createElement('link');
-      applePrecomposedLink.rel = 'apple-touch-icon-precomposed';
-      applePrecomposedLink.href = logo;
-      document.head.appendChild(applePrecomposedLink);
+      setFavicon(logo);
     }
 
     return () => {
       if (isMounted.current) {
-        const links = document.querySelectorAll('link[rel*="icon"]');
-        links.forEach(link => link.remove());
+        document.querySelectorAll('link[rel*="icon"]').forEach(link => link.remove());
       }
     };
   }, [logo]);
