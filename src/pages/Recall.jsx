@@ -1,6 +1,5 @@
- import React, { useState, useEffect, useRef, useCallback } from 'react';
+ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   FaBrain, FaLock, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
   FaPencil, FaCircleInfo, FaMicroscope, FaDna, FaCapsules, FaBook,
@@ -14,25 +13,11 @@ import {
   getUser, getRecallSession, checkRecallSession, getRecallStats,
   getRecallAchievements, getRecallDashboard, getRecallTopics,
   getSelectedLevel, setSelectedLevel, continueRecallSession,
-  submitRecallAnswer, completeRecallSession, getLeaderboard,
-  getAllSiteSections
+  submitRecallAnswer, completeRecallSession, getLeaderboard
 } from '../api/cachedClient';
 import '../styles/bioRecall.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
-import '../api/sections.js';
-
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -20 }
-};
-
-const pageTransition = {
-  type: 'tween',
-  ease: 'easeInOut',
-  duration: 0.3
-};
 
 const strengthIcons = {
   excellent: FaStar,
@@ -105,8 +90,7 @@ async function playTone(type) {
   } catch (e) {}
 }
 
-function BioRecall() {
-  const [sections, setSections] = useState(null);
+export default function BioRecall() {
   const [currentUser, setCurrentUser] = useState(null);
   const [currentLevel, setCurrentLevel] = useState(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -156,18 +140,12 @@ function BioRecall() {
   const [xpProgress, setXpProgress] = useState({ level: 1, xpIntoLevel: 0, xpToNext: 100, progressPercent: 0 });
   const [masteryAverage, setMasteryAverage] = useState(0);
   const [spinMessages, setSpinMessages] = useState(['Checking...', 'Reviewing...', 'Feedback ready']);
-  const [theme, setTheme] = useState('light');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isMounted = useRef(true);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try { return localStorage.getItem('bioRecall_sound') !== 'off'; } catch { return true; }
   });
-  const currentYear = new Date().getFullYear();
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') { document.body.classList.add('dark-mode'); setTheme('dark'); }
-    getAllSiteSections().then(setSections).catch(() => {});
     const handleFirstInteraction = () => {
       getAudioContext();
       window.removeEventListener('click', handleFirstInteraction);
@@ -200,16 +178,6 @@ function BioRecall() {
   const safeHide = useCallback(() => {
     if (isMounted.current) { try { hide(); } catch (e) {} }
   }, [hide]);
-
-  const handleLogout = async () => {
-    try {
-      const { signout } = await import('../api/client');
-      await signout();
-      window.location.href = '/';
-    } catch (e) {
-      window.location.href = '/';
-    }
-  };
 
   useEffect(() => {
     isMounted.current = true;
@@ -972,230 +940,74 @@ function BioRecall() {
 
   if (loading) {
     return (
-      <motion.div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-        <header className="site-header">
-          <div className="header-container">
-            <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
-              {sections?.site_config?.logo_url ? (
-                <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
-              ) : 'AliverBiopharm'}
-            </Link>
-            <nav aria-label="Main navigation">
-              <ul className="main-nav">
-                <li><Link to="/">Home</Link></li>
-                <li><Link to="/recall" className="active">BioRecall</Link></li>
-              </ul>
-            </nav>
-            <div className="nav-actions">
-              <button className="theme-toggle" onClick={() => {
-                const dark = document.body.classList.toggle('dark-mode');
-                localStorage.setItem('theme', dark ? 'dark' : 'light');
-                setTheme(dark ? 'dark' : 'light');
-              }}><i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i></button>
-              <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}><i className="fa-solid fa-bars"></i></button>
-            </div>
-          </div>
-        </header>
-        <div className="loading-spinner" style={{ display: 'flex', flex: 1 }}>
-          <div className="spinner-colors">
-            <div className="spinner-dot-color"></div><div className="spinner-dot-color"></div>
-            <div className="spinner-dot-color"></div><div className="spinner-dot-color"></div>
-          </div>
-          <div style={{ fontWeight: 600, color: 'var(--primary)' }}>Preparing your session...</div>
+      <div className="loading-spinner" style={{ display: 'flex', flex: 1, minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner-colors">
+          <div className="spinner-dot-color"></div><div className="spinner-dot-color"></div>
+          <div className="spinner-dot-color"></div><div className="spinner-dot-color"></div>
         </div>
-      </motion.div>
+        <div style={{ fontWeight: 600, color: 'var(--primary)' }}>Preparing your session...</div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
-      <header className="site-header">
-        <div className="header-container">
-          <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
-            {sections?.site_config?.logo_url ? (
-              <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
-            ) : 'AliverBiopharm'}
-          </Link>
-          <nav aria-label="Main navigation">
-            <ul className="main-nav">
-              {(sections?.navigation?.links || [
-                { href: '/', label: 'Home' },
-                { href: '/quiz', label: 'Quizzes' },
-                { href: '/recall', label: 'BioRecall' },
-                { href: '#contact', label: 'Contact' }
-              ]).filter(Boolean).map(link => (
-                <li key={link.href}>
-                  {link.href.startsWith('#') || link.href.startsWith('http') ? (
-                    <a href={link.href} className={link.href === '/recall' ? 'active' : ''}>{link.label}</a>
-                  ) : (
-                    <Link to={link.href} className={link.href === '/recall' ? 'active' : ''}>{link.label}</Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <div className="nav-actions">
-            <button className="theme-toggle" onClick={() => {
-              const dark = document.body.classList.toggle('dark-mode');
-              localStorage.setItem('theme', dark ? 'dark' : 'light');
-              setTheme(dark ? 'dark' : 'light');
-            }}>
-              {theme === 'dark' ? <FaSun /> : <FaMoon />}
-            </button>
-            <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <FaBars />
-            </button>
-          </div>
+    <>
+      {renderConfettiCanvas()}
+      <div className="recall-container">
+        <div className="recall-header">
+          <h1>{currentLevel === 'Pharmacy' ? 'RecallRx' : `BioRecall ${currentLevel || ''}`}</h1>
+          {currentLevel && <span className="level-badge">{currentLevel}</span>}
         </div>
-      </header>
-
-      <div className={`mobile-nav-panel ${mobileMenuOpen ? 'active' : ''}`}>
-        <div className="mobile-nav-panel-inner">
-          <div className="mobile-nav-header">
-            <div className="mobile-nav-header-row">
-              <div className="mobile-auth-top">
-                {currentUser ? (
-                  <button className="mobile-signout-btn" onClick={handleLogout}><FaRightFromBracket /> Sign Out</button>
-                ) : (
-                  <>
-                    <Link to="/login" className="mobile-signin-btn">Sign In</Link>
-                    <Link to="/register" className="mobile-signup-btn">Create Account</Link>
-                  </>
+        <div className="main-layout">
+          <div className="main-content">
+            {!sessionActive && !showReport && (
+              <div className="entrance-screen">
+                <div className="recall-card" style={{ textAlign: 'center' }}>
+                  <FaBrain size="3rem" color="var(--primary)" />
+                  {!currentUser ? (
+                    <p style={{ marginTop: '0.5rem', color: 'var(--primary)' }}>
+                      <Link to="/" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Sign in or Create an account</Link> to start your recall journey.
+                    </p>
+                  ) : showLevelInput ? renderLevelInput() : (
+                    <>
+                      <p><FaLock /> Your level is locked:</p>
+                      <div className="locked-level">{currentLevel}</div>
+                      <button className="continue-btn" onClick={openTopicModal}>Continue to Topics</button>
+                      {isSuperAdmin && <button className="admin-change-btn" onClick={() => setShowLevelInput(true)}>Change level (admin)</button>}
+                    </>
+                  )}
+                  {currentUser && <p style={{ marginTop: '0.5rem' }}><FaFire color="#e67e22" /> {streakDays} Day Recall Streak</p>}
+                  {currentUser && <p style={{ marginTop: '0.5rem' }}><FaStar color="#f1c40f" /> Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</p>}
+                  {message && <div className={`user-message ${message.type}`}>{message.text}</div>}
+                </div>
+                {currentUser && currentLevel && !showLevelInput && (
+                  <>{renderWeakTopicAlert()}{renderDashboard()}</>
                 )}
               </div>
-              <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}><FaXmark /></button>
-            </div>
-          </div>
-          <nav className="mobile-nav-links">
-            {(sections?.navigation?.links || []).filter(Boolean).map(link => (
-              link.href.startsWith('#') || link.href.startsWith('http') ? (
-                <a key={link.href} href={link.href}>{link.label}</a>
-              ) : (
-                <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
-              )
-            ))}
-          </nav>
-        </div>
-      </div>
-      <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
-
-      <main style={{ flex: 1 }}>
-        <div className="recall-container">
-          {renderConfettiCanvas()}
-          <div className="recall-header">
-            <h1>{currentLevel === 'Pharmacy' ? 'RecallRx' : `BioRecall ${currentLevel || ''}`}</h1>
-            {currentLevel && <span className="level-badge">{currentLevel}</span>}
-          </div>
-          <div className="main-layout">
-            <div className="main-content">
-              {!sessionActive && !showReport && (
-                <div className="entrance-screen">
-                  <div className="recall-card" style={{ textAlign: 'center' }}>
-                    <FaBrain size="3rem" color="var(--primary)" />
-                    {!currentUser ? (
-                      <p style={{ marginTop: '0.5rem', color: 'var(--primary)' }}>
-                        <Link to="/" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Sign in or Create an account</Link> to start your recall journey.
-                      </p>
-                    ) : showLevelInput ? renderLevelInput() : (
-                      <>
-                        <p><FaLock /> Your level is locked:</p>
-                        <div className="locked-level">{currentLevel}</div>
-                        <button className="continue-btn" onClick={openTopicModal}>Continue to Topics</button>
-                        {isSuperAdmin && <button className="admin-change-btn" onClick={() => setShowLevelInput(true)}>Change level (admin)</button>}
-                      </>
-                    )}
-                    {currentUser && <p style={{ marginTop: '0.5rem' }}><FaFire color="#e67e22" /> {streakDays} Day Recall Streak</p>}
-                    {currentUser && <p style={{ marginTop: '0.5rem' }}><FaStar color="#f1c40f" /> Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</p>}
-                    {message && <div className={`user-message ${message.type}`}>{message.text}</div>}
+            )}
+            {sessionActive && (
+              <div className="session-screen">
+                <div className="recall-card">{renderQuestion()}</div>
+                <div className="analytics-row">
+                  <div className="stat-card">
+                    <FaChartLine size="1.8rem" color="var(--primary)" />
+                    <span>E:{userAnswersRecord.filter(r => r.strength === 'excellent').length} S:{userAnswersRecord.filter(r => r.strength === 'strong').length} D:{userAnswersRecord.filter(r => r.strength === 'developing').length}</span>
                   </div>
-                  {currentUser && currentLevel && !showLevelInput && (
-                    <>{renderWeakTopicAlert()}{renderDashboard()}</>
-                  )}
+                  <div className="stat-card"><FaTrophy size="1.8rem" color="var(--primary)" /> Mastery: <span>{masteryAverage}%</span></div>
+                  <div className="stat-card"><FaFire size="1.8rem" color="var(--primary)" /> Streak: <span>{streakDays} days</span></div>
                 </div>
-              )}
-              {sessionActive && (
-                <div className="session-screen">
-                  <div className="recall-card">{renderQuestion()}</div>
-                  <div className="analytics-row">
-                    <div className="stat-card">
-                      <FaChartLine size="1.8rem" color="var(--primary)" />
-                      <span>E:{userAnswersRecord.filter(r => r.strength === 'excellent').length} S:{userAnswersRecord.filter(r => r.strength === 'strong').length} D:{userAnswersRecord.filter(r => r.strength === 'developing').length}</span>
-                    </div>
-                    <div className="stat-card"><FaTrophy size="1.8rem" color="var(--primary)" /> Mastery: <span>{masteryAverage}%</span></div>
-                    <div className="stat-card"><FaFire size="1.8rem" color="var(--primary)" /> Streak: <span>{streakDays} days</span></div>
-                  </div>
-                </div>
-              )}
-              {showReport && renderReport()}
-            </div>
-            <div className="sidebar">
-              {currentUser && currentLevel && !sessionActive && !showReport && <>{renderLeaderboard()}</>}
-            </div>
-          </div>
-          {topicModalOpen && renderTopicModal()}
-          {renderFloatingCards()}
-          {showConfirm && renderConfirm()}
-        </div>
-      </main>
-
-      <footer className="footer-fat">
-        <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
-          <div style={{ maxWidth: '260px' }}>
-            <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
-              {sections?.site_config?.logo_url ? <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} /> : 'AliverBiopharm'}
-            </Link>
-            <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>Advancing biology and pharmacy education for every learner.</p>
-            <div className="footer-social">
-              {(sections?.footer?.social_links || []).map(s => (
-                <a key={s.platform} href={s.url} target="_blank" rel="noopener noreferrer"><i className={s.icon}></i></a>
-              ))}
-            </div>
-          </div>
-          <div className="footer-grid">
-            {(sections?.footer?.columns || []).map(col => (
-              <div key={col.heading}>
-                <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>{col.heading}</h4>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {col.items?.map(item => (
-                    <li key={item.label}>
-                      {item.href.startsWith('#') || item.href.startsWith('http') ? (
-                        <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
-                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
-                          {item.label}
-                        </a>
-                      ) : (
-                        <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
-                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
-                          {item.label}
-                        </Link>
-                      )}
-                    </li>
-                  ))}
-                </ul>
               </div>
-            ))}
+            )}
+            {showReport && renderReport()}
+          </div>
+          <div className="sidebar">
+            {currentUser && currentLevel && !sessionActive && !showReport && <>{renderLeaderboard()}</>}
           </div>
         </div>
-        <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
-          <nav style={{ display: 'flex', gap: '22px' }}>
-            <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
-            <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
-            <Link to="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</Link>
-          </nav>
-        </div>
-      </footer>
-
-      <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><FaArrowUp /></button>
-    </motion.div>
+        {topicModalOpen && renderTopicModal()}
+        {renderFloatingCards()}
+        {showConfirm && renderConfirm()}
+      </div>
+    </>
   );
 }
-
-export default BioRecall;
