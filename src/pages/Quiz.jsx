@@ -1,4 +1,5 @@
- import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
