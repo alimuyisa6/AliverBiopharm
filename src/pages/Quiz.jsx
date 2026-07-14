@@ -29,8 +29,7 @@ import QuizWeakAreas from '../components/quiz/QuizWeakAreas';
 
 import {
   FaHouse,
-  FaSearch,
-  FaCheckCircle,
+  FaMagnifyingGlass,
   FaSun,
   FaMoon,
   FaBars,
@@ -45,7 +44,6 @@ import {
   FaTriangleExclamation,
   FaFire,
   FaLightbulb,
-  FaMagnifyingGlass,
   FaBookOpen,
   FaAward,
   FaChartLine,
@@ -53,7 +51,7 @@ import {
   FaStar,
   FaClock,
   FaInfo,
-  FaExclamation,
+  FaCircleExclamation,
   FaLink,
   FaRocket,
   FaUsers,
@@ -151,17 +149,17 @@ function Quiz() {
     return targetIndex === answers.findIndex(a => a === null);
   }, []);
 
+  const navigateTo = useCallback((idx) => {
+    setQuestionTransition(true);
+    setTimeout(() => { setCurrentIndex(idx); setQuestionTransition(false); }, 200);
+  }, []);
+
   const goToNextUnanswered = useCallback((answers, currentIdx) => {
     const first = answers.findIndex(a => a === null);
     if (first !== -1 && first !== currentIdx) {
       setQuestionTransition(true);
       setTimeout(() => { setCurrentIndex(first); setQuestionTransition(false); }, 200);
     }
-  }, []);
-
-  const navigateTo = useCallback((idx) => {
-    setQuestionTransition(true);
-    setTimeout(() => { setCurrentIndex(idx); setQuestionTransition(false); }, 200);
   }, []);
 
   const saveQuizStateToStorage = useCallback(() => {
@@ -637,7 +635,7 @@ function Quiz() {
       )}
 
       <div className="breadcrumb">
-        <Link to="/"><FaHome style={{ marginRight: '4px' }} /> Home</Link><span>›</span><span>Quizzes</span>
+        <Link to="/"><FaHouse style={{ marginRight: '4px' }} /> Home</Link><span>›</span><span>Quizzes</span>
         {currentTopic && (<><span>›</span><span>{currentTopic}</span></>)}
         {currentTopic && resultData && (<><span>›</span><span>Results</span></>)}
       </div>
@@ -737,7 +735,7 @@ function Quiz() {
             <div className="result-score">{resultData.percentage}%</div>
             <p style={{ fontSize: '1rem', color: 'var(--clr-text-dim)' }}>{resultData.score}/{resultData.total} correct</p>
             <p style={{ fontStyle: 'italic', fontSize: '0.95rem', color: 'var(--clr-text-dim)' }}>{resultData.passed ? 'Outstanding! You really know this!' : 'Keep studying! Every expert was once a beginner.'}</p>
-            <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`}>{resultData.passed ? <FaCheckCircle style={{ marginRight: '4px' }} /> : <FaCircleXmark style={{ marginRight: '4px' }} />} {resultData.passed ? 'Passed' : 'Not passed'}</span>
+            <span className={`status-badge ${resultData.passed ? 'status-pass' : 'status-fail'}`}>{resultData.passed ? <FaCircleCheck style={{ marginRight: '4px' }} /> : <FaCircleXmark style={{ marginRight: '4px' }} />} {resultData.passed ? 'Passed' : 'Not passed'}</span>
             {tabSwitchCount > 0 && (
               <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.5rem' }}>
                 <FaTriangleExclamation style={{ marginRight: '4px' }} />
@@ -887,7 +885,7 @@ function Quiz() {
                   const completed = topicData?.completed_blocks?.includes(i);
                   let icon = null, cls = '';
                   if (locked) { cls = 'locked'; icon = <FaLock style={{ marginRight: '6px', color: '#ef4444' }} />; }
-                  else if (completed) { cls = 'completed'; icon = <FaCheckCircle style={{ marginRight: '6px', color: '#10b981' }} />; }
+                  else if (completed) { cls = 'completed'; icon = <FaCircleCheck style={{ marginRight: '6px', color: '#10b981' }} />; }
                   else { icon = <FaCircleCheck style={{ marginRight: '6px', color: '#0ab5b5' }} />; }
                   return (
                     <button key={i} className={`block-nav-btn ${cls}`} disabled={locked} onClick={() => startBlock(i)}>
@@ -906,12 +904,12 @@ function Quiz() {
             <div onClick={e => e.stopPropagation()}>
               <h3>Quiz Rules</h3>
               <ul>
-                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> 10 questions per block</li>
-                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> 70% to pass</li>
-                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> Immediate feedback per question</li>
-                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> Full explanations on review</li>
-                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> 10-minute time limit</li>
-                <li><FaCheckCircle style={{ color: '#10b981', marginRight: '8px' }} /> Block locks for 24h after completion</li>
+                <li><FaCircleCheck style={{ color: '#10b981', marginRight: '8px' }} /> 10 questions per block</li>
+                <li><FaCircleCheck style={{ color: '#10b981', marginRight: '8px' }} /> 70% to pass</li>
+                <li><FaCircleCheck style={{ color: '#10b981', marginRight: '8px' }} /> Immediate feedback per question</li>
+                <li><FaCircleCheck style={{ color: '#10b981', marginRight: '8px' }} /> Full explanations on review</li>
+                <li><FaCircleCheck style={{ color: '#10b981', marginRight: '8px' }} /> 10-minute time limit</li>
+                <li><FaCircleCheck style={{ color: '#10b981', marginRight: '8px' }} /> Block locks for 24h after completion</li>
                 <li><FaTriangleExclamation style={{ color: '#f59e0b', marginRight: '8px' }} /> Tab switches are recorded</li>
                 <li><FaTriangleExclamation style={{ color: '#ef4444', marginRight: '8px' }} /> {MAX_TAB_SWITCHES} tab switches = auto-submit</li>
               </ul>
