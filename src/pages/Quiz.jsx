@@ -28,7 +28,7 @@ import QuizLearningPath from '../components/quiz/QuizLearningPath';
 import QuizWeakAreas from '../components/quiz/QuizWeakAreas';
 
 import {
-  FaHome,
+  FaHouse,
   FaSearch,
   FaCheckCircle,
   FaSun,
