@@ -1,8 +1,8 @@
- import { useState, useEffect, useCallback } from 'react';
+ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaSun, FaMoon, FaBars, FaXmark, FaUser, FaChevronDown,
+  FaSun, FaMoon, FaBars, FaTimes, FaUser, FaChevronDown,
   FaRightToBracket, FaUserPlus, FaRightFromBracket, FaSpinner,
   FaGaugeHigh, FaGear, FaArrowUp,
 } from 'react-icons/fa6';
@@ -52,6 +52,8 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  
+  const isMounted = useRef(true);
 
   const {
     logo, siteName, navigation, footer, loading, theme,
@@ -64,6 +66,12 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const isHomepage = location.pathname === '/';
 
   useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 10);
       setShowBackToTop(window.scrollY > 400);
@@ -72,10 +80,19 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu and user dropdown on route change
+  // Force close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
+    
+    const timeoutId = setTimeout(() => {
+      if (isMounted.current) {
+        setMobileMenuOpen(false);
+        document.body.style.overflow = '';
+      }
+    }, 50);
+    
+    return () => clearTimeout(timeoutId);
   }, [location.pathname]);
 
   // Close user dropdown when clicking outside
@@ -109,9 +126,16 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     } catch {
       // Silent fail
     } finally {
-      setSigningOut(false);
+      if (isMounted.current) {
+        setSigningOut(false);
+      }
     }
   }, [refreshUser, navigate]);
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+    document.body.style.overflow = '';
+  }, []);
 
   const renderNavLink = (link) => {
     const isExternal = link.href?.startsWith('http') || link.href?.startsWith('mailto');
@@ -138,14 +162,14 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={closeMobileMenu}
         >
           {link.label}
         </a>
       );
     }
     return (
-      <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>
+      <Link key={link.href} to={link.href} onClick={closeMobileMenu}>
         {link.label}
       </Link>
     );
@@ -284,7 +308,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={closeMobileMenu}
             />
 
             {/* Panel */}
@@ -318,14 +342,14 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                           <Link
                             to="/login"
                             className="mobile-signin-btn"
-                            onClick={() => setMobileMenuOpen(false)}
+                            onClick={closeMobileMenu}
                           >
                             <FaRightToBracket /> Sign In
                           </Link>
                           <Link
                             to="/register"
                             className="mobile-signup-btn"
-                            onClick={() => setMobileMenuOpen(false)}
+                            onClick={closeMobileMenu}
                           >
                             <FaUserPlus /> Sign Up
                           </Link>
@@ -334,10 +358,10 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                     </div>
                     <button
                       className="mobile-close-btn"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                       aria-label="Close menu"
                     >
-                      <FaXmark />
+                      <FaTimes />
                     </button>
                   </div>
                 </div>
@@ -346,10 +370,10 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                   {isAuthenticated && (
                     <>
                       <div className="mobile-nav-divider" />
-                      <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                      <Link to="/dashboard" onClick={closeMobileMenu}>
                         <FaGaugeHigh /> Dashboard
                       </Link>
-                      <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                      <Link to="/profile" onClick={closeMobileMenu}>
                         <FaGear /> Profile
                       </Link>
                     </>
@@ -457,14 +481,77 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         </footer>
       )}
 
-      {/* Back to Top Button */}
+      {/* Back to Top Button with Cyan, Magenta, Orange, and Blue colors */}
       <button
         className={`back-to-top${showBackToTop ? ' visible' : ''}`}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Back to top"
+        style={{
+          background: 'linear-gradient(135deg, #00BCD4 0%, #E91E63 33%, #FF9800 66%, #2196F3 100%)',
+          border: 'none',
+          boxShadow: '0 4px 15px rgba(0, 188, 212, 0.4), 0 0 20px rgba(233, 30, 99, 0.2)',
+          transition: 'all 0.3s ease',
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          zIndex: 1000,
+          width: '3rem',
+          height: '3rem',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          opacity: showBackToTop ? 1 : 0,
+          transform: showBackToTop ? 'translateY(0)' : 'translateY(20px)',
+          pointerEvents: showBackToTop ? 'auto' : 'none',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 188, 212, 0.6), 0 0 30px rgba(233, 30, 99, 0.4), 0 0 40px rgba(255, 152, 0, 0.2)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 188, 212, 0.4), 0 0 20px rgba(233, 30, 99, 0.2)';
+        }}
       >
-        <FaArrowUp />
+        <FaArrowUp style={{ color: '#FFFFFF', fontSize: '1.2rem' }} />
       </button>
+
+      {/* CSS for the gradient animation */}
+      <style>{`
+        .back-to-top {
+          animation: gradientShift 3s ease infinite;
+          background-size: 200% 200% !important;
+        }
+        
+        @keyframes gradientShift {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+        
+        .back-to-top.visible {
+          animation: gradientShift 3s ease infinite, fadeInUp 0.3s ease;
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
