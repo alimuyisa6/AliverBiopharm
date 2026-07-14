@@ -2,9 +2,19 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaSun, FaMoon, FaBars, FaXmark, FaUser, FaChevronDown,
-  FaRightToBracket, FaUserPlus, FaRightFromBracket, FaSpinner,
-  FaGaugeHigh, FaGear, FaArrowUp,
+  FaSun,
+  FaMoon,
+  FaBars,
+  FaXmark,
+  FaUser,
+  FaChevronDown,
+  FaRightToBracket,
+  FaUserPlus,
+  FaRightFromBracket,
+  FaSpinner,
+  FaGaugeHigh,
+  FaGear,
+  FaArrowUp,
 } from 'react-icons/fa6';
 import { useLayout } from '../contexts/LayoutContext';
 import { signout } from '../api/client';
@@ -26,17 +36,17 @@ const mobilePanelVariants = {
   hidden: {
     x: '100%',
     opacity: 0,
-    transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' }
+    transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' },
   },
   visible: {
     x: 0,
     opacity: 1,
-    transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' }
+    transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' },
   },
   exit: {
     x: '100%',
     opacity: 0,
-    transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' }
+    transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' },
   },
 };
 
@@ -52,57 +62,62 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  
   const isMounted = useRef(true);
-
   const {
-    logo, siteName, navigation, footer, loading, theme,
-    toggleTheme, isAuthenticated, refreshUser, user,
+    logo,
+    siteName,
+    navigation,
+    footer,
+    loading,
+    theme,
+    toggleTheme,
+    isAuthenticated,
+    refreshUser,
+    user,
   } = useLayout();
-  
   const location = useLocation();
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const isHomepage = location.pathname === '/';
 
-  // Dynamic favicon from Supabase logo - with canvas fallback
   useEffect(() => {
-    const setFavicon = async (logoUrl) => {
-      try {
-        // Remove all existing favicon links
-        document.querySelectorAll('link[rel*="icon"]').forEach(link => link.remove());
-
-        // Try to create a proper favicon using canvas (resizes and converts to ICO-compatible format)
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        img.onload = () => {
+    if (!logo) return;
+    let cancelled = false;
+    const clearExistingIcons = () => {
+      document.querySelectorAll('link[rel*="icon"]').forEach((link) => link.remove());
+    };
+    const applyDirectFallback = (url) => {
+      if (cancelled) return;
+      clearExistingIcons();
+      const faviconLink = document.createElement('link');
+      faviconLink.rel = 'icon';
+      faviconLink.href = url;
+      document.head.appendChild(faviconLink);
+    };
+    const setFavicon = (logoUrl) => {
+      clearExistingIcons();
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        if (cancelled) return;
+        try {
           const canvas = document.createElement('canvas');
-          const size = 32; // Standard favicon size
+          const size = 32;
           canvas.width = size;
           canvas.height = size;
-          
           const ctx = canvas.getContext('2d');
-          // Fill background if image might have transparency
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, size, size);
-          
-          // Draw image maintaining aspect ratio
           const scale = Math.min(size / img.width, size / img.height);
           const x = (size - img.width * scale) / 2;
           const y = (size - img.height * scale) / 2;
           ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-          
           const faviconUrl = canvas.toDataURL('image/png');
-          
-          // Create favicon link
           const faviconLink = document.createElement('link');
           faviconLink.rel = 'icon';
           faviconLink.type = 'image/png';
           faviconLink.href = faviconUrl;
           document.head.appendChild(faviconLink);
-          
-          // Create apple-touch-icon (larger size)
           const appleCanvas = document.createElement('canvas');
           appleCanvas.width = 180;
           appleCanvas.height = 180;
@@ -113,41 +128,23 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           const appleX = (180 - img.width * appleScale) / 2;
           const appleY = (180 - img.height * appleScale) / 2;
           appleCtx.drawImage(img, appleX, appleY, img.width * appleScale, img.height * appleScale);
-          
           const appleTouchLink = document.createElement('link');
           appleTouchLink.rel = 'apple-touch-icon';
           appleTouchLink.href = appleCanvas.toDataURL('image/png');
           document.head.appendChild(appleTouchLink);
-        };
-        
-        img.onerror = () => {
-          // Fallback: try direct link as favicon
-          const faviconLink = document.createElement('link');
-          faviconLink.rel = 'icon';
-          faviconLink.type = 'image/png';
-          faviconLink.href = logoUrl;
-          document.head.appendChild(faviconLink);
-        };
-        
-        img.src = logoUrl;
-      } catch (error) {
-        console.error('Failed to set favicon:', error);
-        // Fallback to direct link
-        const faviconLink = document.createElement('link');
-        faviconLink.rel = 'icon';
-        faviconLink.href = logoUrl;
-        document.head.appendChild(faviconLink);
-      }
+        } catch (err) {
+          console.error('Favicon canvas processing failed, using direct URL fallback:', err);
+          applyDirectFallback(logoUrl);
+        }
+      };
+      img.onerror = () => {
+        applyDirectFallback(logoUrl);
+      };
+      img.src = logoUrl;
     };
-
-    if (logo) {
-      setFavicon(logo);
-    }
-
+    setFavicon(logo);
     return () => {
-      if (isMounted.current) {
-        document.querySelectorAll('link[rel*="icon"]').forEach(link => link.remove());
-      }
+      cancelled = true;
     };
   }, [logo]);
 
@@ -166,23 +163,19 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Force close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
     document.body.style.overflow = '';
-    
     const timeoutId = setTimeout(() => {
       if (isMounted.current) {
         setMobileMenuOpen(false);
         document.body.style.overflow = '';
       }
     }, 100);
-    
     return () => clearTimeout(timeoutId);
   }, [location.pathname]);
 
-  // Close user dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userDropdownOpen && !e.target.closest('.user-dropdown')) {
@@ -193,14 +186,15 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [userDropdownOpen]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [mobileMenuOpen]);
 
   const handleSignout = useCallback(async () => {
@@ -211,7 +205,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
       await refreshUser();
       navigate('/');
     } catch {
-      // Silent fail
     } finally {
       if (isMounted.current) {
         setSigningOut(false);
@@ -264,16 +257,18 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '1rem',
-        fontFamily: 'var(--font-body)',
-        color: 'var(--clr-text-dim)',
-      }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1rem',
+          fontFamily: 'var(--font-body)',
+          color: 'var(--clr-text-dim)',
+        }}
+      >
         <FaSpinner className="icon-spin" size={32} color="var(--clr-cyan)" />
         <p>Loading {siteName}...</p>
       </div>
@@ -282,32 +277,30 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Skip to main content link */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
 
-      {/* Header */}
       <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
         <div className="header-container">
-          {/* Logo */}
           <Link to="/" className="logo-link" aria-label={`${siteName} Home`}>
             {logo ? (
               <img src={logo} alt={siteName} loading="eager" />
             ) : (
-              <span style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                letterSpacing: 'var(--ls-snug)',
-                color: 'var(--clr-white)',
-              }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
+                  letterSpacing: 'var(--ls-snug)',
+                  color: 'var(--clr-white)',
+                }}
+              >
                 {siteName}
               </span>
             )}
           </Link>
 
-          {/* Desktop Navigation */}
           <nav aria-label="Main navigation">
             <ul className="main-nav">
               {navigation.map((link) => (
@@ -316,12 +309,10 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             </ul>
           </nav>
 
-          {/* Nav Actions */}
           <div className="nav-actions">
             {isHomepage && <NotificationBell user={user} />}
             {headerExtras}
 
-            {/* User Dropdown (Desktop + Mobile) */}
             {isAuthenticated ? (
               <div className="user-dropdown">
                 <button
@@ -350,27 +341,17 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                     }}
                     disabled={signingOut}
                   >
-                    {signingOut ? (
-                      <FaSpinner className="icon-spin" />
-                    ) : (
-                      <FaRightFromBracket />
-                    )}
+                    {signingOut ? <FaSpinner className="icon-spin" /> : <FaRightFromBracket />}
                     {signingOut ? 'Signing out...' : 'Sign Out'}
                   </button>
                 </div>
               </div>
             ) : null}
 
-            {/* Theme Toggle */}
-            <button
-              className="theme-toggle"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-            >
+            <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
               {theme === 'dark' ? <FaSun /> : <FaMoon />}
             </button>
 
-            {/* Mobile Toggle (Hamburger) */}
             <button
               className="mobile-toggle"
               onClick={(e) => {
@@ -386,11 +367,9 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         </div>
       </header>
 
-      {/* Mobile Navigation Panel */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Overlay */}
             <motion.div
               key="mobile-nav-overlay"
               className="mobile-nav-overlay"
@@ -401,7 +380,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               onClick={closeMobileMenu}
             />
 
-            {/* Panel */}
             <motion.div
               key="mobile-nav-panel"
               className="mobile-nav-panel"
@@ -480,7 +458,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
       <motion.main
         id="main-content"
         style={{
@@ -488,7 +465,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           marginTop: 60,
           width: '100%',
           maxWidth: '100vw',
-          overflowX: 'hidden'
+          overflowX: 'hidden',
         }}
         variants={pageVariants}
         initial="initial"
@@ -500,7 +477,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         {children}
       </motion.main>
 
-      {/* Footer */}
       {showFooter && (
         <footer className="footer-fat">
           <div className="footer-inner">
@@ -576,15 +552,16 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         </footer>
       )}
 
-      {/* Back to Top Button with Cyan, Magenta, Orange, and Blue colors */}
       <button
         className={`back-to-top${showBackToTop ? ' visible' : ''}`}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Back to top"
         style={{
-          background: 'linear-gradient(135deg, #00BCD4 0%, #E91E63 33%, #FF9800 66%, #2196F3 100%)',
+          background:
+            'linear-gradient(135deg, #00BCD4 0%, #E91E63 33%, #FF9800 66%, #2196F3 100%)',
           border: 'none',
-          boxShadow: '0 4px 15px rgba(0, 188, 212, 0.4), 0 0 20px rgba(233, 30, 99, 0.2)',
+          boxShadow:
+            '0 4px 15px rgba(0, 188, 212, 0.4), 0 0 20px rgba(233, 30, 99, 0.2)',
           transition: 'all 0.3s ease',
           position: 'fixed',
           bottom: '2rem',
@@ -603,39 +580,31 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 188, 212, 0.6), 0 0 30px rgba(233, 30, 99, 0.4), 0 0 40px rgba(255, 152, 0, 0.2)';
+          e.currentTarget.style.boxShadow =
+            '0 6px 20px rgba(0, 188, 212, 0.6), 0 0 30px rgba(233, 30, 99, 0.4), 0 0 40px rgba(255, 152, 0, 0.2)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 188, 212, 0.4), 0 0 20px rgba(233, 30, 99, 0.2)';
+          e.currentTarget.style.boxShadow =
+            '0 4px 15px rgba(0, 188, 212, 0.4), 0 0 20px rgba(233, 30, 99, 0.2)';
         }}
       >
         <FaArrowUp style={{ color: '#FFFFFF', fontSize: '1.2rem' }} />
       </button>
 
-      {/* CSS for the gradient animation */}
       <style>{`
         .back-to-top {
           animation: gradientShift 3s ease infinite;
           background-size: 200% 200% !important;
         }
-        
         @keyframes gradientShift {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
-        
         .back-to-top.visible {
           animation: gradientShift 3s ease infinite, fadeInUp 0.3s ease;
         }
-        
         @keyframes fadeInUp {
           from {
             opacity: 0;
