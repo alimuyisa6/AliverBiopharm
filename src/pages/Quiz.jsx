@@ -1,6 +1,5 @@
- import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
 import {
@@ -22,7 +21,6 @@ import {
   submitQuizWithSession,
   getQuizSessionStatus
 } from '../api/cachedClient';
-import { getAllSiteSections } from '../api/client';
 import QuizHero from '../components/quiz/QuizHero';
 import QuizDashboard from '../components/quiz/QuizDashboard';
 import QuizChallenges from '../components/quiz/QuizChallenges';
@@ -33,9 +31,6 @@ import {
   FaHome,
   FaSearch,
   FaCheckCircle,
-} from "react-icons/fa";
-
-import {
   FaSun,
   FaMoon,
   FaBars,
@@ -60,52 +55,17 @@ import {
   FaInfo,
   FaExclamation,
   FaLink,
-  FaArrowUp,
   FaRocket,
   FaUsers,
   FaUser,
   FaEnvelope,
   FaRightFromBracket,
-  FaShieldHalved,
   FaShareAlt,
-  FaStethoscope,
-  FaVial,
-  FaMicroscope,
-  FaHeartPulse,
-  FaDna,
-  FaCapsules,
-  FaSyringe,
-  FaPrescription,
-  FaStaffSnake,
-  FaVirus,
-  FaBiohazard,
-  FaRadiation,
-  FaTablets,
-  FaPrescriptionBottle,
-  FaBookMedical,
-  FaHospital,
-  FaBandage,
-  FaPumpMedical,
-  FaTruckMedical,
-  FaComment,
-  FaMessage,
-  FaEnvelopeCircleCheck,
-  FaUserPen,
-  FaUserPlus,
-  FaFilePdf,
-  FaDownload,
-  FaSpinner,
-  FaChevronLeft,
-  FaChevronRight,
-  FaArrowLeft,
-  FaArrowRight,
-  FaUnlock,
-  FaListCheck,
-  FaChartSimple,
-  FaFlask,
-  FaLeaf,
   FaVolumeHigh,
   FaVolumeXmark,
+  FaSpinner,
+  FaArrowLeft,
+  FaArrowRight,
 } from "react-icons/fa6";
 
 class QuizErrorBoundary extends React.Component {
@@ -125,25 +85,12 @@ class QuizErrorBoundary extends React.Component {
   }
 }
 
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -20 }
-};
-
-const pageTransition = {
-  type: 'tween',
-  ease: 'easeInOut',
-  duration: 0.3
-};
-
 const SOUND_CORRECT = typeof window !== 'undefined' ? (() => { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); return () => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.setValueAtTime(520, ctx.currentTime); o.frequency.setValueAtTime(660, ctx.currentTime + 0.1); g.gain.setValueAtTime(0.15, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.3); }; } catch { return () => {}; } })() : () => {};
 
 const SOUND_INCORRECT = typeof window !== 'undefined' ? (() => { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); return () => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.type = 'sawtooth'; o.frequency.setValueAtTime(260, ctx.currentTime); g.gain.setValueAtTime(0.1, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25); o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.25); }; } catch { return () => {}; } })() : () => {};
 
 function Quiz() {
-  const { user, logout } = useAuth();
-  const [sections, setSections] = useState(null);
+  const { user } = useAuth();
   const [currentLevel, setCurrentLevel] = useState('O-Level');
   const [currentTopic, setCurrentTopic] = useState('');
   const [allTopics, setAllTopics] = useState([]);
@@ -166,8 +113,6 @@ function Quiz() {
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [filterAccordions, setFilterAccordions] = useState({ level: false });
   const [topicSearch, setTopicSearch] = useState('');
-  const [theme, setTheme] = useState('light');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
   const [showResumeModal, setShowResumeModal] = useState(false);
@@ -277,18 +222,11 @@ function Quiz() {
   }, []);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') { document.body.classList.add('dark-mode'); setTheme('dark'); }
-
     const load = async () => {
       try {
         setLoading(true);
-        const siteData = await getAllSiteSections();
-        setSections(siteData);
-        const glossary = siteData?.glossary?.data || [];
-        const map = {};
-        glossary.forEach(g => { if (g.term) map[g.term.toLowerCase()] = g.definition; });
-        setGlossaryMap(map);
+        const glossary = {};
+        setGlossaryMap(glossary);
 
         const topics = await getQuizTopics({ level: 'O-Level' });
         setAllTopics(Array.isArray(topics) ? topics : []);
@@ -541,172 +479,134 @@ function Quiz() {
     }
   }
 
-function setConfidenceForCurrent(level) {
-  const next = [...confidence];
-  next[currentIndex] = level;
-  setConfidence(next);
-}
-
-function nextQuestion() {
-  const first = getFirstUnansweredIndex(userAnswers);
-  if (first !== -1 && first !== currentIndex) navigateTo(first);
-  else if (currentIndex < quizQuestions.length - 1 && userAnswers[currentIndex] !== null) {
-    if (canNavigateTo(currentIndex + 1, userAnswers)) navigateTo(currentIndex + 1);
+  function setConfidenceForCurrent(level) {
+    const next = [...confidence];
+    next[currentIndex] = level;
+    setConfidence(next);
   }
-}
 
-function prevQuestion() { if (currentIndex > 0) navigateTo(currentIndex - 1); }
-
-async function submitBlockWithSession() {
-  if (quizQuestions.length === 0) return;
-  
-  const allAnswered = userAnswers.every(a => a !== null);
-  if (!allAnswered) {
-    showToast('Please answer all questions before submitting.', 'warning');
-    return;
+  function nextQuestion() {
+    const first = getFirstUnansweredIndex(userAnswers);
+    if (first !== -1 && first !== currentIndex) navigateTo(first);
+    else if (currentIndex < quizQuestions.length - 1 && userAnswers[currentIndex] !== null) {
+      if (canNavigateTo(currentIndex + 1, userAnswers)) navigateTo(currentIndex + 1);
+    }
   }
-  
-  const answersPayload = quizQuestions.map((q, idx) => ({
-    id: q.id,
-    selectedOption: userAnswers[idx]?.selected || 'X'
-  }));
-  
-  const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
-  setLoading(true);
-  
-  try {
-    const result = await submitQuizWithSession(
-      currentLevel,
-      currentTopic,
-      currentBlock,
-      answersPayload,
-      timeTaken
-    );
+
+  function prevQuestion() { if (currentIndex > 0) navigateTo(currentIndex - 1); }
+
+  async function submitBlockWithSession() {
+    if (quizQuestions.length === 0) return;
     
-    if (!result.success) {
-      if (result.auto_submitted) {
-        showToast(result.message || 'Quiz auto-submitted due to tab switching', 'warning');
-        if (result.score !== undefined) {
-          setResultData(result);
-        }
-        setLoading(false);
-        return;
-      }
-      showToast('Submission failed: ' + (result.message || 'Unknown error'), 'error');
-      setLoading(false);
+    const allAnswered = userAnswers.every(a => a !== null);
+    if (!allAnswered) {
+      showToast('Please answer all questions before submitting.', 'warning');
       return;
     }
     
-    setResultData(result);
-    trackEvent('quiz_complete', {
-      level: currentLevel,
-      topic: currentTopic,
-      block: currentBlock,
-      score: result.percentage,
-      passed: result.passed,
-      tab_switches: result.tab_switches || 0
-    });
+    const answersPayload = quizQuestions.map((q, idx) => ({
+      id: q.id,
+      selectedOption: userAnswers[idx]?.selected || 'X'
+    }));
     
-    const newBadges = [];
-    if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) {
-      newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
-    }
-    if (!earnedBadges.includes('first_block')) {
-      newBadges.push({ id: 'first_block', label: 'First Block Done' });
-    }
-    for (let b of newBadges) await saveAchievement({ id: b.id, label: b.label });
-    setEarnedBadges(prev => [...prev, ...newBadges.map(b => b.id)]);
-    if (streak >= 10 && !earnedBadges.includes('streak_10')) {
-      await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
-      setEarnedBadges(prev => [...prev, 'streak_10']);
-    }
+    const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
+    setLoading(true);
     
-    let rule = null;
-    if (result.percentage >= 90) {
-      rule = { message: "Excellent! You're ready for more advanced material.", action: null };
-    } else if (result.percentage < 70) {
-      rule = { message: 'Review key concepts from this block before moving on.', action: 'review_block' };
-    }
-    setAdaptivePath(rule);
-    await loadTopics(currentLevel);
-    setLoading(false);
-    if (result.passed && result.percentage >= 90) showConfetti();
-  } catch (err) {
-    showToast('Submission failed: ' + err.message, 'error');
-    setLoading(false);
-  }
-}
-
-async function submitBlock() {
-  if (quizQuestions.length === 0) return;
-  const allAnswered = userAnswers.every(a => a !== null);
-  if (!allAnswered) { showToast('Please answer all questions before submitting.', 'warning'); return; }
-  const answersPayload = quizQuestions.map((q, idx) => ({ id: q.id, selectedOption: userAnswers[idx]?.selected || 'X' }));
-  const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
-  setLoading(true);
-  try {
-    const result = await submitQuizBlock({ level: currentLevel, topic: currentTopic, block_number: currentBlock, answers: answersPayload, time_taken: timeTaken });
-    setResultData(result);
-    trackEvent('quiz_complete', { level: currentLevel, topic: currentTopic, block: currentBlock, score: result.percentage, passed: result.passed, tab_switches: tabSwitchCount });
-    const newBadges = [];
-    if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
-    if (!earnedBadges.includes('first_block')) newBadges.push({ id: 'first_block', label: 'First Block Done' });
-    for (let b of newBadges) await saveAchievement({ id: b.id, label: b.label });
-    setEarnedBadges(prev => [...prev, ...newBadges.map(b => b.id)]);
-    if (streak >= 10 && !earnedBadges.includes('streak_10')) {
-      await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
-      setEarnedBadges(prev => [...prev, 'streak_10']);
-    }
-    let rule = null;
-    if (result.percentage >= 90) rule = { message: "Excellent! You're ready for more advanced material.", action: null };
-    else if (result.percentage < 70) rule = { message: 'Review key concepts from this block before moving on.', action: 'review_block' };
-    setAdaptivePath(rule);
-    await loadTopics(currentLevel);
-    setLoading(false);
-    if (result.passed && result.percentage >= 90) showConfetti();
-  } catch (err) { showToast('Submission failed: ' + err.message, 'error'); setLoading(false); }
-}
-
-async function loadLeaderboard() {
-  setLeaderboardLoading(true);
-  try {
-    const data = await getLeaderboard(currentLevel, 10);
-    setLeaderboard(Array.isArray(data) ? data : []);
-  } catch { setLeaderboard([]); }
-  setLeaderboardLoading(false);
-}
-
-function showConfetti() {
-  if (typeof document === 'undefined') return;
-  const colors = ['#0ab5b5', '#b8873a', '#e2c06a', '#10b981', '#f59e0b'];
-  const particles = [];
-  for (let i = 0; i < 50; i++) {
-    const p = document.createElement('div');
-    p.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:-10px;border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ${2 + Math.random() * 3}s linear forwards`;
-    document.body.appendChild(p);
-    particles.push(p);
-  }
-  const timer = setTimeout(() => {
-    particles.forEach(p => {
-      if (p && p.parentNode) {
-        p.parentNode.removeChild(p);
+    try {
+      const result = await submitQuizWithSession(
+        currentLevel,
+        currentTopic,
+        currentBlock,
+        answersPayload,
+        timeTaken
+      );
+      
+      if (!result.success) {
+        if (result.auto_submitted) {
+          showToast(result.message || 'Quiz auto-submitted due to tab switching', 'warning');
+          if (result.score !== undefined) {
+            setResultData(result);
+          }
+          setLoading(false);
+          return;
+        }
+        showToast('Submission failed: ' + (result.message || 'Unknown error'), 'error');
+        setLoading(false);
+        return;
       }
-    });
-    confettiTimers.current = confettiTimers.current.filter(t => t !== timer);
-  }, 4000);
-  confettiTimers.current.push(timer);
-}
+      
+      setResultData(result);
+      trackEvent('quiz_complete', {
+        level: currentLevel,
+        topic: currentTopic,
+        block: currentBlock,
+        score: result.percentage,
+        passed: result.passed,
+        tab_switches: result.tab_switches || 0
+      });
+      
+      const newBadges = [];
+      if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) {
+        newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
+      }
+      if (!earnedBadges.includes('first_block')) {
+        newBadges.push({ id: 'first_block', label: 'First Block Done' });
+      }
+      for (let b of newBadges) await saveAchievement({ id: b.id, label: b.label });
+      setEarnedBadges(prev => [...prev, ...newBadges.map(b => b.id)]);
+      if (streak >= 10 && !earnedBadges.includes('streak_10')) {
+        await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
+        setEarnedBadges(prev => [...prev, 'streak_10']);
+      }
+      
+      let rule = null;
+      if (result.percentage >= 90) {
+        rule = { message: "Excellent! You're ready for more advanced material.", action: null };
+      } else if (result.percentage < 70) {
+        rule = { message: 'Review key concepts from this block before moving on.', action: 'review_block' };
+      }
+      setAdaptivePath(rule);
+      await loadTopics(currentLevel);
+      setLoading(false);
+      if (result.passed && result.percentage >= 90) showConfetti();
+    } catch (err) {
+      showToast('Submission failed: ' + err.message, 'error');
+      setLoading(false);
+    }
+  }
 
-const currentYear = new Date().getFullYear();
+  async function loadLeaderboard() {
+    setLeaderboardLoading(true);
+    try {
+      const data = await getLeaderboard(currentLevel, 10);
+      setLeaderboard(Array.isArray(data) ? data : []);
+    } catch { setLeaderboard([]); }
+    setLeaderboardLoading(false);
+  }
 
-if (loading && !quizQuestions.length && !resultData && !currentTopic) {
-  return (
-    <motion.div
-      className="quiz-page"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
+  function showConfetti() {
+    if (typeof document === 'undefined') return;
+    const colors = ['#0ab5b5', '#b8873a', '#e2c06a', '#10b981', '#f59e0b'];
+    const particles = [];
+    for (let i = 0; i < 50; i++) {
+      const p = document.createElement('div');
+      p.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:-10px;border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ${2 + Math.random() * 3}s linear forwards`;
+      document.body.appendChild(p);
+      particles.push(p);
+    }
+    const timer = setTimeout(() => {
+      particles.forEach(p => {
+        if (p && p.parentNode) {
+          p.parentNode.removeChild(p);
+        }
+      });
+      confettiTimers.current = confettiTimers.current.filter(t => t !== timer);
+    }, 4000);
+    confettiTimers.current.push(timer);
+  }
+
+  if (loading && !quizQuestions.length && !resultData && !currentTopic) {
+    return (
       <div className="section">
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '3rem 0' }}>
           {[1,2,3,4].map(i => (
@@ -717,84 +617,16 @@ if (loading && !quizQuestions.length && !resultData && !currentTopic) {
           ))}
         </div>
       </div>
-    </motion.div>
-  );
-}
+    );
+  }
 
-const firstUnanswered = getFirstUnansweredIndex(userAnswers);
-const allAnswered = userAnswers.length > 0 && userAnswers.every(a => a !== null);
-const timerPercent = timeLeft !== null ? (timeLeft / 600) * 100 : 100;
-const timerColor = timerPercent > 50 ? '#10b981' : timerPercent > 20 ? '#f59e0b' : '#ef4444';
+  const firstUnanswered = getFirstUnansweredIndex(userAnswers);
+  const allAnswered = userAnswers.length > 0 && userAnswers.every(a => a !== null);
+  const timerPercent = timeLeft !== null ? (timeLeft / 600) * 100 : 100;
+  const timerColor = timerPercent > 50 ? '#10b981' : timerPercent > 20 ? '#f59e0b' : '#ef4444';
 
-return (
-  <motion.div
-    className="quiz-page"
-    initial="initial"
-    animate="in"
-    exit="out"
-    variants={pageVariants}
-    transition={pageTransition}
-  >
-    <header className="site-header">
-      <div className="header-container">
-        <Link to="/" className="logo-link" aria-label="AliverBiopharm Home">
-          {sections?.site_config?.logo_url ? (
-            <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '70px', width: 'auto' }} />
-          ) : 'AliverBiopharm'}
-        </Link>
-        <nav aria-label="Main navigation">
-          <ul className="main-nav">
-            {sections?.navigation?.links?.map(link => (
-              <li key={link.href}>
-                {link.href.startsWith('#') || link.href.startsWith('http') ? (
-                  <a href={link.href}>{link.label}</a>
-                ) : (
-                  <Link to={link.href}>{link.label}</Link>
-                )}
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="nav-actions">
-          <button className="theme-toggle" title={soundEnabled ? 'Mute sounds' : 'Enable sounds'} onClick={() => { const next = !soundEnabled; setSoundEnabled(next); localStorage.setItem('quiz_sound', next ? 'on' : 'off'); }}>
-            {soundEnabled ? <FaVolumeHigh style={{ color: '#94a3b8' }} /> : <FaVolumeXmark style={{ color: '#ef4444' }} />}
-          </button>
-          <button className="theme-toggle" onClick={() => { const dark = document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', dark ? 'dark' : 'light'); setTheme(dark ? 'dark' : 'light'); }}>
-            {theme === 'dark' ? <FaSun style={{ color: '#f59e0b' }} /> : <FaMoon style={{ color: '#94a3b8' }} />}
-          </button>
-          <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}><FaBars style={{ color: '#ffffff' }} /></button>
-        </div>
-      </div>
-    </header>
-
-    <div className={`mobile-nav-panel ${mobileMenuOpen ? 'active' : ''}`}>
-      <div className="mobile-nav-panel-inner">
-        <div className="mobile-nav-header">
-          <div className="mobile-nav-header-row">
-            <div className="mobile-auth-top">
-              {user ? (
-                <button className="mobile-signout-btn" onClick={logout}><FaRightFromBracket style={{ color: '#ef4444', marginRight: '8px' }} /> Sign Out</button>
-              ) : (
-                <><Link to="/login" className="mobile-signin-btn">Sign In</Link><Link to="/register" className="mobile-signup-btn">Create Account</Link></>
-              )}
-            </div>
-            <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}><FaXmark style={{ color: '#94a3b8' }} /></button>
-          </div>
-        </div>
-        <nav className="mobile-nav-links">
-          {(sections?.navigation?.links || []).map(link => (
-            link.href.startsWith('#') || link.href.startsWith('http') ? (
-              <a key={link.href} href={link.href}>{link.label}</a>
-            ) : (
-              <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
-            )
-          ))}
-        </nav>
-      </div>
-    </div>
-    <div className={`mobile-nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
-
-    <main className="section">
+  return (
+    <>
       <span className="sec-label">ASSESSMENTS</span>
       <h1 className="section-title">Knowledge Quizzes</h1>
 
@@ -1129,65 +961,13 @@ return (
             </div>
           </div>
         )}
-      </main>
-
-      <footer className="footer-fat">
-        <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
-          <div style={{ maxWidth: '260px' }}>
-            <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
-              {sections?.site_config?.logo_url ? <img src={sections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} /> : 'AliverBiopharm'}
-            </Link>
-            <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>Advancing biology and pharmacy education for every learner.</p>
-            <div className="footer-social">
-              {(sections?.footer?.social_links || []).map(s => (
-                <a key={s.platform} href={s.url} target="_blank" rel="noopener noreferrer"><i className={s.icon}></i></a>
-              ))}
-            </div>
-          </div>
-          <div className="footer-grid">
-            {(sections?.footer?.columns || []).map(col => (
-              <div key={col.heading}>
-                <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>{col.heading}</h4>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {col.items?.map(item => (
-                    <li key={item.label}>
-                      {item.href.startsWith('#') || item.href.startsWith('http') ? (
-                        <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
-                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
-                          {item.label}
-                        </a>
-                      ) : (
-                        <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
-                          {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
-                          {item.label}
-                        </Link>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
-          <nav style={{ display: 'flex', gap: '22px' }}>
-            <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
-            <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
-            <Link to="/accessibility" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Accessibility</Link>
-          </nav>
-        </div>
-      </footer>
-
-      <button className="back-to-top" id="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><FaArrowUp style={{ color: '#b8873a' }} /></button>
-      <Link to="#pricing" className="sticky-cta"><FaRocket style={{ marginRight: '6px' }} /> Start Learning</Link>
 
       {toast && (
         <div className={`toast toast-${toast.type}`}>
           {toast.message}
         </div>
       )}
-    </motion.div>
+    </>
   );
 }
 
