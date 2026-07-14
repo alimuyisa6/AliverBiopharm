@@ -2,7 +2,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaSun, FaMoon, FaBars, FaTimes, FaUser, FaChevronDown,
+  FaSun, FaMoon, FaBars, FaXmark, FaUser, FaChevronDown,
   FaRightToBracket, FaUserPlus, FaRightFromBracket, FaSpinner,
   FaGaugeHigh, FaGear, FaArrowUp,
 } from 'react-icons/fa6';
@@ -54,6 +54,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   
   const isMounted = useRef(true);
+  const mobileMenuRef = useRef(null);
 
   const {
     logo, siteName, navigation, footer, loading, theme,
@@ -84,13 +85,14 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   useEffect(() => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
+    document.body.style.overflow = '';
     
     const timeoutId = setTimeout(() => {
       if (isMounted.current) {
         setMobileMenuOpen(false);
         document.body.style.overflow = '';
       }
-    }, 50);
+    }, 100);
     
     return () => clearTimeout(timeoutId);
   }, [location.pathname]);
@@ -133,6 +135,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   }, [refreshUser, navigate]);
 
   const closeMobileMenu = useCallback(() => {
+    console.log('Closing mobile menu'); // Debug log
     setMobileMenuOpen(false);
     document.body.style.overflow = '';
   }, []);
@@ -286,7 +289,11 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             {/* Mobile Toggle (Hamburger) */}
             <button
               className="mobile-toggle"
-              onClick={() => setMobileMenuOpen(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Opening mobile menu'); // Debug log
+                setMobileMenuOpen(true);
+              }}
               aria-label="Open menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -308,11 +315,15 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              onClick={closeMobileMenu}
+              onClick={(e) => {
+                e.stopPropagation();
+                closeMobileMenu();
+              }}
             />
 
             {/* Panel */}
             <motion.div
+              ref={mobileMenuRef}
               key="mobile-nav-panel"
               className="mobile-nav-panel"
               variants={mobilePanelVariants}
@@ -358,10 +369,16 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                     </div>
                     <button
                       className="mobile-close-btn"
-                      onClick={closeMobileMenu}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Close button clicked'); // Debug log
+                        closeMobileMenu();
+                      }}
                       aria-label="Close menu"
+                      type="button"
                     >
-                      <FaTimes />
+                      <FaXmark />
                     </button>
                   </div>
                 </div>
