@@ -23,15 +23,15 @@ const pageTransition = {
 };
 
 const mobilePanelVariants = {
-  hidden: { x: '100%', opacity: 0 },
-  visible: { x: 0, opacity: 1, transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' } },
-  exit: { x: '100%', opacity: 0, transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' } },
+  hidden: { x: '100%', opacity: 0, pointerEvents: 'none' },
+  visible: { x: 0, opacity: 1, pointerEvents: 'auto', transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' } },
+  exit: { x: '100%', opacity: 0, pointerEvents: 'none', transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' } },
 };
 
 const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-  exit: { opacity: 0 },
+  hidden: { opacity: 0, pointerEvents: 'none' },
+  visible: { opacity: 1, pointerEvents: 'auto' },
+  exit: { opacity: 0, pointerEvents: 'none' },
 };
 
 export default function Layout({ children, headerExtras, showFooter = true }) {
@@ -217,23 +217,25 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
       <AnimatePresence>
         {mobileMenuOpen && (
-          <>
-            <motion.div
-              className="mobile-nav-overlay active"
-              variants={overlayVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-
-            <motion.div
-              className="mobile-nav-panel active"
-              variants={mobilePanelVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
+          <motion.div
+            key="mobile-nav-overlay"
+            className="mobile-nav-overlay"
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+        {mobileMenuOpen && (
+          <motion.div
+            key="mobile-nav-panel"
+            className="mobile-nav-panel"
+            variants={mobilePanelVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
               <div className="mobile-nav-panel-inner">
                 <div className="mobile-nav-header">
                   <div className="mobile-nav-header-row">
@@ -291,8 +293,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                   )}
                 </nav>
               </div>
-            </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
 
