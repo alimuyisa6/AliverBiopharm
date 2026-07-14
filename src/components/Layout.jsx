@@ -54,7 +54,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   
   const isMounted = useRef(true);
-  const mobileMenuRef = useRef(null);
 
   const {
     logo, siteName, navigation, footer, loading, theme,
@@ -135,7 +134,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   }, [refreshUser, navigate]);
 
   const closeMobileMenu = useCallback(() => {
-    console.log('Closing mobile menu'); // Debug log
     setMobileMenuOpen(false);
     document.body.style.overflow = '';
   }, []);
@@ -291,7 +289,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               className="mobile-toggle"
               onClick={(e) => {
                 e.stopPropagation();
-                console.log('Opening mobile menu'); // Debug log
                 setMobileMenuOpen(true);
               }}
               aria-label="Open menu"
@@ -315,15 +312,11 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              onClick={(e) => {
-                e.stopPropagation();
-                closeMobileMenu();
-              }}
+              onClick={closeMobileMenu}
             />
 
             {/* Panel */}
             <motion.div
-              ref={mobileMenuRef}
               key="mobile-nav-panel"
               className="mobile-nav-panel"
               variants={mobilePanelVariants}
@@ -372,7 +365,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('Close button clicked'); // Debug log
                         closeMobileMenu();
                       }}
                       aria-label="Close menu"
