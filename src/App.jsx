@@ -4,7 +4,6 @@ import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import { LayoutProvider } from './contexts/LayoutContext';
 import Layout from './components/Layout';
-import NotificationBell from './components/NotificationBell';
 import AdminLauncher from './components/AdminLauncher';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -43,9 +42,21 @@ function ScrollManager() {
 
     const savedY = scrollPositions[key];
     restoreAttemptsRef.current = 0;
+    let userScrolled = false;
+
+    const cancelRestore = () => {
+      userScrolled = true;
+    };
 
     if (savedY !== undefined) {
+      // If the person touches or scrolls while we're still trying to restore
+      // position, back off immediately instead of fighting their input.
+      window.addEventListener('touchstart', cancelRestore, { passive: true });
+      window.addEventListener('wheel', cancelRestore, { passive: true });
+
       const attemptRestore = () => {
+        if (userScrolled) return;
+
         const maxHeight = Math.max(
           document.documentElement.scrollHeight,
           document.body.scrollHeight
@@ -79,6 +90,8 @@ function ScrollManager() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchstart', cancelRestore);
+      window.removeEventListener('wheel', cancelRestore);
       clearTimeout(saveTimer);
       scrollPositions[key] = window.scrollY;
     };
@@ -94,7 +107,7 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <ScrollManager />
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Layout headerExtras={<NotificationBell />}><Home /></Layout>} />
+        <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/login" element={<Layout><Login /></Layout>} />
         <Route path="/register" element={<Layout><Register /></Layout>} />
         <Route path="/quiz" element={<Layout><ProtectedRoute><Quiz /></ProtectedRoute></Layout>} />
@@ -111,7 +124,7 @@ function AnimatedRoutes() {
         <Route path="/classroom" element={<Layout><ProtectedRoute><Classroom /></ProtectedRoute></Layout>} />
         <Route path="/classroom/:roomId" element={<Layout><ProtectedRoute><ClassroomRoom /></ProtectedRoute></Layout>} />
         <Route path="/tutor/apply" element={<Layout><ProtectedRoute><TutorApply /></ProtectedRoute></Layout>} />
-        <Route path="/tutor/dashboard" element={<Layout headerExtras={<NotificationBell />}><ProtectedRoute><TutorDashboard /></ProtectedRoute></Layout>} />
+        <Route path="/tutor/dashboard" element={<Layout><ProtectedRoute><TutorDashboard /></ProtectedRoute></Layout>} />
         <Route path="/info/:slug" element={<Layout><InfoPage /></Layout>} />
         <Route path="*" element={<Layout><div className="section" style={{ textAlign: 'center', paddingTop: '6rem' }}><h1 className="section-title">404</h1><p className="section-subtitle">Page not found</p></div></Layout>} />
       </Routes>
