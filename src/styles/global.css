@@ -1664,3 +1664,15 @@ body.dark-mode .f-input:focus {
 .icon-spin {
   animation: icon-spin 1s linear infinite;
 }
+
+.mobile-toggle,
+.theme-toggle,
+.mobile-close-btn,
+.back-to-top {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-panel {
+  -webkit-overflow-scrolling: touch;
+}
