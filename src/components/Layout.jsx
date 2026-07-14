@@ -23,15 +23,27 @@ const pageTransition = {
 };
 
 const mobilePanelVariants = {
-  hidden: { x: '100%', opacity: 0, pointerEvents: 'none' },
-  visible: { x: 0, opacity: 1, pointerEvents: 'auto', transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' } },
-  exit: { x: '100%', opacity: 0, pointerEvents: 'none', transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' } },
+  hidden: {
+    x: '100%',
+    opacity: 0,
+    transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' }
+  },
+  visible: {
+    x: 0,
+    opacity: 1,
+    transition: { type: 'tween', duration: 0.3, ease: 'easeInOut' }
+  },
+  exit: {
+    x: '100%',
+    opacity: 0,
+    transition: { type: 'tween', duration: 0.25, ease: 'easeInOut' }
+  },
 };
 
 const overlayVariants = {
-  hidden: { opacity: 0, pointerEvents: 'none' },
-  visible: { opacity: 1, pointerEvents: 'auto' },
-  exit: { opacity: 0, pointerEvents: 'none' },
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 export default function Layout({ children, headerExtras, showFooter = true }) {
@@ -39,20 +51,13 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const [scrolled, setScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const {
-    logo,
-    siteName,
-    navigation,
-    footer,
-    loading,
-    theme,
-    toggleTheme,
-    isAuthenticated,
-    refreshUser,
-    user,
+    logo, siteName, navigation, footer, loading, theme,
+    toggleTheme, isAuthenticated, refreshUser, user,
   } = useLayout();
-
+  
   const location = useLocation();
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
@@ -67,17 +72,42 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Close mobile menu and user dropdown on route change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setUserDropdownOpen(false);
   }, [location.pathname]);
+
+  // Close user dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userDropdownOpen && !e.target.closest('.user-dropdown')) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [userDropdownOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
 
   const handleSignout = useCallback(async () => {
     setSigningOut(true);
+    setUserDropdownOpen(false);
     try {
       await signout();
       await refreshUser();
       navigate('/');
     } catch {
+      // Silent fail
     } finally {
       setSigningOut(false);
     }
@@ -141,12 +171,15 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Skip to main content link */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
 
+      {/* Header */}
       <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
         <div className="header-container">
+          {/* Logo */}
           <Link to="/" className="logo-link" aria-label={`${siteName} Home`}>
             {logo ? (
               <img src={logo} alt={siteName} loading="eager" />
@@ -163,6 +196,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             )}
           </Link>
 
+          {/* Desktop Navigation */}
           <nav aria-label="Main navigation">
             <ul className="main-nav">
               {navigation.map((link) => (
@@ -171,24 +205,40 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             </ul>
           </nav>
 
+          {/* Nav Actions */}
           <div className="nav-actions">
             {isHomepage && <NotificationBell user={user} />}
             {headerExtras}
 
+            {/* User Dropdown (Desktop + Mobile) */}
             {isAuthenticated ? (
               <div className="user-dropdown">
-                <button className="user-dropdown-trigger">
+                <button
+                  className="user-dropdown-trigger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setUserDropdownOpen(!userDropdownOpen);
+                  }}
+                  aria-expanded={userDropdownOpen}
+                  aria-haspopup="true"
+                >
                   <FaUser />
                   <FaChevronDown size={10} />
                 </button>
-                <div className="user-dropdown-menu">
-                  <Link to="/dashboard">
+                <div className={`user-dropdown-menu${userDropdownOpen ? ' open' : ''}`}>
+                  <Link to="/dashboard" onClick={() => setUserDropdownOpen(false)}>
                     <FaGaugeHigh /> Dashboard
                   </Link>
-                  <Link to="/profile">
+                  <Link to="/profile" onClick={() => setUserDropdownOpen(false)}>
                     <FaGear /> Profile
                   </Link>
-                  <button onClick={handleSignout} disabled={signingOut}>
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      handleSignout();
+                    }}
+                    disabled={signingOut}
+                  >
                     {signingOut ? (
                       <FaSpinner className="icon-spin" />
                     ) : (
@@ -200,14 +250,21 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               </div>
             ) : null}
 
-            <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+            {/* Theme Toggle */}
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+            >
               {theme === 'dark' ? <FaSun /> : <FaMoon />}
             </button>
 
+            {/* Mobile Toggle (Hamburger) */}
             <button
               className="mobile-toggle"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
             >
               <FaBars />
             </button>
@@ -215,33 +272,40 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         </div>
       </header>
 
+      {/* Mobile Navigation Panel */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            key="mobile-nav-overlay"
-            className="mobile-nav-overlay"
-            variants={overlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        )}
-        {mobileMenuOpen && (
-          <motion.div
-            key="mobile-nav-panel"
-            className="mobile-nav-panel"
-            variants={mobilePanelVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
+          <>
+            {/* Overlay */}
+            <motion.div
+              key="mobile-nav-overlay"
+              className="mobile-nav-overlay"
+              variants={overlayVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Panel */}
+            <motion.div
+              key="mobile-nav-panel"
+              className="mobile-nav-panel"
+              variants={mobilePanelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
               <div className="mobile-nav-panel-inner">
                 <div className="mobile-nav-header">
                   <div className="mobile-nav-header-row">
                     <div className="mobile-auth-top">
                       {isAuthenticated ? (
-                        <button className="mobile-signout-btn" onClick={handleSignout} disabled={signingOut}>
+                        <button
+                          className="mobile-signout-btn"
+                          onClick={handleSignout}
+                          disabled={signingOut}
+                        >
                           {signingOut ? (
                             <FaSpinner className="icon-spin" />
                           ) : (
@@ -277,7 +341,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                     </button>
                   </div>
                 </div>
-
                 <nav className="mobile-nav-links">
                   {navigation.map(renderMobileNavLink)}
                   {isAuthenticated && (
@@ -293,13 +356,21 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                   )}
                 </nav>
               </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
+      {/* Main Content */}
       <motion.main
         id="main-content"
-        style={{ flex: 1, marginTop: 60, width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}
+        style={{
+          flex: 1,
+          marginTop: 60,
+          width: '100%',
+          maxWidth: '100vw',
+          overflowX: 'hidden'
+        }}
         variants={pageVariants}
         initial="initial"
         animate="in"
@@ -310,6 +381,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         {children}
       </motion.main>
 
+      {/* Footer */}
       {showFooter && (
         <footer className="footer-fat">
           <div className="footer-inner">
@@ -327,14 +399,19 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               {footer.social_links?.length > 0 && (
                 <div className="footer-social">
                   {footer.social_links.filter(Boolean).map((s, idx) => (
-                    <a key={s.platform || idx} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}>
+                    <a
+                      key={s.platform || idx}
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={s.platform}
+                    >
                       <i className={s.icon} />
                     </a>
                   ))}
                 </div>
               )}
             </div>
-
             {footer.columns?.length > 0 && (
               <div className="footer-grid">
                 {footer.columns.filter(Boolean).map((col, idx) => (
@@ -367,7 +444,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               </div>
             )}
           </div>
-
           <div className="footer-bottom">
             <p>&copy; {currentYear} {siteName}. All rights reserved.</p>
             <nav className="footer-bottom-nav">
@@ -381,6 +457,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         </footer>
       )}
 
+      {/* Back to Top Button */}
       <button
         className={`back-to-top${showBackToTop ? ' visible' : ''}`}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
