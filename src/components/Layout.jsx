@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa6';
 import { useLayout } from '../contexts/LayoutContext';
 import { signout } from '../api/client';
+import NotificationBell from './NotificationBell';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -49,11 +50,13 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     toggleTheme,
     isAuthenticated,
     refreshUser,
+    user,
   } = useLayout();
 
   const location = useLocation();
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
+  const isHomepage = location.pathname === '/';
 
   useEffect(() => {
     const onScroll = () => {
@@ -169,6 +172,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           </nav>
 
           <div className="nav-actions">
+            {isHomepage && <NotificationBell user={user} />}
             {headerExtras}
 
             {isAuthenticated ? (
