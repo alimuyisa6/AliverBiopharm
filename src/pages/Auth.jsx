@@ -9,7 +9,7 @@ import InlineSpinner from '../loading/components/InlineSpinner';
 import { 
   FaEnvelope, FaLock, FaUser, FaArrowRight, FaArrowLeft, 
   FaUserPlus, FaSignInAlt, FaCircleCheck, FaGraduationCap,
-  FaShieldAlt, FaRocket, FaBook, FaChartLine, FaUsers,
+  FaShield, FaRocket, FaBook, FaChartLine, FaUsers,
   FaEye, FaEyeSlash
 } from 'react-icons/fa6';
 
@@ -268,7 +268,7 @@ export default function Auth() {
               <span>Expert resources</span>
             </div>
             <div className="auth-feature">
-              <FaShieldAlt className="feature-icon" style={{ color: 'var(--clr-blue)' }} />
+              <FaShield className="feature-icon" style={{ color: 'var(--clr-blue)' }} />
               <span>Secure & private</span>
             </div>
             <div className="auth-feature">
