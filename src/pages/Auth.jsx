@@ -8,7 +8,7 @@ import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
 import { 
   FaEnvelope, FaLock, FaUser, FaArrowRight, FaArrowLeft, 
-  FaUserPlus, FaSignInAlt, FaCircleCheck, FaGraduationCap,
+  FaUserPlus, FaRightToBracket, FaCircleCheck, FaGraduationCap,
   FaShield, FaRocket, FaBook, FaChartLine, FaUsers,
   FaEye, FaEyeSlash
 } from 'react-icons/fa6';
@@ -438,7 +438,7 @@ export default function Auth() {
               ) : (
                 <>
                   {mode === 'login' ? (
-                    <><FaSignInAlt /> Sign In</>
+                    <><FaRightToBracket /> Sign In</>
                   ) : (
                     <><FaUserPlus /> Create Account</>
                   )}
