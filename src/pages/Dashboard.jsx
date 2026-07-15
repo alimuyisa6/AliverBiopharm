@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -7,7 +7,7 @@ import {
 } from '../api/client';
 import {
   FaFire, FaTrophy, FaBookOpen, FaBolt, FaArrowRight, FaSpinner,
-  FaMedal, FaStopwatch, FaStar, FaChartLine
+  FaMedal, FaStopwatch, FaStar, FaChartLine, FaRocket, FaBrain
 } from 'react-icons/fa6';
 import '../styles/Dashboard.css';
 
@@ -69,7 +69,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="dashboard-loading">
-        <FaSpinner className="icon-spin" size={32} color="var(--clr-cyan)" />
+        <FaSpinner className="icon-spin" />
       </div>
     );
   }
@@ -77,15 +77,18 @@ export default function Dashboard() {
   const xpIntoLevel = dashboard ? dashboard.xp % 100 : 0;
 
   return (
-    <motion.div className="dashboard-page section" initial="initial" animate="in" variants={pageVariants} transition={{ duration: 0.3 }}>
+    <motion.div className="dashboard-page section" initial="initial" animate="in" variants={pageVariants} transition={{ duration: 0.4 }}>
       <div className="dashboard-header">
         <h1 className="section-title">
           Welcome back{dashboard?.display_name ? `, ${dashboard.display_name}` : ''}
         </h1>
-        <p className="section-subtitle">{dashboard?.rank_title || 'Beginner'} · Here's where you left off</p>
+        <p className="section-subtitle">
+          <FaRocket style={{ color: 'var(--clr-magenta)', marginRight: '0.5rem' }} />
+          {dashboard?.rank_title || 'Beginner'} · Here's where you left off
+        </p>
       </div>
 
-      {error && <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
+      {error && <div className="alert alert-error">{error}</div>}
 
       <div className="dashboard-stat-grid">
         <div className="card dashboard-stat-card">
@@ -93,7 +96,7 @@ export default function Dashboard() {
           <div className="dashboard-stat-value">{dashboard?.xp ?? 0} XP</div>
           <div className="dashboard-stat-label">{xpIntoLevel}/100 to next level</div>
           <div className="dashboard-progress-track">
-            <div className="dashboard-progress-fill" style={{ width: `${xpIntoLevel}%`, background: 'var(--clr-cyan)' }} />
+            <div className="dashboard-progress-fill" style={{ width: `${xpIntoLevel}%`, background: 'linear-gradient(90deg, var(--clr-cyan), var(--clr-blue))' }} />
           </div>
         </div>
 
@@ -117,9 +120,12 @@ export default function Dashboard() {
       </div>
 
       {dashboard?.next_goal?.topic && (
-        <Link to="/quiz" className="card dashboard-cta">
+        <Link to="/quiz" className="dashboard-cta">
           <div>
-            <div className="dashboard-cta-label">Continue where you left off</div>
+            <div className="dashboard-cta-label">
+              <FaBrain style={{ marginRight: '0.4rem', color: 'var(--clr-cyan)' }} />
+              Continue where you left off
+            </div>
             <div className="dashboard-cta-title">{dashboard.next_goal.topic} · Block {dashboard.next_goal.block}</div>
           </div>
           <FaArrowRight />
@@ -127,7 +133,7 @@ export default function Dashboard() {
       )}
 
       {challenge?.title && (
-        <div className="card dashboard-section-card">
+        <div className="dashboard-section-card card">
           <div className="dashboard-section-header">
             <h2><FaBolt style={{ color: 'var(--clr-orange)' }} /> Daily challenge</h2>
             {challenge.completed && <span className="badge-success">Complete</span>}
@@ -139,7 +145,9 @@ export default function Dashboard() {
                 className="dashboard-progress-fill"
                 style={{
                   width: `${Math.min(100, Math.round((challenge.progress / challenge.target) * 100))}%`,
-                  background: challenge.completed ? 'var(--clr-success)' : 'var(--clr-orange)'
+                  background: challenge.completed 
+                    ? 'linear-gradient(90deg, var(--clr-success), #34d399)'
+                    : 'linear-gradient(90deg, var(--clr-orange), #fb923c)'
                 }}
               />
             </div>
@@ -155,7 +163,7 @@ export default function Dashboard() {
           <h2><FaBookOpen style={{ color: 'var(--clr-cyan)' }} /> Continue reading</h2>
         </div>
         {continueReading.length === 0 ? (
-          <p className="dashboard-empty">No reading in progress yet.</p>
+          <p className="dashboard-empty">No reading in progress yet. Start exploring our resources!</p>
         ) : (
           <div className="dashboard-list">
             {continueReading.map((item) => (
