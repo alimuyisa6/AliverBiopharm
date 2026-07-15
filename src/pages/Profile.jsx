@@ -1,10 +1,10 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLayout } from '../contexts/LayoutContext';
 import { updateProfile, changePassword } from '../api/client';
 import { 
   FaUser, FaEnvelope, FaLock, FaCircleCheck, 
-  FaSpinner, FaShield, FaKey, FaIdCard, FaSave,
+  FaSpinner, FaShield, FaKey, FaIdCard, FaFloppyDisk,
   FaEye, FaEyeSlash, FaUserCheck, FaClock, FaCalendar,
   FaMedal, FaStar, FaBookOpen
 } from 'react-icons/fa6';
@@ -236,7 +236,7 @@ export default function Profile() {
                 </>
               ) : (
                 <>
-                  <FaSave />
+                  <FaFloppyDisk />
                   Save Changes
                 </>
               )}
@@ -376,4 +376,4 @@ export default function Profile() {
       </div>
     </motion.div>
   );
-}
+} 
