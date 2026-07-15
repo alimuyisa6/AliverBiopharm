@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaSun, FaMoon, FaBars, FaXmark, FaUser, FaChevronDown,
   FaRightToBracket, FaUserPlus, FaRightFromBracket, FaSpinner,
-  FaGaugeHigh, FaGear, FaArrowUp,
+  FaGaugeHigh, FaGear, FaArrowUp, FaMagnifyingGlass,
 } from 'react-icons/fa6';
 import { useLayout } from '../contexts/LayoutContext';
 import { signout } from '../api/client';
 import NotificationBell from './NotificationBell';
+import SearchOverlay from './SearchOverlay';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -48,6 +49,7 @@ const overlayVariants = {
 
 export default function Layout({ children, headerExtras, showFooter = true }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -112,18 +114,12 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, size, size);
 
-          // 'Cover' fit (with a small extra zoom) instead of 'contain'.
-          // At 16-32px, a logo drawn with letterboxed whitespace around it
-          // reads as a faint speck. Filling the frame — even if it means
-          // cropping a bit of empty margin off the source image — keeps
-          // the mark legible in the browser tab.
           const zoom = 1.15;
           const scale = Math.max(size / img.width, size / img.height) * zoom;
           const x = (size - img.width * scale) / 2;
           const y = (size - img.height * scale) / 2;
           ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
 
-          // This is the line that throws SecurityError on a tainted canvas
           const faviconUrl = canvas.toDataURL('image/png');
 
           const faviconLink = document.createElement('link');
@@ -132,7 +128,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           faviconLink.href = faviconUrl;
           document.head.appendChild(faviconLink);
 
-          // Apple touch icon (larger size)
           const appleCanvas = document.createElement('canvas');
           appleCanvas.width = 180;
           appleCanvas.height = 180;
@@ -149,17 +144,12 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           appleTouchLink.href = appleCanvas.toDataURL('image/png');
           document.head.appendChild(appleTouchLink);
         } catch (err) {
-          // Canvas was tainted (no CORS headers on the logo URL) — fall
-          // back to using the logo URL directly instead of silently
-          // failing to set any favicon at all.
           console.error('Favicon canvas processing failed, using direct URL fallback:', err);
           applyDirectFallback(logoUrl);
         }
       };
 
       img.onerror = () => {
-        // Image itself failed to load — still fall back to a direct link
-        // so we don't leave the favicon unset.
         applyDirectFallback(logoUrl);
       };
 
@@ -188,10 +178,11 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Force close mobile menu on route change
+  // Force close mobile menu and search on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
+    setSearchOpen(false);
     document.body.style.overflow = '';
 
     const timeoutId = setTimeout(() => {
@@ -215,15 +206,30 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [userDropdownOpen]);
 
-  // Prevent body scroll when mobile menu is open
+  // Close search when clicking outside its panel or toggle button
   useEffect(() => {
-    if (mobileMenuOpen) {
+    const handleClickOutside = (e) => {
+      if (
+        searchOpen &&
+        !e.target.closest('.search-overlay-panel') &&
+        !e.target.closest('.search-toggle')
+      ) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [searchOpen]);
+
+  // Prevent body scroll when mobile menu or search is open
+  useEffect(() => {
+    if (mobileMenuOpen || searchOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, searchOpen]);
 
   const handleSignout = useCallback(async () => {
     setSigningOut(true);
@@ -244,6 +250,16 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
     document.body.style.overflow = '';
+  }, []);
+
+  const toggleSearch = useCallback((e) => {
+    e.stopPropagation();
+    setMobileMenuOpen(false);
+    setSearchOpen((open) => !open);
+  }, []);
+
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false);
   }, []);
 
   const renderNavLink = (link) => {
@@ -343,6 +359,16 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             {isHomepage && <NotificationBell user={user} />}
             {headerExtras}
 
+            {/* Search Toggle */}
+            <button
+              className="search-toggle"
+              onClick={toggleSearch}
+              aria-label="Search"
+              aria-expanded={searchOpen}
+            >
+              {searchOpen ? <FaXmark /> : <FaMagnifyingGlass />}
+            </button>
+
             {/* User Dropdown (Desktop + Mobile) */}
             {isAuthenticated ? (
               <div className="user-dropdown">
@@ -397,6 +423,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               className="mobile-toggle"
               onClick={(e) => {
                 e.stopPropagation();
+                setSearchOpen(false);
                 setMobileMenuOpen(true);
               }}
               aria-label="Open menu"
@@ -407,6 +434,9 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           </div>
         </div>
       </header>
+
+      {/* Search Overlay */}
+      <SearchOverlay isOpen={searchOpen} onClose={closeSearch} />
 
       {/* Mobile Navigation Panel */}
       <AnimatePresence>
