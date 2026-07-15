@@ -540,3 +540,15 @@ export async function adminEndClassroom(room_id) {
 
 export async function requestHandoff() { return apiCall('auth', 'handoff_create', {}); }
 export async function exchangeHandoff(token) { return apiCall('auth', 'handoff_exchange', { token }); }
+
+export async function signup(email, password, turnstile_token, extra = {}) {
+  return apiCall('auth', 'signup', { email, password, turnstile_token, ...extra });
+}
+
+export async function updateProfile(full_name) {
+  return apiCall('auth', 'update_profile', { full_name });
+}
+
+export async function changePassword(current_password, new_password) {
+  return apiCall('auth', 'change_password', { current_password, new_password });
+}
