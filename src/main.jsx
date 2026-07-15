@@ -12,6 +12,7 @@ import './styles/Info.css';
 import './styles/Lab.css';
 import './styles/Liveroom.css';
 import './styles/Tutor.css';
+import '.styles/Dashboard.css';
 import LoadingProvider from './loading/LoadingProvider';
 
 function showFatalError(title, message, stack) {
