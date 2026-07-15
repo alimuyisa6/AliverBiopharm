@@ -2,22 +2,24 @@
 import { useAuth } from '../contexts/AuthContext';
 import { signup } from '../api/client';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import '../styles/Auth.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
-import { FaSignInAlt, FaCheckCircle } from 'react-icons/fa';
-import { FaEnvelope, FaLock, FaUser, FaArrowRight, FaArrowLeft, FaUserPlus } from 'react-icons/fa6';
+import { 
+  FaEnvelope, FaLock, FaUser, FaArrowRight, FaArrowLeft, 
+  FaUserPlus, FaSignInAlt, FaCheckCircle, FaGraduationCap,
+  FaShieldAlt, FaRocket, FaBook, FaChartLine, FaUsers,
+  FaEye, FaEyeSlash
+} from 'react-icons/fa6';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
 const pageVariants = {
-  initial: { opacity: 0, x: 60 },
+  initial: { opacity: 0, x: 80 },
   in: { opacity: 1, x: 0 },
-  out: { opacity: 0, x: -60 },
+  out: { opacity: 0, x: -80 },
 };
-
-const pageTransition = { type: 'tween', ease: 'easeInOut', duration: 0.3 };
 
 export default function Auth() {
   const location = useLocation();
@@ -31,6 +33,8 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [focused, setFocused] = useState(null);
+  const [showPassword, setShowPassword] = useState({ password: false, confirm: false });
 
   const { login } = useAuth();
   const turnstileRef = useRef(null);
@@ -103,7 +107,7 @@ export default function Auth() {
       : '';
 
     if (!token) {
-      setError('Verify to continue');
+      setError('Please complete the verification');
       return;
     }
 
@@ -115,7 +119,7 @@ export default function Auth() {
       hide();
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Login failed. Please try again.');
       hide();
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.reset(widgetIdRef.current);
@@ -149,7 +153,7 @@ export default function Auth() {
       : '';
 
     if (!token) {
-      setError('Verify to continue');
+      setError('Please complete the verification');
       return;
     }
 
@@ -165,7 +169,7 @@ export default function Auth() {
         navigate('/login', { state: location.state, replace: true });
       }, 1500);
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || 'Registration failed. Please try again.');
       hide();
       if (window.turnstile && widgetIdRef.current) {
         window.turnstile.reset(widgetIdRef.current);
@@ -182,13 +186,22 @@ export default function Auth() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
       >
         <div className="auth-form-panel">
-          <div className="auth-card">
-            <FaCheckCircle style={{ color: '#10b981', fontSize: '3rem', marginBottom: '1rem' }} />
-            <div className="auth-title">Success</div>
-            <div className="auth-subtitle">Account created. Redirecting...</div>
+          <div className="auth-card success-card">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', damping: 15, stiffness: 200 }}
+            >
+              <FaCheckCircle className="success-icon" />
+            </motion.div>
+            <h2 className="success-title">Account Created!</h2>
+            <p className="success-subtitle">Welcome to Aliver Biopharm. Redirecting you to login...</p>
+            <div className="success-loader">
+              <div className="loader-bar"></div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -202,117 +215,266 @@ export default function Auth() {
       animate="in"
       exit="out"
       variants={pageVariants}
-      transition={pageTransition}
+      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
     >
       <div className="auth-brand-panel">
         <div className="auth-brand-content">
-          <div className="auth-label">ALIVER BIOPHARM</div>
-          <div className="auth-brand-title">
-            {mode === 'login' ? 'Welcome back' : 'Create account'}
-          </div>
-          <div className="auth-brand-description">
-            {mode === 'login' ? 'Sign in to continue.' : 'Join the platform.'}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="auth-brand-badge"
+          >
+            <FaGraduationCap />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="auth-label"
+          >
+            ALIVER BIOPHARM
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="auth-brand-title"
+          >
+            {mode === 'login' ? 'Welcome Back' : 'Start Your Journey'}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="auth-brand-description"
+          >
+            {mode === 'login' 
+              ? 'Sign in to continue your learning journey' 
+              : 'Create an account and start learning today'}
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="auth-features"
+          >
+            <div className="auth-feature">
+              <FaRocket className="feature-icon" style={{ color: 'var(--clr-cyan)' }} />
+              <span>Personalized learning</span>
+            </div>
+            <div className="auth-feature">
+              <FaBook className="feature-icon" style={{ color: 'var(--clr-magenta)' }} />
+              <span>Expert resources</span>
+            </div>
+            <div className="auth-feature">
+              <FaShieldAlt className="feature-icon" style={{ color: 'var(--clr-blue)' }} />
+              <span>Secure & private</span>
+            </div>
+            <div className="auth-feature">
+              <FaUsers className="feature-icon" style={{ color: 'var(--clr-orange)' }} />
+              <span>Community learning</span>
+            </div>
+          </motion.div>
         </div>
       </div>
 
       <div className="auth-form-panel">
-        <div className="auth-card">
-          <div className="auth-title">{mode === 'login' ? 'Login' : 'Register'}</div>
-          <div className="auth-subtitle">
-            {mode === 'login' ? 'Access your account securely' : 'Create your account securely'}
+        <motion.div
+          className="auth-card"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="auth-header">
+            <h2 className="auth-title">{mode === 'login' ? 'Sign In' : 'Create Account'}</h2>
+            <p className="auth-subtitle">
+              {mode === 'login' 
+                ? 'Access your account securely' 
+                : 'Join thousands of learners worldwide'}
+            </p>
           </div>
 
-          {error && <div className="auth-error">{error}</div>}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="auth-error"
+              >
+                <span className="error-icon">⚠</span>
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="auth-form">
             {mode === 'register' && (
-              <div className="input-wrapper">
-                <FaUser style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                <input
-                  type="text"
-                  placeholder="Full name"
-                  value={fullName}
-                  onChange={e => setFullName(e.target.value)}
-                  className="form-input"
-                  style={{ paddingLeft: '44px' }}
-                  required
-                  disabled={submitting}
-                />
+              <div className="form-group">
+                <label className="form-label">
+                  <FaUser className="label-icon" />
+                  Full Name
+                </label>
+                <div className="input-wrapper">
+                  <FaUser className="input-icon" />
+                  <input
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    onFocus={() => setFocused('name')}
+                    onBlur={() => setFocused(null)}
+                    className={`form-input ${focused === 'name' ? 'input-focused' : ''}`}
+                    required
+                    disabled={submitting}
+                  />
+                  <div className="input-highlight"></div>
+                </div>
               </div>
             )}
 
-            <div className="input-wrapper">
-              <FaEnvelope style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="form-input"
-                style={{ paddingLeft: '44px' }}
-                required
-                disabled={submitting}
-              />
-            </div>
-
-            <div className="input-wrapper">
-              <FaLock style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="form-input"
-                style={{ paddingLeft: '44px' }}
-                required
-                disabled={submitting}
-              />
-            </div>
-
-            {mode === 'register' && (
+            <div className="form-group">
+              <label className="form-label">
+                <FaEnvelope className="label-icon" />
+                Email Address
+              </label>
               <div className="input-wrapper">
-                <FaLock style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <FaEnvelope className="input-icon" />
                 <input
-                  type="password"
-                  placeholder="Confirm password"
-                  value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
-                  className="form-input"
-                  style={{ paddingLeft: '44px' }}
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  onFocus={() => setFocused('email')}
+                  onBlur={() => setFocused(null)}
+                  className={`form-input ${focused === 'email' ? 'input-focused' : ''}`}
                   required
                   disabled={submitting}
                 />
+                <div className="input-highlight"></div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <FaLock className="label-icon" />
+                Password
+              </label>
+              <div className="input-wrapper password-wrapper">
+                <FaLock className="input-icon" />
+                <input
+                  type={showPassword.password ? 'text' : 'password'}
+                  placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  onFocus={() => setFocused('password')}
+                  onBlur={() => setFocused(null)}
+                  className={`form-input ${focused === 'password' ? 'input-focused' : ''}`}
+                  required
+                  disabled={submitting}
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(prev => ({ ...prev, password: !prev.password }))}
+                  disabled={submitting}
+                >
+                  {showPassword.password ? <FaEyeSlash /> : <FaEye />}
+                </button>
+                <div className="input-highlight"></div>
+              </div>
+              {mode === 'register' && (
+                <span className="input-hint">Minimum 8 characters</span>
+              )}
+            </div>
+
+            {mode === 'register' && (
+              <div className="form-group">
+                <label className="form-label">
+                  <FaLock className="label-icon" />
+                  Confirm Password
+                </label>
+                <div className="input-wrapper password-wrapper">
+                  <FaLock className="input-icon" />
+                  <input
+                    type={showPassword.confirm ? 'text' : 'password'}
+                    placeholder="Confirm your password"
+                    value={confirm}
+                    onChange={e => setConfirm(e.target.value)}
+                    onFocus={() => setFocused('confirm')}
+                    onBlur={() => setFocused(null)}
+                    className={`form-input ${focused === 'confirm' ? 'input-focused' : ''}`}
+                    required
+                    disabled={submitting}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(prev => ({ ...prev, confirm: !prev.confirm }))}
+                    disabled={submitting}
+                  >
+                    {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                  <div className="input-highlight"></div>
+                </div>
               </div>
             )}
 
             <div ref={turnstileRef} className="auth-captcha"></div>
 
-            <button type="submit" className={`btn-primary auth-submit${submitting ? ' alv-btn-loading' : ''}`} disabled={submitting}>
-              {mode === 'login'
-                ? (submitting ? <><InlineSpinner /> Signing in...</> : <><FaSignInAlt style={{ marginRight: '8px' }} /> Sign in</>)
-                : (submitting ? <><InlineSpinner /> Creating account...</> : <><FaUserPlus style={{ marginRight: '8px' }} /> Create Account</>)}
-            </button>
+            <motion.button
+              type="submit"
+              className={`btn-primary auth-submit ${submitting ? 'loading' : ''}`}
+              disabled={submitting}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {submitting ? (
+                <>
+                  <InlineSpinner />
+                  {mode === 'login' ? 'Signing in...' : 'Creating account...'}
+                </>
+              ) : (
+                <>
+                  {mode === 'login' ? (
+                    <><FaSignInAlt /> Sign In</>
+                  ) : (
+                    <><FaUserPlus /> Create Account</>
+                  )}
+                </>
+              )}
+            </motion.button>
           </form>
 
-          <div className="auth-footer-text">
-            {mode === 'login' ? (
-              <>
-                No account?{' '}
-                <button type="button" className="auth-link" onClick={() => switchMode('register')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}>
-                  <FaArrowRight style={{ marginRight: '4px', fontSize: '0.8rem' }} /> Register
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <button type="button" className="auth-link" onClick={() => switchMode('login')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}>
-                  <FaArrowLeft style={{ marginRight: '4px', fontSize: '0.8rem' }} /> Login
-                </button>
-              </>
-            )}
+          <div className="auth-footer">
+            <p className="auth-footer-text">
+              {mode === 'login' ? (
+                <>
+                  Don't have an account?{' '}
+                  <button 
+                    type="button" 
+                    className="auth-link" 
+                    onClick={() => switchMode('register')}
+                  >
+                    Sign Up <FaArrowRight />
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{' '}
+                  <button 
+                    type="button" 
+                    className="auth-link" 
+                    onClick={() => switchMode('login')}
+                  >
+                    <FaArrowLeft /> Sign In
+                  </button>
+                </>
+              )}
+            </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
