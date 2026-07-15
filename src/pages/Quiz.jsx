@@ -1,4 +1,4 @@
-import React from 'react';
+ import React from 'react';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,6 +15,7 @@ import {
   saveAchievement,
   saveQuizState,
   getQuizState,
+  clearQuizState,
   trackEvent,
   getLeaderboard,
   startQuizSession,
@@ -535,6 +536,10 @@ function Quiz() {
       }
       
       setResultData(result);
+
+      sessionStorage.removeItem('quiz_resume');
+      clearQuizState().catch(() => {});
+
       trackEvent('quiz_complete', {
         level: currentLevel,
         topic: currentTopic,
