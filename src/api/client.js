@@ -185,6 +185,7 @@ export async function submitMood(mood, message) { return apiCall('interactions',
 export async function saveAchievement(badge) { return apiCall('interactions', 'save_achievement', { badge }); }
 export async function saveQuizState(state) { return apiCall('interactions', 'save_quiz_state', { state }); }
 export async function getQuizState() { return getRequest('interactions', 'get_quiz_state'); }
+export async function clearQuizState() { return apiCall('interactions', 'clear_quiz_state', {}); }
 export async function trackEvent(eventName, eventData = {}) { return apiCall('interactions', 'track_event', { event_name: eventName, event_data: eventData }); }
 
 export async function getAdminStats() { return getRequest('admin', 'stats'); }
