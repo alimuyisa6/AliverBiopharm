@@ -245,6 +245,7 @@ export {
   saveAchievement,
   saveQuizState,
   getQuizState,
+  clearQuizState,
   trackEvent,
   getAdminStats,
   getSubmissions,
@@ -319,4 +320,7 @@ export {
   endClassroom,
   shareClassroomResource,
   fileClassroomComplaint,
+  updateProfile,
+  changePassword,
+  globalSearch,
 } from './client';
