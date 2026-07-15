@@ -5,8 +5,7 @@ import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import { LayoutProvider } from './contexts/LayoutContext';
 import Layout from './components/Layout';
 import AdminLauncher from './components/AdminLauncher';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Auth from './pages/Auth';
 import Home from './pages/Home';
 import Quiz from './pages/Quiz';
 import PastPapers from './pages/PastPapers';
@@ -22,6 +21,8 @@ import Classroom from './pages/Classroom';
 import ClassroomRoom from './pages/ClassroomRoom';
 import TutorApply from './pages/TutorApply';
 import TutorDashboard from './pages/TutorDashboard';
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
 
 const scrollPositions = {};
 
@@ -49,8 +50,6 @@ function ScrollManager() {
     };
 
     if (savedY !== undefined) {
-      // If the person touches or scrolls while we're still trying to restore
-      // position, back off immediately instead of fighting their input.
       window.addEventListener('touchstart', cancelRestore, { passive: true });
       window.addEventListener('wheel', cancelRestore, { passive: true });
 
@@ -108,8 +107,10 @@ function AnimatedRoutes() {
       <ScrollManager />
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Layout><Home /></Layout>} />
-        <Route path="/login" element={<Layout><Login /></Layout>} />
-        <Route path="/register" element={<Layout><Register /></Layout>} />
+        <Route path="/login" element={<Layout><Auth /></Layout>} />
+        <Route path="/register" element={<Layout><Auth /></Layout>} />
+        <Route path="/dashboard" element={<Layout><ProtectedRoute><Dashboard /></ProtectedRoute></Layout>} />
+        <Route path="/profile" element={<Layout><ProtectedRoute><Profile /></ProtectedRoute></Layout>} />
         <Route path="/quiz" element={<Layout><ProtectedRoute><Quiz /></ProtectedRoute></Layout>} />
         <Route path="/past-papers" element={<Layout><PastPapers /></Layout>} />
         <Route path="/recall" element={<Layout><ProtectedRoute><BioRecall /></ProtectedRoute></Layout>} />
