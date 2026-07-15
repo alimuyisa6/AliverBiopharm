@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+ import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getAllSiteSections } from '../api/cachedClient';
-import { getUser } from '../api/client';
+import { useAuth } from './AuthContext';
 
 const LayoutContext = createContext(null);
 
@@ -12,13 +12,14 @@ export function useLayout() {
 
 export function LayoutProvider({ children }) {
   const [sections, setSections] = useState(null);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [sectionsLoading, setSectionsLoading] = useState(true);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme');
     if (saved) return saved;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
+
+  const { user, loading: authLoading, refresh: refreshUser } = useAuth();
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
@@ -28,21 +29,12 @@ export function LayoutProvider({ children }) {
     });
   }, []);
 
-  const refreshUser = useCallback(async () => {
-    try {
-      const data = await getUser();
-      setUser(data?.user || null);
-    } catch {
-      setUser(null);
-    }
-  }, []);
-
   useEffect(() => {
-    Promise.all([getAllSiteSections(), refreshUser()])
-      .then(([data]) => setSections(data))
+    getAllSiteSections()
+      .then(setSections)
       .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [refreshUser]);
+      .finally(() => setSectionsLoading(false));
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', theme === 'dark');
@@ -52,7 +44,7 @@ export function LayoutProvider({ children }) {
   const value = {
     sections,
     user,
-    loading,
+    loading: sectionsLoading || authLoading,
     theme,
     toggleTheme,
     refreshUser,
@@ -64,4 +56,4 @@ export function LayoutProvider({ children }) {
   };
 
   return <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>;
-} 
+}
