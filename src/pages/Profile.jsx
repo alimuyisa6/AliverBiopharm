@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLayout } from '../contexts/LayoutContext';
 import { updateProfile, changePassword } from '../api/client';
 import { 
-  FaUser, FaEnvelope, FaLock, FaCheck, 
-  FaSpinner, FaShieldAlt, FaKey, FaIdCard, FaSave,
+  FaUser, FaEnvelope, FaLock, FaCircleCheck, 
+  FaSpinner, FaShield, FaKey, FaIdCard, FaSave,
   FaEye, FaEyeSlash, FaUserCheck, FaClock, FaCalendar,
   FaMedal, FaStar, FaBookOpen
 } from 'react-icons/fa6';
@@ -116,7 +116,7 @@ export default function Profile() {
             <FaUser className="avatar-icon" />
           </div>
           <div className="avatar-badge">
-            <FaShieldAlt />
+            <FaShield />
           </div>
         </div>
       </div>
@@ -187,7 +187,7 @@ export default function Profile() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                 >
-                  <FaCheck className="alert-icon" />
+                  <FaCircleCheck className="alert-icon" />
                   Profile updated successfully
                 </motion.div>
               )}
@@ -278,7 +278,7 @@ export default function Profile() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                 >
-                  <FaCheck className="alert-icon" />
+                  <FaCircleCheck className="alert-icon" />
                   Password changed successfully
                 </motion.div>
               )}
