@@ -117,7 +117,6 @@ async function getRequest(module, path, params = {}) {
 
 export { getRequest, apiCall };
 
-export async function signup(email, password, turnstile_token) { return apiCall('auth', 'signup', { email, password, turnstile_token }); }
 export async function signin(email, password, turnstile_token) { return apiCall('auth', 'signin', { email, password, turnstile_token }); }
 export async function signout() { return apiCall('auth', 'signout', {}); }
 export async function getUser() { return getRequest('auth', 'get_user'); }
