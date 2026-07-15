@@ -8,7 +8,7 @@ import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
 import { 
   FaEnvelope, FaLock, FaUser, FaArrowRight, FaArrowLeft, 
-  FaUserPlus, FaSignInAlt, FaCheckCircle, FaGraduationCap,
+  FaUserPlus, FaSignInAlt, FaCircleCheck, FaGraduationCap,
   FaShieldAlt, FaRocket, FaBook, FaChartLine, FaUsers,
   FaEye, FaEyeSlash
 } from 'react-icons/fa6';
@@ -195,7 +195,7 @@ export default function Auth() {
               animate={{ scale: 1 }}
               transition={{ type: 'spring', damping: 15, stiffness: 200 }}
             >
-              <FaCheckCircle className="success-icon" />
+              <FaCircleCheck className="success-icon" />
             </motion.div>
             <h2 className="success-title">Account Created!</h2>
             <p className="success-subtitle">Welcome to Aliver Biopharm. Redirecting you to login...</p>
