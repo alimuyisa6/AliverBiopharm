@@ -109,8 +109,8 @@ function AnimatedRoutes() {
         <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/login" element={<Layout><Auth /></Layout>} />
         <Route path="/register" element={<Layout><Auth /></Layout>} />
-        <Route path="/dashboard" element={<Layout><ProtectedRoute><Dashboard /></ProtectedRoute></Layout>} />
-        <Route path="/profile" element={<Layout><ProtectedRoute><Profile /></ProtectedRoute></Layout>} />
+        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+        <Route path="/profile" element={<Layout><Profile /></Layout>} />
         <Route path="/quiz" element={<Layout><ProtectedRoute><Quiz /></ProtectedRoute></Layout>} />
         <Route path="/past-papers" element={<Layout><PastPapers /></Layout>} />
         <Route path="/recall" element={<Layout><ProtectedRoute><BioRecall /></ProtectedRoute></Layout>} />
