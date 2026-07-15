@@ -551,3 +551,8 @@ export async function updateProfile(full_name) {
 export async function changePassword(current_password, new_password) {
   return apiCall('auth', 'change_password', { current_password, new_password });
 }
+
+
+export async function globalSearch(query) {
+  return getRequest('search', 'global', { q: query });
+}
