@@ -1,5 +1,6 @@
- import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { getUser, signin, signout } from '../api/client';
+ // src/contexts/AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { getUser, signin, signout, getProfile } from '../api/client';
 import { Navigate, useLocation } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa6';
 
@@ -12,7 +13,12 @@ export function AuthProvider({ children }) {
   const checkAuth = useCallback(async () => {
     try {
       const data = await getUser();
-      setUser(data?.user || null);
+      if (data?.user) {
+        const profileData = await getProfile();
+        setUser({ ...data.user, profile: profileData || { role: 'student', track: null, class_name: null, onboarding_completed: false } });
+      } else {
+        setUser(null);
+      }
     } catch {
       setUser(null);
     } finally {
@@ -34,13 +40,17 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const refresh = useCallback(async () => {
+    await checkAuth();
+  }, [checkAuth]);
+
   const value = {
     user,
     loading,
     isAuthenticated: !!user,
     login,
     logout,
-    refresh: checkAuth,
+    refresh,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -68,6 +78,10 @@ export function ProtectedRoute({ children }) {
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  if (!user.profile?.onboarding_completed && location.pathname !== '/onboarding' && location.pathname !== '/profile') {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return children;
