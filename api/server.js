@@ -1,4 +1,5 @@
- import {
+ // server.js
+import {
   setCorsHeaders,
   generateCsrfToken,
   getClientIp
@@ -12,7 +13,7 @@ import {
   SecurityError
 } from '../lib/security-middleware.js';
 
- const MODULE_MAP = {
+const MODULE_MAP = {
   auth:               new URL('../lib/auth.js', import.meta.url).href,
   admin:              new URL('../lib/admin.js', import.meta.url).href,
   chat:               new URL('../lib/chat.js', import.meta.url).href,
@@ -30,8 +31,8 @@ import {
   'weekly-challenge': new URL('../lib/weekly-challenge.js', import.meta.url).href,
   lab:                new URL('../lib/lab.js', import.meta.url).href,
   search:             new URL('../lib/search.js', import.meta.url).href,
+  profile:            new URL('../lib/profile.js', import.meta.url).href,
 };
- 
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const AUTH_ATTEMPT_PATHS = new Set(['signup', 'signin']);
