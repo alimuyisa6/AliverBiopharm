@@ -8,7 +8,6 @@ import {
   getQuizBlock,
   checkDailyRetry,
   checkQuizAnswer,
-  submitQuizBlock,
   recordDailyVisit,
   getUserStreak,
   getUserAchievements,
@@ -66,6 +65,7 @@ import {
   FaSpinner,
   FaArrowLeft,
   FaArrowRight,
+  FaShieldHalved,
 } from "react-icons/fa6";
 
 class QuizErrorBoundary extends React.Component {
@@ -88,6 +88,8 @@ class QuizErrorBoundary extends React.Component {
 const SOUND_CORRECT = typeof window !== 'undefined' ? (() => { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); return () => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.setValueAtTime(520, ctx.currentTime); o.frequency.setValueAtTime(660, ctx.currentTime + 0.1); g.gain.setValueAtTime(0.15, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.3); }; } catch { return () => {}; } })() : () => {};
 
 const SOUND_INCORRECT = typeof window !== 'undefined' ? (() => { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); return () => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.type = 'sawtooth'; o.frequency.setValueAtTime(260, ctx.currentTime); g.gain.setValueAtTime(0.1, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25); o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.25); }; } catch { return () => {}; } })() : () => {};
+
+const REDIRECT_SECONDS = 10;
 
 function Quiz() {
   const { user } = useAuth();
@@ -128,10 +130,14 @@ function Quiz() {
   const [answerSubmitting, setAnswerSubmitting] = useState(false);
   const [sessionActive, setSessionActive] = useState(true);
   const [blockTabSwitch, setBlockTabSwitch] = useState(false);
+  const [integrityOverlay, setIntegrityOverlay] = useState(false);
+  const [integrityCountdown, setIntegrityCountdown] = useState(REDIRECT_SECONDS);
   const spinnerTimeout = useRef(null);
   const saveDebounceRef = useRef(null);
   const touchStartX = useRef(null);
   const confettiTimers = useRef([]);
+  const tabSwitchLock = useRef(false);
+  const integrityIntervalRef = useRef(null);
   const MAX_TAB_SWITCHES = 3;
 
   const SPINNER_WORDS = [
@@ -218,6 +224,7 @@ function Quiz() {
     return () => {
       confettiTimers.current.forEach(timer => clearTimeout(timer));
       confettiTimers.current = [];
+      if (integrityIntervalRef.current) clearInterval(integrityIntervalRef.current);
     };
   }, []);
 
@@ -267,7 +274,7 @@ function Quiz() {
   useEffect(() => {
     if (!quizQuestions.length) return;
     const handleKey = (e) => {
-      if (answerSubmitting) return;
+      if (answerSubmitting || integrityOverlay) return;
       if (['a','b','c','d'].includes(e.key.toLowerCase())) selectAnswer(e.key.toUpperCase());
       if (e.key === 'ArrowRight') {
         const first = getFirstUnansweredIndex(userAnswers);
@@ -280,56 +287,59 @@ function Quiz() {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [quizQuestions, currentIndex, userAnswers, answerSubmitting]);
+  }, [quizQuestions, currentIndex, userAnswers, answerSubmitting, integrityOverlay]);
 
   useEffect(() => {
     if (!quizQuestions.length || !sessionActive) return;
-    
+
     let warningTimeout = null;
-    
-    const handleVisibility = async () => {
-      if (document.hidden) {
-        try {
-          const result = await trackTabSwitch(currentLevel, currentTopic, currentBlock);
-          
-          if (!result.success && result.auto_submitted) {
-            setSessionActive(false);
-            setTabWarning(true);
-            showToast(result.message || 'Quiz auto-submitted due to tab switching', 'warning');
-            setTimeout(() => {
-              submitBlockWithSession();
-            }, 1500);
-            return;
-          }
-          
-          if (result.success) {
-            setTabSwitchCount(result.tab_switches);
-            setTabWarning(true);
-            setBlockTabSwitch(true);
-            warningTimeout = setTimeout(() => {
-              setTabWarning(false);
-              setBlockTabSwitch(false);
-            }, 4000);
-            
-            if (result.remaining <= 1) {
-              showToast(`Warning: ${result.remaining} tab switch${result.remaining > 1 ? 'es' : ''} remaining!`, 'warning');
-            }
-          }
-        } catch (error) {
-          console.error('Failed to track tab switch:', error);
+
+    const handleTabAway = async () => {
+      if (tabSwitchLock.current) return;
+      tabSwitchLock.current = true;
+      setTimeout(() => { tabSwitchLock.current = false; }, 1000);
+
+      try {
+        const result = await trackTabSwitch(currentLevel, currentTopic, currentBlock);
+
+        if (!result.success && result.auto_submitted) {
+          setSessionActive(false);
+          triggerIntegrityLock(result.message);
+          return;
         }
+
+        if (result.success) {
+          setTabSwitchCount(result.tab_switches);
+          setTabWarning(true);
+          setBlockTabSwitch(true);
+          warningTimeout = setTimeout(() => {
+            setTabWarning(false);
+            setBlockTabSwitch(false);
+          }, 4000);
+
+          if (result.remaining <= 1) {
+            showToast(`Warning: ${result.remaining} tab switch${result.remaining > 1 ? 'es' : ''} remaining before auto-submit!`, 'warning');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to track tab switch:', error);
       }
     };
-    
+
+    const handleVisibility = () => { if (document.hidden) handleTabAway(); };
+    const handleBlur = () => { handleTabAway(); };
+
     document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleBlur);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleBlur);
       if (warningTimeout) clearTimeout(warningTimeout);
     };
   }, [quizQuestions.length, currentLevel, currentTopic, currentBlock, sessionActive]);
 
   useEffect(() => {
-    if (quizStartTime && quizQuestions.length) {
+    if (quizStartTime && quizQuestions.length && !integrityOverlay) {
       const interval = setInterval(() => {
         const elapsed = Math.floor((new Date() - new Date(quizStartTime)) / 1000);
         const remaining = Math.max(0, 600 - elapsed);
@@ -342,7 +352,7 @@ function Quiz() {
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [quizStartTime, quizQuestions.length]);
+  }, [quizStartTime, quizQuestions.length, integrityOverlay]);
 
   useEffect(() => {
     saveQuizStateToStorage();
@@ -412,10 +422,10 @@ function Quiz() {
     const blockNum = pendingBlock;
     setCurrentBlock(blockNum);
     setLoading(true);
-    
+
     try {
       const sessionResult = await startQuizSession(currentLevel, currentTopic, blockNum);
-      
+
       if (!sessionResult.success) {
         if (sessionResult.auto_submitted) {
           showToast(sessionResult.message || 'Quiz auto-submitted. Please start a new block.', 'warning');
@@ -428,17 +438,17 @@ function Quiz() {
         setLoading(false);
         return;
       }
-      
+
       setTabSwitchCount(sessionResult.tab_switches || 0);
       setSessionActive(true);
-      
+
       const data = await getQuizBlock({ level: currentLevel, topic: currentTopic, block_number: blockNum });
       if (!data || !data.questions || !data.questions.length) {
         showToast('No questions available.', 'error');
         setLoading(false);
         return;
       }
-      
+
       setQuizQuestions(data.questions);
       setUserAnswers(new Array(data.questions.length).fill(null));
       setConfidence(new Array(data.questions.length).fill(null));
@@ -455,7 +465,7 @@ function Quiz() {
   }
 
   async function selectAnswer(optionLetter) {
-    if (userAnswers[currentIndex] !== null || answerSubmitting) return;
+    if (userAnswers[currentIndex] !== null || answerSubmitting || integrityOverlay) return;
     setAnswerSubmitting(true);
     setShowingSpinner(true);
     setSpinnerWord(SPINNER_WORDS[Math.floor(Math.random() * SPINNER_WORDS.length)]);
@@ -495,23 +505,50 @@ function Quiz() {
 
   function prevQuestion() { if (currentIndex > 0) navigateTo(currentIndex - 1); }
 
+  function triggerIntegrityLock(message) {
+    setTabWarning(false);
+    setBlockTabSwitch(false);
+    setIntegrityOverlay(true);
+    setIntegrityCountdown(REDIRECT_SECONDS);
+    showToast(message || 'Quiz auto-submitted due to tab switching', 'warning');
+
+    submitBlockWithSession();
+
+    if (integrityIntervalRef.current) clearInterval(integrityIntervalRef.current);
+    integrityIntervalRef.current = setInterval(() => {
+      setIntegrityCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(integrityIntervalRef.current);
+          returnToBlockList();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  function returnToBlockList() {
+    if (integrityIntervalRef.current) clearInterval(integrityIntervalRef.current);
+    setIntegrityOverlay(false);
+    setQuizQuestions([]);
+    setResultData(null);
+    setUserAnswers([]);
+    setTimeLeft(null);
+    setTabSwitchCount(0);
+    loadTopics(currentLevel);
+  }
+
   async function submitBlockWithSession() {
     if (quizQuestions.length === 0) return;
-    
-    const allAnswered = userAnswers.every(a => a !== null);
-    if (!allAnswered) {
-      showToast('Please answer all questions before submitting.', 'warning');
-      return;
-    }
-    
+
     const answersPayload = quizQuestions.map((q, idx) => ({
       id: q.id,
       selectedOption: userAnswers[idx]?.selected || 'X'
     }));
-    
+
     const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
     setLoading(true);
-    
+
     try {
       const result = await submitQuizWithSession(
         currentLevel,
@@ -520,25 +557,22 @@ function Quiz() {
         answersPayload,
         timeTaken
       );
-      
+
+      sessionStorage.removeItem('quiz_resume');
+      clearQuizState().catch(() => {});
+
+      if (result.auto_submitted) {
+        setLoading(false);
+        return;
+      }
+
       if (!result.success) {
-        if (result.auto_submitted) {
-          showToast(result.message || 'Quiz auto-submitted due to tab switching', 'warning');
-          if (result.score !== undefined) {
-            setResultData(result);
-          }
-          setLoading(false);
-          return;
-        }
         showToast('Submission failed: ' + (result.message || 'Unknown error'), 'error');
         setLoading(false);
         return;
       }
-      
-      setResultData(result);
 
-      sessionStorage.removeItem('quiz_resume');
-      clearQuizState().catch(() => {});
+      setResultData(result);
 
       trackEvent('quiz_complete', {
         level: currentLevel,
@@ -548,7 +582,7 @@ function Quiz() {
         passed: result.passed,
         tab_switches: result.tab_switches || 0
       });
-      
+
       const newBadges = [];
       if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) {
         newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
@@ -562,7 +596,7 @@ function Quiz() {
         await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
         setEarnedBadges(prev => [...prev, 'streak_10']);
       }
-      
+
       let rule = null;
       if (result.percentage >= 90) {
         rule = { message: "Excellent! You're ready for more advanced material.", action: null };
@@ -847,7 +881,7 @@ function Quiz() {
                   else if (opt === selected) { cls = ' incorrect'; icon = <FaCircleXmark style={{ color: '#ef4444', marginLeft: 'auto', fontSize: '1rem' }} />; }
                 }
                 return (
-                  <button key={opt} className={`option-btn${cls}`} disabled={answered || answerSubmitting} onClick={() => selectAnswer(opt)}>
+                  <button key={opt} className={`option-btn${cls}`} disabled={answered || answerSubmitting || integrityOverlay} onClick={() => selectAnswer(opt)}>
                     <span className="option-letter">{opt}</span>
                     <span dangerouslySetInnerHTML={{ __html: renderGlossary(quizQuestions[currentIndex][`option_${opt.toLowerCase()}`]) }} />
                     {icon}
@@ -917,7 +951,7 @@ function Quiz() {
                 <li><FaCircleCheck style={{ color: '#10b981', marginRight: '8px' }} /> 10-minute time limit</li>
                 <li><FaCircleCheck style={{ color: '#10b981', marginRight: '8px' }} /> Block locks for 24h after completion</li>
                 <li><FaTriangleExclamation style={{ color: '#f59e0b', marginRight: '8px' }} /> Tab switches are recorded</li>
-                <li><FaTriangleExclamation style={{ color: '#ef4444', marginRight: '8px' }} /> {MAX_TAB_SWITCHES} tab switches = auto-submit</li>
+                <li><FaTriangleExclamation style={{ color: '#ef4444', marginRight: '8px' }} /> {MAX_TAB_SWITCHES} tab switches auto-submits and locks this block for 48 hours</li>
               </ul>
               <button className="btn-primary" style={{ width: '100%' }} onClick={confirmStartBlock}>I understand, let's begin!</button>
             </div>
@@ -965,6 +999,44 @@ function Quiz() {
             </div>
           </div>
         )}
+
+      {integrityOverlay && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(5, 10, 15, 0.92)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1.5rem',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '440px', width: '100%',
+              background: 'var(--clr-navy-card, #12141c)',
+              border: '1px solid #ef4444',
+              borderRadius: '16px',
+              padding: '2rem 1.75rem',
+              textAlign: 'center',
+            }}
+          >
+            <FaShieldHalved style={{ fontSize: '2.5rem', color: '#ef4444', marginBottom: '1rem' }} />
+            <h2 style={{ fontSize: '1.25rem', color: 'var(--clr-white)', marginBottom: '0.75rem' }}>
+              Quiz Auto-Submitted
+            </h2>
+            <p style={{ fontSize: '0.95rem', color: 'var(--clr-text-dim)', lineHeight: 1.6, marginBottom: '0.75rem' }}>
+              To maintain academic integrity on AliverBiopharm, switching away from this tab during a timed
+              assessment is not permitted. Your answers have been submitted based on your progress so far, and
+              this block is now locked for <strong>48 hours</strong>.
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--clr-text-muted)', marginBottom: '1.5rem' }}>
+              Returning to Block selection in <strong style={{ color: '#ef4444' }}>{integrityCountdown}s</strong>...
+            </p>
+            <button className="btn-primary" style={{ width: '100%' }} onClick={returnToBlockList}>
+              Back to Blocks Now
+            </button>
+          </div>
+        </div>
+      )}
 
       {toast && (
         <div className={`toast toast-${toast.type}`}>
