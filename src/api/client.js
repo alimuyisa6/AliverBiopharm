@@ -557,3 +557,10 @@ export async function changePassword(current_password, new_password) {
 export async function globalSearch(query) {
   return getRequest('search', 'global', { q: query });
 }
+
+// src/api/client.js (additions — full file already provided; append these exports)
+export async function getProfile() { return getRequest('profile', 'get_profile'); }
+export async function saveOnboarding(payload) { return apiCall('profile', 'save_onboarding', payload); }
+export async function requestLevelChange(requested_track, requested_class, reason) { return apiCall('profile', 'request_level_change', { requested_track, requested_class, reason }); }
+export async function getClassSequence(track) { return getRequest('profile', 'class_sequence', { track }); }
+export async function getPharmacyPrograms() { return getRequest('profile', 'pharmacy_programs'); }
