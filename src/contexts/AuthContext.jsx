@@ -1,5 +1,4 @@
- // src/contexts/AuthContext.jsx
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+ import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getUser, signin, signout, getProfile } from '../api/client';
 import { Navigate, useLocation } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa6';
