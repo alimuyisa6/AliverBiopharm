@@ -1,9 +1,9 @@
-// src/pages/OnboardingFlow.jsx
+ // src/pages/OnboardingFlow.jsx (fixed import)
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { saveOnboarding, getClassSequence, getPharmacyPrograms } from '../api/client';
 import { useNavigate } from 'react-router-dom';
-import { FaUserGraduate, FaChalkboardTeacher, FaSeedling, FaFlask, FaCapsules, FaArrowRight, FaArrowLeft, FaSpinner, FaCheck } from 'react-icons/fa6';
+import { FaUserGraduate, FaChalkboardUser, FaSeedling, FaFlask, FaCapsules, FaArrowRight, FaArrowLeft, FaSpinner, FaCheck } from 'react-icons/fa6';
 
 const TRACKS = [
   { value: 'O-Level', icon: FaSeedling, label: 'O-Level', description: 'Senior 1 – 4' },
@@ -76,7 +76,7 @@ export default function OnboardingFlow() {
                 <span className="fc-option-sub">I'm here to learn</span>
               </button>
               <button className={`fc-option-btn ${role === 'teacher' ? 'fc-selected' : ''}`} onClick={() => { setRole('teacher'); setStep(1); }}>
-                <FaChalkboardTeacher className="fc-option-icon" />
+                <FaChalkboardUser className="fc-option-icon" />
                 <span className="fc-option-label">Teacher</span>
                 <span className="fc-option-sub">I'm here to teach or contribute content</span>
               </button>
