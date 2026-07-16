@@ -1,4 +1,5 @@
- import React from 'react';
+ // src/pages/Quiz.jsx
+import React from 'react';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -93,7 +94,10 @@ const REDIRECT_SECONDS = 10;
 
 function Quiz() {
   const { user } = useAuth();
-  const [currentLevel, setCurrentLevel] = useState('O-Level');
+  const currentLevel = user?.profile?.track || 'O-Level';
+  const currentClassName = user?.profile?.class_name;
+  const isTeacher = user?.profile?.role === 'teacher';
+
   const [currentTopic, setCurrentTopic] = useState('');
   const [allTopics, setAllTopics] = useState([]);
   const [quizQuestions, setQuizQuestions] = useState([]);
@@ -201,7 +205,7 @@ function Quiz() {
     if (!resumeData) return;
     const state = resumeData;
     setCurrentTopic(state.topic || '');
-    setCurrentLevel(state.level || currentLevel);
+    // level already set from profile, ignore resume level
     setCurrentBlock(state.block !== undefined ? state.block : 0);
     setTotalBlocks(state.totalBlocks || 0);
     setQuizQuestions(state.questions || []);
@@ -212,7 +216,7 @@ function Quiz() {
     setResumeData(null);
     setShowResumeModal(false);
     sessionStorage.removeItem('quiz_resume');
-  }, [resumeData, currentLevel]);
+  }, [resumeData]);
 
   const handleDiscardResume = useCallback(() => {
     setResumeData(null);
@@ -235,7 +239,7 @@ function Quiz() {
         const glossary = {};
         setGlossaryMap(glossary);
 
-        const topics = await getQuizTopics({ level: 'O-Level' });
+        const topics = await getQuizTopics({ level: currentLevel });
         setAllTopics(Array.isArray(topics) ? topics : []);
 
         if (user) {
@@ -270,6 +274,13 @@ function Quiz() {
   }, []);
 
   useEffect(() => { loadTopics(currentLevel); }, [currentLevel]);
+
+  async function loadTopics(level) {
+    try {
+      const topics = await getQuizTopics({ level: level || currentLevel });
+      setAllTopics(Array.isArray(topics) ? topics : []);
+    } catch { showToast('Failed to load topics', 'error'); }
+  }
 
   useEffect(() => {
     if (!quizQuestions.length) return;
@@ -392,13 +403,6 @@ function Quiz() {
     }
     return DOMPurify.sanitize(escaped, { ALLOWED_TAGS: ['span'], ALLOWED_ATTR: ['class'] });
   }, [glossaryMap]);
-
-  async function loadTopics(level) {
-    try {
-      const topics = await getQuizTopics({ level: level || currentLevel });
-      setAllTopics(Array.isArray(topics) ? topics : []);
-    } catch { showToast('Failed to load topics', 'error'); }
-  }
 
   async function openTopicBlocks(topic, total) {
     setCurrentTopic(topic);
@@ -643,6 +647,14 @@ function Quiz() {
     confettiTimers.current.push(timer);
   }
 
+  const filteredTopics = useMemo(() => {
+    return allTopics.filter(t => {
+      if (isTeacher) return true;
+      if (!t.class_name) return true; // no class assigned, show all
+      return t.class_name === currentClassName;
+    });
+  }, [allTopics, isTeacher, currentClassName]);
+
   if (loading && !quizQuestions.length && !resultData && !currentTopic) {
     return (
       <div className="section">
@@ -715,36 +727,14 @@ function Quiz() {
             </button>
           </div>
 
-          <div className="filter-bar">
-            <button className={`filter-toggle-btn ${filterDropdownOpen ? 'open' : ''}`} onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}>
-              <FaFilter style={{ color: '#8b5cf6', marginRight: '6px' }} /> Filter <FaChevronDown style={{ fontSize: '0.75rem', transition: 'transform 0.3s', transform: filterDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
-            </button>
-            {filterDropdownOpen && (
-              <div className="filter-dropdown">
-                <div className="filter-accordion">
-                  <button className={`filter-accordion-btn ${filterAccordions.level ? 'open' : ''}`} onClick={() => setFilterAccordions({ ...filterAccordions, level: !filterAccordions.level })}>
-                    <span>Level</span><span className="filter-selected">{currentLevel}</span><FaChevronDown />
-                  </button>
-                  {filterAccordions.level && (
-                    <div className="filter-options open">
-                      <label className="filter-option"><input type="radio" name="level" value="O-Level" checked={currentLevel === 'O-Level'} onChange={() => setCurrentLevel('O-Level')} /> O-Level</label>
-                      <label className="filter-option"><input type="radio" name="level" value="A-Level" checked={currentLevel === 'A-Level'} onChange={() => setCurrentLevel('A-Level')} /> A-Level</label>
-                      <label className="filter-option"><input type="radio" name="level" value="Pharmacy" checked={currentLevel === 'Pharmacy'} onChange={() => setCurrentLevel('Pharmacy')} /> Pharmacy</label>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
           <div className="topic-grid">
-            {allTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).length === 0 && (
+            {filteredTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).length === 0 && (
               <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--clr-text-muted)', fontSize: '1rem' }}>
                 <FaMagnifyingGlass style={{ fontSize: '2rem', marginBottom: '1rem', display: 'block', opacity: 0.4 }} />
-                No topics match your search.
+                No topics match your search or class.
               </div>
             )}
-            {allTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).map(topic => {
+            {filteredTopics.filter(t => !topicSearch || t.topic_name.toLowerCase().includes(topicSearch.toLowerCase())).map(topic => {
               const hasQuestions = (topic.question_count || 0) > 0 && (topic.total_blocks || 0) > 0;
               const allDone = hasQuestions && topic.completed_blocks?.length === topic.total_blocks;
               if (hasQuestions && !allDone) {
@@ -771,7 +761,7 @@ function Quiz() {
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div className="question-card" style={{ textAlign: 'center' }}>
             {resultData.passed ? <FaTrophy style={{ fontSize: '3rem', color: '#f59e0b' }} /> : <FaBookOpen style={{ fontSize: '3rem', color: '#6b7280' }} />}
-            <h2 style={{ color: 'var(--clr-text-dim)' }}>{resultData.passed ? `Congratulations, ${user?.email?.split('@')[0] || 'Learner'}!` : 'Block Complete'}</h2>
+            <h2 style={{ color: 'var(--clr-text-dim)' }}>{resultData.passed ? `Congratulations, ${user?.full_name || user?.email?.split('@')[0] || 'Learner'}!` : 'Block Complete'}</h2>
             <div className="result-score">{resultData.percentage}%</div>
             <p style={{ fontSize: '1rem', color: 'var(--clr-text-dim)' }}>{resultData.score}/{resultData.total} correct</p>
             <p style={{ fontStyle: 'italic', fontSize: '0.95rem', color: 'var(--clr-text-dim)' }}>{resultData.passed ? 'Outstanding! You really know this!' : 'Keep studying! Every expert was once a beginner.'}</p>
