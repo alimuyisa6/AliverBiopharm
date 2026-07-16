@@ -1,19 +1,26 @@
  import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { signup } from '../api/client';
+import { signup, getClassSequence, getPharmacyPrograms } from '../api/client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../styles/Auth.css';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
-import { 
-  FaEnvelope, FaLock, FaUser, FaArrowRight, FaArrowLeft, 
+import {
+  FaEnvelope, FaLock, FaUser, FaArrowRight, FaArrowLeft,
   FaUserPlus, FaRightToBracket, FaCircleCheck, FaGraduationCap,
   FaShield, FaRocket, FaBook, FaChartLine, FaUsers,
-  FaEye, FaEyeSlash
+  FaEye, FaEyeSlash, FaUserGraduate, FaChalkboardUser,
+  FaSeedling, FaFlask, FaCapsules, FaCheck
 } from 'react-icons/fa6';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
+
+const TRACKS = [
+  { value: 'O-Level', icon: FaSeedling, label: 'O-Level', description: 'Senior 1 – 4' },
+  { value: 'A-Level', icon: FaFlask, label: 'A-Level', description: 'Senior 5 – 6' },
+  { value: 'Pharmacy', icon: FaCapsules, label: 'Pharmacy', description: 'Certificate, Diploma, Degree' },
+];
 
 const pageVariants = {
   initial: { opacity: 0, x: 80 },
@@ -36,6 +43,12 @@ export default function Auth() {
   const [focused, setFocused] = useState(null);
   const [showPassword, setShowPassword] = useState({ password: false, confirm: false });
 
+  const [onboardingStep, setOnboardingStep] = useState(0);
+  const [role, setRole] = useState(null);
+  const [track, setTrack] = useState(null);
+  const [className, setClassName] = useState(null);
+  const [classes, setClasses] = useState([]);
+
   const { login } = useAuth();
   const turnstileRef = useRef(null);
   const widgetIdRef = useRef(null);
@@ -44,6 +57,20 @@ export default function Auth() {
   const redirectTo = location.state?.from
     ? `${location.state.from.pathname}${location.state.from.search || ''}`
     : '/dashboard';
+
+  useEffect(() => {
+    if (track) {
+      if (track === 'Pharmacy') {
+        getPharmacyPrograms().then(data => {
+          setClasses((data || []).map(p => ({ value: p.program_name, label: p.program_name, description: p.description })));
+        }).catch(() => setClasses([]));
+      } else {
+        getClassSequence(track).then(data => {
+          setClasses((data || []).map(c => ({ value: c.class_name, label: c.class_name })));
+        }).catch(() => setClasses([]));
+      }
+    }
+  }, [track]);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,14 +125,17 @@ export default function Auth() {
     });
   }, [navigate, location.state]);
 
+  const getTurnstileToken = () => {
+    return window.turnstile && widgetIdRef.current
+      ? window.turnstile.getResponse(widgetIdRef.current)
+      : '';
+  };
+
   async function handleLogin(e) {
     e.preventDefault();
     setError('');
 
-    const token = window.turnstile && widgetIdRef.current
-      ? window.turnstile.getResponse(widgetIdRef.current)
-      : '';
-
+    const token = getTurnstileToken();
     if (!token) {
       setError('Please complete the verification');
       return;
@@ -148,12 +178,27 @@ export default function Auth() {
       return;
     }
 
-    const token = window.turnstile && widgetIdRef.current
-      ? window.turnstile.getResponse(widgetIdRef.current)
-      : '';
-
+    const token = getTurnstileToken();
     if (!token) {
       setError('Please complete the verification');
+      return;
+    }
+
+    if (mode === 'register') {
+      setOnboardingStep(1);
+    }
+  }
+
+  async function handleOnboardingFinish() {
+    setError('');
+    if (!role || !track || !className) {
+      setError('Please complete all onboarding steps');
+      return;
+    }
+
+    const token = getTurnstileToken();
+    if (!token) {
+      setError('Verification expired. Please go back and complete the challenge.');
       return;
     }
 
@@ -161,12 +206,17 @@ export default function Auth() {
     show('form', 'Creating your account...');
 
     try {
-      await signup(email, password, token, { full_name: fullName.trim() });
+      await signup(email, password, token, {
+        full_name: fullName.trim(),
+        role,
+        track,
+        class_name: className,
+      });
       setSuccess(true);
       hide();
 
       setTimeout(() => {
-        navigate('/login', { state: location.state, replace: true });
+        navigate(redirectTo, { replace: true });
       }, 1500);
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -178,6 +228,13 @@ export default function Auth() {
       setSubmitting(false);
     }
   }
+
+  const progressPct = () => {
+    if (onboardingStep === 1) return 35;
+    if (onboardingStep === 2) return 70;
+    if (onboardingStep === 3) return 100;
+    return 0;
+  };
 
   if (success) {
     return (
@@ -198,10 +255,118 @@ export default function Auth() {
               <FaCircleCheck className="success-icon" />
             </motion.div>
             <h2 className="success-title">Account Created!</h2>
-            <p className="success-subtitle">Welcome to Aliver Biopharm. Redirecting you to login...</p>
+            <p className="success-subtitle">Welcome to Aliver Biopharm. Redirecting you to your dashboard...</p>
             <div className="success-loader">
               <div className="loader-bar"></div>
             </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (onboardingStep > 0) {
+    return (
+      <motion.div
+        className="auth-page"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      >
+        <div className="auth-form-panel">
+          <div className="auth-card">
+            <div className="auth-header">
+              <h2 className="auth-title">Complete Your Profile</h2>
+              <p className="auth-subtitle">Help us personalise your learning experience</p>
+            </div>
+
+            <div className="fc-progress-track" style={{ marginBottom: '2rem' }}>
+              <div className="fc-progress-fill" style={{ width: `${progressPct()}%` }} />
+            </div>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="auth-error"
+                >
+                  <span className="error-icon">⚠</span>
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {onboardingStep === 1 && (
+              <div className="fc-step">
+                <span className="fc-step-label">Step 1 of 3</span>
+                <h3 className="fc-step-title">I am a...</h3>
+                <div className="fc-option-grid fc-cols-1">
+                  <button className={`fc-option-btn ${role === 'student' ? 'fc-selected' : ''}`} onClick={() => { setRole('student'); setOnboardingStep(2); }}>
+                    <FaUserGraduate className="fc-option-icon" />
+                    <span className="fc-option-label">Student</span>
+                    <span className="fc-option-sub">I'm here to learn</span>
+                  </button>
+                  <button className={`fc-option-btn ${role === 'teacher' ? 'fc-selected' : ''}`} onClick={() => { setRole('teacher'); setOnboardingStep(2); }}>
+                    <FaChalkboardUser className="fc-option-icon" />
+                    <span className="fc-option-label">Teacher</span>
+                    <span className="fc-option-sub">I'm here to teach or contribute content</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {onboardingStep === 2 && (
+              <div className="fc-step">
+                <span className="fc-step-label">Step 2 of 3</span>
+                <h3 className="fc-step-title">Select your track</h3>
+                <div className="fc-option-grid fc-cols-1">
+                  {TRACKS.map(t => {
+                    const Icon = t.icon;
+                    return (
+                      <button key={t.value} className={`fc-option-btn ${track === t.value ? 'fc-selected' : ''}`} onClick={() => { setTrack(t.value); setClassName(null); setOnboardingStep(3); }}>
+                        <Icon className="fc-option-icon" />
+                        <span className="fc-option-label">{t.label}</span>
+                        <span className="fc-option-sub">{t.description}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                  <button className="fc-btn fc-btn-ghost" onClick={() => { setOnboardingStep(1); setTrack(null); }}>
+                    <FaArrowLeft /> Back
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {onboardingStep === 3 && (
+              <div className="fc-step">
+                <span className="fc-step-label">Step 3 of 3</span>
+                <h3 className="fc-step-title">
+                  {track === 'Pharmacy' ? 'Select your programme' : 'Select your class'}
+                </h3>
+                <div className="fc-option-grid fc-cols-1">
+                  {classes.map(c => (
+                    <button key={c.value} className={`fc-option-btn ${className === c.value ? 'fc-selected' : ''}`} onClick={() => setClassName(c.value)}>
+                      <span className="fc-option-label">{c.label}</span>
+                      {c.description && <span className="fc-option-sub">{c.description}</span>}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ marginTop: '1.5rem', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                  <button className="fc-btn fc-btn-ghost" onClick={() => setOnboardingStep(2)}>
+                    <FaArrowLeft /> Back
+                  </button>
+                  <button className="btn-primary auth-submit" onClick={handleOnboardingFinish} disabled={!className || submitting}>
+                    {submitting ? <><InlineSpinner /> Creating account...</> : <><FaCheck /> Complete Registration</>}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
@@ -249,8 +414,8 @@ export default function Auth() {
             transition={{ delay: 0.5 }}
             className="auth-brand-description"
           >
-            {mode === 'login' 
-              ? 'Sign in to continue your learning journey' 
+            {mode === 'login'
+              ? 'Sign in to continue your learning journey'
               : 'Create an account and start learning today'}
           </motion.p>
           <motion.div
@@ -289,8 +454,8 @@ export default function Auth() {
           <div className="auth-header">
             <h2 className="auth-title">{mode === 'login' ? 'Sign In' : 'Create Account'}</h2>
             <p className="auth-subtitle">
-              {mode === 'login' 
-                ? 'Access your account securely' 
+              {mode === 'login'
+                ? 'Access your account securely'
                 : 'Join thousands of learners worldwide'}
             </p>
           </div>
@@ -452,9 +617,9 @@ export default function Auth() {
               {mode === 'login' ? (
                 <>
                   Don't have an account?{' '}
-                  <button 
-                    type="button" 
-                    className="auth-link" 
+                  <button
+                    type="button"
+                    className="auth-link"
                     onClick={() => switchMode('register')}
                   >
                     Sign Up <FaArrowRight />
@@ -463,9 +628,9 @@ export default function Auth() {
               ) : (
                 <>
                   Already have an account?{' '}
-                  <button 
-                    type="button" 
-                    className="auth-link" 
+                  <button
+                    type="button"
+                    className="auth-link"
                     onClick={() => switchMode('login')}
                   >
                     <FaArrowLeft /> Sign In
