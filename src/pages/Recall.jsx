@@ -1,19 +1,18 @@
  import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  FaBrain, FaLock, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
+  FaBrain, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
   FaPencil, FaCircleInfo, FaMicroscope, FaDna, FaCapsules, FaBook,
   FaBookOpen, FaBullseye, FaLeaf, FaFlask, FaTree, FaSeedling,
   FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck, FaLink,
   FaTriangleExclamation, FaExclamation, FaDownload, FaClock,
-  FaVolumeHigh, FaVolumeXmark, FaRotate, FaBars, FaSun, FaMoon,
-  FaRightFromBracket, FaXmark, FaArrowUp
+  FaVolumeHigh, FaVolumeXmark, FaRotate
 } from 'react-icons/fa6';
+import { useAuth } from '../contexts/AuthContext';
 import {
-  getUser, getRecallSession, checkRecallSession, getRecallStats,
+  getRecallSession, checkRecallSession, getRecallStats,
   getRecallAchievements, getRecallDashboard, getRecallTopics,
-  getSelectedLevel, setSelectedLevel, continueRecallSession,
-  submitRecallAnswer, completeRecallSession, getLeaderboard
+  continueRecallSession, submitRecallAnswer, completeRecallSession, getLeaderboard
 } from '../api/cachedClient';
 import '../styles/bioRecall.css';
 import useLoading from '../loading/useLoading';
@@ -91,9 +90,9 @@ async function playTone(type) {
 }
 
 export default function BioRecall() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [currentLevel, setCurrentLevel] = useState(null);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const { user } = useAuth();
+  const level = user?.profile?.track || null;
+
   const [sessionQuestions, setSessionQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sessionActive, setSessionActive] = useState(false);
@@ -101,7 +100,6 @@ export default function BioRecall() {
   const [userAnswersRecord, setUserAnswersRecord] = useState([]);
   const [sessionId, setSessionId] = useState(null);
   const [xpTotal, setXpTotal] = useState(0);
-  const [recallLevel, setRecallLevel] = useState(1);
   const [streakDays, setStreakDays] = useState(0);
   const [masteryTopics, setMasteryTopics] = useState({});
   const [topicXpMap, setTopicXpMap] = useState({});
@@ -117,9 +115,6 @@ export default function BioRecall() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [loading, setLoading] = useState(true);
   const [feedbackResult, setFeedbackResult] = useState(null);
-  const [showLevelInput, setShowLevelInput] = useState(true);
-  const [levelInputValue, setLevelInputValue] = useState('');
-  const [settingLevel, setSettingLevel] = useState(false);
   const [message, setMessage] = useState(null);
   const [offlineQueue, setOfflineQueue] = useState([]);
   const [showConfirm, setShowConfirm] = useState(null);
@@ -190,51 +185,36 @@ export default function BioRecall() {
 
   useEffect(() => {
     document.body.classList.remove('theme-olevel', 'theme-alevel', 'theme-pharmacy');
-    if (currentLevel === 'O-Level') document.body.classList.add('theme-olevel');
-    else if (currentLevel === 'A-Level') document.body.classList.add('theme-alevel');
-    else if (currentLevel === 'Pharmacy') document.body.classList.add('theme-pharmacy');
-  }, [currentLevel]);
+    if (level === 'O-Level') document.body.classList.add('theme-olevel');
+    else if (level === 'A-Level') document.body.classList.add('theme-alevel');
+    else if (level === 'Pharmacy') document.body.classList.add('theme-pharmacy');
+  }, [level]);
 
   useEffect(() => {
+    if (!user || !level) return;
     (async () => {
       try {
-        const user = await getUser();
+        await loadUserProgress(level);
         if (!isMounted.current) return;
-        if (user?.user) {
-          setCurrentUser(user.user);
-          const { selected_level, is_super_admin } = await getSelectedLevel();
-          if (!isMounted.current) return;
-          if (selected_level) {
-            setCurrentLevel(selected_level);
-            setIsSuperAdmin(is_super_admin);
-            setShowLevelInput(false);
-            await loadUserProgress(selected_level);
-            if (!isMounted.current) return;
-            await restoreActiveSession(selected_level);
-            await fetchDashboardAndAchievements();
-          } else {
-            setShowLevelInput(true);
-          }
-        } else {
-          setCurrentUser(null);
-        }
+        await restoreActiveSession(level);
+        if (!isMounted.current) return;
+        await fetchDashboardAndAchievements(level);
       } catch (e) {
         console.error(e);
-        if (isMounted.current) setMessage({ text: 'Failed to authenticate. Please sign in.', type: 'warning' });
+        if (isMounted.current) setMessage({ text: 'Could not load your progress. Please refresh.', type: 'warning' });
       } finally {
         if (isMounted.current) setLoading(false);
       }
     })();
-  }, []);
+  }, [user, level]);
 
-  const loadUserProgress = async (level) => {
-    if (!level) return;
+  const loadUserProgress = async (lvl) => {
+    if (!lvl) return;
     try {
       const stats = await getRecallStats();
       if (!isMounted.current) return;
       if (stats) {
         setXpTotal(stats.total_xp || 0);
-        setRecallLevel(stats.recall_level || 1);
         setStreakDays(stats.streak_days || 0);
         setMasteryTopics(stats.topic_mastery || {});
         setTopicXpMap(stats.topic_xp || {});
@@ -250,9 +230,9 @@ export default function BioRecall() {
     }
   };
 
-  const restoreActiveSession = async (level) => {
+  const restoreActiveSession = async (lvl) => {
     try {
-      const session = await getRecallSession({ level });
+      const session = await getRecallSession({ level: lvl });
       if (!isMounted.current) return false;
       if (session && session.questions?.length && session.session_id) {
         setSessionQuestions(session.questions);
@@ -261,7 +241,6 @@ export default function BioRecall() {
         setCurrentIndex(session.current_index || 0);
         setUserAnswersRecord(session.user_answers || []);
         setSessionActive(true);
-        setShowLevelInput(false);
         setShowReport(false);
         setQuestionStartTime(new Date());
         setMessage({ text: 'Your previous session was restored.', type: 'info' });
@@ -273,12 +252,12 @@ export default function BioRecall() {
     return false;
   };
 
-  const fetchDashboardAndAchievements = async () => {
+  const fetchDashboardAndAchievements = async (lvl) => {
     try {
       const [dash, ach, lb] = await Promise.all([
         getRecallDashboard(),
         getRecallAchievements(),
-        getLeaderboard(currentLevel, 10).catch(() => [])
+        getLeaderboard(lvl, 10).catch(() => [])
       ]);
       if (!isMounted.current) return;
       setDashboardData(dash);
@@ -331,38 +310,9 @@ export default function BioRecall() {
     return () => { if (animationId) cancelAnimationFrame(animationId); };
   }, [showConfetti]);
 
-  const handleSetLevel = async () => {
-    const level = validateAndNormalizeLevel(levelInputValue);
-    if (!level) { setMessage({ text: 'Please enter a valid level (O-Level, A-Level, Pharmacy)', type: 'warning' }); return; }
-    setSettingLevel(true);
-    show('form', 'Setting your level...');
-    try {
-      await setSelectedLevel(level);
-      if (!isMounted.current) return;
-      setCurrentLevel(level);
-      setShowLevelInput(false);
-      await loadUserProgress(level);
-      await fetchDashboardAndAchievements();
-      setMessage({ text: `Level set to ${level}.`, type: 'info' });
-    } catch (e) {
-      if (isMounted.current) setMessage({ text: e.message, type: 'error' });
-    } finally {
-      setSettingLevel(false);
-      safeHide();
-    }
-  };
-
-  const validateAndNormalizeLevel = (input) => {
-    const raw = input.trim().toLowerCase();
-    if (raw === 'olevel' || raw === 'o-level') return 'O-Level';
-    if (raw === 'alevel' || raw === 'a-level') return 'A-Level';
-    if (raw === 'pharmacy') return 'Pharmacy';
-    return null;
-  };
-
   const openTopicModal = async () => {
     try {
-      const topics = await getRecallTopics(currentLevel);
+      const topics = await getRecallTopics(level);
       if (!isMounted.current) return;
       setTopicList(topics || []);
       setTopicModalOpen(true);
@@ -375,7 +325,7 @@ export default function BioRecall() {
     setLoading(true);
     show('quiz', 'Preparing session...');
     try {
-      await checkRecallSession({ level: currentLevel, topic });
+      await checkRecallSession({ level, topic });
     } catch (e) {
       if (isMounted.current) {
         setMessage({ text: e.message === 'Daily session already completed' ? "You've already completed today's session. Come back tomorrow!" : e.message, type: 'warning' });
@@ -385,7 +335,7 @@ export default function BioRecall() {
       return;
     }
     try {
-      const session = await getRecallSession({ level: currentLevel, topic });
+      const session = await getRecallSession({ level, topic });
       if (!isMounted.current) return;
       if (session && session.questions?.length) {
         setSessionQuestions(session.questions);
@@ -414,7 +364,7 @@ export default function BioRecall() {
   };
 
   const handleAnswerSubmission = async () => {
-    if (analyzing || !sessionActive || !currentUser) return;
+    if (analyzing || !sessionActive || !user) return;
     const answer = answerInputRef.current?.value.trim();
     if (!answer) return;
     const question = sessionQuestions[currentIndex];
@@ -454,7 +404,6 @@ export default function BioRecall() {
       if (result.leveled_up) { triggerConfetti(); playSound('achievement'); }
       if (result.daily_quest_completed) { triggerConfetti(); playSound('achievement'); }
       if (result.xp_progress) setXpProgress(result.xp_progress);
-      if (result.new_level) setRecallLevel(result.new_level);
       if (result.rank_title) setRankTitle(result.rank_title);
       if (result.mastery_average !== undefined) setMasteryAverage(result.mastery_average);
       setXpTotal(prev => prev + (result.xp || 0));
@@ -483,8 +432,8 @@ export default function BioRecall() {
       };
       setUserAnswersRecord(prev => [...prev, detailedAnswer]);
       setBrainEnergy(prev => Math.max(0, prev - 5));
-      await loadUserProgress(currentLevel);
-      await fetchDashboardAndAchievements();
+      await loadUserProgress(level);
+      await fetchDashboardAndAchievements(level);
     } catch (err) {
       clearInterval(spinnerInterval);
       safeHide();
@@ -551,7 +500,7 @@ export default function BioRecall() {
     } catch (_) {}
     if (!isMounted.current) return;
     setShowReport(true);
-    await loadUserProgress(currentLevel);
+    await loadUserProgress(level);
     setBrainEnergy(100);
     safeHide();
   };
@@ -561,7 +510,7 @@ export default function BioRecall() {
   const exportStudyNotes = () => {
     if (!userAnswersRecord.length) return;
     const totalTime = sessionReport?.total_time_formatted || '0s';
-    let content = `BioRecall Study Notes \u2013 ${currentLevel}\nSession Date: ${new Date().toLocaleDateString()}\nTotal Questions: ${userAnswersRecord.length}\nTotal Time: ${totalTime}\n\n`;
+    let content = `BioRecall Study Notes \u2013 ${level}\nSession Date: ${new Date().toLocaleDateString()}\nTotal Questions: ${userAnswersRecord.length}\nTotal Time: ${totalTime}\n\n`;
     userAnswersRecord.forEach((item, idx) => {
       content += `Q${idx + 1}: ${item.question}\nYour answer: ${item.userAnswer}\nCorrect answer: ${item.correctAnswer}\nStrength: ${item.strength} (XP: ${item.xp})\nTime: ${item.timeTakenFormatted || '0s'}\n`;
       if (item.feedback?.answer_explanation) content += `Explanation: ${item.feedback.answer_explanation}\n`;
@@ -681,19 +630,6 @@ export default function BioRecall() {
     );
   };
 
-  const renderLevelInput = () => (
-    <div className="level-input-area">
-      <p><FaLock className="lock-icon" /> Choose your level once. You cannot change it later.</p>
-      <input type="text" value={levelInputValue} onChange={(e) => setLevelInputValue(e.target.value)}
-        placeholder="Type: O-Level, A-Level or Pharmacy"
-        onKeyDown={(e) => e.key === 'Enter' && handleSetLevel()} />
-      <button className="retry-level-btn" onClick={handleSetLevel} disabled={settingLevel}>
-        {settingLevel ? <><InlineSpinner /> Setting...</> : 'Set Level'}
-      </button>
-      {message && <div className={`user-message ${message.type}`}>{message.text}</div>}
-    </div>
-  );
-
   const renderDashboard = () => {
     if (!dashboardData) return null;
     const topicEntries = Object.entries(masteryTopics).filter(([t]) => t && t !== 'null').slice(0, 6);
@@ -757,7 +693,7 @@ export default function BioRecall() {
         <div className="dashboard-card">
           <div className="card-title"><FaFlask size="2.5rem" color="#3498db" /> Subject</div>
           <div className="subject-illustration"><i className={`fa-solid ${dashboardData.subjectIllustration}`}></i></div>
-          <div>{currentLevel}</div>
+          <div>{level}</div>
         </div>
         <div className="dashboard-card">
           <div className="card-title"><FaStarOfLife size="2.5rem" color="var(--primary)" /> Topic Mastery</div>
@@ -898,7 +834,7 @@ export default function BioRecall() {
   const renderFloatingCards = () => {
     if (!floatingCards) return null;
     const items = floatingConcepts.length ? floatingConcepts : ['Cell', 'DNA', 'Enzyme'];
-    const icon = currentLevel === 'O-Level' ? <FaMicroscope /> : currentLevel === 'A-Level' ? <FaDna /> : <FaCapsules />;
+    const icon = level === 'O-Level' ? <FaMicroscope /> : level === 'A-Level' ? <FaDna /> : <FaCapsules />;
     const cards = Array.from({ length: 12 }, (_, i) => {
       const text = items[Math.floor(Math.random() * items.length)];
       return (
@@ -913,7 +849,7 @@ export default function BioRecall() {
   const renderTopicModal = () => (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h3 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Choose a topic for {currentLevel}</h3>
+        <h3 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Choose a topic for {level}</h3>
         <div style={{ marginBottom: '1rem' }}>
           {topicList.length === 0 ? <p>Loading topics...</p> : topicList.map(t => (
             <button key={t.name} className="option-btn" onClick={() => startSessionFromTopicModal(t.name)}>{t.name}</button>
@@ -955,8 +891,8 @@ export default function BioRecall() {
       {renderConfettiCanvas()}
       <div className="recall-container">
         <div className="recall-header">
-          <h1>{currentLevel === 'Pharmacy' ? 'RecallRx' : `BioRecall ${currentLevel || ''}`}</h1>
-          {currentLevel && <span className="level-badge">{currentLevel}</span>}
+          <h1>{level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${level || ''}`}</h1>
+          {level && <span className="level-badge">{level}</span>}
         </div>
         <div className="main-layout">
           <div className="main-content">
@@ -964,25 +900,13 @@ export default function BioRecall() {
               <div className="entrance-screen">
                 <div className="recall-card" style={{ textAlign: 'center' }}>
                   <FaBrain size="3rem" color="var(--primary)" />
-                  {!currentUser ? (
-                    <p style={{ marginTop: '0.5rem', color: 'var(--primary)' }}>
-                      <Link to="/" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Sign in or Create an account</Link> to start your recall journey.
-                    </p>
-                  ) : showLevelInput ? renderLevelInput() : (
-                    <>
-                      <p><FaLock /> Your level is locked:</p>
-                      <div className="locked-level">{currentLevel}</div>
-                      <button className="continue-btn" onClick={openTopicModal}>Continue to Topics</button>
-                      {isSuperAdmin && <button className="admin-change-btn" onClick={() => setShowLevelInput(true)}>Change level (admin)</button>}
-                    </>
-                  )}
-                  {currentUser && <p style={{ marginTop: '0.5rem' }}><FaFire color="#e67e22" /> {streakDays} Day Recall Streak</p>}
-                  {currentUser && <p style={{ marginTop: '0.5rem' }}><FaStar color="#f1c40f" /> Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</p>}
+                  <button className="continue-btn" onClick={openTopicModal}>Continue to Topics</button>
+                  <p style={{ marginTop: '0.5rem' }}><FaFire color="#e67e22" /> {streakDays} Day Recall Streak</p>
+                  <p style={{ marginTop: '0.5rem' }}><FaStar color="#f1c40f" /> Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</p>
                   {message && <div className={`user-message ${message.type}`}>{message.text}</div>}
                 </div>
-                {currentUser && currentLevel && !showLevelInput && (
-                  <>{renderWeakTopicAlert()}{renderDashboard()}</>
-                )}
+                {renderWeakTopicAlert()}
+                {renderDashboard()}
               </div>
             )}
             {sessionActive && (
@@ -1001,7 +925,7 @@ export default function BioRecall() {
             {showReport && renderReport()}
           </div>
           <div className="sidebar">
-            {currentUser && currentLevel && !sessionActive && !showReport && <>{renderLeaderboard()}</>}
+            {!sessionActive && !showReport && <>{renderLeaderboard()}</>}
           </div>
         </div>
         {topicModalOpen && renderTopicModal()}
