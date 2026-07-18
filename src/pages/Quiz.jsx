@@ -1,7 +1,6 @@
- // src/pages/Quiz.jsx
-import React from 'react';
+ import React from 'react';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
 import {
@@ -28,7 +27,6 @@ import QuizDashboard from '../components/quiz/QuizDashboard';
 import QuizChallenges from '../components/quiz/QuizChallenges';
 import QuizLearningPath from '../components/quiz/QuizLearningPath';
 import QuizWeakAreas from '../components/quiz/QuizWeakAreas';
-
 import {
   FaHouse,
   FaMagnifyingGlass,
@@ -87,7 +85,6 @@ class QuizErrorBoundary extends React.Component {
 }
 
 const SOUND_CORRECT = typeof window !== 'undefined' ? (() => { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); return () => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.setValueAtTime(520, ctx.currentTime); o.frequency.setValueAtTime(660, ctx.currentTime + 0.1); g.gain.setValueAtTime(0.15, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3); o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.3); }; } catch { return () => {}; } })() : () => {};
-
 const SOUND_INCORRECT = typeof window !== 'undefined' ? (() => { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); return () => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.type = 'sawtooth'; o.frequency.setValueAtTime(260, ctx.currentTime); g.gain.setValueAtTime(0.1, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25); o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.25); }; } catch { return () => {}; } })() : () => {};
 
 const REDIRECT_SECONDS = 10;
@@ -97,6 +94,10 @@ function Quiz() {
   const currentLevel = user?.profile?.track || 'O-Level';
   const currentClassName = user?.profile?.class_name;
   const isTeacher = user?.profile?.role === 'teacher';
+
+  if (user && !user.profile?.onboarding_completed) {
+    return <Navigate to="/complete-profile" />;
+  }
 
   const [currentTopic, setCurrentTopic] = useState('');
   const [allTopics, setAllTopics] = useState([]);
@@ -155,17 +156,14 @@ function Quiz() {
   }, []);
 
   const getFirstUnansweredIndex = useCallback((answers) => answers.findIndex(a => a === null), []);
-
   const canNavigateTo = useCallback((targetIndex, answers) => {
     if (answers[targetIndex] !== null) return true;
     return targetIndex === answers.findIndex(a => a === null);
   }, []);
-
   const navigateTo = useCallback((idx) => {
     setQuestionTransition(true);
     setTimeout(() => { setCurrentIndex(idx); setQuestionTransition(false); }, 200);
   }, []);
-
   const goToNextUnanswered = useCallback((answers, currentIdx) => {
     const first = answers.findIndex(a => a === null);
     if (first !== -1 && first !== currentIdx) {
@@ -173,7 +171,6 @@ function Quiz() {
       setTimeout(() => { setCurrentIndex(first); setQuestionTransition(false); }, 200);
     }
   }, []);
-
   const saveQuizStateToStorage = useCallback(() => {
     if (quizQuestions.length > 0 && userAnswers.some(a => a !== null)) {
       const state = {
@@ -185,7 +182,6 @@ function Quiz() {
       sessionStorage.setItem('quiz_resume', JSON.stringify(state));
     }
   }, [quizQuestions, userAnswers, currentTopic, currentLevel, currentBlock, totalBlocks, currentIndex, quizStartTime]);
-
   const saveQuizStateToBackend = useCallback(() => {
     if (!user) return;
     if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
@@ -200,12 +196,10 @@ function Quiz() {
       } catch {}
     }, 2000);
   }, [user, currentLevel, currentTopic, currentBlock, totalBlocks, userAnswers, currentIndex, quizStartTime, quizQuestions]);
-
   const handleResume = useCallback(() => {
     if (!resumeData) return;
     const state = resumeData;
     setCurrentTopic(state.topic || '');
-    // level already set from profile, ignore resume level
     setCurrentBlock(state.block !== undefined ? state.block : 0);
     setTotalBlocks(state.totalBlocks || 0);
     setQuizQuestions(state.questions || []);
@@ -217,7 +211,6 @@ function Quiz() {
     setShowResumeModal(false);
     sessionStorage.removeItem('quiz_resume');
   }, [resumeData]);
-
   const handleDiscardResume = useCallback(() => {
     setResumeData(null);
     setShowResumeModal(false);
@@ -238,10 +231,8 @@ function Quiz() {
         setLoading(true);
         const glossary = {};
         setGlossaryMap(glossary);
-
         const topics = await getQuizTopics({ level: currentLevel });
         setAllTopics(Array.isArray(topics) ? topics : []);
-
         if (user) {
           await recordDailyVisit();
           const [streakData, badges, savedState] = await Promise.all([
@@ -256,7 +247,6 @@ function Quiz() {
             return;
           }
         }
-
         const saved = sessionStorage.getItem('quiz_resume');
         if (saved) {
           const state = JSON.parse(saved);
@@ -274,7 +264,6 @@ function Quiz() {
   }, []);
 
   useEffect(() => { loadTopics(currentLevel); }, [currentLevel]);
-
   async function loadTopics(level) {
     try {
       const topics = await getQuizTopics({ level: level || currentLevel });
@@ -302,23 +291,18 @@ function Quiz() {
 
   useEffect(() => {
     if (!quizQuestions.length || !sessionActive) return;
-
     let warningTimeout = null;
-
     const handleTabAway = async () => {
       if (tabSwitchLock.current) return;
       tabSwitchLock.current = true;
       setTimeout(() => { tabSwitchLock.current = false; }, 1000);
-
       try {
         const result = await trackTabSwitch(currentLevel, currentTopic, currentBlock);
-
         if (!result.success && result.auto_submitted) {
           setSessionActive(false);
           triggerIntegrityLock(result.message);
           return;
         }
-
         if (result.success) {
           setTabSwitchCount(result.tab_switches);
           setTabWarning(true);
@@ -327,7 +311,6 @@ function Quiz() {
             setTabWarning(false);
             setBlockTabSwitch(false);
           }, 4000);
-
           if (result.remaining <= 1) {
             showToast(`Warning: ${result.remaining} tab switch${result.remaining > 1 ? 'es' : ''} remaining before auto-submit!`, 'warning');
           }
@@ -336,10 +319,8 @@ function Quiz() {
         console.error('Failed to track tab switch:', error);
       }
     };
-
     const handleVisibility = () => { if (document.hidden) handleTabAway(); };
     const handleBlur = () => { handleTabAway(); };
-
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('blur', handleBlur);
     return () => {
@@ -410,7 +391,6 @@ function Quiz() {
     setQuizQuestions([]);
     setResultData(null);
   }
-
   async function startBlock(blockNum) {
     if (!user) { showToast('Please sign in.', 'error'); return; }
     try {
@@ -420,16 +400,13 @@ function Quiz() {
     setPendingBlock(blockNum);
     setShowRulesModal(true);
   }
-
   async function confirmStartBlock() {
     setShowRulesModal(false);
     const blockNum = pendingBlock;
     setCurrentBlock(blockNum);
     setLoading(true);
-
     try {
       const sessionResult = await startQuizSession(currentLevel, currentTopic, blockNum);
-
       if (!sessionResult.success) {
         if (sessionResult.auto_submitted) {
           showToast(sessionResult.message || 'Quiz auto-submitted. Please start a new block.', 'warning');
@@ -442,17 +419,14 @@ function Quiz() {
         setLoading(false);
         return;
       }
-
       setTabSwitchCount(sessionResult.tab_switches || 0);
       setSessionActive(true);
-
       const data = await getQuizBlock({ level: currentLevel, topic: currentTopic, block_number: blockNum });
       if (!data || !data.questions || !data.questions.length) {
         showToast('No questions available.', 'error');
         setLoading(false);
         return;
       }
-
       setQuizQuestions(data.questions);
       setUserAnswers(new Array(data.questions.length).fill(null));
       setConfidence(new Array(data.questions.length).fill(null));
@@ -467,7 +441,6 @@ function Quiz() {
       setLoading(false);
     }
   }
-
   async function selectAnswer(optionLetter) {
     if (userAnswers[currentIndex] !== null || answerSubmitting || integrityOverlay) return;
     setAnswerSubmitting(true);
@@ -492,13 +465,11 @@ function Quiz() {
       setAnswerSubmitting(false);
     }
   }
-
   function setConfidenceForCurrent(level) {
     const next = [...confidence];
     next[currentIndex] = level;
     setConfidence(next);
   }
-
   function nextQuestion() {
     const first = getFirstUnansweredIndex(userAnswers);
     if (first !== -1 && first !== currentIndex) navigateTo(first);
@@ -506,18 +477,14 @@ function Quiz() {
       if (canNavigateTo(currentIndex + 1, userAnswers)) navigateTo(currentIndex + 1);
     }
   }
-
   function prevQuestion() { if (currentIndex > 0) navigateTo(currentIndex - 1); }
-
   function triggerIntegrityLock(message) {
     setTabWarning(false);
     setBlockTabSwitch(false);
     setIntegrityOverlay(true);
     setIntegrityCountdown(REDIRECT_SECONDS);
     showToast(message || 'Quiz auto-submitted due to tab switching', 'warning');
-
     submitBlockWithSession();
-
     if (integrityIntervalRef.current) clearInterval(integrityIntervalRef.current);
     integrityIntervalRef.current = setInterval(() => {
       setIntegrityCountdown((prev) => {
@@ -530,7 +497,6 @@ function Quiz() {
       });
     }, 1000);
   }
-
   function returnToBlockList() {
     if (integrityIntervalRef.current) clearInterval(integrityIntervalRef.current);
     setIntegrityOverlay(false);
@@ -541,18 +507,14 @@ function Quiz() {
     setTabSwitchCount(0);
     loadTopics(currentLevel);
   }
-
   async function submitBlockWithSession() {
     if (quizQuestions.length === 0) return;
-
     const answersPayload = quizQuestions.map((q, idx) => ({
       id: q.id,
       selectedOption: userAnswers[idx]?.selected || 'X'
     }));
-
     const timeTaken = Math.round((new Date() - new Date(quizStartTime)) / 1000);
     setLoading(true);
-
     try {
       const result = await submitQuizWithSession(
         currentLevel,
@@ -561,23 +523,18 @@ function Quiz() {
         answersPayload,
         timeTaken
       );
-
       sessionStorage.removeItem('quiz_resume');
       clearQuizState().catch(() => {});
-
       if (result.auto_submitted) {
         setLoading(false);
         return;
       }
-
       if (!result.success) {
         showToast('Submission failed: ' + (result.message || 'Unknown error'), 'error');
         setLoading(false);
         return;
       }
-
       setResultData(result);
-
       trackEvent('quiz_complete', {
         level: currentLevel,
         topic: currentTopic,
@@ -586,7 +543,6 @@ function Quiz() {
         passed: result.passed,
         tab_switches: result.tab_switches || 0
       });
-
       const newBadges = [];
       if (result.percentage >= 100 && !earnedBadges.includes('perfect_block')) {
         newBadges.push({ id: 'perfect_block', label: 'Perfect Score' });
@@ -600,7 +556,6 @@ function Quiz() {
         await saveAchievement({ id: 'streak_10', label: '10-Day Streak' });
         setEarnedBadges(prev => [...prev, 'streak_10']);
       }
-
       let rule = null;
       if (result.percentage >= 90) {
         rule = { message: "Excellent! You're ready for more advanced material.", action: null };
@@ -616,7 +571,6 @@ function Quiz() {
       setLoading(false);
     }
   }
-
   async function loadLeaderboard() {
     setLeaderboardLoading(true);
     try {
@@ -625,7 +579,6 @@ function Quiz() {
     } catch { setLeaderboard([]); }
     setLeaderboardLoading(false);
   }
-
   function showConfetti() {
     if (typeof document === 'undefined') return;
     const colors = ['#0ab5b5', '#b8873a', '#e2c06a', '#10b981', '#f59e0b'];
@@ -646,11 +599,10 @@ function Quiz() {
     }, 4000);
     confettiTimers.current.push(timer);
   }
-
   const filteredTopics = useMemo(() => {
     return allTopics.filter(t => {
       if (isTeacher) return true;
-      if (!t.class_name) return true; // no class assigned, show all
+      if (!t.class_name) return true;
       return t.class_name === currentClassName;
     });
   }, [allTopics, isTeacher, currentClassName]);
