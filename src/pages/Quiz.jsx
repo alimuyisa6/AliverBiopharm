@@ -66,6 +66,7 @@ import {
   FaArrowLeft,
   FaArrowRight,
   FaShieldHalved,
+  FaLayerGroup,
 } from "react-icons/fa6";
 
 class QuizErrorBoundary extends React.Component {
@@ -102,6 +103,7 @@ function Quiz() {
 
   const [currentTopic, setCurrentTopic] = useState('');
   const [allTopics, setAllTopics] = useState([]);
+  const [levelTotals, setLevelTotals] = useState({ total_questions: 0, total_topics: 0 });
   const [classSequence, setClassSequence] = useState([]);
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [userAnswers, setUserAnswers] = useState([]);
@@ -233,8 +235,12 @@ function Quiz() {
         setLoading(true);
         const glossary = {};
         setGlossaryMap(glossary);
-        const topics = await getQuizTopics({ level: currentLevel });
-        setAllTopics(Array.isArray(topics) ? topics : []);
+        const topicsResponse = await getQuizTopics({ level: currentLevel });
+        setAllTopics(Array.isArray(topicsResponse?.topics) ? topicsResponse.topics : []);
+        setLevelTotals({
+          total_questions: topicsResponse?.total_questions || 0,
+          total_topics: topicsResponse?.total_topics || 0
+        });
         if (user) {
           await recordDailyVisit();
           const [streakData, badges, savedState] = await Promise.all([
@@ -268,8 +274,12 @@ function Quiz() {
   useEffect(() => { loadTopics(currentLevel); }, [currentLevel]);
   async function loadTopics(level) {
     try {
-      const topics = await getQuizTopics({ level: level || currentLevel });
-      setAllTopics(Array.isArray(topics) ? topics : []);
+      const topicsResponse = await getQuizTopics({ level: level || currentLevel });
+      setAllTopics(Array.isArray(topicsResponse?.topics) ? topicsResponse.topics : []);
+      setLevelTotals({
+        total_questions: topicsResponse?.total_questions || 0,
+        total_topics: topicsResponse?.total_topics || 0
+      });
     } catch { showToast('Failed to load topics', 'error'); }
   }
 
@@ -698,6 +708,11 @@ function Quiz() {
 
       {!currentTopic ? (
         <>
+          <div className="level-totals-bar" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--clr-text-muted)', fontSize: '0.9rem' }}>
+            <FaLayerGroup style={{ color: '#0ab5b5' }} />
+            <span>{currentLevel}: {levelTotals.total_questions} question{levelTotals.total_questions === 1 ? '' : 's'} across {levelTotals.total_topics} topic{levelTotals.total_topics === 1 ? '' : 's'}</span>
+          </div>
+
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
             <div className="topic-search" style={{ flex: 1 }}>
               <input type="text" placeholder="Search topics..." value={topicSearch} onChange={e => setTopicSearch(e.target.value)} />
