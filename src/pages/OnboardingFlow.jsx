@@ -1,8 +1,7 @@
- // src/pages/OnboardingFlow.jsx (fixed import)
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { saveOnboarding, getClassSequence, getPharmacyPrograms } from '../api/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FaUserGraduate, FaChalkboardUser, FaSeedling, FaFlask, FaCapsules, FaArrowRight, FaArrowLeft, FaSpinner, FaCheck } from 'react-icons/fa6';
 
 const TRACKS = [
@@ -14,7 +13,10 @@ const TRACKS = [
 export default function OnboardingFlow() {
   const { user, refresh } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const [searchParams] = useSearchParams();
+  const isClassOnly = searchParams.get('classOnly') === 'true' && user?.profile?.track;
+
+  const [step, setStep] = useState(isClassOnly ? 2 : 0);
   const [role, setRole] = useState(null);
   const [track, setTrack] = useState(null);
   const [className, setClassName] = useState(null);
@@ -23,24 +25,28 @@ export default function OnboardingFlow() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (track) {
-      if (track === 'Pharmacy') {
+    const targetTrack = isClassOnly ? user.profile.track : track;
+    if (targetTrack) {
+      if (targetTrack === 'Pharmacy') {
         getPharmacyPrograms().then(data => {
           setClasses((data || []).map(p => ({ value: p.program_name, label: p.program_name, description: p.description })));
         }).catch(() => setClasses([]));
       } else {
-        getClassSequence(track).then(data => {
+        getClassSequence(targetTrack).then(data => {
           setClasses((data || []).map(c => ({ value: c.class_name, label: c.class_name })));
         }).catch(() => setClasses([]));
       }
     }
-  }, [track]);
+  }, [track, isClassOnly, user]);
 
   async function handleFinish() {
     setLoading(true);
     setError('');
     try {
-      await saveOnboarding({ role, track, class_name: className });
+      const payload = isClassOnly
+        ? { class_name: className }
+        : { role, track, class_name: className };
+      await saveOnboarding(payload);
       await refresh();
       navigate('/dashboard', { replace: true });
     } catch (err) {
@@ -53,8 +59,7 @@ export default function OnboardingFlow() {
   function progressPct() {
     if (step === 0) return 5;
     if (step === 1) return 35;
-    if (step === 2) return 70;
-    return 100;
+    return 70;
   }
 
   return (
@@ -64,7 +69,7 @@ export default function OnboardingFlow() {
           <div className="fc-progress-fill" style={{ width: `${progressPct()}%` }} />
         </div>
 
-        {step === 0 && (
+        {!isClassOnly && step === 0 && (
           <div className="fc-step">
             <span className="fc-step-label">Step 1 of 3</span>
             <h1 className="fc-step-title">I am a...</h1>
@@ -84,7 +89,7 @@ export default function OnboardingFlow() {
           </div>
         )}
 
-        {step === 1 && (
+        {!isClassOnly && step === 1 && (
           <div className="fc-step">
             <span className="fc-step-label">Step 2 of 3</span>
             <h1 className="fc-step-title">Select your track</h1>
@@ -109,16 +114,16 @@ export default function OnboardingFlow() {
           </div>
         )}
 
-        {step === 2 && (
+        {(isClassOnly || step === 2) && (
           <div className="fc-step">
-            <span className="fc-step-label">Step 3 of 3</span>
+            <span className="fc-step-label">{isClassOnly ? 'Update your class' : 'Step 3 of 3'}</span>
             <h1 className="fc-step-title">
-              {track === 'Pharmacy' ? 'Select your programme' : 'Select your class'}
+              {track === 'Pharmacy' || (isClassOnly && user.profile.track === 'Pharmacy') ? 'Select your programme' : 'Select your class'}
             </h1>
             <p className="fc-step-subtitle">
-              {track === 'Pharmacy'
+              {track === 'Pharmacy' || (isClassOnly && user.profile.track === 'Pharmacy')
                 ? 'Which pharmacy programme are you enrolled in?'
-                : `Which ${track} class are you in?`}
+                : `Which ${track || user.profile.track} class are you in?`}
             </p>
             <div className="fc-option-grid fc-cols-1">
               {classes.map(c => (
@@ -130,11 +135,13 @@ export default function OnboardingFlow() {
             </div>
             {error && <div className="alert alert-error" style={{ marginTop: '1rem' }}>{error}</div>}
             <div style={{ marginTop: '1.5rem', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button className="fc-btn fc-btn-ghost" onClick={() => setStep(1)}>
-                <FaArrowLeft /> Back
-              </button>
+              {!isClassOnly && (
+                <button className="fc-btn fc-btn-ghost" onClick={() => setStep(1)}>
+                  <FaArrowLeft /> Back
+                </button>
+              )}
               <button className="fc-btn fc-btn-primary" onClick={handleFinish} disabled={!className || loading}>
-                {loading ? <><FaSpinner className="icon-spin" /> Saving...</> : <><FaCheck /> Complete Setup</>}
+                {loading ? <><FaSpinner className="icon-spin" /> Saving...</> : <><FaCheck /> {isClassOnly ? 'Update Class' : 'Complete Setup'}</>}
               </button>
             </div>
           </div>
