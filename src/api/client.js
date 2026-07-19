@@ -117,7 +117,7 @@ async function getRequest(module, path, params = {}) {
 
 export { getRequest, apiCall };
 
-export async function signin(email, password, turnstile_token) { return apiCall('auth', 'signin', { email, password, turnstile_token }); }
+export async function signin(email, password, turnstile_token, mfa_code) { return apiCall('auth', 'signin', { email, password, turnstile_token, mfa_code }); }
 export async function signout() { return apiCall('auth', 'signout', {}); }
 export async function getUser() { return getRequest('auth', 'get_user'); }
 
@@ -203,6 +203,10 @@ export async function getAppFeatures(pageId = 'all') { return getRequest('admin'
 export async function getUserActivityTrace() { return getRequest('admin', 'get_user_activity_trace'); }
 export async function deleteQuizTopic(topic, level) { return apiCall('admin', 'delete_quiz_topic', { topic, level }); }
 export async function listAllUsers() { return getRequest('admin', 'list_users'); }
+export async function getAuditLog() { return getRequest('admin', 'get_audit_log'); }
+export async function setupMfa() { return apiCall('admin', 'setup_mfa', {}); }
+export async function confirmMfa(code) { return apiCall('admin', 'confirm_mfa', { code }); }
+export async function disableMfa(userId) { return apiCall('admin', 'disable_mfa', { userId }); }
 
 export async function submitContact(formData) { return apiCall('contact', 'submit_contact', { formData }); }
 export async function subscribeNewsletter(email) { return apiCall('contact', 'subscribe_newsletter', { formData: { email } }); }
