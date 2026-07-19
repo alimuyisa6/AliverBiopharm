@@ -336,7 +336,7 @@ export async function getFlashcardProgress() {
 
 export async function getCommunityActivity() { return getRequest('community', 'activity'); }
 
-export async function getLeaderboard(level, limit = 20) { return getRequest('stats', 'leaderboard', { level, limit }); }
+export async function getLeaderboard(level, limit = 20) { return getRequest('interactions', 'leaderboard', { level, limit }); }
 
 export async function uploadFile(fileName, fileData) { return apiCall('upload', 'upload_file', { file_name: fileName, file_data: fileData }); }
 
@@ -564,5 +564,6 @@ export async function saveOnboarding(payload) { return apiCall('profile', 'save_
 export async function requestLevelChange(requested_track, requested_class, reason) { return apiCall('profile', 'request_level_change', { requested_track, requested_class, reason }); }
 export async function getClassSequence(track) { return getRequest('profile', 'class_sequence', { track }); }
 export async function getPharmacyPrograms() { return getRequest('profile', 'pharmacy_programs'); }
+export async function getLevelChangeStatus() { return getRequest('profile', 'level_change_status'); }
 
 export async function adminUpdateProfile(user_id, track, class_name) { return apiCall('profile', 'admin_update_profile', { user_id, track, class_name }); }
