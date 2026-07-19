@@ -18,19 +18,17 @@ let _infoListCache = (() => {
 
 let _infoListPromise = null;
 
-export function getSections() {
-  if (_cache) return Promise.resolve(_cache);
-  if (_promise) return _promise;
+ export async function getSections() {
+  const data = await getAllSiteSections();
 
-  _promise = getAllSiteSections().then(data => {
-    _cache = data;
-    try { sessionStorage.setItem('siteSections', JSON.stringify(data)); } catch {}
-    _promise = null;
-    return data;
-  });
+  _cache = data;
 
-  return _promise;
-}
+  try {
+    sessionStorage.setItem('siteSections', JSON.stringify(data));
+  } catch {}
+
+  return data;
+ }
 
 export function clearSectionsCache() {
   _cache = null;
