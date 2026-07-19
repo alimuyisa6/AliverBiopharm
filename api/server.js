@@ -39,11 +39,10 @@ export default async function handler(req, res) {
   try {
     const ctx = await createAuthenticatedContext(req, res);
     if (ctx.fingerprintRejected) return res.status(401).json({ error: 'Session invalidated due to a security concern. Please sign in again.' });
-    if (ctx.csrfSecret) { const originalJson = res.json.bind(res); res.json = (data) => { if (data && typeof data === 'object' && !data.error) data.csrf_token = generateCsrfToken(ctx.csrfSecret); return originalJson(data); }; }
+    if (ctx.csrfSecret) { const originalJson = res.json.bind(res); res.json = (data) => { if (data && typeof data === 'object' && !data.error) data.csrf_token = generateCsrfToken(ctx.csrfSecret, ctx.fingerprint); return originalJson(data); }; }
     const isAuthAttempt = moduleName === 'auth' && AUTH_ATTEMPT_PATHS.has(path);
     const isCsrfExempt = CSRF_EXEMPT_PATHS.has(path);
     const rateLimitAction = isAuthAttempt ? 'auth_attempt' : null;
-     
     const allowed = await rateLimiter.check(ctx.fingerprint || getClientIp(req), ctx.userId, rateLimitAction);
     if (!allowed) {
       if (isAuthAttempt) { const remaining = await rateLimiter.getAuthAttemptsRemaining(getClientIp(req)); return res.status(429).json({ error: 'Too many login attempts. Please try again later.', retry_after_minutes: 15, attempts_remaining: remaining }); }
