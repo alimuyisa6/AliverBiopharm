@@ -38,13 +38,15 @@ export default async function handler(req, res) {
   try { mod = await import(modulePath); } catch (importErr) { console.error(`[IMPORT ERROR] ${moduleName}`, importErr.message); return res.status(500).json({ error: 'Module load failed', module: moduleName, detail: importErr.message }); }
   try {
     const ctx = await createAuthenticatedContext(req, res);
-    if (ctx.fingerprintRejected) return res.status(401).json({ error: 'Session invalidated due to security concern. Please sign in again.' });
+    if (ctx.fingerprintRejected) return res.status(401).json({ error: 'Session invalidated due to a security concern. Please sign in again.' });
     if (ctx.csrfSecret) { const originalJson = res.json.bind(res); res.json = (data) => { if (data && typeof data === 'object' && !data.error) data.csrf_token = generateCsrfToken(ctx.csrfSecret); return originalJson(data); }; }
     const isAuthAttempt = moduleName === 'auth' && AUTH_ATTEMPT_PATHS.has(path);
     const isCsrfExempt = CSRF_EXEMPT_PATHS.has(path);
     const rateLimitAction = isAuthAttempt ? 'auth_attempt' : null;
-    if (!rateLimiter.check(ctx.fingerprint || getClientIp(req), ctx.userId, rateLimitAction)) {
-      if (isAuthAttempt) { const remaining = rateLimiter.getAuthAttemptsRemaining(getClientIp(req)); return res.status(429).json({ error: 'Too many login attempts. Please try again later.', retry_after_minutes: 15, attempts_remaining: remaining }); }
+     
+    const allowed = await rateLimiter.check(ctx.fingerprint || getClientIp(req), ctx.userId, rateLimitAction);
+    if (!allowed) {
+      if (isAuthAttempt) { const remaining = await rateLimiter.getAuthAttemptsRemaining(getClientIp(req)); return res.status(429).json({ error: 'Too many login attempts. Please try again later.', retry_after_minutes: 15, attempts_remaining: remaining }); }
       return res.status(429).json({ error: 'Too many requests. Please try again later.' });
     }
     if (!SAFE_METHODS.has(req.method) && !isCsrfExempt) { try { enforceCsrf(req, ctx); } catch (csrfError) { return res.status(csrfError.statusCode || 403).json({ error: csrfError.message }); } }
