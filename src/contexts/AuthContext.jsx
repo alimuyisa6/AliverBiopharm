@@ -1,4 +1,4 @@
- import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getUser, signin, signout, getProfile } from '../api/client';
 import { Navigate, useLocation } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa6';
@@ -29,9 +29,13 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, [checkAuth]);
 
-  const login = useCallback(async (email, password, turnstileToken) => {
-    await signin(email, password, turnstileToken);
+  const login = useCallback(async (email, password, turnstileToken, mfaCode) => {
+    const result = await signin(email, password, turnstileToken, mfaCode);
+    if (result?.mfa_required) {
+      return result;
+    }
     await checkAuth();
+    return result;
   }, [checkAuth]);
 
   const logout = useCallback(async () => {
@@ -85,3 +89,4 @@ export function ProtectedRoute({ children }) {
 
   return children;
 }
+ 
