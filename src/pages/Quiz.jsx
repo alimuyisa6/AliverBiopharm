@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DOMPurify from 'dompurify';
+import { getClassSequence } from '../api/client';
 import {
   getQuizTopics,
   getQuizBlock,
@@ -101,6 +102,7 @@ function Quiz() {
 
   const [currentTopic, setCurrentTopic] = useState('');
   const [allTopics, setAllTopics] = useState([]);
+  const [classSequence, setClassSequence] = useState([]);
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [userAnswers, setUserAnswers] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -270,6 +272,20 @@ function Quiz() {
       setAllTopics(Array.isArray(topics) ? topics : []);
     } catch { showToast('Failed to load topics', 'error'); }
   }
+
+  // Fetch the class sequence for the learner's track so topic access can be
+  // evaluated the same way the backend evaluates it (enforceClassAccess /
+  // canAccessContent in lib/profile.js), instead of a naive string-equality
+  // check against class_name which was hiding topics the backend would
+  // actually allow (recap access to earlier classes in the same track).
+  useEffect(() => {
+    if (!currentLevel || isTeacher) { setClassSequence([]); return; }
+    let cancelled = false;
+    getClassSequence(currentLevel)
+      .then(seq => { if (!cancelled) setClassSequence(Array.isArray(seq) ? seq : []); })
+      .catch(() => { if (!cancelled) setClassSequence([]); });
+    return () => { cancelled = true; };
+  }, [currentLevel, isTeacher]);
 
   useEffect(() => {
     if (!quizQuestions.length) return;
@@ -599,13 +615,25 @@ function Quiz() {
     }, 4000);
     confettiTimers.current.push(timer);
   }
+
+  // Mirrors the backend's enforceClassAccess/canAccessContent logic
+  // (lib/profile.js): a topic is visible if it has no class_name (unscoped),
+  // if the learner is a teacher, if it matches the learner's own class
+  // exactly, or if it's an earlier class in the same track sequence
+  // (recap access). Falls open on unmapped classes, matching the backend's
+  // "unmapped_class" behavior.
   const filteredTopics = useMemo(() => {
+    const ownOrder = classSequence.find(c => c.class_name === currentClassName)?.sequence_order;
     return allTopics.filter(t => {
       if (isTeacher) return true;
       if (!t.class_name) return true;
-      return t.class_name === currentClassName;
+      if (t.class_name === currentClassName) return true;
+      if (ownOrder === undefined) return true;
+      const topicOrder = classSequence.find(c => c.class_name === t.class_name)?.sequence_order;
+      if (topicOrder === undefined) return true;
+      return topicOrder <= ownOrder;
     });
-  }, [allTopics, isTeacher, currentClassName]);
+  }, [allTopics, isTeacher, currentClassName, classSequence]);
 
   if (loading && !quizQuestions.length && !resultData && !currentTopic) {
     return (
