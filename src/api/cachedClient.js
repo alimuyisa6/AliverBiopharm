@@ -180,6 +180,18 @@ export const submitQuizWithSession = (level, topic, blockNumber, answers, timeTa
 export const getQuizSessionStatus = () =>
   api.getQuizSessionStatus();
 
+export const getAuditLog = () =>
+  withCache('audit_log', api.getAuditLog, false)();
+
+export const setupMfa = () =>
+  api.setupMfa();
+
+export const confirmMfa = (code) =>
+  api.confirmMfa(code);
+
+export const disableMfa = (userId) =>
+  api.disableMfa(userId);
+
 export function invalidateNoteCache(id) { invalidateCache(`note_${id}`); }
 export function invalidateChatCache(roomId) { invalidateCache(`chat_${roomId}`); }
 export function invalidateClassroomCache(room_id) {
