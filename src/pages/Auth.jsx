@@ -39,6 +39,10 @@ export default function Auth() {
   const [className, setClassName] = useState(null);
   const [classes, setClasses] = useState([]);
 
+  const [mfaStep, setMfaStep] = useState(false);
+  const [mfaCode, setMfaCode] = useState('');
+  const [mfaError, setMfaError] = useState('');
+
   const { login } = useAuth();
   const turnstileRef = useRef(null);
   const widgetIdRef = useRef(null);
@@ -79,7 +83,48 @@ export default function Auth() {
   async function handleLogin(e) {
     e.preventDefault(); setError(''); const token = getTurnstileToken(); if (!token) { setError('Please complete the verification'); return; }
     setSubmitting(true); show('auth', 'Signing you in...');
-    try { await login(email, password, token); hide(); navigate(redirectTo, { replace: true }); } catch (err) { setError(err.message || 'Login failed.'); hide(); if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current); } finally { setSubmitting(false); }
+    try {
+      const result = await login(email, password, token);
+      if (result?.mfa_required) {
+        hide();
+        setSubmitting(false);
+        setMfaStep(true);
+        if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+        return;
+      }
+      hide();
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(err.message || 'Login failed.'); hide();
+      if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+    } finally { setSubmitting(false); }
+  }
+
+  async function handleMfaSubmit(e) {
+    e.preventDefault(); setMfaError('');
+    if (!mfaCode.trim() || mfaCode.trim().length !== 6) { setMfaError('Enter the 6-digit code from your authenticator app'); return; }
+    const token = getTurnstileToken();
+    if (!token) { setMfaError('Please complete the verification again'); return; }
+    setSubmitting(true); show('auth', 'Verifying...');
+    try {
+      const result = await login(email, password, token, mfaCode.trim());
+      if (result?.mfa_required) {
+        setMfaError('Incorrect code. Please try again.');
+        hide();
+        if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+        return;
+      }
+      hide();
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setMfaError(err.message || 'Verification failed.'); hide();
+      if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
+    } finally { setSubmitting(false); }
+  }
+
+  function handleMfaBack() {
+    setMfaStep(false); setMfaCode(''); setMfaError('');
+    if (window.turnstile && widgetIdRef.current) window.turnstile.reset(widgetIdRef.current);
   }
 
   async function handleRegister(e) {
@@ -108,6 +153,55 @@ export default function Auth() {
     return (
       <motion.div className="auth-page" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
         <div className="auth-form-panel"><div className="auth-card success-card"><motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 15, stiffness: 200 }}><FaCircleCheck className="success-icon" /></motion.div><h2 className="success-title">Account Created!</h2><p className="success-subtitle">Welcome to Aliver Biopharm. Redirecting you...</p><div className="success-loader"><div className="loader-bar"></div></div></div></div>
+      </motion.div>
+    );
+  }
+
+  if (mfaStep) {
+    return (
+      <motion.div className="auth-page" initial="initial" animate="in" exit="out" variants={pageVariants} transition={{ type: 'spring', damping: 25, stiffness: 200 }}>
+        <div className="auth-form-panel">
+          <motion.div className="auth-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <div className="auth-header">
+              <h2 className="auth-title">Two-Factor Verification</h2>
+              <p className="auth-subtitle">Enter the 6-digit code from your authenticator app</p>
+            </div>
+            <AnimatePresence>{mfaError && <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="auth-error"><span className="error-icon">⚠</span>{mfaError}</motion.div>}</AnimatePresence>
+            <form onSubmit={handleMfaSubmit} className="auth-form">
+              <div className="form-group">
+                <label className="form-label">Authentication Code</label>
+                <div className="input-wrapper">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={mfaCode}
+                    onChange={e => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onFocus={() => setFocused('mfa')}
+                    onBlur={() => setFocused(null)}
+                    className={`form-input ${focused === 'mfa' ? 'input-focused' : ''}`}
+                    style={{ letterSpacing: '0.4em', textAlign: 'center' }}
+                    required
+                    disabled={submitting}
+                    autoFocus
+                  />
+                  <div className="input-highlight"></div>
+                </div>
+              </div>
+              <div ref={turnstileRef} className="auth-captcha"></div>
+              <motion.button type="submit" className={`btn-primary auth-submit ${submitting ? 'loading' : ''}`} disabled={submitting} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                {submitting ? <><InlineSpinner /> Verifying...</> : 'Verify and Sign In'}
+              </motion.button>
+            </form>
+            <div className="auth-footer">
+              <p className="auth-footer-text">
+                <button type="button" className="auth-link" onClick={handleMfaBack}><FaArrowLeft /> Back to sign in</button>
+              </p>
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
     );
   }
