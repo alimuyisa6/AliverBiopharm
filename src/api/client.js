@@ -569,5 +569,7 @@ export async function requestLevelChange(requested_track, requested_class, reaso
 export async function getClassSequence(track) { return getRequest('profile', 'class_sequence', { track }); }
 export async function getPharmacyPrograms() { return getRequest('profile', 'pharmacy_programs'); }
 export async function getLevelChangeStatus() { return getRequest('profile', 'level_change_status'); }
+export async function getPendingLevelChanges() { return getRequest('profile', 'pending_level_changes'); }
+export async function reviewLevelChange(request_id, action) { return apiCall('profile', 'review_level_change', { request_id, action }); }
 
 export async function adminUpdateProfile(user_id, track, class_name) { return apiCall('profile', 'admin_update_profile', { user_id, track, class_name }); }
