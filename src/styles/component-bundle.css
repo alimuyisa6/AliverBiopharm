@@ -3782,3 +3782,17 @@ footer li {
   .card .btn-primary { margin: auto 1rem 1.1rem 1rem; }
   .card-link-arrow { padding: 0 1rem 1.1rem; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes icon-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
