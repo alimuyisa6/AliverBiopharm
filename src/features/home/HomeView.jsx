@@ -18,7 +18,7 @@ import { ContinueLearningSection } from './ContinueLearningSection';
 import { FlashcardSection } from '../flashcards/FlashcardSection';
 import { PdfLibrarySection } from '../pdfs/PdfLibrarySection';
 import { PdfPreviewModal } from '../pdfs/PdfPreviewModal';
-import { NotesSection } from '../notes/NotesSection';
+import { NotesSection } from '../Notes/NotesSection';
 import { MoodCheckSection } from '../mood/MoodCheckSection';
 import { CommunitySection } from '../community/CommunitySection';
 import { ContactSection } from '../contact/ContactSection';
