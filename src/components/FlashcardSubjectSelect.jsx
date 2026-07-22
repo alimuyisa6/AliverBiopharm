@@ -8,7 +8,7 @@ import {
   FaTrophy,
   FaArrowLeft,
   FaArrowRight,
-  FaRandom,
+  FaShuffle,
   FaLayerGroup,
   FaSearch,
   FaChevronRight
@@ -169,7 +169,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
               </div>
 
               <button className="fc-random-btn" onClick={handleRandom} disabled={!decks.length}>
-                <FaRandom />
+                <FaShuffle />
                 Let the system choose for me
               </button>
             </div>
