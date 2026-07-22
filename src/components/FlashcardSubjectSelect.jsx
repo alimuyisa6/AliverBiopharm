@@ -12,7 +12,7 @@ import {
   FaLayerGroup,
   FaSearch,
   FaChevronRight
-} from 'react-icons/fa';
+} from 'react-icons/fa6';
 
 const CONFIDENCE_OPTS = [
   { value: 'Beginner', icon: FaSeedling, label: 'Beginner' },
@@ -121,12 +121,12 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
                 );
               })}
             </div>
-            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button className="fc-btn fc-btn-ghost" onClick={onBack}>
+            <div className="fc-nav">
+              <button className="fc-btn-ghost" onClick={onBack}>
                 <FaArrowLeft /> Back
               </button>
               <button
-                className="fc-btn fc-btn-primary"
+                className="fc-btn-primary"
                 onClick={handleConfNext}
                 disabled={!confidence}
               >
@@ -185,8 +185,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
               <div className="fc-empty">
                 <FaLayerGroup />
                 No decks found for {state.selected_class} {state.selected_discipline} yet.
-                <br />
-                <span style={{ fontSize: 'var(--text-sm)', marginTop: '0.5rem', display: 'block' }}>
+                <span className="fc-empty-hint">
                   Check back soon as more decks are added for your class.
                 </span>
               </div>
@@ -196,8 +195,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
               <div className="fc-empty">
                 <FaSearch />
                 No decks match "{topic}" for your class.
-                <br />
-                <span style={{ fontSize: 'var(--text-sm)', marginTop: '0.5rem', display: 'block' }}>
+                <span className="fc-empty-hint">
                   Try a different {topicLabel} or pick from the list below.
                 </span>
               </div>
@@ -205,9 +203,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
 
             {!loading && visibleDecks.length > 0 && (
               <>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--clr-text-muted)', textAlign: 'center', marginTop: '1.5rem', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
-                  Available Decks
-                </p>
+                <p className="fc-deck-list-label">Available Decks</p>
                 <div className="fc-deck-list">
                   {visibleDecks.slice(0, 8).map(deck => (
                     <button
@@ -233,8 +229,8 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
               </>
             )}
 
-            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-              <button className="fc-btn fc-btn-ghost" onClick={() => setStep(0)}>
+            <div className="fc-nav fc-nav-center">
+              <button className="fc-btn-ghost" onClick={() => setStep(0)}>
                 <FaArrowLeft /> Back
               </button>
             </div>
