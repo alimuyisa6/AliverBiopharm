@@ -1,34 +1,30 @@
-  import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { useAuth } from '../../contexts/AuthContext';
-import { useLevelFilter } from '../../hooks/useLevelFilter';
-import { useContentAccess } from '../../hooks/useContentAccess';
-
-import { HeroCarousel } from './HeroCarousel';
-import { StatsGrid } from './StatsGrid';
-import { TeamScroll } from './TeamScroll';
-import { TestimonialSlider } from './TestimonialSlider';
-import { PricingCards } from './PricingCards';
-import { BlogGrid } from './BlogGrid';
-import { FaqAccordion } from './FaqAccordion';
-import { NewsletterForm } from './NewsletterForm';
-import { ContinueLearningSection } from './ContinueLearningSection';
-
-import { FlashcardSection } from '../flashcards/FlashcardSection';
-import { PdfLibrarySection } from '../pdfs/PdfLibrarySection';
-import { PdfPreviewModal } from '../pdfs/PdfPreviewModal';
-import { NotesSection } from '../Notes/NotesSection';
-import { MoodCheckSection } from '../mood/MoodCheckSection';
-import { CommunitySection } from '../community/CommunitySection';
-import { ContactSection } from '../contact/ContactSection';
-import { ChatWidget } from '../chat/ChatWidget';
-import { ClassroomSection } from '../classroom/ClassroomSection';
-
-import InfoCards from '../../components/InfoCards';
-import InteractiveShowcase from '../../components/InteractiveShowcase';
-import { PendingApprovalScreen } from '../../components/access/PendingApprovalScreen';
-
+import { useAuth } from '../contexts/AuthContext';
+import { useLevelFilter } from '../hooks/useLevelFilter';
+import { useContentAccess } from '../hooks/useContentAccess';
+import { HeroCarousel } from '../features/home/HeroCarousel';
+import { StatsGrid } from '../features/home/StatsGrid';
+import { TeamScroll } from '../features/home/TeamScroll';
+import { TestimonialSlider } from '../features/home/TestimonialSlider';
+import { PricingCards } from '../features/home/PricingCards';
+import { BlogGrid } from '../features/home/BlogGrid';
+import { FaqAccordion } from '../features/home/FaqAccordion';
+import { NewsletterForm } from '../features/home/NewsletterForm';
+import { ContinueLearningSection } from '../features/home/ContinueLearningSection';
+import { FlashcardSection } from '../features/flashcards/FlashcardSection';
+import { PdfLibrarySection } from '../features/pdfs/PdfLibrarySection';
+import { PdfPreviewModal } from '../features/pdfs/PdfPreviewModal';
+import { NotesSection } from '../features/notes/NotesSection';
+import { ContentGuideCard } from '../features/home/ContentGuideCard';
+import { MoodCheckSection } from '../features/mood/MoodCheckSection';
+import { CommunitySection } from '../features/community/CommunitySection';
+import { ContactSection } from '../features/contact/ContactSection';
+import { ChatWidget } from '../features/chat/ChatWidget';
+import { ClassroomSection } from '../features/classroom/ClassroomSection';
+import InfoCards from '../components/InfoCards';
+import InteractiveShowcase from '../components/InteractiveShowcase';
+import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import {
   getResources,
   getPastPapers,
@@ -36,8 +32,10 @@ import {
   getFlashcardDecks,
   getPublicStats,
   getContinueReading,
-  getCommunityActivity
-} from '../../api/client';
+  getCommunityActivity,
+  getPdfsByLevel,
+  getNotesStructure
+} from '../api/client';
 
 export default function Home() {
   const { user } = useAuth();
@@ -46,7 +44,16 @@ export default function Home() {
   const { level, class_name, showAll } = useLevelFilter();
 
   const [loading, setLoading] = useState(true);
-  const [sections, setSections] = useState({ hero: { slides: [] }, team: { members: [] }, testimonials: { quotes: [] }, pricing: { plans: [] }, blog: { posts: [] }, faq: { items: [] }, contact: { info: [] }, weekly_challenge: null });
+  const [sections, setSections] = useState({
+    hero: { slides: [] },
+    team: { members: [] },
+    testimonials: { quotes: [] },
+    pricing: { plans: [] },
+    blog: { posts: [] },
+    faq: { items: [] },
+    contact: { info: [] },
+    weekly_challenge: null
+  });
   const [publicStats, setPublicStats] = useState(null);
   const [communityActivity, setCommunityActivity] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -60,14 +67,9 @@ export default function Home() {
   const [moodSubmitted, setMoodSubmitted] = useState(false);
   const [continueLearning, setContinueLearning] = useState([]);
   const [pdfs, setPdfs] = useState([]);
-  const [pdfLevel, setPdfLevel] = useState(level || 'O-Level');
-  const [pdfSelectedTopic, setPdfSelectedTopic] = useState(null);
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [previewPdf, setPreviewPdf] = useState(null);
   const [groupedNotes, setGroupedNotes] = useState({});
-  const [notesSelectedLevel, setNotesSelectedLevel] = useState(level || 'O-Level');
-  const [notesSelectedTopic, setNotesSelectedTopic] = useState(null);
-  const [notesFilterVisible, setNotesFilterVisible] = useState(false);
   const [notesContent, setNotesContent] = useState(null);
   const [notesReactions, setNotesReactions] = useState(null);
   const [notesComments, setNotesComments] = useState([]);
@@ -86,27 +88,81 @@ export default function Home() {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      const [stats, papers, topics, decks, continueReading, activity] = await Promise.all([
+      const effectiveLevel = showAll ? null : level;
+      const effectiveClass = showAll ? null : class_name;
+
+      const [
+        stats,
+        papers,
+        topics,
+        decks,
+        continueReading,
+        activity,
+        pdfData,
+        notesData
+      ] = await Promise.all([
         getPublicStats().catch(() => null),
         getPastPapers({ limit: 3 }).catch(() => []),
-        getQuizTopics({ level: level || 'O-Level' }).catch(() => []),
-        getFlashcardDecks({ level: level || 'O-Level' }).catch(() => []),
+        getQuizTopics({
+          level: effectiveLevel || 'O-Level',
+          class_name: effectiveClass
+        }).catch(() => []),
+        getFlashcardDecks({
+          level: effectiveLevel || 'O-Level',
+          class_programme: effectiveClass
+        }).catch(() => []),
         user ? getContinueReading(5).catch(() => []) : Promise.resolve([]),
-        getCommunityActivity().catch(() => [])
+        getCommunityActivity().catch(() => []),
+        effectiveLevel
+          ? getPdfsByLevel(effectiveLevel, effectiveClass).catch(() => ({ pdfs: [] }))
+          : Promise.resolve({ pdfs: [] }),
+        effectiveLevel
+          ? getNotesStructure(effectiveLevel, effectiveClass).catch(() => [])
+          : Promise.resolve([])
       ]);
 
       setPublicStats(stats);
       setCommunityActivity(activity);
       setContinueLearning(continueReading);
+      setPdfs(pdfData?.pdfs || []);
+
+      const notesGrouped = {};
+      (notesData || []).forEach(item => {
+        const topic = item.topic || 'General';
+        if (!notesGrouped[topic]) notesGrouped[topic] = [];
+        notesGrouped[topic].push(item);
+      });
+      setGroupedNotes(notesGrouped);
 
       setSections({
-        hero: { slides: [{ title: 'Welcome to AliverBiopharm', subtitle: 'Advanced Biology & Pharmacy Learning', cta_text: 'Start Learning', cta_link: '/dashboard', icon: 'fa-arrow-right', background_image: '' }] },
+        hero: {
+          slides: [{
+            title: 'Welcome to AliverBiopharm',
+            subtitle: 'Advanced Biology & Pharmacy Learning',
+            cta_text: 'Start Learning',
+            cta_link: '/dashboard',
+            icon: 'fa-arrow-right',
+            background_image: ''
+          }]
+        },
         team: { members: [] },
-        testimonials: { quotes: [{ text: 'AliverBiopharm transformed how I study biology.', author: 'Sarah M., O-Level Student' }] },
+        testimonials: {
+          quotes: [{
+            text: 'AliverBiopharm transformed how I study biology.',
+            author: 'Sarah M., O-Level Student'
+          }]
+        },
         pricing: { plans: [] },
         blog: { posts: [] },
         faq: { items: [] },
-        contact: { info: [{ label: 'Email', value: 'support@aliverbiopharm.com', icon: 'fa-envelope', href: 'mailto:support@aliverbiopharm.com' }] },
+        contact: {
+          info: [{
+            label: 'Email',
+            value: 'support@aliverbiopharm.com',
+            icon: 'fa-envelope',
+            href: 'mailto:support@aliverbiopharm.com'
+          }]
+        },
         weekly_challenge: null
       });
     } catch (err) {
@@ -118,20 +174,30 @@ export default function Home() {
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    setContactStatus({ success: true, message: 'Thank you! We\'ll get back to you soon.' });
+    setContactStatus({
+      success: true,
+      message: 'Thank you! We\'ll get back to you soon.'
+    });
     setContactForm({ name: '', email: '', subject: '', message: '' });
     setTimeout(() => setContactStatus(null), 3000);
   };
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
-    setNewsletterStatus({ success: true, message: 'Subscribed successfully!' });
+    setNewsletterStatus({
+      success: true,
+      message: 'Subscribed successfully!'
+    });
     setNewsletterEmail('');
     setTimeout(() => setNewsletterStatus(null), 3000);
   };
 
   const handleWeeklyChallengeSubmit = (selected) => {
-    setWeeklyChallengeAnswer({ selected, correct: true, explanation: 'Correct! This is the right answer.' });
+    setWeeklyChallengeAnswer({
+      selected,
+      correct: true,
+      explanation: 'Correct! This is the right answer.'
+    });
   };
 
   const handleMoodSubmit = () => {
@@ -157,24 +223,50 @@ export default function Home() {
   const handleNoteReaction = (noteId, reaction) => {
     setNotesReactions(prev => ({
       ...prev,
-      counts: { ...prev?.counts, [reaction]: (prev?.counts?.[reaction] || 0) + 1 },
+      counts: {
+        ...prev?.counts,
+        [reaction]: (prev?.counts?.[reaction] || 0) + 1
+      },
       user_reaction: reaction
     }));
   };
 
   const handleNoteComment = (noteId) => {
     if (notesCommentInput.trim()) {
-      setNotesComments(prev => [...prev, { comment: notesCommentInput, user_name: 'You', created_at: new Date().toISOString() }]);
+      setNotesComments(prev => [
+        ...prev,
+        {
+          comment: notesCommentInput,
+          user_name: 'You',
+          created_at: new Date().toISOString()
+        }
+      ]);
       setNotesCommentInput('');
     }
   };
 
   const sendChat = () => {
     if (chatInput.trim()) {
-      setChatMessages(prev => [...prev, { id: Date.now(), sender_type: 'user', content: chatInput, created_at: new Date().toISOString() }]);
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: Date.now(),
+          sender_type: 'user',
+          content: chatInput,
+          created_at: new Date().toISOString()
+        }
+      ]);
       setChatInput('');
       setTimeout(() => {
-        setChatMessages(prev => [...prev, { id: Date.now() + 1, sender_type: 'admin', content: 'Thanks for your message. How can I help?', created_at: new Date().toISOString() }]);
+        setChatMessages(prev => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            sender_type: 'admin',
+            content: 'Thanks for your message. How can I help?',
+            created_at: new Date().toISOString()
+          }
+        ]);
       }, 1500);
     }
   };
@@ -191,7 +283,9 @@ export default function Home() {
     return (
       <div className="home-loading">
         <div className="home-loading-spinner">
-          <span></span><span></span><span></span>
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
       </div>
     );
@@ -210,12 +304,16 @@ export default function Home() {
 
       <ClassroomSection user={user} />
 
-      <StatsGrid stats={{
-        resources_count: publicStats?.resources_count || 0,
-        users_count: publicStats?.users_count || 0,
-        downloads_count: publicStats?.downloads_count || 0,
-        quiz_attempts: publicStats?.quiz_attempts || 0,
-      }} />
+      <StatsGrid
+        stats={{
+          resources_count: publicStats?.resources_count || 0,
+          users_count: publicStats?.users_count || 0,
+          downloads_count: publicStats?.downloads_count || 0,
+          quiz_attempts: publicStats?.quiz_attempts || 0
+        }}
+      />
+
+      <ContentGuideCard user={user} />
 
       <ContinueLearningSection
         continueLearning={continueLearning}
@@ -232,27 +330,23 @@ export default function Home() {
 
       <PdfLibrarySection
         pdfs={pdfs}
-        pdfLevel={pdfLevel}
-        pdfSelectedTopic={pdfSelectedTopic}
-        onLevelChange={(newLevel) => { setPdfLevel(newLevel); setPdfSelectedTopic(null); }}
-        onTopicSelect={setPdfSelectedTopic}
         onPreview={handlePdfPreview}
         onDownload={handlePdfDownload}
       />
 
       <NotesSection
         groupedNotes={groupedNotes}
-        notesSelectedLevel={notesSelectedLevel}
-        notesSelectedTopic={notesSelectedTopic}
-        notesFilterVisible={notesFilterVisible}
         notesContent={notesContent}
         notesReactions={notesReactions}
         notesComments={notesComments}
         notesCommentInput={notesCommentInput}
-        onSelectLevel={setNotesSelectedLevel}
-        onSelectTopic={setNotesSelectedTopic}
-        onToggleFilter={() => setNotesFilterVisible(!notesFilterVisible)}
-        onReadNote={(id) => navigate(`/notes/read?id=${id}`)}
+        onReadNote={(id) => {
+          if (id) {
+            navigate(`/notes/read?id=${id}`);
+          } else {
+            setNotesContent(null);
+          }
+        }}
         onReaction={handleNoteReaction}
         onComment={handleNoteComment}
         onCommentInputChange={setNotesCommentInput}
