@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+ import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getUser, signin, signout, getProfile } from '../api/client';
 import { Navigate, useLocation } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa6';
@@ -14,7 +14,18 @@ export function AuthProvider({ children }) {
       const data = await getUser();
       if (data?.user) {
         const profileData = await getProfile();
-        setUser({ ...data.user, profile: profileData || { role: 'student', track: null, class_name: null, onboarding_completed: false } });
+        setUser({
+          ...data.user,
+          profile: profileData || {
+            role: 'student',
+            track: null,
+            class_name: null,
+            onboarding_completed: false,
+            is_approved_teacher: false,
+            approved_track: null,
+            approval_notes: null
+          }
+        });
       } else {
         setUser(null);
       }
@@ -73,8 +84,8 @@ export function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '40vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <FaSpinner className="icon-spin" size={28} color="var(--clr-cyan)" />
+      <div className="protected-loading">
+        <FaSpinner className="icon-spin" />
       </div>
     );
   }
@@ -87,6 +98,9 @@ export function ProtectedRoute({ children }) {
     return <Navigate to="/onboarding" replace />;
   }
 
+  if (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   return children;
 }
- 
