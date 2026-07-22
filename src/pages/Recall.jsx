@@ -1,20 +1,57 @@
- import { useState, useEffect, useRef, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  FaBrain, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
-  FaPencil, FaCircleInfo, FaMicroscope, FaDna, FaCapsules, FaBook,
-  FaBookOpen, FaBullseye, FaLeaf, FaFlask, FaTree, FaSeedling,
-  FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck, FaLink,
-  FaTriangleExclamation, FaExclamation, FaDownload, FaClock,
-  FaVolumeHigh, FaVolumeXmark, FaRotate
+  FaBrain,
+  FaCheck,
+  FaTrophy,
+  FaFire,
+  FaStar,
+  FaChartLine,
+  FaPencil,
+  FaCircleInfo,
+  FaMicroscope,
+  FaDna,
+  FaCapsules,
+  FaBookOpen,
+  FaBullseye,
+  FaLeaf,
+  FaFlask,
+  FaTree,
+  FaSeedling,
+  FaStarOfLife,
+  FaChartSimple,
+  FaCalendarDay,
+  FaCircleCheck,
+  FaLink,
+  FaTriangleExclamation,
+  FaExclamation,
+  FaDownload,
+  FaClock,
+  FaVolumeHigh,
+  FaVolumeXmark,
+  FaRotate,
+  FaHouse,
+  FaArrowLeft,
+  FaArrowRight,
+  FaSpinner
 } from 'react-icons/fa6';
 import { useAuth } from '../contexts/AuthContext';
+import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
+import { useLevelFilter } from '../hooks/useLevelFilter';
+import { useContentAccess } from '../hooks/useContentAccess';
 import {
-  getRecallSession, checkRecallSession, getRecallStats,
-  getRecallAchievements, getRecallDashboard, getRecallTopics,
-  continueRecallSession, submitRecallAnswer, completeRecallSession, getLeaderboard
+  getRecallSession,
+  checkRecallSession,
+  getRecallStats,
+  getRecallAchievements,
+  getRecallDashboard,
+  getRecallTopics,
+  continueRecallSession,
+  submitRecallAnswer,
+  completeRecallSession,
+  getLeaderboard
 } from '../api/cachedClient';
-import '../styles/bioRecall.css';
+import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
 
@@ -30,9 +67,10 @@ function escapeHtml(unsafe) {
 }
 
 let audioCtx = null;
+
 async function getAudioContext() {
   if (!audioCtx) {
-    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; }
   }
   if (audioCtx.state === 'suspended') await audioCtx.resume();
   return audioCtx;
@@ -55,21 +93,24 @@ async function playTone(type) {
         osc.frequency.setValueAtTime(659.25, now + 0.1);
         osc.frequency.setValueAtTime(783.99, now + 0.2);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-        osc.start(now); osc.stop(now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
         break;
       case 'strong':
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.setValueAtTime(554.37, now + 0.08);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        osc.start(now); osc.stop(now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
         break;
       case 'developing':
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(330, now);
         osc.frequency.setValueAtTime(294, now + 0.15);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-        osc.start(now); osc.stop(now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
         break;
       case 'achievement':
         osc.type = 'sine';
@@ -78,20 +119,24 @@ async function playTone(type) {
         osc.frequency.setValueAtTime(783.99, now + 0.24);
         osc.frequency.setValueAtTime(1046.5, now + 0.36);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-        osc.start(now); osc.stop(now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
         break;
       default:
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-        osc.start(now); osc.stop(now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
     }
-  } catch (e) {}
+  } catch {}
 }
 
 export default function BioRecall() {
   const { user } = useAuth();
-  const level = user?.profile?.track || null;
+  const { isReady } = useRequireOnboarding();
+  const access = useContentAccess();
+  const { level, showAll } = useLevelFilter();
 
   const [sessionQuestions, setSessionQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -116,7 +161,6 @@ export default function BioRecall() {
   const [loading, setLoading] = useState(true);
   const [feedbackResult, setFeedbackResult] = useState(null);
   const [message, setMessage] = useState(null);
-  const [offlineQueue, setOfflineQueue] = useState([]);
   const [showConfirm, setShowConfirm] = useState(null);
   const [debugLog, setDebugLog] = useState([]);
   const countdownRef = useRef(null);
@@ -171,12 +215,12 @@ export default function BioRecall() {
   };
 
   const safeHide = useCallback(() => {
-    if (isMounted.current) { try { hide(); } catch (e) {} }
+    if (isMounted.current) { try { hide(); } catch {} }
   }, [hide]);
 
   useEffect(() => {
     isMounted.current = true;
-    return () => { isMounted.current = false; try { hide(); } catch (e) {} };
+    return () => { isMounted.current = false; try { hide(); } catch {} };
   }, [hide]);
 
   const addDebug = (msg) => {
@@ -191,7 +235,7 @@ export default function BioRecall() {
   }, [level]);
 
   useEffect(() => {
-    if (!user || !level) return;
+    if (!isReady || !access.canAccess || access.isPending || !level) return;
     (async () => {
       try {
         await loadUserProgress(level);
@@ -206,7 +250,7 @@ export default function BioRecall() {
         if (isMounted.current) setLoading(false);
       }
     })();
-  }, [user, level]);
+  }, [isReady, access.canAccess, access.isPending, level]);
 
   const loadUserProgress = async (lvl) => {
     if (!lvl) return;
@@ -246,8 +290,8 @@ export default function BioRecall() {
         setMessage({ text: 'Your previous session was restored.', type: 'info' });
         return true;
       }
-    } catch (e) {
-      console.warn('No active session to restore', e);
+    } catch {
+      return false;
     }
     return false;
   };
@@ -287,8 +331,10 @@ export default function BioRecall() {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height - canvas.height,
-        r: Math.random() * 6 + 2, d: Math.random() * 20 + 10,
-        color: `hsl(${Math.random() * 360}, 80%, 60%)`, tilt: Math.random() * 10 - 5
+        r: Math.random() * 6 + 2,
+        d: Math.random() * 20 + 10,
+        color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+        tilt: Math.random() * 10 - 5
       });
     }
     let animationId;
@@ -297,11 +343,14 @@ export default function BioRecall() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let alive = false;
       particles.forEach(p => {
-        p.y += (p.d / 10); p.x += Math.sin(p.tilt);
+        p.y += (p.d / 10);
+        p.x += Math.sin(p.tilt);
         if (p.y > canvas.height + 10) return;
         alive = true;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.color; ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
       });
       if (alive && showConfetti) animationId = requestAnimationFrame(draw);
       else if (isMounted.current) setShowConfetti(false);
@@ -316,7 +365,7 @@ export default function BioRecall() {
       if (!isMounted.current) return;
       setTopicList(topics || []);
       setTopicModalOpen(true);
-    } catch (e) {
+    } catch {
       if (isMounted.current) { setTopicList([]); setTopicModalOpen(true); }
     }
   };
@@ -385,7 +434,8 @@ export default function BioRecall() {
     try {
       addDebug('Calling submitRecallAnswer...');
       const result = await submitRecallAnswer({
-        session_id: sessionId, question_id: question.id,
+        session_id: sessionId,
+        question_id: question.id,
         user_answer: answer,
         nonce: crypto.randomUUID?.() || Math.random().toString(36),
         started_at: startedAt
@@ -505,7 +555,10 @@ export default function BioRecall() {
     safeHide();
   };
 
-  const startSessionFromTopicModal = (topic) => { setTopicModalOpen(false); startSession(topic); };
+  const startSessionFromTopicModal = (topic) => {
+    setTopicModalOpen(false);
+    startSession(topic);
+  };
 
   const exportStudyNotes = () => {
     if (!userAnswersRecord.length) return;
@@ -540,8 +593,9 @@ export default function BioRecall() {
     if (!weak.length) return null;
     return (
       <div className="weak-topic-alert">
-        <FaTriangleExclamation /> Weak Topics: {weak.map(([t, v]) => `${t} (${Math.round(v)}%)`).join(', ')}
-        <span style={{ marginLeft: '8px', fontSize: '0.8rem' }}>Focus on these topics!</span>
+        <FaTriangleExclamation />
+        Weak Topics: {weak.map(([t, v]) => `${t} (${Math.round(v)}%)`).join(', ')}
+        <span className="weak-topic-hint">Focus on these topics!</span>
       </div>
     );
   };
@@ -582,7 +636,9 @@ export default function BioRecall() {
       <div className="leaderboard-panel">
         <h3 className="leaderboard-title"><FaTrophy /> Leaderboard</h3>
         <table className="leaderboard-table">
-          <thead><tr><th>Rank</th><th>User</th><th>XP</th><th>Level</th></tr></thead>
+          <thead>
+            <tr><th>Rank</th><th>User</th><th>XP</th><th>Level</th></tr>
+          </thead>
           <tbody>
             {leaderboard.map((entry, idx) => (
               <tr key={idx}>
@@ -603,28 +659,13 @@ export default function BioRecall() {
   );
 
   useEffect(() => {
-    const syncOffline = async () => {
-      const queue = [...offlineQueue];
-      setOfflineQueue([]);
-      for (const item of queue) {
-        try {
-          await submitRecallAnswer({ session_id: sessionId, question_id: item.questionId, user_answer: item.answer, nonce: crypto.randomUUID?.() || Math.random().toString(36) });
-          if (isMounted.current) setMessage({ text: 'Your saved answer has been submitted!', type: 'info' });
-        } catch (e) { console.warn('sync failed', e); }
-      }
-    };
-    if (offlineQueue.length && navigator.onLine) syncOffline();
-    const handleOnline = () => { if (offlineQueue.length) syncOffline(); };
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
-  }, [offlineQueue, sessionId]);
-
-  useEffect(() => { return () => { if (countdownRef.current) clearInterval(countdownRef.current); }; }, []);
+    return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
+  }, []);
 
   const renderDebugPanel = () => {
     if (!debugLog.length) return null;
     return (
-      <div style={{ background: '#111', color: '#0f0', fontSize: '11px', padding: '8px', marginTop: '8px', borderRadius: '6px', overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+      <div className="debug-panel">
         {debugLog.map((line, i) => <div key={i}>{line}</div>)}
       </div>
     );
@@ -637,7 +678,7 @@ export default function BioRecall() {
     const isQuestComplete = daily.isCompleted || (daily.completed >= daily.target);
     return (
       <div className="dashboard-grid">
-        <div className="dashboard-card" style={{ background: isQuestComplete ? 'var(--success-light, #e6ffe6)' : undefined }}>
+        <div className="dashboard-card">
           <div className="card-title">
             <FaBullseye size="2.5rem" color={isQuestComplete ? '#27ae60' : 'var(--primary)'} />
             Daily Challenge
@@ -645,14 +686,18 @@ export default function BioRecall() {
           </div>
           <div>{isQuestComplete ? 'Quest Complete!' : `Complete ${daily.target || 10} Recall Questions`}</div>
           <div>Progress: {daily.completed || 0} / {daily.target || 10}</div>
-          <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${Math.min(daily.progressPercent || 0, 100)}%` }} /></div>
+          <div className="progress-bar-bg">
+            <div className="progress-bar-fill" style={{ width: `${Math.min(daily.progressPercent || 0, 100)}%` }} />
+          </div>
           <div>Reward: +50 XP</div>
         </div>
         <div className="dashboard-card">
           <div className="card-title"><FaChartSimple size="2.5rem" color="var(--primary)" /> XP Progress</div>
-          <div>Level {xpProgress.level} · <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{rankTitle}</span></div>
+          <div>Level {xpProgress.level} · <span className="rank-label">{rankTitle}</span></div>
           <div className="xp-progress">{xpProgress.xpIntoLevel} / 100 XP to next level</div>
-          <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${xpProgress.progressPercent}%` }} /></div>
+          <div className="progress-bar-bg">
+            <div className="progress-bar-fill" style={{ width: `${xpProgress.progressPercent}%` }} />
+          </div>
         </div>
         <div className="dashboard-card">
           <div className="card-title"><FaTrophy size="2.5rem" color="gold" /> Achievements</div>
@@ -673,7 +718,9 @@ export default function BioRecall() {
         )}
         <div className="dashboard-card">
           <div className="card-title"><FaBrain size="2.5rem" color="#9b59b6" /> Brain Energy</div>
-          <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${brainEnergy}%` }} /></div>
+          <div className="progress-bar-bg">
+            <div className="progress-bar-fill" style={{ width: `${brainEnergy}%` }} />
+          </div>
           <div>{brainEnergy}% energy remaining</div>
         </div>
         <div className="dashboard-card">
@@ -700,7 +747,7 @@ export default function BioRecall() {
           <div className="topic-icon-grid">
             {topicEntries.map(([topic, mastery]) => (
               <div key={topic} className="topic-icon-card">
-                <div className="topic-big-icon"><FaBook /></div>
+                <div className="topic-big-icon"><FaBookOpen /></div>
                 <div className="topic-name">{escapeHtml(topic)}</div>
                 <div className="topic-mastery">{Math.round(mastery)}%</div>
               </div>
@@ -723,7 +770,7 @@ export default function BioRecall() {
     const report = sessionReport || {};
     return (
       <div className="report-screen">
-        <div className="recall-card" style={{ textAlign: 'center' }}>
+        <div className="recall-card">
           <FaChartSimple size="3rem" color="var(--primary)" />
           <h2>Today's Recall Report</h2>
           <p>Reviewed: {sessionQuestions.length}</p>
@@ -732,8 +779,8 @@ export default function BioRecall() {
           <p><FaClock /> Total time: {report.total_time_formatted || '0s'} | Avg per question: {report.avg_time_formatted || '0s'}</p>
           <p>Top Topic: {report.top_topic || 'N/A'}</p>
           <p><FaFire color="#e67e22" /> Streak: {streakDays} days</p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '1.5rem' }}>
-            <button className="btn-check" style={{ width: 'auto' }} onClick={() => { setShowReport(false); setSessionActive(false); }}>See You Tomorrow</button>
+          <div className="report-actions">
+            <button className="btn-check" onClick={() => { setShowReport(false); setSessionActive(false); }}>See You Tomorrow</button>
             <button className="export-btn" onClick={exportStudyNotes}><FaDownload /> Export Notes</button>
           </div>
         </div>
@@ -751,22 +798,22 @@ export default function BioRecall() {
     const color = strength_meaning?.color || 'var(--primary)';
     return (
       <div className="feedback-area">
-        <div className={`recall-strength ${strengthClass}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+        <div className={`recall-strength ${strengthClass}`}>
           <Icon size="1.5rem" color={color} />
           <div>
-            <div style={{ fontWeight: 700, fontSize: '1.1rem', color }}>{label}</div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #666)', marginTop: '2px' }}>{description}</div>
+            <div className="strength-label" style={{ color }}>{label}</div>
+            <div className="strength-description">{description}</div>
           </div>
         </div>
-        <div style={{ marginBottom: '8px' }}>Matched: <strong>{escapeHtml(matched)}</strong></div>
-        <div><FaTrophy color="#f1c40f" /> +{xp} XP</div>
+        <div className="feedback-matched">Matched: <strong>{escapeHtml(matched)}</strong></div>
+        <div className="feedback-xp"><FaTrophy color="#f1c40f" /> +{xp} XP</div>
         {diff && diff.your_answer && (
-          <div className="feedback-section" style={{ background: 'var(--warning-light, #fef9e7)', borderLeft: '3px solid var(--warning, #e67e22)', padding: '12px', marginTop: '14px', borderRadius: '6px' }}>
+          <div className="feedback-comparison">
             <h4><FaExclamation color="#e67e22" /> Answer Comparison</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
-              <div>Your answer: <span style={{ background: '#fdebd0', padding: '2px 8px', borderRadius: '4px', fontWeight: 500 }}>{escapeHtml(diff.your_answer)}</span></div>
-              <div>Correct answer: <span style={{ background: '#d5f5e3', padding: '2px 8px', borderRadius: '4px', fontWeight: 600, color: '#27ae60' }}>{escapeHtml(diff.correct_answer)}</span></div>
-              {diff.was_common_mistake && <div style={{ fontSize: '0.8rem', color: '#e67e22', marginTop: '4px' }}>This is a common mistake. See explanation below.</div>}
+            <div className="comparison-row">
+              <div>Your answer: <span className="comparison-wrong">{escapeHtml(diff.your_answer)}</span></div>
+              <div>Correct answer: <span className="comparison-correct">{escapeHtml(diff.correct_answer)}</span></div>
+              {diff.was_common_mistake && <div className="common-mistake-tag">This is a common mistake. See explanation below.</div>}
             </div>
           </div>
         )}
@@ -803,24 +850,36 @@ export default function BioRecall() {
           <div className="flip-card-front">
             <div className="progress-badge">Question {currentIndex + 1} of {sessionQuestions.length}</div>
             <div className="question-text">{escapeHtml(question?.text)}</div>
-            <input type="text" className="answer-input" placeholder="Type your answer..."
-              ref={answerInputRef} disabled={analyzing}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !analyzing && sessionActive) handleAnswerSubmission(); }} />
-            <button className="btn-check" onClick={handleAnswerSubmission} disabled={analyzing || !sessionActive}>
+            <input
+              type="text"
+              className="answer-input"
+              placeholder="Type your answer..."
+              ref={answerInputRef}
+              disabled={analyzing}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !analyzing && sessionActive) handleAnswerSubmission(); }}
+            />
+            <button
+              className="btn-check"
+              onClick={handleAnswerSubmission}
+              disabled={analyzing || !sessionActive}
+            >
               {analyzing ? <><InlineSpinner /> Checking...</> : <><FaPencil /> Check</>}
             </button>
             {analyzing && !feedbackResult && (
               <div className="spinner-overlay">
-                {spinnerMessage} <span className="dot-spin"></span><span className="dot-spin"></span><span className="dot-spin"></span>
+                {spinnerMessage}
+                <span className="dot-spin"></span>
+                <span className="dot-spin"></span>
+                <span className="dot-spin"></span>
               </div>
             )}
-            {message && <div className={`user-message ${message.type}`} style={{ marginTop: '1rem' }}>{message.text}</div>}
+            {message && <div className={`user-message ${message.type}`}>{message.text}</div>}
             {renderDebugPanel()}
           </div>
           <div className="flip-card-back">
             {renderFeedback()}
             {!analyzing && feedbackResult && (
-              <div className="next-timer" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
+              <div className="next-timer">
                 <div className="countdown">Next in {countdown}s</div>
                 <button className="next-btn" onClick={moveToNextQuestion}>Next</button>
               </div>
@@ -849,14 +908,16 @@ export default function BioRecall() {
   const renderTopicModal = () => (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h3 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Choose a topic for {level}</h3>
-        <div style={{ marginBottom: '1rem' }}>
+        <h3 className="modal-title">Choose a topic for {level}</h3>
+        <div className="modal-topics">
           {topicList.length === 0 ? <p>Loading topics...</p> : topicList.map(t => (
-            <button key={t.name} className="option-btn" onClick={() => startSessionFromTopicModal(t.name)}>{t.name}</button>
+            <button key={t.topic_name} className="option-btn" onClick={() => startSessionFromTopicModal(t.topic_name)}>
+              {t.topic_name}
+            </button>
           ))}
         </div>
         <button className="option-btn" onClick={() => { setTopicModalOpen(false); startSession(null); }}>All topics (any order)</button>
-        <button className="btn-check" style={{ width: 'auto', marginTop: '0.5rem' }} onClick={() => setTopicModalOpen(false)}>Cancel</button>
+        <button className="modal-cancel" onClick={() => setTopicModalOpen(false)}>Cancel</button>
       </div>
     </div>
   );
@@ -866,22 +927,34 @@ export default function BioRecall() {
     return (
       <div className="modal-overlay">
         <div className="modal-content">
-          <p>{showConfirm.message}</p>
-          <button className="option-btn" onClick={() => { showConfirm.onConfirm(); setShowConfirm(null); }}>Yes, continue</button>
-          <button className="option-btn" onClick={() => { showConfirm.onCancel(); setShowConfirm(null); }}>No, finish</button>
+          <p className="confirm-message">{showConfirm.message}</p>
+          <div className="confirm-actions">
+            <button className="option-btn" onClick={() => { showConfirm.onConfirm(); setShowConfirm(null); }}>Yes, continue</button>
+            <button className="option-btn" onClick={() => { showConfirm.onCancel(); setShowConfirm(null); }}>No, finish</button>
+          </div>
         </div>
       </div>
     );
   };
 
+  if (!isReady || access.isPending) {
+    return <PendingApprovalScreen />;
+  }
+
+  if (!access.canAccess) {
+    return <div className="recall-access-denied">Access restricted. Please contact support.</div>;
+  }
+
   if (loading) {
     return (
-      <div className="loading-spinner" style={{ display: 'flex', flex: 1, minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="recall-loading">
         <div className="spinner-colors">
-          <div className="spinner-dot-color"></div><div className="spinner-dot-color"></div>
-          <div className="spinner-dot-color"></div><div className="spinner-dot-color"></div>
+          <div className="spinner-dot-color"></div>
+          <div className="spinner-dot-color"></div>
+          <div className="spinner-dot-color"></div>
+          <div className="spinner-dot-color"></div>
         </div>
-        <div style={{ fontWeight: 600, color: 'var(--primary)' }}>Preparing your session...</div>
+        <div className="recall-loading-text">Preparing your session...</div>
       </div>
     );
   }
@@ -890,19 +963,26 @@ export default function BioRecall() {
     <>
       {renderConfettiCanvas()}
       <div className="recall-container">
+        <div className="breadcrumb">
+          <Link to="/"><FaHouse className="breadcrumb-icon" /> Home</Link>
+          <span>›</span>
+          <span>Recall Practice</span>
+        </div>
+
         <div className="recall-header">
           <h1>{level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${level || ''}`}</h1>
           {level && <span className="level-badge">{level}</span>}
         </div>
+
         <div className="main-layout">
           <div className="main-content">
             {!sessionActive && !showReport && (
               <div className="entrance-screen">
-                <div className="recall-card" style={{ textAlign: 'center' }}>
+                <div className="recall-card">
                   <FaBrain size="3rem" color="var(--primary)" />
                   <button className="continue-btn" onClick={openTopicModal}>Continue to Topics</button>
-                  <p style={{ marginTop: '0.5rem' }}><FaFire color="#e67e22" /> {streakDays} Day Recall Streak</p>
-                  <p style={{ marginTop: '0.5rem' }}><FaStar color="#f1c40f" /> Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</p>
+                  <p className="recall-streak-info"><FaFire color="#e67e22" /> {streakDays} Day Recall Streak</p>
+                  <p className="recall-xp-info"><FaStar color="#f1c40f" /> Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</p>
                   {message && <div className={`user-message ${message.type}`}>{message.text}</div>}
                 </div>
                 {renderWeakTopicAlert()}
@@ -917,8 +997,14 @@ export default function BioRecall() {
                     <FaChartLine size="1.8rem" color="var(--primary)" />
                     <span>E:{userAnswersRecord.filter(r => r.strength === 'excellent').length} S:{userAnswersRecord.filter(r => r.strength === 'strong').length} D:{userAnswersRecord.filter(r => r.strength === 'developing').length}</span>
                   </div>
-                  <div className="stat-card"><FaTrophy size="1.8rem" color="var(--primary)" /> Mastery: <span>{masteryAverage}%</span></div>
-                  <div className="stat-card"><FaFire size="1.8rem" color="var(--primary)" /> Streak: <span>{streakDays} days</span></div>
+                  <div className="stat-card">
+                    <FaTrophy size="1.8rem" color="var(--primary)" />
+                    Mastery: <span>{masteryAverage}%</span>
+                  </div>
+                  <div className="stat-card">
+                    <FaFire size="1.8rem" color="var(--primary)" />
+                    Streak: <span>{streakDays} days</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -928,6 +1014,7 @@ export default function BioRecall() {
             {!sessionActive && !showReport && <>{renderLeaderboard()}</>}
           </div>
         </div>
+
         {topicModalOpen && renderTopicModal()}
         {renderFloatingCards()}
         {showConfirm && renderConfirm()}
