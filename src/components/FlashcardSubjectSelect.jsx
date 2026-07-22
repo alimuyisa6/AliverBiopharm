@@ -1,16 +1,16 @@
  import React, { useState, useEffect } from 'react';
 import { getAdaptiveFlashcardDecks } from '../api/cachedClient';
-import { 
-  FaSeedling, 
-  FaBookOpen, 
-  FaLightbulb, 
-  FaRocket, 
+ import {
+  FaSeedling,
+  FaBookOpen,
+  FaLightbulb,
+  FaRocket,
   FaTrophy,
   FaArrowLeft,
   FaArrowRight,
   FaShuffle,
   FaLayerGroup,
-  FaSearch,
+  FaMagnifyingGlass,
   FaChevronRight
 } from 'react-icons/fa6';
 
@@ -193,7 +193,7 @@ export default function FlashcardSubjectSelect({ state, onStart, onBack }) {
 
             {!loading && decks.length > 0 && topic && visibleDecks.length === 0 && (
               <div className="fc-empty">
-                <FaSearch />
+                <FaMagnifyingGlass />
                 No decks match "{topic}" for your class.
                 <span className="fc-empty-hint">
                   Try a different {topicLabel} or pick from the list below.
