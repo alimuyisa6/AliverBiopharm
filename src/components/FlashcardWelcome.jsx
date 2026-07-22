@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+ import React, { useEffect, useState } from 'react';
 
 export default function FlashcardWelcome({ user, level, discipline, cls, onDone }) {
   const [flipped, setFlipped] = useState(false);
@@ -24,7 +24,6 @@ export default function FlashcardWelcome({ user, level, discipline, cls, onDone 
 
         <div className="fc-welcome-wrap">
           <div className={`fc-welcome-card ${flipped ? 'fc-flipped' : ''}`}>
-
             <div className="fc-welcome-front">
               <div className="fc-welcome-emoji">👋</div>
               <div className="fc-welcome-name">Welcome, {displayName}</div>
@@ -44,7 +43,6 @@ export default function FlashcardWelcome({ user, level, discipline, cls, onDone 
                 {cls}
               </div>
             </div>
-
           </div>
         </div>
       </div>
