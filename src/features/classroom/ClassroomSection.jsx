@@ -1,6 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLiveClassroomFeed } from '../../api/cachedClient';
+import { getLiveClassroomFeed } from '../../../api/cachedClient';
 
 function formatDuration(seconds) {
   if (!seconds) return '0m';
@@ -16,7 +16,9 @@ export function ClassroomSection({ user }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getLiveClassroomFeed().then(setFeed).finally(() => setLoading(false));
+    getLiveClassroomFeed()
+      .then(setFeed)
+      .finally(() => setLoading(false));
     const interval = setInterval(() => getLiveClassroomFeed().then(setFeed), 30000);
     return () => clearInterval(interval);
   }, []);
