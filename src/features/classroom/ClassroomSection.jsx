@@ -1,6 +1,6 @@
  import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLiveClassroomFeed } from '../../../api/cachedClient';
+import { getLiveClassroomFeed } from '../../api/cachedClient';
 
 function formatDuration(seconds) {
   if (!seconds) return '0m';
