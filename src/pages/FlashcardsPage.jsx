@@ -1,48 +1,37 @@
- import { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import FlashcardOnboarding from '../components/FlashcardOnboarding';
+import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
+import { useLevelFilter } from '../hooks/useLevelFilter';
+import { useContentAccess } from '../hooks/useContentAccess';
 import FlashcardWelcome from '../components/FlashcardWelcome';
 import FlashcardSubjectSelect from '../components/FlashcardSubjectSelect';
 import FlashcardDeckView from '../components/FlashcardDeckView';
 import FlashcardProgress from '../components/Flashcardprogress';
+import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import {
   getFlashcardOnboardingState,
   saveFlashcardOnboarding,
   completeFlashcardSession,
   getKnownFlashcards,
+  getAdaptiveFlashcardDecks
 } from '../api/cachedClient';
-import { FaSpinner } from "react-icons/fa";
-import { FaTriangleExclamation } from "react-icons/fa6";
+import { FaSpinner, FaTriangleExclamation } from 'react-icons/fa6';
 
 const STAGE = {
   LOADING: 'loading',
-  ONBOARDING: 'onboarding',
   WELCOME: 'welcome',
   SUBJECT: 'subject',
   STUDY: 'study',
-  COMPLETE: 'complete',
-};
-
-const COLORS = {
-  primary: '#b8873a',
-  secondary: '#0ab5b5',
-  accent: '#10b981',
-  magenta: '#b8873a',
-  cyan: '#0ab5b5',
-  orange: '#f59e0b',
-  red: '#ef4444',
-  green: '#10b981',
-  purple: '#8b5cf6',
-  pink: '#ec4899',
-  blue: '#3b82f6',
-  white: '#ffffff',
-  dim: '#94a3b8',
+  COMPLETE: 'complete'
 };
 
 export default function FlashcardsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isReady } = useRequireOnboarding();
+  const access = useContentAccess();
+  const { level, class_name, showAll } = useLevelFilter();
 
   const [stage, setStage] = useState(STAGE.LOADING);
   const [fcState, setFcState] = useState(null);
@@ -57,13 +46,13 @@ export default function FlashcardsPage() {
       return;
     }
     init();
-  }, [user]);
+  }, [user, isReady, access.canAccess, level]);
 
   async function init() {
     try {
       const [stateData, knownData] = await Promise.all([
         getFlashcardOnboardingState(),
-        getKnownFlashcards(),
+        getKnownFlashcards()
       ]);
       setKnownIds(knownData || []);
 
@@ -71,20 +60,19 @@ export default function FlashcardsPage() {
         setFcState(stateData);
         setStage(STAGE.SUBJECT);
       } else {
-        setStage(STAGE.ONBOARDING);
+        const initialPayload = {
+          selected_level: level || 'O-Level',
+          selected_discipline: level === 'Pharmacy' ? 'Pharmacy' : 'Biology',
+          selected_class: class_name || '',
+          onboarding_complete: false
+        };
+        await saveFlashcardOnboarding(initialPayload);
+        setFcState(initialPayload);
+        setStage(STAGE.WELCOME);
       }
-    } catch {
+    } catch (err) {
       setError('Failed to load. Please refresh.');
-    }
-  }
-
-  async function handleOnboardingComplete(payload) {
-    try {
-      await saveFlashcardOnboarding({ ...payload, onboarding_complete: false });
-      setFcState(prev => ({ ...prev, ...payload }));
-      setStage(STAGE.WELCOME);
-    } catch {
-      setError('Failed to save your choices. Please try again.');
+      console.error(err);
     }
   }
 
@@ -102,7 +90,7 @@ export default function FlashcardsPage() {
     saveFlashcardOnboarding({
       confidence_level: confidence,
       last_topic: topic || null,
-      last_deck_id: deck.id,
+      last_deck_id: deck.id
     }).catch(() => {});
     setFcState(prev => ({ ...prev, confidence_level: confidence, last_topic: topic }));
     setSelectedDeck(deck);
@@ -118,7 +106,7 @@ export default function FlashcardsPage() {
           total: data.card_count ?? total,
           correct: data.correct ?? 0,
           incorrect: data.incorrect ?? 0,
-          score: data.score ?? 0,
+          score: data.score ?? 0
         };
       } catch {}
     }
@@ -132,11 +120,12 @@ export default function FlashcardsPage() {
     setStage(STAGE.SUBJECT);
   }
 
-  function handleResetOnboarding() {
-    setFcState(null);
-    setSelectedDeck(null);
-    setSessionResult(null);
-    setStage(STAGE.ONBOARDING);
+  if (!isReady || access.isPending) {
+    return <PendingApprovalScreen />;
+  }
+
+  if (!access.canAccess) {
+    return <div className="fc-access-denied">Access restricted. Please contact support.</div>;
   }
 
   if (error) {
@@ -144,11 +133,9 @@ export default function FlashcardsPage() {
       <div className="fc-page">
         <div className="fc-page-inner">
           <div className="fc-empty">
-            <FaTriangleExclamation style={{ color: COLORS.red, fontSize: '3rem', marginBottom: '1rem' }} />
-            <p style={{ color: COLORS.white }}>{error}</p>
-            <button className="fc-btn fc-btn-primary" style={{ marginTop: '1rem' }} onClick={init}>
-              Try Again
-            </button>
+            <FaTriangleExclamation className="fc-empty-icon" />
+            <p className="fc-empty-text">{error}</p>
+            <button className="fc-btn-primary" onClick={init}>Try Again</button>
           </div>
         </div>
       </div>
@@ -160,16 +147,12 @@ export default function FlashcardsPage() {
       <div className="fc-page">
         <div className="fc-page-inner">
           <div className="fc-loading">
-            <FaSpinner className="icon-spin" style={{ color: COLORS.primary, fontSize: '2rem' }} />
-            <p style={{ color: COLORS.dim, marginTop: '1rem' }}>Loading your flashcards…</p>
+            <FaSpinner className="icon-spin" />
+            <p className="fc-loading-text">Loading your flashcards…</p>
           </div>
         </div>
       </div>
     );
-  }
-
-  if (stage === STAGE.ONBOARDING) {
-    return <FlashcardOnboarding onComplete={handleOnboardingComplete} />;
   }
 
   if (stage === STAGE.WELCOME) {
@@ -189,7 +172,7 @@ export default function FlashcardsPage() {
       <FlashcardSubjectSelect
         state={fcState}
         onStart={handleSubjectStart}
-        onBack={handleResetOnboarding}
+        onBack={() => navigate('/')}
       />
     );
   }
