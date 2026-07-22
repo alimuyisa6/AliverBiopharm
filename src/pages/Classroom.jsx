@@ -1,71 +1,42 @@
- import { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClassroomOnboarding } from '../features/classroom/ClassroomOnboarding';
 import { useAuth } from '../contexts/AuthContext';
-import { getClassroomOnboardingStatus, saveClassroomOnboarding, listClassrooms } from '../api/client';
+import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
+import { useLevelFilter } from '../hooks/useLevelFilter';
+import { useContentAccess } from '../hooks/useContentAccess';
+import { ClassroomSection as ClassroomSectionComponent } from '../components/features/classroom/ClassroomSection';
+import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
+import { listClassrooms, getClassroomLevels, getClassroomTopics } from '../api/client';
 
 export default function Classroom() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [onboarding, setOnboarding] = useState(null);
+  const { isReady } = useRequireOnboarding();
+  const access = useContentAccess();
+  const { level, class_name, showAll } = useLevelFilter();
+
   const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   useEffect(() => {
-    checkOnboardingStatus();
-  }, []);
+    if (!isReady || !access.canAccess || access.isPending) return;
+    fetchRooms();
+  }, [isReady, access.canAccess, access.isPending, level, class_name]);
 
-  const checkOnboardingStatus = async () => {
-    try {
-      const data = await getClassroomOnboardingStatus();
-      if (data?.onboarding?.has_completed_onboarding) {
-        const saved = {
-          level: data.onboarding.level,
-          class_name: data.onboarding.class_name,
-          topic: { topic_name: data.onboarding.selected_topic },
-        };
-        setOnboarding(saved);
-        setShowOnboarding(false);
-        fetchRooms(saved);
-      }
-    } catch {} finally {
-      setCheckingOnboarding(false);
-    }
-  };
-
-  const fetchRooms = async (onboardData) => {
+  const fetchRooms = async () => {
     setLoading(true);
     setError(null);
     try {
-      const topicId = onboardData.topic?.id || onboardData.topic?.topic_name || onboardData.topic?.unit_name || onboardData.topic?.name || '';
-      const data = await listClassrooms(onboardData.level, onboardData.class_name, topicId);
+      const effectiveLevel = showAll ? null : level;
+      const effectiveClass = showAll ? null : class_name;
+      const data = await listClassrooms(effectiveLevel, effectiveClass, null);
       setRooms(data || []);
-    } catch {
+    } catch (err) {
       setError('Failed to load classrooms');
+      console.error(err);
     }
     setLoading(false);
-  };
-
-  const handleOnboardingComplete = async (data) => {
-    setOnboarding(data);
-    setShowOnboarding(false);
-    try {
-      await saveClassroomOnboarding(data);
-    } catch {}
-    fetchRooms(data);
-  };
-
-  const handleResetOnboarding = () => {
-    setShowOnboarding(true);
-    setRooms([]);
-    setOnboarding(null);
-  };
-
-  const handleJoinRoom = (roomId) => {
-    navigate(`/classroom/${roomId}`);
   };
 
   const statusIcons = {
@@ -76,68 +47,66 @@ export default function Classroom() {
     offline: { icon: 'fa-circle', color: '#64748b', label: 'Offline' },
   };
 
-  if (checkingOnboarding) {
+  if (!isReady || access.isPending) {
+    return <PendingApprovalScreen />;
+  }
+
+  if (!access.canAccess) {
+    return <div className="classroom-access-denied">Access restricted. Please contact support.</div>;
+  }
+
+  if (loading) {
     return (
       <div className="classroom-loading">
-        <i className="fa-solid fa-spinner fa-spin"></i>
-        <p>Loading...</p>
+        <span className="loading-spinner"></span>
+        <p>Loading classrooms...</p>
       </div>
     );
   }
 
   return (
-    <>
+    <div className="classroom-page">
       <div className="classroom-header">
         <span className="sec-label">Live Learning</span>
         <h1 className="section-title">Classrooms</h1>
-        {onboarding && !showOnboarding && (
+        {level && !showAll && (
           <div className="classroom-active-filters">
-            <span className="filter-tag">{onboarding.level}</span>
-            <span className="filter-tag">{onboarding.class_name}</span>
-            <span className="filter-tag">{onboarding.topic?.topic_name || onboarding.topic?.unit_name || onboarding.topic?.name}</span>
-            <button className="filter-change-btn" onClick={handleResetOnboarding}>
-              <i className="fa-solid fa-pen"></i> Change
-            </button>
+            <span className="filter-tag">{level}</span>
+            {class_name && <span className="filter-tag">{class_name}</span>}
+          </div>
+        )}
+        {showAll && (
+          <div className="classroom-active-filters">
+            <span className="filter-tag teacher-all">All Levels (Teacher Access)</span>
           </div>
         )}
       </div>
 
-      {showOnboarding && (
-        <ClassroomOnboarding onComplete={handleOnboardingComplete} />
-      )}
-
-      {!showOnboarding && loading && (
-        <div className="classroom-loading">
-          <i className="fa-solid fa-spinner fa-spin"></i>
-          <p>Finding classrooms...</p>
-        </div>
-      )}
-
-      {!showOnboarding && error && (
+      {error && (
         <div className="classroom-error">
           <p>{error}</p>
-          <button className="btn-secondary" onClick={() => fetchRooms(onboarding)}>Retry</button>
+          <button className="btn-secondary" onClick={fetchRooms}>Retry</button>
         </div>
       )}
 
-      {!showOnboarding && !loading && !error && rooms.length === 0 && (
+      {!loading && !error && rooms.length === 0 && (
         <div className="classroom-empty">
           <i className="fa-solid fa-door-closed"></i>
           <h3>No Classrooms Available</h3>
-          <p>No active rooms for this topic. Check back later or start a discussion.</p>
+          <p>No active rooms for your level. Check back later or start a discussion.</p>
           <button className="btn-primary" onClick={() => navigate('/tutor/apply')}>
             <i className="fa-solid fa-chalkboard-user"></i> Become a Tutor
           </button>
         </div>
       )}
 
-      {!showOnboarding && !loading && !error && rooms.length > 0 && (
+      {!loading && !error && rooms.length > 0 && (
         <div className="classroom-grid">
           {rooms.map(room => {
             const status = statusIcons[room.status] || statusIcons.offline;
             return (
               <div key={room.id} className={`classroom-card ${room.status}`}>
-                <div className="room-status-bar" style={{ background: status.color }}>
+                <div className="room-status-bar" style={{ backgroundColor: status.color }}>
                   <i className={`fa-solid ${status.icon}`}></i>
                   <span>{status.label}</span>
                 </div>
@@ -164,7 +133,7 @@ export default function Classroom() {
                 </div>
                 <div className="room-footer">
                   {room.status === 'live' && (
-                    <button className="btn-primary" onClick={() => handleJoinRoom(room.id)}>
+                    <button className="btn-primary" onClick={() => navigate(`/classroom/${room.id}`)}>
                       <i className="fa-solid fa-door-open"></i> Join Now
                     </button>
                   )}
@@ -174,7 +143,7 @@ export default function Classroom() {
                     </button>
                   )}
                   {room.status === 'open_floor' && (
-                    <button className="btn-primary" onClick={() => handleJoinRoom(room.id)}>
+                    <button className="btn-primary" onClick={() => navigate(`/classroom/${room.id}`)}>
                       <i className="fa-solid fa-users"></i> Join Discussion
                     </button>
                   )}
@@ -194,6 +163,6 @@ export default function Classroom() {
           })}
         </div>
       )}
-    </>
+    </div>
   );
 }
