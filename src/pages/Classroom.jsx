@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
-import { ClassroomSection as ClassroomSectionComponent } from '../components/features/classroom/ClassroomSection';
+import { ClassroomSection as ClassroomSectionComponent } from '../features/classroom/ClassroomSection';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import { listClassrooms, getClassroomLevels, getClassroomTopics } from '../api/client';
 
