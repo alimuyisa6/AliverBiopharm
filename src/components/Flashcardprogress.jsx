@@ -1,4 +1,4 @@
-import React from 'react';
+ import React from 'react';
 
 export default function FlashcardProgress({ result, onRestart, onHome }) {
   const { total = 0, correct = 0, incorrect = 0, score = 0 } = result || {};
@@ -40,10 +40,10 @@ export default function FlashcardProgress({ result, onRestart, onHome }) {
           </div>
 
           <div className="fc-complete-actions">
-            <button className="fc-btn fc-btn-primary" onClick={onRestart}>
+            <button className="fc-btn-primary" onClick={onRestart}>
               <i className="fa-solid fa-rotate-right"></i> Study Again
             </button>
-            <button className="fc-btn fc-btn-ghost" onClick={onHome}>
+            <button className="fc-btn-ghost" onClick={onHome}>
               <i className="fa-solid fa-house"></i> Home
             </button>
           </div>
