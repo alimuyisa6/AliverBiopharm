@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+ import React, { useState, useEffect } from 'react';
 import {
   getFlashcardDeck,
   toggleFlashcardKnown,
@@ -10,26 +10,26 @@ import {
 } from '../api/cachedClient';
 
 const MODES = [
-  { value: 'flip',                   icon: 'fa-rotate',        label: 'Flip' },
-  { value: 'typed',                  icon: 'fa-keyboard',      label: 'Typed' },
-  { value: 'multiple_choice',        icon: 'fa-list-check',    label: 'MCQ' },
-  { value: 'structure_identification', icon: 'fa-microscope',  label: 'Structure' },
+  { value: 'flip', icon: 'fa-rotate', label: 'Flip' },
+  { value: 'typed', icon: 'fa-keyboard', label: 'Typed' },
+  { value: 'multiple_choice', icon: 'fa-list-check', label: 'MCQ' },
+  { value: 'structure_identification', icon: 'fa-microscope', label: 'Structure' },
 ];
 
 export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode: initialMode = 'flip', onComplete }) {
-  const [deck, setDeck]           = useState(null);
-  const [cards, setCards]         = useState([]);
-  const [index, setIndex]         = useState(0);
-  const [mode, setMode]           = useState(initialMode);
-  const [flipped, setFlipped]     = useState(false);
-  const [known, setKnown]         = useState(new Set(knownIds));
+  const [deck, setDeck] = useState(null);
+  const [cards, setCards] = useState([]);
+  const [index, setIndex] = useState(0);
+  const [mode, setMode] = useState(initialMode);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState(new Set(knownIds));
   const [bookmarked, setBookmarked] = useState(new Set());
   const [sessionId, setSessionId] = useState(null);
   const [typedAnswer, setTypedAnswer] = useState('');
-  const [feedback, setFeedback]   = useState(null);
+  const [feedback, setFeedback] = useState(null);
   const [mcAnswered, setMcAnswered] = useState(null);
   const [structureTab, setStructureTab] = useState('name');
-  const [loading, setLoading]     = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const card = cards[index] || null;
 
@@ -40,8 +40,8 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'ArrowLeft')  handlePrev();
-      if (e.key === ' ')          { e.preventDefault(); setFlipped(f => !f); }
+      if (e.key === 'ArrowLeft') handlePrev();
+      if (e.key === ' ') { e.preventDefault(); setFlipped(f => !f); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -142,15 +142,15 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
 
   function feedbackClass(strength) {
     if (strength === 'excellent') return 'fc-feedback-excellent';
-    if (strength === 'strong')    return 'fc-feedback-strong';
-    if (strength === 'partial')   return 'fc-feedback-partial';
+    if (strength === 'strong') return 'fc-feedback-strong';
+    if (strength === 'partial') return 'fc-feedback-partial';
     return 'fc-feedback-incorrect';
   }
 
   function feedbackIcon(strength) {
     if (strength === 'excellent') return 'fa-circle-check';
-    if (strength === 'strong')    return 'fa-check';
-    if (strength === 'partial')   return 'fa-circle-exclamation';
+    if (strength === 'strong') return 'fa-check';
+    if (strength === 'partial') return 'fa-circle-exclamation';
     return 'fa-circle-xmark';
   }
 
@@ -175,7 +175,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
             <i className="fa-solid fa-layer-group"></i>
             No cards in this deck yet.
           </div>
-          <button className="fc-btn fc-btn-ghost" onClick={() => onComplete({ sessionId, total: 0 })}>
+          <button className="fc-btn-ghost" onClick={() => onComplete({ sessionId, total: 0 })}>
             <i className="fa-solid fa-arrow-left"></i> Back
           </button>
         </div>
@@ -183,14 +183,13 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
     );
   }
 
-  const isKnown      = known.has(card.id);
+  const isKnown = known.has(card.id);
   const isBookmarked = bookmarked.has(card.id);
-  const isLast       = index === cards.length - 1;
+  const isLast = index === cards.length - 1;
 
   return (
     <div className="fc-page">
       <div className="fc-page-inner">
-
         <div className="fc-progress-track">
           <div className="fc-progress-fill" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
         </div>
@@ -211,10 +210,9 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
         <div className="fc-study-wrap">
           <div className="fc-card-counter">
             {index + 1} / {cards.length}
-            {deck?.title && <span style={{ marginLeft: '0.5rem', opacity: 0.6 }}>· {deck.title}</span>}
+            {deck?.title && <span className="fc-deck-title">{deck.title}</span>}
           </div>
 
-          {/* ── FLIP MODE ── */}
           {mode === 'flip' && (
             <div className="fc-flip-scene" onClick={() => setFlipped(f => !f)}>
               <div className={`fc-flip-card ${flipped ? 'fc-flipped' : ''}`}>
@@ -223,9 +221,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                   <button className="fc-speak-btn" onClick={e => { e.stopPropagation(); speakText(card.front_text); }}>
                     <i className="fa-solid fa-volume-high"></i>
                   </button>
-                  {card.image_url
-                    ? <img src={card.image_url} alt="" className="fc-card-image" />
-                    : null}
+                  {card.image_url && <img src={card.image_url} alt="" className="fc-card-image" />}
                   <p className="fc-card-question">{card.front_text}</p>
                   <span className="fc-card-hint"><i className="fa-regular fa-hand-pointer"></i> Tap to flip</span>
                 </div>
@@ -240,18 +236,15 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
             </div>
           )}
 
-          {/* ── TYPED MODE ── */}
           {mode === 'typed' && (
             <>
-              <div className="fc-flip-scene" style={{ cursor: 'default' }}>
-                <div className="fc-card-face fc-card-front" style={{ position: 'relative', height: '100%' }}>
+              <div className="fc-flip-scene">
+                <div className="fc-card-face fc-card-front">
                   <span className="fc-card-tag">Question</span>
                   <button className="fc-speak-btn" onClick={() => speakText(card.front_text)}>
                     <i className="fa-solid fa-volume-high"></i>
                   </button>
-                  {card.image_url
-                    ? <img src={card.image_url} alt="" className="fc-card-image" />
-                    : null}
+                  {card.image_url && <img src={card.image_url} alt="" className="fc-card-image" />}
                   <p className="fc-card-question">{card.front_text}</p>
                 </div>
               </div>
@@ -266,7 +259,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                 />
                 {!feedback && (
                   <button
-                    className="fc-btn fc-btn-primary"
+                    className="fc-btn-primary"
                     onClick={() => handleCheckTyped()}
                     disabled={!typedAnswer.trim()}
                   >
@@ -278,8 +271,8 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                     <i className={`fa-solid ${feedbackIcon(feedback.strength)}`}></i>
                     <span>
                       {feedback.strength === 'excellent' && 'Perfect! '}
-                      {feedback.strength === 'strong'    && 'Close! '}
-                      {feedback.strength === 'partial'   && 'Partially correct. '}
+                      {feedback.strength === 'strong' && 'Close! '}
+                      {feedback.strength === 'partial' && 'Partially correct. '}
                       {feedback.strength === 'incorrect' && 'Not quite. '}
                       Correct answer: <strong>{feedback.correct_answer}</strong>
                       {feedback.explanation && <span> — {feedback.explanation}</span>}
@@ -290,39 +283,36 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
             </>
           )}
 
-          {/* ── MULTIPLE CHOICE MODE ── */}
           {mode === 'multiple_choice' && (
             <>
-              <div className="fc-flip-scene" style={{ cursor: 'default' }}>
-                <div className="fc-card-face fc-card-front" style={{ position: 'relative', height: '100%' }}>
+              <div className="fc-flip-scene">
+                <div className="fc-card-face fc-card-front">
                   <span className="fc-card-tag">Question</span>
                   <p className="fc-card-question">{card.front_text}</p>
                 </div>
               </div>
-              {(card.mc_options?.length > 0)
-                ? (
-                  <div className="fc-mc-grid">
-                    {card.mc_options.map((opt, i) => {
-                      let cls = 'fc-mc-btn';
-                      if (mcAnswered !== null) {
-                        if (i === card.mc_correct_index) cls += ' fc-mc-correct';
-                        else if (i === mcAnswered)       cls += ' fc-mc-wrong';
-                      }
-                      return (
-                        <button key={i} className={cls} onClick={() => handleMCSelect(i)} disabled={mcAnswered !== null}>
-                          <span className="fc-mc-letter">{String.fromCharCode(65 + i)}</span>
-                          {opt}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )
-                : (
-                  <div className="fc-empty">
-                    <i className="fa-solid fa-list-check"></i>
-                    No MCQ options for this card.
-                  </div>
-                )}
+              {(card.mc_options?.length > 0) ? (
+                <div className="fc-mc-grid">
+                  {card.mc_options.map((opt, i) => {
+                    let cls = 'fc-mc-btn';
+                    if (mcAnswered !== null) {
+                      if (i === card.mc_correct_index) cls += ' fc-mc-correct';
+                      else if (i === mcAnswered) cls += ' fc-mc-wrong';
+                    }
+                    return (
+                      <button key={i} className={cls} onClick={() => handleMCSelect(i)} disabled={mcAnswered !== null}>
+                        <span className="fc-mc-letter">{String.fromCharCode(65 + i)}</span>
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="fc-empty">
+                  <i className="fa-solid fa-list-check"></i>
+                  No MCQ options for this card.
+                </div>
+              )}
               {feedback && (
                 <div className={`fc-feedback ${feedbackClass(feedback.strength)}`}>
                   <i className={`fa-solid ${feedbackIcon(feedback.strength)}`}></i>
@@ -335,20 +325,19 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
             </>
           )}
 
-          {/* ── STRUCTURE IDENTIFICATION MODE ── */}
           {mode === 'structure_identification' && (
             <>
-              <div className="fc-flip-scene" style={{ cursor: 'default', height: 'auto', minHeight: '200px' }}>
-                <div className="fc-card-face fc-card-front" style={{ position: 'relative', minHeight: '200px' }}>
+              <div className="fc-flip-scene">
+                <div className="fc-card-face fc-card-front">
                   <span className="fc-card-tag">Structure</span>
-                  {card.image_url
-                    ? <img src={card.image_url} alt={card.structure_name || 'Structure'} className="fc-card-image" />
-                    : (
-                      <div className="fc-card-placeholder">
-                        <i className="fa-solid fa-image"></i>
-                        <span>{card.structure_name || 'Image coming soon'}</span>
-                      </div>
-                    )}
+                  {card.image_url ? (
+                    <img src={card.image_url} alt={card.structure_name || 'Structure'} className="fc-card-image" />
+                  ) : (
+                    <div className="fc-card-placeholder">
+                      <i className="fa-solid fa-image"></i>
+                      <span>{card.structure_name || 'Image coming soon'}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -378,7 +367,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                 />
                 {!feedback && (
                   <button
-                    className="fc-btn fc-btn-primary"
+                    className="fc-btn-primary"
                     onClick={() => handleCheckTyped(structureTab)}
                     disabled={!typedAnswer.trim()}
                   >
@@ -390,8 +379,8 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                     <i className={`fa-solid ${feedbackIcon(feedback.strength)}`}></i>
                     <span>
                       {feedback.strength === 'excellent' && 'Excellent! '}
-                      {feedback.strength === 'strong'    && 'Close! '}
-                      {feedback.strength === 'partial'   && 'Partially correct. '}
+                      {feedback.strength === 'strong' && 'Close! '}
+                      {feedback.strength === 'partial' && 'Partially correct. '}
                       {feedback.strength === 'incorrect' && 'Not quite. '}
                       {structureTab === 'name'
                         ? <>Structure: <strong>{feedback.correct_answer || card.structure_name}</strong></>
@@ -403,11 +392,10 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
             </>
           )}
 
-          {/* ── ACTIONS ── */}
           <div className="fc-difficulty-row">
-            <button className="fc-diff-btn fc-diff-easy"   onClick={() => handleRate('easy')}>Easy</button>
+            <button className="fc-diff-btn fc-diff-easy" onClick={() => handleRate('easy')}>Easy</button>
             <button className="fc-diff-btn fc-diff-medium" onClick={() => handleRate('medium')}>Medium</button>
-            <button className="fc-diff-btn fc-diff-hard"   onClick={() => handleRate('hard')}>Hard</button>
+            <button className="fc-diff-btn fc-diff-hard" onClick={() => handleRate('hard')}>Hard</button>
           </div>
 
           <div className="fc-card-actions">
@@ -432,24 +420,21 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
               <i className="fa-solid fa-arrow-left"></i>
             </button>
 
-            {isLast
-              ? (
-                <button className="fc-btn fc-btn-primary" onClick={handleFinish}>
-                  Finish <i className="fa-solid fa-flag-checkered"></i>
-                </button>
-              )
-              : (
-                <button className="fc-nav-btn" onClick={handleNext}>
-                  <i className="fa-solid fa-arrow-right"></i>
-                </button>
-              )}
+            {isLast ? (
+              <button className="fc-btn-primary" onClick={handleFinish}>
+                Finish <i className="fa-solid fa-flag-checkered"></i>
+              </button>
+            ) : (
+              <button className="fc-nav-btn" onClick={handleNext}>
+                <i className="fa-solid fa-arrow-right"></i>
+              </button>
+            )}
           </div>
 
-          <p style={{ textAlign: 'center', fontSize: 'var(--text-sm)', color: 'var(--clr-text-muted)', fontFamily: 'var(--font-mono)' }}>
+          <p className="fc-keyboard-hint">
             <i className="fa-regular fa-keyboard"></i> ← → navigate · Space flip
           </p>
         </div>
-
       </div>
     </div>
   );
