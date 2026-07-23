@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLayout } from '../contexts/LayoutContext';
 import { updateProfile, changePassword, requestLevelChange } from '../api/client';
@@ -528,4 +528,4 @@ export default function Profile() {
       </div>
     </motion.div>
   );
-} 
+}
