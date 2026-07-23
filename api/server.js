@@ -19,8 +19,10 @@ const MODULE_MAP = {
   'weekly-challenge': new URL('../lib/weekly-challenge.js', import.meta.url).href,
   lab: new URL('../lib/lab.js', import.meta.url).href,
   search: new URL('../lib/search.js', import.meta.url).href,
-  profile: new URL('../lib/profile.js', import.meta.url).href,
+ profile: new URL('../lib/profile.js', import.meta.url).href,
+contentguide: new URL('../lib/content-guide.js', import.meta.url).href,
 };
+
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const AUTH_ATTEMPT_PATHS = new Set(['signup', 'signin']);
