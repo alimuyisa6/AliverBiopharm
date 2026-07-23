@@ -1,31 +1,34 @@
- import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useLevelFilter } from '../hooks/useLevelFilter';
-import { useContentAccess } from '../hooks/useContentAccess';
-import { HeroCarousel } from '../features/home/HeroCarousel';
-import { StatsGrid } from '../features/home/StatsGrid';
-import { TeamScroll } from '../features/home/TeamScroll';
-import { TestimonialSlider } from '../features/home/TestimonialSlider';
-import { PricingCards } from '../features/home/PricingCards';
-import { BlogGrid } from '../features/home/BlogGrid';
-import { FaqAccordion } from '../features/home/FaqAccordion';
-import { NewsletterForm } from '../features/home/NewsletterForm';
-import { ContinueLearningSection } from '../features/home/ContinueLearningSection';
-import { FlashcardSection } from '../features/flashcards/FlashcardSection';
-import { PdfLibrarySection } from '../features/pdfs/PdfLibrarySection';
-import { PdfPreviewModal } from '../features/pdfs/PdfPreviewModal';
-import { NotesSection } from '../features/notes/NotesSection';
-import { ContentGuideCard } from '../features/home/ContentGuideCard';
-import { MoodCheckSection } from '../features/mood/MoodCheckSection';
-import { CommunitySection } from '../features/community/CommunitySection';
-import { ContactSection } from '../features/contact/ContactSection';
-import { ChatWidget } from '../features/chat/ChatWidget';
-import { ClassroomSection } from '../features/classroom/ClassroomSection';
-import InfoCards from '../components/InfoCards';
-import InteractiveShowcase from '../components/InteractiveShowcase';
-import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
-import { ContentGuideCard } from '../features/home/ContentGuideCard';
+
+import { useAuth } from '../../contexts/AuthContext';
+import { useLevelFilter } from '../../hooks/useLevelFilter';
+import { useContentAccess } from '../../hooks/useContentAccess';
+
+import { HeroCarousel } from './HeroCarousel';
+import { StatsGrid } from './StatsGrid';
+import { TeamScroll } from './TeamScroll';
+import { TestimonialSlider } from './TestimonialSlider';
+import { PricingCards } from './PricingCards';
+import { BlogGrid } from './BlogGrid';
+import { FaqAccordion } from './FaqAccordion';
+import { NewsletterForm } from './NewsletterForm';
+import { ContinueLearningSection } from './ContinueLearningSection';
+import { ContentGuideCard } from './ContentGuideCard';
+
+import { FlashcardSection } from '../flashcards/FlashcardSection';
+import { PdfLibrarySection } from '../pdfs/PdfLibrarySection';
+import { PdfPreviewModal } from '../pdfs/PdfPreviewModal';
+import { NotesSection } from '../notes/NotesSection';
+import { MoodCheckSection } from '../mood/MoodCheckSection';
+import { CommunitySection } from '../community/CommunitySection';
+import { ContactSection } from '../contact/ContactSection';
+import { ChatWidget } from '../chat/ChatWidget';
+import { ClassroomSection } from '../classroom/ClassroomSection';
+
+import InfoCards from '../../components/InfoCards';
+import InteractiveShowcase from '../../components/InteractiveShowcase';
+import { PendingApprovalScreen } from '../../components/access/PendingApprovalScreen';
 import {
   getResources,
   getPastPapers,
