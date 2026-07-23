@@ -21,6 +21,8 @@ const MODULE_MAP = {
   search: new URL('../lib/search.js', import.meta.url).href,
  profile: new URL('../lib/profile.js', import.meta.url).href,
 contentguide: new URL('../lib/content-guide.js', import.meta.url).href,
+'profile-picture': new URL('../lib/profile-picture.js', import.meta.url).href,
+'upload': new URL('../lib/upload.js', import.meta.url).href,
 };
 
 
