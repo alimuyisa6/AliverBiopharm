@@ -25,6 +25,7 @@ import { ClassroomSection } from '../features/classroom/ClassroomSection';
 import InfoCards from '../components/InfoCards';
 import InteractiveShowcase from '../components/InteractiveShowcase';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
+import { ContentGuideCard } from '../features/home/ContentGuideCard';
 import {
   getResources,
   getPastPapers,
