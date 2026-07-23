@@ -39,7 +39,7 @@ import {
   getCommunityActivity,
   getPdfsByLevel,
   getNotesStructure
-} from '../api/client';
+} from '../../api/client';
 
 export default function Home() {
   const { user } = useAuth();
