@@ -228,19 +228,19 @@ export async function getWeeklyChallengeStatus(weekStart) { return getRequest('w
 
 export async function getFlashcards(filters = {}) {
   const params = {};
-  if (filters.level)           params.level           = filters.level;
-  if (filters.discipline)      params.discipline      = filters.discipline;
+  if (filters.level) params.level = filters.level;
+  if (filters.discipline) params.discipline = filters.discipline;
   if (filters.class_programme) params.class_programme = filters.class_programme;
-  if (filters.confidence)      params.confidence      = filters.confidence;
+  if (filters.confidence) params.confidence = filters.confidence;
   return getRequest('flashcards', 'list', params);
 }
 
 export async function getFlashcardDecks(filters = {}) {
   const params = {};
-  if (filters.level)           params.level           = filters.level;
-  if (filters.discipline)      params.discipline      = filters.discipline;
+  if (filters.level) params.level = filters.level;
+  if (filters.discipline) params.discipline = filters.discipline;
   if (filters.class_programme) params.class_programme = filters.class_programme;
-  if (filters.confidence)      params.confidence      = filters.confidence;
+  if (filters.confidence) params.confidence = filters.confidence;
   return getRequest('flashcards', 'decks', params);
 }
 
@@ -276,8 +276,8 @@ export async function startFlashcardSession(deckId, mode = 'flip') {
 
 export async function updateFlashcardSession(sessionId, cardId, correct, currentIndex) {
   return apiCall('flashcards', 'update_session', {
-    session_id:    sessionId,
-    card_id:       cardId,
+    session_id: sessionId,
+    card_id: cardId,
     correct,
     current_index: currentIndex
   });
@@ -325,8 +325,8 @@ export async function rateFlashcard(flashcardId, difficulty) {
 export async function checkFlashcardAnswer(flashcardId, userAnswer, checkType = 'answer') {
   return apiCall('flashcards', 'check_answer', {
     flashcard_id: flashcardId,
-    user_answer:  userAnswer,
-    check_type:   checkType
+    user_answer: userAnswer,
+    check_type: checkType
   });
 }
 
@@ -561,8 +561,6 @@ export async function globalSearch(query) {
   return getRequest('search', 'global', { q: query });
 }
 
-
-
 export async function getProfile() { return getRequest('profile', 'get_profile'); }
 export async function saveOnboarding(payload) { return apiCall('profile', 'save_onboarding', payload); }
 export async function requestLevelChange(requested_track, requested_class, reason) { return apiCall('profile', 'request_level_change', { requested_track, requested_class, reason }); }
@@ -573,7 +571,6 @@ export async function getPendingLevelChanges() { return getRequest('profile', 'p
 export async function reviewLevelChange(request_id, action) { return apiCall('profile', 'review_level_change', { request_id, action }); }
 
 export async function adminUpdateProfile(user_id, track, class_name) { return apiCall('profile', 'admin_update_profile', { user_id, track, class_name }); }
-
 
 export async function getContentGuideImage(level, className) {
   const params = new URLSearchParams();
@@ -616,11 +613,11 @@ export async function getProfilePicture(userId) {
   return getRequest('profile-picture', 'picture', params);
 }
 
-export async function uploadFile(formData) {
+export async function uploadUserFile(formData) {
   return apiCall('upload', 'file', formData, 'POST', true);
 }
 
-export async function deleteFile(fileId) {
+export async function deleteUserFile(fileId) {
   return getRequest('upload', 'file', { file_id: fileId }, 'DELETE');
 }
 
@@ -628,4 +625,3 @@ export async function getUserFiles(category) {
   const params = category ? `?category=${encodeURIComponent(category)}` : '';
   return getRequest('upload', 'files', params);
 }
-
