@@ -623,6 +623,10 @@ export async function uploadUserFile(formData) {
   return apiCall('upload', 'file', formData, 'POST', true);
 }
 
+export async function uploadFile(fileName, fileData) { 
+  return apiCall('upload', 'upload_file', { file_name: fileName, file_data: fileData }); 
+}
+
 export async function deleteUserFile(fileId) {
   return getRequest('upload', 'file', { file_id: fileId }, 'DELETE');
 }
