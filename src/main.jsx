@@ -14,6 +14,7 @@ import './styles/Liveroom.css';
 import './styles/Tutor.css';
 import './styles/Dashboard.css';
 import './styles/Profile.css';
+import './styles/home.css';
 import LoadingProvider from './loading/LoadingProvider';
 
 function showFatalError(title, message, stack) {
