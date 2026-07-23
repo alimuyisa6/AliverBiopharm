@@ -1,4 +1,4 @@
- import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -47,6 +47,17 @@ const overlayVariants = {
   exit: { opacity: 0 },
 };
 
+const throttle = (fn, limit) => {
+  let inThrottle;
+  return function(...args) {
+    if (!inThrottle) {
+      fn.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => { inThrottle = false; }, limit);
+    }
+  };
+};
+
 export default function Layout({ children, headerExtras, showFooter = true }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -67,17 +78,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const currentYear = new Date().getFullYear();
   const isHomepage = location.pathname === '/';
 
-  // Dynamic favicon from Supabase logo, with a resilient fallback chain:
-  // 1) Try to draw the logo onto a canvas so we can resize it into a clean
-  //    32x32 / 180x180 icon.
-  // 2) If the source image doesn't send CORS headers (common for Supabase
-  //    Storage public URLs), the canvas becomes "tainted" and toDataURL()
-  //    throws a SecurityError *inside* the async onload callback. That
-  //    throw is NOT caught by a try/catch around the synchronous setup code,
-  //    so it must be caught locally, right where it happens.
-  // 3) On any failure (load error OR canvas taint), fall back to using the
-  //    raw logo URL directly as the favicon href. Browsers will happily use
-  //    a non-square/non-optimized image as a favicon.
   useEffect(() => {
     if (!logo) return;
 
@@ -106,7 +106,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         if (cancelled) return;
         try {
           const canvas = document.createElement('canvas');
-          const size = 32; // Standard favicon size
+          const size = 32;
           canvas.width = size;
           canvas.height = size;
 
@@ -144,7 +144,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           appleTouchLink.href = appleCanvas.toDataURL('image/png');
           document.head.appendChild(appleTouchLink);
         } catch (err) {
-          console.error('Favicon canvas processing failed, using direct URL fallback:', err);
           applyDirectFallback(logoUrl);
         }
       };
@@ -170,15 +169,15 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => {
+    const onScroll = throttle(() => {
       setScrolled(window.scrollY > 10);
       setShowBackToTop(window.scrollY > 400);
-    };
+    }, 100);
+    
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Force close mobile menu and search on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
@@ -195,7 +194,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => clearTimeout(timeoutId);
   }, [location.pathname]);
 
-  // Close user dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userDropdownOpen && !e.target.closest('.user-dropdown')) {
@@ -206,7 +204,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [userDropdownOpen]);
 
-  // Close search when clicking outside its panel or toggle button
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -221,7 +218,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [searchOpen]);
 
-  // Prevent body scroll when mobile menu or search is open
   useEffect(() => {
     if (mobileMenuOpen || searchOpen) {
       document.body.style.overflow = 'hidden';
@@ -239,7 +235,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
       await refreshUser();
       navigate('/');
     } catch {
-      // Silent fail
     } finally {
       if (isMounted.current) {
         setSigningOut(false);
@@ -320,15 +315,12 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Skip to main content link */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
 
-      {/* Header */}
       <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
         <div className="header-container">
-          {/* Logo */}
           <Link to="/" className="logo-link" aria-label={`${siteName} Home`}>
             {logo ? (
               <img src={logo} alt={siteName} loading="eager" />
@@ -345,7 +337,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             )}
           </Link>
 
-          {/* Desktop Navigation */}
           <nav aria-label="Main navigation">
             <ul className="main-nav">
               {navigation.map((link) => (
@@ -354,12 +345,10 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             </ul>
           </nav>
 
-          {/* Nav Actions */}
           <div className="nav-actions">
             {isHomepage && <NotificationBell user={user} />}
             {headerExtras}
 
-            {/* Search Toggle */}
             <button
               className="search-toggle"
               onClick={toggleSearch}
@@ -369,7 +358,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               {searchOpen ? <FaXmark /> : <FaMagnifyingGlass />}
             </button>
 
-            {/* User Dropdown (Desktop + Mobile) */}
             {isAuthenticated ? (
               <div className="user-dropdown">
                 <button
@@ -409,7 +397,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               </div>
             ) : null}
 
-            {/* Theme Toggle */}
             <button
               className="theme-toggle"
               onClick={toggleTheme}
@@ -418,7 +405,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               {theme === 'dark' ? <FaSun /> : <FaMoon />}
             </button>
 
-            {/* Mobile Toggle (Hamburger) */}
             <button
               className="mobile-toggle"
               onClick={(e) => {
@@ -435,14 +421,11 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         </div>
       </header>
 
-      {/* Search Overlay */}
       <SearchOverlay isOpen={searchOpen} onClose={closeSearch} />
 
-      {/* Mobile Navigation Panel */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Overlay */}
             <motion.div
               key="mobile-nav-overlay"
               className="mobile-nav-overlay"
@@ -453,7 +436,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               onClick={closeMobileMenu}
             />
 
-            {/* Panel */}
             <motion.div
               key="mobile-nav-panel"
               className="mobile-nav-panel"
@@ -532,12 +514,11 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
       <motion.main
         id="main-content"
         style={{
           flex: 1,
-          marginTop: 60,
+          marginTop: isHomepage ? 0 : 60,
           width: '100%',
           maxWidth: '100vw',
           overflowX: 'hidden'
@@ -552,7 +533,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         {children}
       </motion.main>
 
-      {/* Footer */}
       {showFooter && (
         <footer className="footer-fat">
           <div className="footer-inner">
@@ -628,7 +608,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         </footer>
       )}
 
-      {/* Back to Top Button with Cyan, Magenta, Orange, and Blue colors */}
       <button
         className={`back-to-top${showBackToTop ? ' visible' : ''}`}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -665,7 +644,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         <FaArrowUp style={{ color: '#FFFFFF', fontSize: '1.2rem' }} />
       </button>
 
-      {/* CSS for the gradient animation */}
       <style>{`
         .back-to-top {
           animation: gradientShift 3s ease infinite;

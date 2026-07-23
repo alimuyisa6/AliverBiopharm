@@ -1,4 +1,4 @@
- import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
@@ -26,40 +26,73 @@ import Profile from './pages/Profile';
 import OnboardingFlow from './pages/OnboardingFlow';
 
 const scrollPositions = {};
+const scrollRestoreDelay = 100;
+const maxRestoreAttempts = 10;
 
 function ScrollManager() {
   const location = useLocation();
   const prevPathRef = useRef(null);
-  const restoreAttemptsRef = useRef(0);
+  const restoreTimeoutRef = useRef(null);
+
+  const restoreScroll = useCallback((target) => {
+    if (restoreTimeoutRef.current) clearTimeout(restoreTimeoutRef.current);
+    
+    restoreTimeoutRef.current = setTimeout(() => {
+      const maxHeight = Math.max(
+        document.documentElement.scrollHeight,
+        document.body.scrollHeight
+      );
+      const viewportHeight = window.innerHeight;
+      const maxScrollY = Math.max(0, maxHeight - viewportHeight);
+      const safeTarget = Math.min(target, maxScrollY);
+      
+      if (window.scrollY !== safeTarget) {
+        window.scrollTo(0, safeTarget);
+      }
+    }, scrollRestoreDelay);
+  }, []);
 
   useEffect(() => {
     const key = location.pathname;
     const prevPath = prevPathRef.current;
-    if (prevPath && prevPath !== key) scrollPositions[prevPath] = window.scrollY;
+    
+    if (prevPath && prevPath !== key) {
+      scrollPositions[prevPath] = window.scrollY;
+    }
+    
     prevPathRef.current = key;
     const savedY = scrollPositions[key];
-    restoreAttemptsRef.current = 0;
-    let userScrolled = false;
-    const cancelRestore = () => { userScrolled = true; };
-    if (savedY !== undefined) {
-      window.addEventListener('touchstart', cancelRestore, { passive: true });
-      window.addEventListener('wheel', cancelRestore, { passive: true });
-      const attemptRestore = () => {
-        if (userScrolled) return;
-        const maxHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-        const viewportHeight = window.innerHeight;
-        const maxScrollY = maxHeight - viewportHeight;
-        if (maxScrollY >= savedY - 100 || restoreAttemptsRef.current >= 30) { window.scrollTo(0, Math.min(savedY, Math.max(0, maxScrollY))); return; }
-        restoreAttemptsRef.current++;
-        requestAnimationFrame(attemptRestore);
-      };
-      requestAnimationFrame(attemptRestore);
-    } else window.scrollTo(0, 0);
-    let saveTimer;
-    const handleScroll = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { scrollPositions[key] = window.scrollY; }, 150); };
+    
+    if (savedY !== undefined && savedY > 0) {
+      restoreScroll(savedY);
+    } else {
+      if (restoreTimeoutRef.current) clearTimeout(restoreTimeoutRef.current);
+      window.scrollTo(0, 0);
+    }
+
+    return () => {
+      if (restoreTimeoutRef.current) clearTimeout(restoreTimeoutRef.current);
+    };
+  }, [location.pathname, restoreScroll]);
+
+  useEffect(() => {
+    let saveTimeout;
+    
+    const handleScroll = () => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        scrollPositions[location.pathname] = window.scrollY;
+      }, 250);
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => { window.removeEventListener('scroll', handleScroll); window.removeEventListener('touchstart', cancelRestore); window.removeEventListener('wheel', cancelRestore); clearTimeout(saveTimer); scrollPositions[key] = window.scrollY; };
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(saveTimeout);
+    };
   }, [location.pathname]);
+
   return null;
 }
 
@@ -98,7 +131,14 @@ function AnimatedRoutes() {
 }
 
 function App() {
-  return <AuthProvider><LayoutProvider><AnimatedRoutes /><AdminLauncher /></LayoutProvider></AuthProvider>;
+  return (
+    <AuthProvider>
+      <LayoutProvider>
+        <AnimatedRoutes />
+        <AdminLauncher />
+      </LayoutProvider>
+    </AuthProvider>
+  );
 }
 
 export default App;

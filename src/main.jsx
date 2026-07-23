@@ -1,4 +1,4 @@
- import React from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
@@ -24,7 +24,7 @@ function showFatalError(title, message, stack) {
       <h2 style="color:#c0392b;margin:0 0 8px;">${title}</h2>
       <div style="margin-bottom:10px;">${message || 'Unknown error'}</div>
       ${stack ? `<pre style="white-space:pre-wrap;background:#f5f5f5;padding:10px;border-radius:6px;font-size:12px;max-height:240px;overflow:auto;">${stack}</pre>` : ''}
-      <button onclick="window.location.reload()" style="margin-top:12px;padding:8px 16px;background:#c0392b;color:#fff;border:none;border-radius:6px;">Reload</button>
+      <button onclick="window.location.reload()" style="margin-top:12px;padding:8px 16px;background:#c0392b;color:#fff;border:none;border-radius:6px;cursor:pointer;">Reload</button>
     </div>
   `;
 }
@@ -91,7 +91,7 @@ class ErrorBoundary extends React.Component {
           )}
           <button
             onClick={() => window.location.reload()}
-            style={{ marginTop: 12, padding: '8px 16px', background: '#c0392b', color: '#fff', border: 'none', borderRadius: 6 }}
+            style={{ marginTop: 12, padding: '8px 16px', background: '#c0392b', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}
           >
             Reload
           </button>
@@ -108,7 +108,7 @@ function initRevealObserver() {
       entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('in');
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    }, { threshold: 0.25, rootMargin: '0px 0px -50px 0px' });
 
     const observeElements = () => {
       document.querySelectorAll('.reveal:not(.in)').forEach(el => observer.observe(el));
@@ -118,15 +118,24 @@ function initRevealObserver() {
 
     const mutationObserver = new MutationObserver(observeElements);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
   } catch (e) {
     console.warn('Reveal observer init failed', e);
+    return () => {};
   }
 }
 
+let cleanupReveal;
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initRevealObserver);
+  document.addEventListener('DOMContentLoaded', () => {
+    cleanupReveal = initRevealObserver();
+  }, { once: true });
 } else {
-  initRevealObserver();
+  cleanupReveal = initRevealObserver();
 }
 
 try {
@@ -148,4 +157,10 @@ try {
   );
 } catch (error) {
   showFatalError('Initialization Error', error.message, error.stack);
+}
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    if (cleanupReveal) cleanupReveal();
+  });
 }

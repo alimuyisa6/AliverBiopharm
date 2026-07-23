@@ -1,4 +1,4 @@
- import { getCached, setCache, invalidateCache } from '../utils/cache';
+import { getCached, setCache, invalidateCache, invalidateCacheByPattern } from '../utils/cache';
 import * as api from './client';
 
 function withCache(key, fetcher, cacheEnabled = true) {
@@ -200,15 +200,13 @@ export function invalidateClassroomCache(room_id) {
   invalidateCache(`classroom_participants_${room_id}`);
 }
 export function invalidateRecallCache() {
-  invalidateCache('recall_stats');
-  invalidateCache('recall_achievements');
-  invalidateCache('recall_dashboard');
-  invalidateCache('recall_selected_level');
+  invalidateCacheByPattern('recall_');
 }
 export function invalidateUserCache() {
-  invalidateCache('user_streak');
-  invalidateCache('user_achievements');
-  invalidateCache('user_favorites');
+  invalidateCacheByPattern('user_');
+}
+export function invalidateFlashcardCache() {
+  invalidateCacheByPattern('flashcard');
 }
 
 export {
