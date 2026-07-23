@@ -1,7 +1,7 @@
  import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLayout } from '../contexts/LayoutContext';
-import { updateProfile, changePassword, requestLevelChange } from '../api/client';
+import { updateProfile, changePassword, requestLevelChange, getProfile } from '../api/client';
 import { 
   FaUser, FaEnvelope, FaLock, FaCircleCheck, 
   FaSpinner, FaShield, FaKey, FaIdCard, FaFloppyDisk,
@@ -13,30 +13,6 @@ import {
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   in: { opacity: 1, y: 0 },
-};
-
-const LEVEL_CONFIG = {
-  'O-Level': {
-    displayName: 'Secondary School Biology',
-    classLabel: 'Class',
-    options: ['Form 1', 'Form 2', 'Form 3', 'Form 4'],
-    icon: 'fa-seedling',
-    color: '#0a7e7e'
-  },
-  'A-Level': {
-    displayName: 'Advanced Secondary Biology',
-    classLabel: 'Class',
-    options: ['Form 5', 'Form 6'],
-    icon: 'fa-flask',
-    color: '#b8873a'
-  },
-  'Pharmacy': {
-    displayName: 'Pharmacy & Pharmaceutical Sciences',
-    classLabel: 'Programme',
-    options: ['Certificate', 'Diploma', 'Degree'],
-    icon: 'fa-capsules',
-    color: '#10b981'
-  }
 };
 
 export default function Profile() {
@@ -55,17 +31,37 @@ export default function Profile() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState({ current: false, new: false, confirm: false });
 
-  const [changeRequestTrack, setChangeRequestTrack] = useState('');
   const [changeRequestClass, setChangeRequestClass] = useState('');
   const [changeRequestReason, setChangeRequestReason] = useState('');
   const [changeRequestLoading, setChangeRequestLoading] = useState(false);
   const [changeRequestMessage, setChangeRequestMessage] = useState('');
 
+  // Level/class metadata now comes entirely from the backend (get_profile),
+  // which derives it from class_sequence / pharmacy_programs — the same
+  // tables the backend validates level-change requests against. No level
+  // or class config is hardcoded on the frontend.
+  const [profileMeta, setProfileMeta] = useState(null);
+  const [profileMetaError, setProfileMetaError] = useState('');
+
   useEffect(() => {
     if (user?.full_name) setFullName(user.full_name);
-    if (user?.profile?.track) {
-      setChangeRequestTrack(user.profile.track);
+  }, [user]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadProfileMeta() {
+      try {
+        const data = await getProfile();
+        if (!cancelled) {
+          setProfileMeta(data);
+          setProfileMetaError('');
+        }
+      } catch (err) {
+        if (!cancelled) setProfileMetaError(err.message || 'Failed to load profile details');
+      }
     }
+    if (user) loadProfileMeta();
+    return () => { cancelled = true; };
   }, [user]);
 
   async function handleProfileSubmit(e) {
@@ -126,9 +122,8 @@ export default function Profile() {
     setChangeRequestLoading(true);
     setChangeRequestMessage('');
     try {
-      await requestLevelChange(changeRequestTrack, changeRequestClass, changeRequestReason);
+      await requestLevelChange(profileMeta?.track, changeRequestClass, changeRequestReason);
       setChangeRequestMessage('Request submitted for admin review.');
-      setChangeRequestTrack('');
       setChangeRequestClass('');
       setChangeRequestReason('');
     } catch (err) {
@@ -148,11 +143,10 @@ export default function Profile() {
     day: 'numeric'
   }) : 'N/A';
 
-  const currentLevel = user?.profile?.track || 'O-Level';
-  const currentClass = user?.profile?.class_name || 'Not set';
-  const levelConfig = LEVEL_CONFIG[currentLevel] || LEVEL_CONFIG['O-Level'];
-  const classLabel = levelConfig.classLabel || 'Class';
-  const classOptions = levelConfig.options || [];
+  const currentLevel = profileMeta?.level_display_name || profileMeta?.track || 'Not set';
+  const currentClass = profileMeta?.class_name || 'Not set';
+  const classLabel = profileMeta?.class_label || 'Class';
+  const classOptions = profileMeta?.class_options || [];
 
   return (
     <motion.div 
@@ -442,8 +436,15 @@ export default function Profile() {
                 <FaGraduationCap className="card-icon" style={{ color: 'var(--clr-cyan)' }} />
                 Current {classLabel}
               </h2>
-              <div className="card-badge">{currentLevel}</div>
+              <div className="card-badge">{profileMeta?.track || '—'}</div>
             </div>
+
+            {profileMetaError && (
+              <div className="alert alert-error">
+                <span className="alert-icon">⚠</span>
+                {profileMetaError}
+              </div>
+            )}
 
             <div className="profile-level-info">
               <div className="profile-info-row">
@@ -456,7 +457,7 @@ export default function Profile() {
               </div>
               <div className="profile-info-row">
                 <span className="profile-info-label">Available {classLabel}s</span>
-                <span className="profile-info-value">{classOptions.join(', ')}</span>
+                <span className="profile-info-value">{classOptions.join(', ') || '—'}</span>
               </div>
             </div>
 
@@ -480,6 +481,7 @@ export default function Profile() {
                     onChange={e => setChangeRequestClass(e.target.value)} 
                     className="form-input" 
                     required
+                    disabled={classOptions.length === 0}
                   >
                     <option value="">Select {classLabel}</option>
                     {classOptions.map(opt => (
