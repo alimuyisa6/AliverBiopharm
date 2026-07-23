@@ -1,12 +1,14 @@
-  // features/home/HeroCarousel.jsx
+ // features/home/HeroCarousel.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 export function HeroCarousel({ slides, currentSlide }) {
+  if (!slides?.length) return null;
+
   return (
     <section id="home" className="hero-carousel">
       <div className="carousel-viewport">
-        {(slides || []).filter(Boolean).map((slide, idx) => (
+        {slides.map((slide, idx) => (
           <div
             key={idx}
             className={`carousel-slide ${idx === currentSlide ? 'active' : ''}`}
@@ -29,21 +31,6 @@ export function HeroCarousel({ slides, currentSlide }) {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="dynamic-hero-container" id="hero-title-section">
-        <h1 className="dynamic-main-title">
-          <span className="title-word magenta-word">Aliver</span>
-          <span className="title-word cyan-word">Biopharm</span>
-        </h1>
-        <div className="title-sub-line">
-          <span className="sub-word">Advanced</span>
-          <span className="sub-word">Biology</span>
-          <span className="sub-word magenta-word">&amp;</span>
-          <span className="sub-word cyan-word">Pharmacy</span>
-          <span className="sub-word">Learning</span>
-          <span className="sub-word">Platform</span>
-        </div>
       </div>
     </section>
   );
