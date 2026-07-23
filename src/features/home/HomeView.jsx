@@ -1,4 +1,4 @@
-  import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -38,26 +38,18 @@ import {
   getContinueReading,
   getCommunityActivity,
   getPdfsByLevel,
-  getNotesStructure
+  getNotesStructure,
+  getSections
 } from '../../api/client';
 
-export default function Home() {
+export default function HomeView() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const access = useContentAccess();
   const { level, class_name, showAll } = useLevelFilter();
 
   const [loading, setLoading] = useState(true);
-  const [sections, setSections] = useState({
-    hero: { slides: [] },
-    team: { members: [] },
-    testimonials: { quotes: [] },
-    pricing: { plans: [] },
-    blog: { posts: [] },
-    faq: { items: [] },
-    contact: { info: [] },
-    weekly_challenge: null
-  });
+  const [sections, setSections] = useState({});
   const [publicStats, setPublicStats] = useState(null);
   const [communityActivity, setCommunityActivity] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -89,6 +81,14 @@ export default function Home() {
     loadInitialData();
   }, [access.isPending, level]);
 
+  useEffect(() => {
+    if (!sections?.hero_carousel?.slides?.length) return;
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % sections.hero_carousel.slides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [sections]);
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
@@ -103,7 +103,8 @@ export default function Home() {
         continueReading,
         activity,
         pdfData,
-        notesData
+        notesData,
+        sectionsData
       ] = await Promise.all([
         getPublicStats().catch(() => null),
         getPastPapers({ limit: 3 }).catch(() => []),
@@ -122,7 +123,8 @@ export default function Home() {
           : Promise.resolve({ pdfs: [] }),
         effectiveLevel
           ? getNotesStructure(effectiveLevel, effectiveClass).catch(() => [])
-          : Promise.resolve([])
+          : Promise.resolve([]),
+        getSections().catch(() => ({}))
       ]);
 
       setPublicStats(stats);
@@ -138,37 +140,8 @@ export default function Home() {
       });
       setGroupedNotes(notesGrouped);
 
-      setSections({
-        hero: {
-          slides: [{
-            title: 'Welcome to AliverBiopharm',
-            subtitle: 'Advanced Biology & Pharmacy Learning',
-            cta_text: 'Start Learning',
-            cta_link: '/dashboard',
-            icon: 'fa-arrow-right',
-            background_image: ''
-          }]
-        },
-        team: { members: [] },
-        testimonials: {
-          quotes: [{
-            text: 'AliverBiopharm transformed how I study biology.',
-            author: 'Sarah M., O-Level Student'
-          }]
-        },
-        pricing: { plans: [] },
-        blog: { posts: [] },
-        faq: { items: [] },
-        contact: {
-          info: [{
-            label: 'Email',
-            value: 'support@aliverbiopharm.com',
-            icon: 'fa-envelope',
-            href: 'mailto:support@aliverbiopharm.com'
-          }]
-        },
-        weekly_challenge: null
-      });
+      setSections(sectionsData || {});
+
     } catch (err) {
       console.error('Failed to load data:', err);
     } finally {
@@ -298,7 +271,7 @@ export default function Home() {
   return (
     <div className="home-page">
       <HeroCarousel
-        slides={sections.hero?.slides || []}
+        slides={sections?.hero_carousel?.slides || []}
         currentSlide={currentSlide}
       />
 
@@ -372,20 +345,20 @@ export default function Home() {
         onSubmit={handleMoodSubmit}
       />
 
-      <TeamScroll members={sections.team?.members || []} />
+      <TeamScroll members={sections?.team?.members || []} />
 
-      <TestimonialSlider quotes={sections.testimonials?.quotes || []} />
+      <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
 
-      <PricingCards plans={sections.pricing?.plans || []} />
+      <PricingCards plans={sections?.pricing?.plans || []} />
 
-      <BlogGrid posts={sections.blog?.posts || []} />
+      <BlogGrid posts={sections?.blog?.posts || []} />
 
-      <FaqAccordion items={sections.faq?.items || []} />
+      <FaqAccordion items={sections?.faq?.items || []} />
 
       <ContactSection
         contactForm={contactForm}
         contactStatus={contactStatus}
-        contactInfo={sections.contact?.info || []}
+        contactInfo={sections?.contact?.info || []}
         onChange={setContactForm}
         onSubmit={handleContactSubmit}
       />
