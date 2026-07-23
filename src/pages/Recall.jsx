@@ -1,39 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  FaBrain,
-  FaCheck,
-  FaTrophy,
-  FaFire,
-  FaStar,
-  FaChartLine,
-  FaPencil,
-  FaCircleInfo,
-  FaMicroscope,
-  FaDna,
-  FaCapsules,
-  FaBookOpen,
-  FaBullseye,
-  FaLeaf,
-  FaFlask,
-  FaTree,
-  FaSeedling,
-  FaStarOfLife,
-  FaChartSimple,
-  FaCalendarDay,
-  FaCircleCheck,
-  FaLink,
-  FaTriangleExclamation,
-  FaExclamation,
-  FaDownload,
-  FaClock,
-  FaVolumeHigh,
-  FaVolumeXmark,
-  FaRotate,
-  FaHouse,
-  FaArrowLeft,
-  FaArrowRight,
-  FaSpinner
+  FaBrain, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
+  FaPencil, FaCircleInfo, FaMicroscope, FaDna, FaCapsules,
+  FaBookOpen, FaBullseye, FaLeaf, FaFlask, FaTree, FaSeedling,
+  FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck,
+  FaLink, FaTriangleExclamation, FaExclamation, FaDownload,
+  FaClock, FaVolumeHigh, FaVolumeXmark, FaRotate, FaHouse,
+  FaArrowLeft, FaArrowRight, FaSpinner
 } from 'react-icons/fa6';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
@@ -54,7 +28,6 @@ import {
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
-
 
 const strengthIcons = {
   excellent: FaStar,
@@ -137,7 +110,7 @@ export default function BioRecall() {
   const { user } = useAuth();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
-  const { level, showAll } = useLevelFilter();
+  const { level, class_name, showAll } = useLevelFilter();
 
   const [sessionQuestions, setSessionQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -228,6 +201,8 @@ export default function BioRecall() {
     setDebugLog(prev => [...prev.slice(-10), `${new Date().toISOString().slice(11, 19)} ${msg}`]);
   };
 
+  const effectiveClassName = showAll ? null : class_name;
+
   useEffect(() => {
     document.body.classList.remove('theme-olevel', 'theme-alevel', 'theme-pharmacy');
     if (level === 'O-Level') document.body.classList.add('theme-olevel');
@@ -277,7 +252,7 @@ export default function BioRecall() {
 
   const restoreActiveSession = async (lvl) => {
     try {
-      const session = await getRecallSession({ level: lvl });
+      const session = await getRecallSession({ level: lvl, class_name: effectiveClassName });
       if (!isMounted.current) return false;
       if (session && session.questions?.length && session.session_id) {
         setSessionQuestions(session.questions);
@@ -362,7 +337,7 @@ export default function BioRecall() {
 
   const openTopicModal = async () => {
     try {
-      const topics = await getRecallTopics(level);
+      const topics = await getRecallTopics(level, effectiveClassName);
       if (!isMounted.current) return;
       setTopicList(topics || []);
       setTopicModalOpen(true);
@@ -375,17 +350,22 @@ export default function BioRecall() {
     setLoading(true);
     show('quiz', 'Preparing session...');
     try {
-      await checkRecallSession({ level, topic });
+      await checkRecallSession({ level, topic, class_name: effectiveClassName });
     } catch (e) {
       if (isMounted.current) {
-        setMessage({ text: e.message === 'Daily session already completed' ? "You've already completed today's session. Come back tomorrow!" : e.message, type: 'warning' });
+        setMessage({
+          text: e.message === 'Daily session already completed'
+            ? "You've already completed today's session. Come back tomorrow!"
+            : e.message,
+          type: 'warning'
+        });
         setLoading(false);
         safeHide();
       }
       return;
     }
     try {
-      const session = await getRecallSession({ level, topic });
+      const session = await getRecallSession({ level, topic, class_name: effectiveClassName });
       if (!isMounted.current) return;
       if (session && session.questions?.length) {
         setSessionQuestions(session.questions);
@@ -564,9 +544,16 @@ export default function BioRecall() {
   const exportStudyNotes = () => {
     if (!userAnswersRecord.length) return;
     const totalTime = sessionReport?.total_time_formatted || '0s';
-    let content = `BioRecall Study Notes \u2013 ${level}\nSession Date: ${new Date().toLocaleDateString()}\nTotal Questions: ${userAnswersRecord.length}\nTotal Time: ${totalTime}\n\n`;
+    let content = `BioRecall Study Notes \u2013 ${level}${effectiveClassName ? ` \u2013 ${effectiveClassName}` : ''}\n`;
+    content += `Session Date: ${new Date().toLocaleDateString()}\n`;
+    content += `Total Questions: ${userAnswersRecord.length}\n`;
+    content += `Total Time: ${totalTime}\n\n`;
     userAnswersRecord.forEach((item, idx) => {
-      content += `Q${idx + 1}: ${item.question}\nYour answer: ${item.userAnswer}\nCorrect answer: ${item.correctAnswer}\nStrength: ${item.strength} (XP: ${item.xp})\nTime: ${item.timeTakenFormatted || '0s'}\n`;
+      content += `Q${idx + 1}: ${item.question}\n`;
+      content += `Your answer: ${item.userAnswer}\n`;
+      content += `Correct answer: ${item.correctAnswer}\n`;
+      content += `Strength: ${item.strength} (XP: ${item.xp})\n`;
+      content += `Time: ${item.timeTakenFormatted || '0s'}\n`;
       if (item.feedback?.answer_explanation) content += `Explanation: ${item.feedback.answer_explanation}\n`;
       if (item.studyNote) content += `Study Note: ${item.studyNote}\n`;
       if (item.commonMistakeExplanation) content += `Common Confusion: ${item.commonMistakeExplanation}\n`;
@@ -581,9 +568,7 @@ export default function BioRecall() {
     document.body.appendChild(a);
     a.click();
     setTimeout(() => {
-      if (a.parentNode) {
-        a.parentNode.removeChild(a);
-      }
+      if (a.parentNode) a.parentNode.removeChild(a);
       URL.revokeObjectURL(url);
     }, 100);
   };
@@ -741,7 +726,7 @@ export default function BioRecall() {
         <div className="dashboard-card">
           <div className="card-title"><FaFlask size="2.5rem" color="#3498db" /> Subject</div>
           <div className="subject-illustration"><i className={`fa-solid ${dashboardData.subjectIllustration}`}></i></div>
-          <div>{level}</div>
+          <div>{level}{effectiveClassName ? ` · ${effectiveClassName}` : ''}</div>
         </div>
         <div className="dashboard-card">
           <div className="card-title"><FaStarOfLife size="2.5rem" color="var(--primary)" /> Topic Mastery</div>
@@ -909,13 +894,17 @@ export default function BioRecall() {
   const renderTopicModal = () => (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h3 className="modal-title">Choose a topic for {level}</h3>
+        <h3 className="modal-title">Choose a topic for {level}{effectiveClassName ? ` · ${effectiveClassName}` : ''}</h3>
         <div className="modal-topics">
-          {topicList.length === 0 ? <p>Loading topics...</p> : topicList.map(t => (
-            <button key={t.topic_name} className="option-btn" onClick={() => startSessionFromTopicModal(t.topic_name)}>
-              {t.topic_name}
-            </button>
-          ))}
+          {topicList.length === 0 ? (
+            <p>Loading topics...</p>
+          ) : (
+            topicList.map(t => (
+              <button key={t.topic_name} className="option-btn" onClick={() => startSessionFromTopicModal(t.topic_name)}>
+                {t.topic_name} ({t.question_count})
+              </button>
+            ))
+          )}
         </div>
         <button className="option-btn" onClick={() => { setTopicModalOpen(false); startSession(null); }}>All topics (any order)</button>
         <button className="modal-cancel" onClick={() => setTopicModalOpen(false)}>Cancel</button>
@@ -972,7 +961,7 @@ export default function BioRecall() {
 
         <div className="recall-header">
           <h1>{level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${level || ''}`}</h1>
-          {level && <span className="level-badge">{level}</span>}
+          {level && <span className="level-badge">{level}{effectiveClassName ? ` · ${effectiveClassName}` : ''}</span>}
         </div>
 
         <div className="main-layout">
