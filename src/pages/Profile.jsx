@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLayout } from '../contexts/LayoutContext';
 import { updateProfile, changePassword, requestLevelChange } from '../api/client';
@@ -6,7 +6,7 @@ import {
   FaUser, FaEnvelope, FaLock, FaCircleCheck, 
   FaSpinner, FaShield, FaKey, FaIdCard, FaFloppyDisk,
   FaEye, FaEyeSlash, FaUserCheck, FaCalendar,
-  FaMedal, FaStar, FaExchangeAlt, FaGraduationCap,
+  FaMedal, FaStar, FaArrowRightArrowLeft, FaGraduationCap,
   FaBookOpen, FaArrowRight
 } from 'react-icons/fa6';
 
@@ -464,7 +464,7 @@ export default function Profile() {
 
             <div className="profile-change-section">
               <h3 className="profile-change-title">
-                <FaExchangeAlt style={{ color: 'var(--clr-orange)' }} />
+                <FaArrowRightArrowLeft style={{ color: 'var(--clr-orange)' }} />
                 Request {classLabel} Change
               </h3>
               <p className="profile-change-hint">
@@ -517,7 +517,7 @@ export default function Profile() {
                     </>
                   ) : (
                     <>
-                      <FaExchangeAlt /> Request {classLabel} Change
+                      <FaArrowRightArrowLeft /> Request {classLabel} Change
                     </>
                   )}
                 </button>
@@ -528,4 +528,4 @@ export default function Profile() {
       </div>
     </motion.div>
   );
-}
+} 
