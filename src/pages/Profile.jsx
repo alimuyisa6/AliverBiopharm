@@ -9,6 +9,7 @@ import {
   FaMedal, FaStar, FaArrowRightArrowLeft, FaGraduationCap,
   FaBookOpen, FaArrowRight
 } from 'react-icons/fa6';
+import { ProfilePictureUpload } from '../components/ProfilePictureUpload';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -36,10 +37,6 @@ export default function Profile() {
   const [changeRequestLoading, setChangeRequestLoading] = useState(false);
   const [changeRequestMessage, setChangeRequestMessage] = useState('');
 
-  // Level/class metadata now comes entirely from the backend (get_profile),
-  // which derives it from class_sequence / pharmacy_programs — the same
-  // tables the backend validates level-change requests against. No level
-  // or class config is hardcoded on the frontend.
   const [profileMeta, setProfileMeta] = useState(null);
   const [profileMetaError, setProfileMetaError] = useState('');
 
@@ -162,12 +159,13 @@ export default function Profile() {
           <p className="profile-subtitle">Manage your account information and security</p>
         </div>
         <div className="profile-avatar">
-          <div className="avatar-circle">
-            <FaUser className="avatar-icon" />
-          </div>
-          <div className="avatar-badge">
-            <FaShield />
-          </div>
+          <ProfilePictureUpload 
+            currentUrl={user?.profile?.profile_picture_url} 
+            onUpdate={(url) => {
+              refreshUser();
+            }}
+            size={80}
+          />
         </div>
       </div>
 
