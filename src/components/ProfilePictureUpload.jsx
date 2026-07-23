@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+ import React, { useState, useRef } from 'react';
 import { FaCamera, FaSpinner, FaTrash, FaUser } from 'react-icons/fa6';
 import { uploadProfilePicture, deleteProfilePicture } from '../api/client';
 
