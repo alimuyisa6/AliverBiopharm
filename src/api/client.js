@@ -573,3 +573,32 @@ export async function getPendingLevelChanges() { return getRequest('profile', 'p
 export async function reviewLevelChange(request_id, action) { return apiCall('profile', 'review_level_change', { request_id, action }); }
 
 export async function adminUpdateProfile(user_id, track, class_name) { return apiCall('profile', 'admin_update_profile', { user_id, track, class_name }); }
+
+
+export async function getContentGuideImage(level, className) {
+  const params = new URLSearchParams();
+  params.append('level', level);
+  if (className) params.append('class_name', className);
+  return getRequest('contentguide', 'image', params);
+}
+
+export async function getContentGuideImages() {
+  return getRequest('contentguide', 'images');
+}
+
+export async function updateContentGuideImage(level, className, imageUrl, fallbackColor, altText) {
+  return apiCall('contentguide', 'image', {
+    level,
+    class_name: className,
+    image_url: imageUrl,
+    fallback_color: fallbackColor,
+    alt_text: altText
+  });
+}
+
+export async function deleteContentGuideImage(level, className) {
+  return apiCall('contentguide', 'image', {
+    level,
+    class_name: className
+  }, 'DELETE');
+}
