@@ -54,7 +54,7 @@ import {
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import useLoading from '../loading/useLoading';
 import InlineSpinner from '../loading/components/InlineSpinner';
-import './BioRecall.css';
+
 
 const strengthIcons = {
   excellent: FaStar,
