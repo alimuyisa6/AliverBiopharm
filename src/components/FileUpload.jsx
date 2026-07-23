@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+ import React, { useState } from 'react';
 import { FaUpload, FaSpinner, FaTrash, FaFilePdf, FaFileImage } from 'react-icons/fa6';
-import { uploadFile, deleteFile } from '../api/client';
+import { uploadUserFile, deleteUserFile } from '../api/client';
 
 export function FileUpload({ category, onUploadComplete }) {
   const [uploading, setUploading] = useState(false);
@@ -24,7 +24,7 @@ export function FileUpload({ category, onUploadComplete }) {
     setError('');
 
     try {
-      const result = await uploadFile(formData);
+      const result = await uploadUserFile(formData);
       if (result.success) {
         setFiles(prev => [result.file, ...prev]);
         if (onUploadComplete) onUploadComplete(result.file);
@@ -39,7 +39,7 @@ export function FileUpload({ category, onUploadComplete }) {
 
   const handleDelete = async (fileId) => {
     try {
-      await deleteFile(fileId);
+      await deleteUserFile(fileId);
       setFiles(prev => prev.filter(f => f.id !== fileId));
     } catch (err) {
       setError('Failed to delete file');
@@ -48,6 +48,7 @@ export function FileUpload({ category, onUploadComplete }) {
 
   const getIcon = (mimeType) => {
     if (mimeType === 'application/pdf') return <FaFilePdf className="file-icon-pdf" />;
+    if (mimeType && mimeType.startsWith('image/')) return <FaFileImage className="file-icon-image" />;
     return <FaFileImage className="file-icon-image" />;
   };
 
