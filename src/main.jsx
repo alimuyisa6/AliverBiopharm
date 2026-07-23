@@ -11,6 +11,7 @@ import './styles/notifications.css';
 import './styles/Info.css';
 import './styles/Lab.css';
 import './styles/Liveroom.css';
+import './styles/bioRecall.css';
 import './styles/Tutor.css';
 import './styles/Dashboard.css';
 import './styles/Profile.css';
