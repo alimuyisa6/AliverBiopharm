@@ -602,3 +602,30 @@ export async function deleteContentGuideImage(level, className) {
     class_name: className
   }, 'DELETE');
 }
+
+export async function uploadProfilePicture(formData) {
+  return apiCall('profile-picture', 'upload', formData, 'POST', true);
+}
+
+export async function deleteProfilePicture() {
+  return apiCall('profile-picture', 'picture', {});
+}
+
+export async function getProfilePicture(userId) {
+  const params = userId ? `?user_id=${encodeURIComponent(userId)}` : '';
+  return getRequest('profile-picture', 'picture', params);
+}
+
+export async function uploadFile(formData) {
+  return apiCall('upload', 'file', formData, 'POST', true);
+}
+
+export async function deleteFile(fileId) {
+  return getRequest('upload', 'file', { file_id: fileId }, 'DELETE');
+}
+
+export async function getUserFiles(category) {
+  const params = category ? `?category=${encodeURIComponent(category)}` : '';
+  return getRequest('upload', 'files', params);
+}
+
