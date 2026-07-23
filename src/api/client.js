@@ -57,19 +57,27 @@ function dedupeAndQueue(key, execute) {
   return promise;
 }
 
-async function apiCall(module, path, body = {}, method = 'POST') {
+async function apiCall(module, path, body = {}, method = 'POST', isFormData = false) {
   const url = `${API_BASE}?module=${module}&path=${path}`;
-  const cacheKey = `${method}:${module}:${path}`;
+  const cacheKey = `${method}:${module}:${path}:${isFormData ? 'formdata' : 'json'}`;
 
   return dedupeAndQueue(cacheKey, async () => {
-    const headers = { 'Content-Type': 'application/json' };
+    const headers = {};
     if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+    
+    let fetchBody;
+    if (isFormData) {
+      fetchBody = body;
+    } else {
+      headers['Content-Type'] = 'application/json';
+      fetchBody = method === 'POST' ? JSON.stringify(body) : undefined;
+    }
 
     const res = await fetch(url, {
       method,
       headers,
       credentials: 'include',
-      body: method === 'POST' ? JSON.stringify(body) : undefined
+      body: fetchBody
     });
 
     const json = await res.json();
@@ -341,8 +349,6 @@ export async function getFlashcardProgress() {
 export async function getCommunityActivity() { return getRequest('community', 'activity'); }
 
 export async function getLeaderboard(level, limit = 20) { return getRequest('interactions', 'leaderboard', { level, limit }); }
-
-export async function uploadFile(fileName, fileData) { return apiCall('upload', 'upload_file', { file_name: fileName, file_data: fileData }); }
 
 export async function getRecallSession({ level, topic }) { return getRequest('recall', 'session', { level, topic }); }
 export async function checkRecallSession({ level, topic }) { return getRequest('recall', 'session_check', { level, topic }); }
