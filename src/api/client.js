@@ -152,7 +152,7 @@ export async function approveResource(submissionId, action) { return apiCall('re
 export async function getResourceSubmissions() { return getRequest('resources', 'submissions'); }
 export async function getAllRatings() { return getRequest('resources', 'get_all_ratings'); }
 
-export async function getQuizTopics({ level }) { return getRequest('quiz', 'get_quiz_topics', { level }); }
+export async function getQuizTopics({ level, class_name }) { return getRequest('quiz', 'get_quiz_topics', { level, class_name }); }
 export async function getQuizBlock({ level, topic, block_number }) { return getRequest('quiz', 'get_quiz_block', { level, topic, block_number }); }
 export async function checkDailyRetry({ level, topic, block_number }) { return getRequest('quiz', 'check_daily_retry', { level, topic, block_number }); }
 export async function checkQuizAnswer({ question_id, selected_option }) { return apiCall('quiz', 'check_quiz_answer', { question_id, selected_option }); }
@@ -238,6 +238,7 @@ export async function getFlashcards(filters = {}) {
   const params = {};
   if (filters.level) params.level = filters.level;
   if (filters.discipline) params.discipline = filters.discipline;
+  if (filters.class_name) params.class_name = filters.class_name;
   if (filters.class_programme) params.class_programme = filters.class_programme;
   if (filters.confidence) params.confidence = filters.confidence;
   return getRequest('flashcards', 'list', params);
@@ -247,6 +248,7 @@ export async function getFlashcardDecks(filters = {}) {
   const params = {};
   if (filters.level) params.level = filters.level;
   if (filters.discipline) params.discipline = filters.discipline;
+  if (filters.class_name) params.class_name = filters.class_name;
   if (filters.class_programme) params.class_programme = filters.class_programme;
   if (filters.confidence) params.confidence = filters.confidence;
   return getRequest('flashcards', 'decks', params);
@@ -295,10 +297,10 @@ export async function completeFlashcardSession(sessionId) {
   return apiCall('flashcards', 'complete_session', { session_id: sessionId });
 }
 
-export async function createFlashcardDeck(title, description, category, level, discipline, class_programme, difficulty_confidence, card_types, cards) {
+export async function createFlashcardDeck(title, description, category, level, discipline, class_name, difficulty_confidence, card_types, cards) {
   return apiCall('flashcards', 'create_deck', {
     title, description, category, level,
-    discipline, class_programme, difficulty_confidence, card_types, cards
+    discipline, class_name, difficulty_confidence, card_types, cards
   });
 }
 
@@ -370,19 +372,24 @@ export async function dismissNotification(notificationId) { return apiCall('reca
 export async function getNotificationPreferences() { return getRequest('recall', 'notification_prefs'); }
 export async function updateNotificationPreferences(preferences) { return apiCall('recall', 'notification_prefs_update', { preferences }); }
 
-export async function getGlossaryTerms(level, category, search) {
+export async function getGlossaryTerms(level, category, search, class_name) {
   const params = { level };
   if (category) params.category = category;
   if (search) params.search = search;
+  if (class_name) params.class_name = class_name;
   return getRequest('glossary', 'list', params);
 }
 
-export async function getGlossaryTerm(slug, level) {
-  return getRequest('glossary', 'term', { slug, level });
+export async function getGlossaryTerm(slug, level, class_name) {
+  const params = { slug, level };
+  if (class_name) params.class_name = class_name;
+  return getRequest('glossary', 'term', params);
 }
 
-export async function getGlossaryCategories(level) {
-  return getRequest('glossary', 'categories', { level });
+export async function getGlossaryCategories(level, class_name) {
+  const params = { level };
+  if (class_name) params.class_name = class_name;
+  return getRequest('glossary', 'categories', params);
 }
 
 export async function getInfoSection(section) {
