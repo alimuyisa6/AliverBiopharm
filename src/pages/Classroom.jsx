@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
@@ -58,7 +58,7 @@ export default function Classroom() {
   if (loading) {
     return (
       <div className="classroom-loading">
-        <span className="loading-spinner"></span>
+        <i className="fa-solid fa-spinner fa-spin"></i>
         <p>Loading classrooms...</p>
       </div>
     );
@@ -107,8 +107,8 @@ export default function Classroom() {
             const isPremium = room.room_type === 'premium';
             const isHard = room.room_type === 'hard_topic';
             return (
-              <div key={room.id} className={`classroom-card ${room.status}`} style={{ '--card-accent': status.color }}>
-                <div className="card-media">
+              <div key={room.id} className={`classroom-card ${room.status}`}>
+                <div className="classroom-card-media">
                   {room.cover_image_url ? (
                     <img src={room.cover_image_url} alt={room.title} loading="lazy" />
                   ) : (
@@ -134,11 +134,20 @@ export default function Classroom() {
                 <div className="room-body">
                   <h3 className="room-title">{room.title}</h3>
                   <div className="room-meta">
-                    <span><i className="fa-solid fa-book" style={{ color: 'var(--clr-cyan)' }}></i> {room.topic_name}</span>
-                    <span><i className="fa-solid fa-user-graduate" style={{ color: 'var(--clr-blue)' }}></i> {room.class_name}</span>
+                    <span>
+                      <i className="fa-solid fa-book" style={{ color: 'var(--clr-cyan)' }}></i>
+                      {room.topic_name}
+                    </span>
+                    <span>
+                      <i className="fa-solid fa-user-graduate" style={{ color: 'var(--clr-blue)' }}></i>
+                      {room.class_name}
+                    </span>
                   </div>
                   <div className="room-stats">
-                    <span><i className="fa-solid fa-users" style={{ color: 'var(--clr-purple)' }}></i> {room.participant_count || 0} participants</span>
+                    <span>
+                      <i className="fa-solid fa-users" style={{ color: 'var(--clr-purple)' }}></i>
+                      {room.participant_count || 0} participants
+                    </span>
                     {room.room_type !== 'free' && (
                       <span className={`room-type-badge ${room.room_type}`}>
                         <i className={`fa-solid ${room.room_type === 'hard_topic' ? 'fa-triangle-exclamation' : 'fa-crown'}`}></i>
@@ -165,7 +174,8 @@ export default function Classroom() {
                   )}
                   {room.status === 'upcoming' && room.scheduled_at && (
                     <button className="btn-secondary" disabled>
-                      <i className="fa-solid fa-clock" style={{ color: 'var(--clr-orange)' }}></i> {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <i className="fa-solid fa-clock" style={{ color: 'var(--clr-orange)' }}></i>
+                      {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </button>
                   )}
                   {room.status === 'open_floor' && (
@@ -191,4 +201,4 @@ export default function Classroom() {
       )}
     </div>
   );
-} 
+}
