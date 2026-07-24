@@ -116,7 +116,7 @@ export default function Glossary() {
         </button>
 
         <div className={`glossary-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-          <div className="glossary-sidebar-inner">
+          <div className="glossary-sidebar-inner" style={{ '--sidebar-accent': getLevelColor(selectedLevel) }}>
             <div className="glossary-search-area">
               <div className="glossary-search-input-wrap">
                 <i className="fa-solid fa-magnifying-glass glossary-search-icon"></i>
@@ -209,15 +209,15 @@ export default function Glossary() {
               <h2>Select a term to begin</h2>
               <p>Choose any term from the sidebar to see its definition, linked quizzes, study notes, flashcards, and more.</p>
               <div className="glossary-welcome-stats">
-                <div className="glossary-welcome-stat">
+                <div className="glossary-welcome-stat stat-cyan">
                   <span className="glossary-welcome-stat-number">{terms.length}</span>
                   <span className="glossary-welcome-stat-label">Terms</span>
                 </div>
-                <div className="glossary-welcome-stat">
+                <div className="glossary-welcome-stat stat-magenta">
                   <span className="glossary-welcome-stat-number">{Object.keys(groupedTerms).length}</span>
                   <span className="glossary-welcome-stat-label">Categories</span>
                 </div>
-                <div className="glossary-welcome-stat">
+                <div className="glossary-welcome-stat stat-blue">
                   <span className="glossary-welcome-stat-number">{selectedLevel}</span>
                   <span className="glossary-welcome-stat-label">Level</span>
                 </div>
@@ -234,7 +234,7 @@ export default function Glossary() {
             </div>
           ) : termContent ? (
             <div className="glossary-term-detail">
-              <div className="glossary-term-hero">
+              <div className="glossary-term-hero" style={{ '--hero-accent': getLevelColor(selectedLevel) }}>
                 <div className="glossary-term-breadcrumb">
                   <span className="glossary-term-category-badge">
                     {termContent.term.category}
@@ -265,7 +265,7 @@ export default function Glossary() {
                 {(termContent.term.etymology || termContent.term.mnemonic) && (
                   <div className="glossary-term-meta">
                     {termContent.term.etymology && (
-                      <div className="glossary-meta-item">
+                      <div className="glossary-meta-item meta-etymology">
                         <span className="glossary-meta-label">
                           <i className="fa-solid fa-language"></i> Etymology
                         </span>
@@ -273,7 +273,7 @@ export default function Glossary() {
                       </div>
                     )}
                     {termContent.term.mnemonic && (
-                      <div className="glossary-meta-item">
+                      <div className="glossary-meta-item meta-mnemonic">
                         <span className="glossary-meta-label">
                           <i className="fa-solid fa-lightbulb"></i> Memory Aid
                         </span>
@@ -286,7 +286,7 @@ export default function Glossary() {
 
               <div className="glossary-routes">
                 {termContent.content.quizzes.length > 0 && (
-                  <div className="glossary-route-section">
+                  <div className="glossary-route-section route-quiz">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-circle-question"></i>
                       <h3>Quizzes</h3>
@@ -316,7 +316,7 @@ export default function Glossary() {
                 )}
 
                 {termContent.content.pdfs.length > 0 && (
-                  <div className="glossary-route-section">
+                  <div className="glossary-route-section route-pdf">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-file-pdf"></i>
                       <h3>PDF Resources</h3>
@@ -348,7 +348,7 @@ export default function Glossary() {
                 )}
 
                 {termContent.content.notes.length > 0 && (
-                  <div className="glossary-route-section">
+                  <div className="glossary-route-section route-notes">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-file-lines"></i>
                       <h3>Study Notes</h3>
@@ -378,7 +378,7 @@ export default function Glossary() {
                 )}
 
                 {termContent.content.flashcards.length > 0 && (
-                  <div className="glossary-route-section">
+                  <div className="glossary-route-section route-flashcard">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-layer-group"></i>
                       <h3>Flashcard Decks</h3>
@@ -406,7 +406,7 @@ export default function Glossary() {
                 )}
 
                 {termContent.content.past_papers.length > 0 && (
-                  <div className="glossary-route-section">
+                  <div className="glossary-route-section route-paper">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-file-signature"></i>
                       <h3>Past Papers</h3>
@@ -436,7 +436,7 @@ export default function Glossary() {
                 )}
 
                 {termContent.content.recall_questions.length > 0 && (
-                  <div className="glossary-route-section">
+                  <div className="glossary-route-section route-recall">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-brain"></i>
                       <h3>Recall Practice</h3>
@@ -466,7 +466,7 @@ export default function Glossary() {
                 )}
 
                 {termContent.term.related_terms_data && termContent.term.related_terms_data.length > 0 && (
-                  <div className="glossary-route-section">
+                  <div className="glossary-route-section route-related">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-link"></i>
                       <h3>Related Terms</h3>
