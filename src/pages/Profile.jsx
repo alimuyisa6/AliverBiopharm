@@ -1,13 +1,13 @@
- import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLayout } from '../contexts/LayoutContext';
 import { updateProfile, changePassword, requestLevelChange, getProfile } from '../api/client';
-import { 
-  FaUser, FaEnvelope, FaLock, FaCircleCheck, 
+import {
+  FaUser, FaEnvelope, FaLock, FaCircleCheck,
   FaSpinner, FaShield, FaKey, FaIdCard, FaFloppyDisk,
   FaEye, FaEyeSlash, FaUserCheck, FaCalendar,
   FaMedal, FaStar, FaArrowRightArrowLeft, FaGraduationCap,
-  FaBookOpen, FaArrowRight
+  FaClock
 } from 'react-icons/fa6';
 import { ProfilePictureUpload } from '../components/ProfilePictureUpload';
 
@@ -15,6 +15,26 @@ const pageVariants = {
   initial: { opacity: 0, y: 20 },
   in: { opacity: 1, y: 0 },
 };
+
+const TRACK_RING_COLOR = {
+  'O-Level': 'var(--clr-cyan)',
+  'A-Level': 'var(--clr-magenta)',
+  'Pharmacy': 'var(--clr-green)'
+};
+
+function getPasswordStrength(password) {
+  if (!password) return { score: 0, label: '', color: '' };
+  let score = 0;
+  if (password.length >= 10) score++;
+  if (password.length >= 14) score++;
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 2) return { score: 1, label: 'Weak', color: 'var(--clr-red)' };
+  if (score <= 3) return { score: 2, label: 'Fair', color: 'var(--clr-orange)' };
+  return { score: 3, label: 'Strong', color: 'var(--clr-green)' };
+}
 
 export default function Profile() {
   const { user, refreshUser } = useLayout();
@@ -60,6 +80,8 @@ export default function Profile() {
     if (user) loadProfileMeta();
     return () => { cancelled = true; };
   }, [user]);
+
+  const passwordStrength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
 
   async function handleProfileSubmit(e) {
     e.preventDefault();
@@ -144,23 +166,37 @@ export default function Profile() {
   const currentClass = profileMeta?.class_name || 'Not set';
   const classLabel = profileMeta?.class_label || 'Class';
   const classOptions = profileMeta?.class_options || [];
+  const ringColor = TRACK_RING_COLOR[profileMeta?.track] || 'var(--clr-blue)';
+  const isTeacher = profileMeta?.role === 'teacher';
 
   return (
-    <motion.div 
-      className="profile-page" 
-      initial="initial" 
-      animate="in" 
-      variants={pageVariants} 
+    <motion.div
+      className="profile-page"
+      initial="initial"
+      animate="in"
+      variants={pageVariants}
       transition={{ duration: 0.4 }}
     >
       <div className="profile-header">
         <div className="profile-header-content">
           <h1 className="profile-title">Profile Settings</h1>
           <p className="profile-subtitle">Manage your account information and security</p>
+
+          <div className="profile-identity-chips">
+            <span className="chip chip-cyan">{profileMeta?.role || 'student'}</span>
+            {profileMeta?.track && <span className="chip chip-magenta">{profileMeta.track}</span>}
+            {profileMeta?.class_name && <span className="chip chip-blue">{profileMeta.class_name}</span>}
+            {isTeacher && (
+              <span className={`chip ${profileMeta?.is_approved_teacher ? 'chip-green' : 'chip-orange'}`}>
+                {profileMeta?.is_approved_teacher ? <FaCircleCheck /> : <FaClock />}
+                {profileMeta?.is_approved_teacher ? 'Approved Teacher' : 'Pending Approval'}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="profile-avatar">
-          <ProfilePictureUpload 
-            currentUrl={user?.profile?.profile_picture_url} 
+        <div className="profile-avatar-ring" style={{ borderColor: ringColor }}>
+          <ProfilePictureUpload
+            currentUrl={user?.profile?.profile_picture_url}
             onUpdate={(url) => {
               refreshUser();
             }}
@@ -170,28 +206,28 @@ export default function Profile() {
       </div>
 
       <div className="profile-stats-grid">
-        <div className="profile-stat-card">
+        <div className="profile-stat-card profile-stat-card--cyan">
           <div className="stat-icon" style={{ color: 'var(--clr-cyan)' }}>
             <FaUserCheck />
           </div>
           <div className="stat-value">{user?.full_name || 'User'}</div>
           <div className="stat-label">Account Name</div>
         </div>
-        <div className="profile-stat-card">
-          <div className="stat-icon" style={{ color: 'var(--clr-magenta)' }}>
+        <div className="profile-stat-card profile-stat-card--purple">
+          <div className="stat-icon" style={{ color: 'var(--clr-purple)' }}>
             <FaMedal />
           </div>
           <div className="stat-value">{user?.badges_count || 0}</div>
           <div className="stat-label">Badges Earned</div>
         </div>
-        <div className="profile-stat-card">
+        <div className="profile-stat-card profile-stat-card--orange">
           <div className="stat-icon" style={{ color: 'var(--clr-orange)' }}>
             <FaStar />
           </div>
           <div className="stat-value">{user?.xp || 0}</div>
           <div className="stat-label">Total XP</div>
         </div>
-        <div className="profile-stat-card">
+        <div className="profile-stat-card profile-stat-card--blue">
           <div className="stat-icon" style={{ color: 'var(--clr-blue)' }}>
             <FaCalendar />
           </div>
@@ -201,13 +237,13 @@ export default function Profile() {
       </div>
 
       <div className="profile-grid">
-        <motion.div 
+        <motion.div
           className="profile-card-wrapper"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <form onSubmit={handleProfileSubmit} className="profile-card">
+          <form onSubmit={handleProfileSubmit} className="profile-card profile-card--cyan">
             <div className="card-header">
               <h2 className="card-title">
                 <FaIdCard className="card-icon" style={{ color: 'var(--clr-cyan)' }} />
@@ -218,7 +254,7 @@ export default function Profile() {
 
             <AnimatePresence>
               {profileError && (
-                <motion.div 
+                <motion.div
                   className="alert alert-error"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -229,7 +265,7 @@ export default function Profile() {
                 </motion.div>
               )}
               {profileSuccess && (
-                <motion.div 
+                <motion.div
                   className="alert alert-success"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -272,8 +308,8 @@ export default function Profile() {
               <span className="input-hint">Email cannot be changed</span>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn-primary btn-save"
               disabled={savingProfile}
             >
@@ -292,24 +328,27 @@ export default function Profile() {
           </form>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="profile-card-wrapper"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <form onSubmit={handlePasswordSubmit} className="profile-card">
+          <form onSubmit={handlePasswordSubmit} className="profile-card profile-card--magenta">
             <div className="card-header">
               <h2 className="card-title">
                 <FaKey className="card-icon" style={{ color: 'var(--clr-magenta)' }} />
                 Security
               </h2>
-              <div className="card-badge card-badge-security">Protected</div>
+              <div className="card-badge card-badge-security">
+                <FaShield />
+                Protected
+              </div>
             </div>
 
             <AnimatePresence>
               {passwordError && (
-                <motion.div 
+                <motion.div
                   className="alert alert-error"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -320,7 +359,7 @@ export default function Profile() {
                 </motion.div>
               )}
               {passwordSuccess && (
-                <motion.div 
+                <motion.div
                   className="alert alert-success"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -376,6 +415,19 @@ export default function Profile() {
                   {showPassword.new ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
+              {newPassword && (
+                <div className="password-strength-meter">
+                  <div className="password-strength-track">
+                    <div
+                      className="password-strength-fill"
+                      style={{ width: `${(passwordStrength.score / 3) * 100}%`, background: passwordStrength.color }}
+                    />
+                  </div>
+                  <span className="password-strength-label" style={{ color: passwordStrength.color }}>
+                    {passwordStrength.label}
+                  </span>
+                </div>
+              )}
               <span className="input-hint">Minimum 10 characters for security</span>
             </div>
 
@@ -402,8 +454,8 @@ export default function Profile() {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn-primary btn-security"
               disabled={savingPassword}
             >
@@ -422,16 +474,16 @@ export default function Profile() {
           </form>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="profile-card-wrapper"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="profile-card">
+          <div className="profile-card profile-card--green">
             <div className="card-header">
               <h2 className="card-title">
-                <FaGraduationCap className="card-icon" style={{ color: 'var(--clr-cyan)' }} />
+                <FaGraduationCap className="card-icon" style={{ color: 'var(--clr-green)' }} />
                 Current {classLabel}
               </h2>
               <div className="card-badge">{profileMeta?.track || '—'}</div>
@@ -467,17 +519,17 @@ export default function Profile() {
                 Request {classLabel} Change
               </h3>
               <p className="profile-change-hint">
-                Submit a request to change your {classLabel.toLowerCase()}. 
+                Submit a request to change your {classLabel.toLowerCase()}.
                 An admin will review and approve it.
               </p>
 
               <form onSubmit={handleRequestLevelChange} className="profile-change-form">
                 <div className="form-group">
                   <label className="form-label">New {classLabel}</label>
-                  <select 
-                    value={changeRequestClass} 
-                    onChange={e => setChangeRequestClass(e.target.value)} 
-                    className="form-input" 
+                  <select
+                    value={changeRequestClass}
+                    onChange={e => setChangeRequestClass(e.target.value)}
+                    className="form-input"
                     required
                     disabled={classOptions.length === 0}
                   >
@@ -490,11 +542,11 @@ export default function Profile() {
 
                 <div className="form-group">
                   <label className="form-label">Reason for Change</label>
-                  <textarea 
-                    value={changeRequestReason} 
-                    onChange={e => setChangeRequestReason(e.target.value)} 
-                    className="form-input" 
-                    rows="3" 
+                  <textarea
+                    value={changeRequestReason}
+                    onChange={e => setChangeRequestReason(e.target.value)}
+                    className="form-input"
+                    rows="3"
                     placeholder="Why do you want to change your class?"
                     required
                   />
@@ -506,8 +558,8 @@ export default function Profile() {
                   </div>
                 )}
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn-primary profile-change-btn"
                   disabled={changeRequestLoading || !changeRequestClass}
                 >
