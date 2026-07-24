@@ -125,114 +125,641 @@ async function getRequest(module, path, params = {}) {
 
 export { getRequest, apiCall };
 
-export async function signin(email, password, turnstile_token, mfa_code) { return apiCall('auth', 'signin', { email, password, turnstile_token, mfa_code }); }
-export async function signout() { return apiCall('auth', 'signout', {}); }
-export async function getUser() { return getRequest('auth', 'get_user'); }
+// ============================================
+// AUTH ENDPOINTS
+// ============================================
 
-export async function getAllSiteSections() { return getRequest('site', 'get_all_site_sections'); }
-export async function getSectionHeadings() { return getRequest('site', 'get_section_headings'); }
-export async function updateSiteSection(section, data) { return apiCall('site', 'update_site_section', { section, data }); }
-export async function updateSectionHeadings(headings) { return apiCall('site', 'update_section_headings', { headings }); }
+export async function signin(email, password, turnstile_token, mfa_code) { 
+  return apiCall('auth', 'signin', { email, password, turnstile_token, mfa_code }); 
+}
 
-export async function getResources(filters = {}) { return getRequest('resources', 'get_resources', filters); }
-export async function getFilterOptions() { return getRequest('resources', 'get_filter_options'); }
-export async function getPdfsByLevel(level) { return getRequest('resources', 'get_pdfs_by_level', { level }); }
-export async function trackPdfPreview(pdfId) { return apiCall('resources', 'track_pdf_preview', { pdf_id: pdfId }); }
-export async function trackPdfDownload(pdfId) { return apiCall('resources', 'track_pdf_download', { pdf_id: pdfId }); }
-export async function getNotesStructure() { return getRequest('resources', 'get_notes_structure'); }
-export async function getNoteContent(subtopicId) { return getRequest('resources', 'get_note_content', { subtopic_id: subtopicId }); }
-export async function getNotePreview(subtopicId) { return getRequest('resources', 'get_note_preview', { subtopic_id: subtopicId }); }
-export async function getNoteReactions(noteId) { return getRequest('resources', 'get_note_reactions', { note_id: noteId }); }
-export async function toggleNoteReaction(noteId, reactionType) { return apiCall('resources', 'toggle_note_reaction', { note_id: noteId, reaction_type: reactionType }); }
-export async function saveReadingProgress(noteId, scrollPercentage, scrollPosition, timeSpent, completed = false) { return apiCall('resources', 'save_reading_progress', { note_id: noteId, scroll_percentage: scrollPercentage, scroll_position: scrollPosition, time_spent: timeSpent, completed }); }
-export async function getReadingProgress(noteId) { return getRequest('resources', 'get_reading_progress', { note_id: noteId }); }
-export async function getContinueReading(limit = 10) { return getRequest('resources', 'get_continue_reading', { limit }); }
-export async function submitResource(payload) { return apiCall('resources', 'submit_resource', { payload }); }
-export async function approveResource(submissionId, action) { return apiCall('resources', 'approve', { submissionId, action }); }
-export async function getResourceSubmissions() { return getRequest('resources', 'submissions'); }
-export async function getAllRatings() { return getRequest('resources', 'get_all_ratings'); }
+export async function signout() { 
+  return apiCall('auth', 'signout', {}); 
+}
 
-export async function getQuizTopics({ level, class_name }) { return getRequest('quiz', 'get_quiz_topics', { level, class_name }); }
-export async function getQuizBlock({ level, topic, block_number }) { return getRequest('quiz', 'get_quiz_block', { level, topic, block_number }); }
-export async function checkDailyRetry({ level, topic, block_number }) { return getRequest('quiz', 'check_daily_retry', { level, topic, block_number }); }
-export async function checkQuizAnswer({ question_id, selected_option }) { return apiCall('quiz', 'check_quiz_answer', { question_id, selected_option }); }
-export async function submitQuizBlock({ level, topic, block_number, answers, time_taken }) { return apiCall('quiz', 'submit_quiz_block', { level, topic, block_number, answers, time_taken }); }
-export async function addQuizQuestionsBatch(level, topic, questions, batch_name) { return apiCall('quiz', 'add_quiz_questions_batch', { level, topic, questions, batch_name }); }
+export async function getUser() { 
+  return getRequest('auth', 'get_user'); 
+}
 
-export async function getPlatformStats() { return getRequest('interactions', 'platform-stats'); }
-export async function getUserDashboard() { return getRequest('interactions', 'dashboard'); }
-export async function getDailyChallenge() { return getRequest('interactions', 'daily-challenge'); }
-export async function getWeakAreas() { return getRequest('interactions', 'weak-areas'); }
-export async function getLearningPaths(level) { return getRequest('interactions', 'learning-paths', { level }); }
-export async function getPersonalRecords() { return getRequest('interactions', 'personal-records'); }
+export async function signup(email, password, turnstile_token, extra = {}) {
+  return apiCall('auth', 'signup', { email, password, turnstile_token, ...extra });
+}
 
-export async function getPastPapers(filters = {}) { return getRequest('past-papers', 'get_papers', filters); }
-export async function getPastPaperFilterOptions() { return getRequest('past-papers', 'get_filter_options'); }
-export async function getPastPaper(id) { return getRequest('past-papers', 'get_paper', { id }); }
-export async function getPastPaperDownloadUrl(id) { return getRequest('past-papers', 'get_download_url', { id }); }
-export async function addPastPaper(data) { return apiCall('past-papers', 'add_paper', data); }
-export async function addPastPapersBatch(papers) { return apiCall('past-papers', 'add_papers_batch', { papers }); }
-export async function deletePastPaper(id) { return apiCall('past-papers', 'delete_paper', { id }); }
-export async function trackPastPaperDownload(id) { return apiCall('past-papers', 'track_download', { id }); }
+export async function updateProfile(full_name) {
+  return apiCall('auth', 'update_profile', { full_name });
+}
 
-export async function toggleFavorite(resourceId) { return apiCall('interactions', 'toggle_favorite', { resource_id: resourceId }); }
-export async function recordView(resourceId) { return apiCall('interactions', 'record_view', { resource_id: resourceId }); }
-export async function recordDownload(resourceId) { return apiCall('interactions', 'record_download', { resource_id: resourceId }); }
-export async function recordDailyVisit() { return apiCall('interactions', 'record_daily_visit', {}); }
-export async function submitRating(resourceId, rating) { return apiCall('interactions', 'submit_rating', { resource_id: resourceId, rating }); }
-export async function likeResource(resourceId) { return apiCall('interactions', 'like_resource', { resource_id: resourceId }); }
-export async function commentResource(resourceId, comment) { return apiCall('interactions', 'comment_resource', { resource_id: resourceId, comment }); }
-export async function getResourceInteractions(resourceId) { return getRequest('interactions', 'get_resource_interactions', { resource_id: resourceId }); }
-export async function getUserFavorites() { return getRequest('interactions', 'get_user_favorites'); }
-export async function getRecentViews(limit = 5) { return getRequest('interactions', 'get_recent_views', { limit }); }
-export async function getUserRatings() { return getRequest('interactions', 'get_user_ratings'); }
-export async function getUserAchievements() { return getRequest('interactions', 'get_user_achievements'); }
-export async function getUserStreak() { return getRequest('interactions', 'get_user_streak'); }
-export async function getPublicStats() { return getRequest('interactions', 'get_public_stats'); }
-export async function submitMood(mood, message) { return apiCall('interactions', 'submit_mood', { mood, message }); }
-export async function saveAchievement(badge) { return apiCall('interactions', 'save_achievement', { badge }); }
-export async function saveQuizState(state) { return apiCall('interactions', 'save_quiz_state', { state }); }
-export async function getQuizState() { return getRequest('interactions', 'get_quiz_state'); }
-export async function clearQuizState() { return apiCall('interactions', 'clear_quiz_state', {}); }
-export async function trackEvent(eventName, eventData = {}) { return apiCall('interactions', 'track_event', { event_name: eventName, event_data: eventData }); }
+export async function changePassword(current_password, new_password) {
+  return apiCall('auth', 'change_password', { current_password, new_password });
+}
 
-export async function getAdminStats() { return getRequest('admin', 'stats'); }
-export async function getSubmissions() { return getRequest('admin', 'submissions'); }
-export async function getContactMessages() { return getRequest('admin', 'messages'); }
-export async function getAdminUsers() { return getRequest('admin', 'get_admin_users'); }
-export async function getNewsletterSubscribers() { return getRequest('admin', 'get_newsletter_subscribers'); }
-export async function getDonations() { return getRequest('admin', 'get_donations'); }
-export async function getPageActivity() { return getRequest('admin', 'get_page_activity'); }
-export async function updateUserRole(userId, role) { return apiCall('admin', 'update_user_role', { userId, role }); }
-export async function updateUserLock(userId, lock, reason) { return apiCall('admin', 'update_user_lock', { userId, lock, reason }); }
-export async function updateUserRestriction(userId, restriction_type, reason, duration_hours) { return apiCall('admin', 'update_user_restriction', { userId, restriction_type, reason, duration_hours }); }
-export async function updateAppFeature(feature_key, settings, is_enabled) { return apiCall('admin', 'update_app_feature', { feature_key, settings, is_enabled }); }
-export async function getAppFeatures(pageId = 'all') { return getRequest('admin', 'get_app_features', { page_id: pageId }); }
-export async function getUserActivityTrace() { return getRequest('admin', 'get_user_activity_trace'); }
-export async function deleteQuizTopic(topic, level) { return apiCall('admin', 'delete_quiz_topic', { topic, level }); }
-export async function listAllUsers() { return getRequest('admin', 'list_users'); }
-export async function getAuditLog() { return getRequest('admin', 'get_audit_log'); }
-export async function setupMfa() { return apiCall('admin', 'setup_mfa', {}); }
-export async function confirmMfa(code) { return apiCall('admin', 'confirm_mfa', { code }); }
-export async function disableMfa(userId) { return apiCall('admin', 'disable_mfa', { userId }); }
+export async function requestHandoff() { 
+  return apiCall('auth', 'handoff_create', {}); 
+}
 
-export async function submitContact(formData) { return apiCall('contact', 'submit_contact', { formData }); }
-export async function subscribeNewsletter(email) { return apiCall('contact', 'subscribe_newsletter', { formData: { email } }); }
+export async function exchangeHandoff(token) { 
+  return apiCall('auth', 'handoff_exchange', { token }); 
+}
 
-export async function requestChat() { return apiCall('chat', 'request_chat', {}); }
-export async function getChatMessages(roomId) { return getRequest('chat', 'get_chat_messages', { room_id: roomId }); }
-export async function sendChatMessage(roomId, message) { return apiCall('chat', 'send_chat_message', { room_id: roomId, message }); }
-export async function deleteChatMessage(messageId) { return apiCall('chat', 'delete_chat_message', { message_id: messageId }); }
-export async function checkAdminOnline() { return getRequest('chat', 'check_admin_online'); }
-export async function updateUserPresence() { return apiCall('chat', 'update_user_presence', {}); }
-export async function adminGetPendingRequests() { return getRequest('chat', 'admin_get_pending_requests'); }
-export async function adminAcceptChat(roomId) { return apiCall('chat', 'admin_accept_chat', { room_id: roomId }); }
-export async function adminRejectChat(roomId) { return apiCall('chat', 'admin_reject_chat', { room_id: roomId }); }
-export async function adminUpdatePresence(is_online, is_busy) { return apiCall('chat', 'admin_update_presence', { is_online, is_busy }); }
-export async function adminGetActiveChats() { return getRequest('chat', 'admin_get_active_chats'); }
+// ============================================
+// PROFILE PICTURE ENDPOINTS (RESTful)
+// ============================================
 
-export async function submitWeeklyChallenge(weekStart, selectedOption) { return apiCall('weekly-challenge', 'submit', { week_start: weekStart, selected_option: selectedOption }); }
-export async function getWeeklyChallengeStatus(weekStart) { return getRequest('weekly-challenge', 'status', { week_start: weekStart }); }
+/**
+ * Upload a profile picture
+ * @param {FormData} formData - FormData containing the file
+ * @returns {Promise<Object>} - Returns { success, profile_picture_url }
+ */
+export async function uploadProfilePicture(formData) {
+  try {
+    const response = await fetch('/api/server/upload', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+      // Don't set Content-Type - browser sets it with boundary for FormData
+    });
+
+    const json = await response.json();
+    if (json.csrf_token) csrfToken = json.csrf_token;
+    
+    if (!response.ok) {
+      if (response.status === 403 && json.restricted) {
+        handleRestrictionResponse(json);
+      }
+      console.error('Upload error:', json.error);
+      throw new Error(json.error || 'Upload failed');
+    }
+    
+    return json.data !== undefined ? json.data : json;
+  } catch (error) {
+    console.error('Upload API error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete the current user's profile picture
+ * @returns {Promise<Object>} - Returns { success }
+ */
+export async function deleteProfilePicture() {
+  try {
+    const response = await fetch('/api/server/picture', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+
+    const json = await response.json();
+    if (json.csrf_token) csrfToken = json.csrf_token;
+    
+    if (!response.ok) {
+      if (response.status === 403 && json.restricted) {
+        handleRestrictionResponse(json);
+      }
+      console.error('Delete error:', json.error);
+      throw new Error(json.error || 'Delete failed');
+    }
+    
+    return json.data !== undefined ? json.data : json;
+  } catch (error) {
+    console.error('Delete API error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get a user's profile picture URL
+ * @param {string} userId - Optional user ID (defaults to current user)
+ * @returns {Promise<Object>} - Returns { profile_picture_url }
+ */
+export async function getProfilePicture(userId) {
+  try {
+    const url = userId 
+      ? `/api/server/picture?user_id=${encodeURIComponent(userId)}`
+      : '/api/server/picture';
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    const json = await response.json();
+    if (json.csrf_token) csrfToken = json.csrf_token;
+    
+    if (!response.ok) {
+      if (response.status === 403 && json.restricted) {
+        handleRestrictionResponse(json);
+      }
+      console.error('Get picture error:', json.error);
+      throw new Error(json.error || 'Failed to get picture');
+    }
+    
+    return json.data !== undefined ? json.data : json;
+  } catch (error) {
+    console.error('Get picture API error:', error);
+    throw error;
+  }
+}
+
+// ============================================
+// PROFILE ENDPOINTS
+// ============================================
+
+export async function getProfile() { 
+  return getRequest('profile', 'get_profile'); 
+}
+
+export async function saveOnboarding(payload) { 
+  return apiCall('profile', 'save_onboarding', payload); 
+}
+
+export async function requestLevelChange(requested_track, requested_class, reason) { 
+  return apiCall('profile', 'request_level_change', { requested_track, requested_class, reason }); 
+}
+
+export async function getClassSequence(track) { 
+  return getRequest('profile', 'class_sequence', { track }); 
+}
+
+export async function getPharmacyPrograms() { 
+  return getRequest('profile', 'pharmacy_programs'); 
+}
+
+export async function getLevelChangeStatus() { 
+  return getRequest('profile', 'level_change_status'); 
+}
+
+export async function getPendingLevelChanges() { 
+  return getRequest('profile', 'pending_level_changes'); 
+}
+
+export async function reviewLevelChange(request_id, action) { 
+  return apiCall('profile', 'review_level_change', { request_id, action }); 
+}
+
+export async function adminUpdateProfile(user_id, track, class_name) { 
+  return apiCall('profile', 'admin_update_profile', { user_id, track, class_name }); 
+}
+
+// ============================================
+// SITE ENDPOINTS
+// ============================================
+
+export async function getAllSiteSections() { 
+  return getRequest('site', 'get_all_site_sections'); 
+}
+
+export async function getSectionHeadings() { 
+  return getRequest('site', 'get_section_headings'); 
+}
+
+export async function updateSiteSection(section, data) { 
+  return apiCall('site', 'update_site_section', { section, data }); 
+}
+
+export async function updateSectionHeadings(headings) { 
+  return apiCall('site', 'update_section_headings', { headings }); 
+}
+
+export async function getInfoSection(section) {
+  return getRequest('site', 'get_info_section', { section });
+}
+
+export async function getInfoSectionsList() {
+  return getRequest('site', 'get_info_sections_list');
+}
+
+export async function updateInfoSection(section, data) {
+  return apiCall('site', 'update_info_section', { section, ...data });
+}
+
+// ============================================
+// RESOURCES ENDPOINTS
+// ============================================
+
+export async function getResources(filters = {}) { 
+  return getRequest('resources', 'get_resources', filters); 
+}
+
+export async function getFilterOptions() { 
+  return getRequest('resources', 'get_filter_options'); 
+}
+
+export async function getPdfsByLevel(level) { 
+  return getRequest('resources', 'get_pdfs_by_level', { level }); 
+}
+
+export async function trackPdfPreview(pdfId) { 
+  return apiCall('resources', 'track_pdf_preview', { pdf_id: pdfId }); 
+}
+
+export async function trackPdfDownload(pdfId) { 
+  return apiCall('resources', 'track_pdf_download', { pdf_id: pdfId }); 
+}
+
+export async function getNotesStructure() { 
+  return getRequest('resources', 'get_notes_structure'); 
+}
+
+export async function getNoteContent(subtopicId) { 
+  return getRequest('resources', 'get_note_content', { subtopic_id: subtopicId }); 
+}
+
+export async function getNotePreview(subtopicId) { 
+  return getRequest('resources', 'get_note_preview', { subtopic_id: subtopicId }); 
+}
+
+export async function getNoteReactions(noteId) { 
+  return getRequest('resources', 'get_note_reactions', { note_id: noteId }); 
+}
+
+export async function toggleNoteReaction(noteId, reactionType) { 
+  return apiCall('resources', 'toggle_note_reaction', { note_id: noteId, reaction_type: reactionType }); 
+}
+
+export async function saveReadingProgress(noteId, scrollPercentage, scrollPosition, timeSpent, completed = false) { 
+  return apiCall('resources', 'save_reading_progress', { 
+    note_id: noteId, 
+    scroll_percentage: scrollPercentage, 
+    scroll_position: scrollPosition, 
+    time_spent: timeSpent, 
+    completed 
+  }); 
+}
+
+export async function getReadingProgress(noteId) { 
+  return getRequest('resources', 'get_reading_progress', { note_id: noteId }); 
+}
+
+export async function getContinueReading(limit = 10) { 
+  return getRequest('resources', 'get_continue_reading', { limit }); 
+}
+
+export async function submitResource(payload) { 
+  return apiCall('resources', 'submit_resource', { payload }); 
+}
+
+export async function approveResource(submissionId, action) { 
+  return apiCall('resources', 'approve', { submissionId, action }); 
+}
+
+export async function getResourceSubmissions() { 
+  return getRequest('resources', 'submissions'); 
+}
+
+export async function getAllRatings() { 
+  return getRequest('resources', 'get_all_ratings'); 
+}
+
+// ============================================
+// QUIZ ENDPOINTS
+// ============================================
+
+export async function getQuizTopics({ level, class_name }) { 
+  return getRequest('quiz', 'get_quiz_topics', { level, class_name }); 
+}
+
+export async function getQuizBlock({ level, topic, block_number }) { 
+  return getRequest('quiz', 'get_quiz_block', { level, topic, block_number }); 
+}
+
+export async function checkDailyRetry({ level, topic, block_number }) { 
+  return getRequest('quiz', 'check_daily_retry', { level, topic, block_number }); 
+}
+
+export async function checkQuizAnswer({ question_id, selected_option }) { 
+  return apiCall('quiz', 'check_quiz_answer', { question_id, selected_option }); 
+}
+
+export async function submitQuizBlock({ level, topic, block_number, answers, time_taken }) { 
+  return apiCall('quiz', 'submit_quiz_block', { level, topic, block_number, answers, time_taken }); 
+}
+
+export async function addQuizQuestionsBatch(level, topic, questions, batch_name) { 
+  return apiCall('quiz', 'add_quiz_questions_batch', { level, topic, questions, batch_name }); 
+}
+
+export async function startQuizSession(level, topic, blockNumber, state = {}) {
+  return apiCall('quiz', 'quiz_start_session', { level, topic, block_number: blockNumber, state });
+}
+
+export async function trackTabSwitch(level, topic, blockNumber) {
+  return apiCall('quiz', 'quiz_tab_switch', { level, topic, block_number: blockNumber });
+}
+
+export async function submitQuizWithSession(level, topic, blockNumber, answers, timeTaken) {
+  return apiCall('quiz', 'quiz_submit_with_session', { level, topic, block_number: blockNumber, answers, time_taken: timeTaken });
+}
+
+export async function getQuizSessionStatus() {
+  return getRequest('quiz', 'quiz_session_status');
+}
+
+// ============================================
+// INTERACTIONS ENDPOINTS
+// ============================================
+
+export async function getPlatformStats() { 
+  return getRequest('interactions', 'platform-stats'); 
+}
+
+export async function getUserDashboard() { 
+  return getRequest('interactions', 'dashboard'); 
+}
+
+export async function getDailyChallenge() { 
+  return getRequest('interactions', 'daily-challenge'); 
+}
+
+export async function getWeakAreas() { 
+  return getRequest('interactions', 'weak-areas'); 
+}
+
+export async function getLearningPaths(level) { 
+  return getRequest('interactions', 'learning-paths', { level }); 
+}
+
+export async function getPersonalRecords() { 
+  return getRequest('interactions', 'personal-records'); 
+}
+
+export async function toggleFavorite(resourceId) { 
+  return apiCall('interactions', 'toggle_favorite', { resource_id: resourceId }); 
+}
+
+export async function recordView(resourceId) { 
+  return apiCall('interactions', 'record_view', { resource_id: resourceId }); 
+}
+
+export async function recordDownload(resourceId) { 
+  return apiCall('interactions', 'record_download', { resource_id: resourceId }); 
+}
+
+export async function recordDailyVisit() { 
+  return apiCall('interactions', 'record_daily_visit', {}); 
+}
+
+export async function submitRating(resourceId, rating) { 
+  return apiCall('interactions', 'submit_rating', { resource_id: resourceId, rating }); 
+}
+
+export async function likeResource(resourceId) { 
+  return apiCall('interactions', 'like_resource', { resource_id: resourceId }); 
+}
+
+export async function commentResource(resourceId, comment) { 
+  return apiCall('interactions', 'comment_resource', { resource_id: resourceId, comment }); 
+}
+
+export async function getResourceInteractions(resourceId) { 
+  return getRequest('interactions', 'get_resource_interactions', { resource_id: resourceId }); 
+}
+
+export async function getUserFavorites() { 
+  return getRequest('interactions', 'get_user_favorites'); 
+}
+
+export async function getRecentViews(limit = 5) { 
+  return getRequest('interactions', 'get_recent_views', { limit }); 
+}
+
+export async function getUserRatings() { 
+  return getRequest('interactions', 'get_user_ratings'); 
+}
+
+export async function getUserAchievements() { 
+  return getRequest('interactions', 'get_user_achievements'); 
+}
+
+export async function getUserStreak() { 
+  return getRequest('interactions', 'get_user_streak'); 
+}
+
+export async function getPublicStats() { 
+  return getRequest('interactions', 'get_public_stats'); 
+}
+
+export async function submitMood(mood, message) { 
+  return apiCall('interactions', 'submit_mood', { mood, message }); 
+}
+
+export async function saveAchievement(badge) { 
+  return apiCall('interactions', 'save_achievement', { badge }); 
+}
+
+export async function saveQuizState(state) { 
+  return apiCall('interactions', 'save_quiz_state', { state }); 
+}
+
+export async function getQuizState() { 
+  return getRequest('interactions', 'get_quiz_state'); 
+}
+
+export async function clearQuizState() { 
+  return apiCall('interactions', 'clear_quiz_state', {}); 
+}
+
+export async function trackEvent(eventName, eventData = {}) { 
+  return apiCall('interactions', 'track_event', { event_name: eventName, event_data: eventData }); 
+}
+
+export async function getLeaderboard(level, limit = 20) { 
+  return getRequest('interactions', 'leaderboard', { level, limit }); 
+}
+
+// ============================================
+// PAST PAPERS ENDPOINTS
+// ============================================
+
+export async function getPastPapers(filters = {}) { 
+  return getRequest('past-papers', 'get_papers', filters); 
+}
+
+export async function getPastPaperFilterOptions() { 
+  return getRequest('past-papers', 'get_filter_options'); 
+}
+
+export async function getPastPaper(id) { 
+  return getRequest('past-papers', 'get_paper', { id }); 
+}
+
+export async function getPastPaperDownloadUrl(id) { 
+  return getRequest('past-papers', 'get_download_url', { id }); 
+}
+
+export async function addPastPaper(data) { 
+  return apiCall('past-papers', 'add_paper', data); 
+}
+
+export async function addPastPapersBatch(papers) { 
+  return apiCall('past-papers', 'add_papers_batch', { papers }); 
+}
+
+export async function deletePastPaper(id) { 
+  return apiCall('past-papers', 'delete_paper', { id }); 
+}
+
+export async function trackPastPaperDownload(id) { 
+  return apiCall('past-papers', 'track_download', { id }); 
+}
+
+// ============================================
+// ADMIN ENDPOINTS
+// ============================================
+
+export async function getAdminStats() { 
+  return getRequest('admin', 'stats'); 
+}
+
+export async function getSubmissions() { 
+  return getRequest('admin', 'submissions'); 
+}
+
+export async function getContactMessages() { 
+  return getRequest('admin', 'messages'); 
+}
+
+export async function getAdminUsers() { 
+  return getRequest('admin', 'get_admin_users'); 
+}
+
+export async function getNewsletterSubscribers() { 
+  return getRequest('admin', 'get_newsletter_subscribers'); 
+}
+
+export async function getDonations() { 
+  return getRequest('admin', 'get_donations'); 
+}
+
+export async function getPageActivity() { 
+  return getRequest('admin', 'get_page_activity'); 
+}
+
+export async function updateUserRole(userId, role) { 
+  return apiCall('admin', 'update_user_role', { userId, role }); 
+}
+
+export async function updateUserLock(userId, lock, reason) { 
+  return apiCall('admin', 'update_user_lock', { userId, lock, reason }); 
+}
+
+export async function updateUserRestriction(userId, restriction_type, reason, duration_hours) { 
+  return apiCall('admin', 'update_user_restriction', { userId, restriction_type, reason, duration_hours }); 
+}
+
+export async function updateAppFeature(feature_key, settings, is_enabled) { 
+  return apiCall('admin', 'update_app_feature', { feature_key, settings, is_enabled }); 
+}
+
+export async function getAppFeatures(pageId = 'all') { 
+  return getRequest('admin', 'get_app_features', { page_id: pageId }); 
+}
+
+export async function getUserActivityTrace() { 
+  return getRequest('admin', 'get_user_activity_trace'); 
+}
+
+export async function deleteQuizTopic(topic, level) { 
+  return apiCall('admin', 'delete_quiz_topic', { topic, level }); 
+}
+
+export async function listAllUsers() { 
+  return getRequest('admin', 'list_users'); 
+}
+
+export async function getAuditLog() { 
+  return getRequest('admin', 'get_audit_log'); 
+}
+
+export async function setupMfa() { 
+  return apiCall('admin', 'setup_mfa', {}); 
+}
+
+export async function confirmMfa(code) { 
+  return apiCall('admin', 'confirm_mfa', { code }); 
+}
+
+export async function disableMfa(userId) { 
+  return apiCall('admin', 'disable_mfa', { userId }); 
+}
+
+// ============================================
+// CONTACT ENDPOINTS
+// ============================================
+
+export async function submitContact(formData) { 
+  return apiCall('contact', 'submit_contact', { formData }); 
+}
+
+export async function subscribeNewsletter(email) { 
+  return apiCall('contact', 'subscribe_newsletter', { formData: { email } }); 
+}
+
+// ============================================
+// CHAT ENDPOINTS
+// ============================================
+
+export async function requestChat() { 
+  return apiCall('chat', 'request_chat', {}); 
+}
+
+export async function getChatMessages(roomId) { 
+  return getRequest('chat', 'get_chat_messages', { room_id: roomId }); 
+}
+
+export async function sendChatMessage(roomId, message) { 
+  return apiCall('chat', 'send_chat_message', { room_id: roomId, message }); 
+}
+
+export async function deleteChatMessage(messageId) { 
+  return apiCall('chat', 'delete_chat_message', { message_id: messageId }); 
+}
+
+export async function checkAdminOnline() { 
+  return getRequest('chat', 'check_admin_online'); 
+}
+
+export async function updateUserPresence() { 
+  return apiCall('chat', 'update_user_presence', {}); 
+}
+
+export async function adminGetPendingRequests() { 
+  return getRequest('chat', 'admin_get_pending_requests'); 
+}
+
+export async function adminAcceptChat(roomId) { 
+  return apiCall('chat', 'admin_accept_chat', { room_id: roomId }); 
+}
+
+export async function adminRejectChat(roomId) { 
+  return apiCall('chat', 'admin_reject_chat', { room_id: roomId }); 
+}
+
+export async function adminUpdatePresence(is_online, is_busy) { 
+  return apiCall('chat', 'admin_update_presence', { is_online, is_busy }); 
+}
+
+export async function adminGetActiveChats() { 
+  return getRequest('chat', 'admin_get_active_chats'); 
+}
+
+// ============================================
+// WEEKLY CHALLENGE ENDPOINTS
+// ============================================
+
+export async function submitWeeklyChallenge(weekStart, selectedOption) { 
+  return apiCall('weekly-challenge', 'submit', { week_start: weekStart, selected_option: selectedOption }); 
+}
+
+export async function getWeeklyChallengeStatus(weekStart) { 
+  return getRequest('weekly-challenge', 'status', { week_start: weekStart }); 
+}
+
+// ============================================
+// FLASHCARDS ENDPOINTS
+// ============================================
 
 export async function getFlashcards(filters = {}) {
   const params = {};
@@ -348,29 +875,97 @@ export async function getFlashcardProgress() {
   return getRequest('flashcards', 'progress');
 }
 
-export async function getCommunityActivity() { return getRequest('community', 'activity'); }
+// ============================================
+// COMMUNITY ENDPOINTS
+// ============================================
 
-export async function getLeaderboard(level, limit = 20) { return getRequest('interactions', 'leaderboard', { level, limit }); }
+export async function getCommunityActivity() { 
+  return getRequest('community', 'activity'); 
+}
 
-export async function getRecallSession({ level, topic }) { return getRequest('recall', 'session', { level, topic }); }
-export async function checkRecallSession({ level, topic }) { return getRequest('recall', 'session_check', { level, topic }); }
-export async function getRecallStats() { return getRequest('recall', 'stats'); }
-export async function getRecallAchievements() { return getRequest('recall', 'achievements'); }
-export async function getRecallDashboard() { return getRequest('recall', 'dashboard'); }
-export async function getRecallTopics(level) { return getRequest('recall', 'topics', { level }); }
-export async function checkFirstVisit({ level, topic }) { return getRequest('recall', 'first_visit', { level, topic }); }
-export async function getSelectedLevel() { return getRequest('recall', 'get_selected_level'); }
-export async function continueRecallSession({ session_id }) { return apiCall('recall', 'continue', { session_id }); }
-export async function submitRecallAnswer({ session_id, question_id, user_answer, nonce, started_at }) { return apiCall('recall', 'answer', { session_id, question_id, user_answer, nonce, started_at }); }
-export async function completeRecallSession({ session_id }) { return apiCall('recall', 'complete', { session_id }); }
-export async function setSelectedLevel(level) { return apiCall('recall', 'set_selected_level', { level }); }
+// ============================================
+// RECALL ENDPOINTS
+// ============================================
 
-export async function getNotifications(params = {}) { return getRequest('recall', 'notifications', params); }
-export async function markNotificationRead(notificationId) { return apiCall('recall', 'notification_read', { notification_id: notificationId }); }
-export async function markAllNotificationsRead() { return apiCall('recall', 'notification_read_all', {}); }
-export async function dismissNotification(notificationId) { return apiCall('recall', 'notification_dismiss', { notification_id: notificationId }); }
-export async function getNotificationPreferences() { return getRequest('recall', 'notification_prefs'); }
-export async function updateNotificationPreferences(preferences) { return apiCall('recall', 'notification_prefs_update', { preferences }); }
+export async function getRecallSession({ level, topic }) { 
+  return getRequest('recall', 'session', { level, topic }); 
+}
+
+export async function checkRecallSession({ level, topic }) { 
+  return getRequest('recall', 'session_check', { level, topic }); 
+}
+
+export async function getRecallStats() { 
+  return getRequest('recall', 'stats'); 
+}
+
+export async function getRecallAchievements() { 
+  return getRequest('recall', 'achievements'); 
+}
+
+export async function getRecallDashboard() { 
+  return getRequest('recall', 'dashboard'); 
+}
+
+export async function getRecallTopics(level) { 
+  return getRequest('recall', 'topics', { level }); 
+}
+
+export async function checkFirstVisit({ level, topic }) { 
+  return getRequest('recall', 'first_visit', { level, topic }); 
+}
+
+export async function getSelectedLevel() { 
+  return getRequest('recall', 'get_selected_level'); 
+}
+
+export async function continueRecallSession({ session_id }) { 
+  return apiCall('recall', 'continue', { session_id }); 
+}
+
+export async function submitRecallAnswer({ session_id, question_id, user_answer, nonce, started_at }) { 
+  return apiCall('recall', 'answer', { session_id, question_id, user_answer, nonce, started_at }); 
+}
+
+export async function completeRecallSession({ session_id }) { 
+  return apiCall('recall', 'complete', { session_id }); 
+}
+
+export async function setSelectedLevel(level) { 
+  return apiCall('recall', 'set_selected_level', { level }); 
+}
+
+// ============================================
+// NOTIFICATIONS ENDPOINTS
+// ============================================
+
+export async function getNotifications(params = {}) { 
+  return getRequest('recall', 'notifications', params); 
+}
+
+export async function markNotificationRead(notificationId) { 
+  return apiCall('recall', 'notification_read', { notification_id: notificationId }); 
+}
+
+export async function markAllNotificationsRead() { 
+  return apiCall('recall', 'notification_read_all', {}); 
+}
+
+export async function dismissNotification(notificationId) { 
+  return apiCall('recall', 'notification_dismiss', { notification_id: notificationId }); 
+}
+
+export async function getNotificationPreferences() { 
+  return getRequest('recall', 'notification_prefs'); 
+}
+
+export async function updateNotificationPreferences(preferences) { 
+  return apiCall('recall', 'notification_prefs_update', { preferences }); 
+}
+
+// ============================================
+// GLOSSARY ENDPOINTS
+// ============================================
 
 export async function getGlossaryTerms(level, category, search, class_name) {
   const params = { level };
@@ -392,60 +987,59 @@ export async function getGlossaryCategories(level, class_name) {
   return getRequest('glossary', 'categories', params);
 }
 
-export async function getInfoSection(section) {
-  return getRequest('site', 'get_info_section', { section });
+// ============================================
+// LAB ENDPOINTS
+// ============================================
+
+export async function fetchLabTools() { 
+  return getRequest('lab', 'tools'); 
 }
 
-export async function getInfoSectionsList() {
-  return getRequest('site', 'get_info_sections_list');
-}
-
-export async function updateInfoSection(section, data) {
-  return apiCall('site', 'update_info_section', { section, ...data });
-}
-
-export async function fetchLabTools() { return getRequest('lab', 'tools'); }
 export async function fetchLabDrugs(level) {
   const params = {};
   if (level) params.level = level;
   return getRequest('lab', 'drugs', params);
 }
-export async function fetchLabInteraction(drugAId, drugBId) { return getRequest('lab', 'interactions', { drug_a_id: drugAId, drug_b_id: drugBId }); }
+
+export async function fetchLabInteraction(drugAId, drugBId) { 
+  return getRequest('lab', 'interactions', { drug_a_id: drugAId, drug_b_id: drugBId }); 
+}
+
 export async function fetchLabPathways(level) {
   const params = {};
   if (level) params.level = level;
   return getRequest('lab', 'pathways', params);
 }
-export async function fetchLabPathway(slug) { return getRequest('lab', 'pathway_by_slug', { slug }); }
+
+export async function fetchLabPathway(slug) { 
+  return getRequest('lab', 'pathway_by_slug', { slug }); 
+}
+
 export async function fetchLabCases(level, difficulty) {
   const params = {};
   if (level) params.level = level;
   if (difficulty) params.difficulty = difficulty;
   return getRequest('lab', 'cases', params);
 }
-export async function fetchLabCase(id) { return getRequest('lab', 'case_by_id', { id }); }
-export async function submitLabScore(caseId, userId, score, maxScore) { return apiCall('lab', 'submit_score', { case_id: caseId, user_id: userId, score, max_score: maxScore }); }
+
+export async function fetchLabCase(id) { 
+  return getRequest('lab', 'case_by_id', { id }); 
+}
+
+export async function submitLabScore(caseId, userId, score, maxScore) { 
+  return apiCall('lab', 'submit_score', { case_id: caseId, user_id: userId, score, max_score: maxScore }); 
+}
+
 export async function fetchLabFormulas(level, drug) {
   const params = {};
   if (level) params.level = level;
   if (drug) params.drug = drug;
   return getRequest('lab', 'formulas', params);
 }
-export async function startQuizSession(level, topic, blockNumber, state = {}) {
-  return apiCall('quiz', 'quiz_start_session', { level, topic, block_number: blockNumber, state });
-}
 
-export async function trackTabSwitch(level, topic, blockNumber) {
-  return apiCall('quiz', 'quiz_tab_switch', { level, topic, block_number: blockNumber });
-}
-
-export async function submitQuizWithSession(level, topic, blockNumber, answers, timeTaken) {
-  return apiCall('quiz', 'quiz_submit_with_session', { level, topic, block_number: blockNumber, answers, time_taken: timeTaken });
-}
-
-export async function getQuizSessionStatus() {
-  return getRequest('quiz', 'quiz_session_status');
-}
+// ============================================
+// CLASSROOM ENDPOINTS
+// ============================================
 
 export async function getClassroomTopics(level, class_name) {
   return getRequest('classroom', 'topics', { level, class_name });
@@ -555,35 +1149,17 @@ export async function adminEndClassroom(room_id) {
   return apiCall('classroom', 'end_room', { room_id });
 }
 
-export async function requestHandoff() { return apiCall('auth', 'handoff_create', {}); }
-export async function exchangeHandoff(token) { return apiCall('auth', 'handoff_exchange', { token }); }
-
-export async function signup(email, password, turnstile_token, extra = {}) {
-  return apiCall('auth', 'signup', { email, password, turnstile_token, ...extra });
-}
-
-export async function updateProfile(full_name) {
-  return apiCall('auth', 'update_profile', { full_name });
-}
-
-export async function changePassword(current_password, new_password) {
-  return apiCall('auth', 'change_password', { current_password, new_password });
-}
+// ============================================
+// SEARCH ENDPOINTS
+// ============================================
 
 export async function globalSearch(query) {
   return getRequest('search', 'global', { q: query });
 }
 
-export async function getProfile() { return getRequest('profile', 'get_profile'); }
-export async function saveOnboarding(payload) { return apiCall('profile', 'save_onboarding', payload); }
-export async function requestLevelChange(requested_track, requested_class, reason) { return apiCall('profile', 'request_level_change', { requested_track, requested_class, reason }); }
-export async function getClassSequence(track) { return getRequest('profile', 'class_sequence', { track }); }
-export async function getPharmacyPrograms() { return getRequest('profile', 'pharmacy_programs'); }
-export async function getLevelChangeStatus() { return getRequest('profile', 'level_change_status'); }
-export async function getPendingLevelChanges() { return getRequest('profile', 'pending_level_changes'); }
-export async function reviewLevelChange(request_id, action) { return apiCall('profile', 'review_level_change', { request_id, action }); }
-
-export async function adminUpdateProfile(user_id, track, class_name) { return apiCall('profile', 'admin_update_profile', { user_id, track, class_name }); }
+// ============================================
+// CONTENT GUIDE ENDPOINTS
+// ============================================
 
 export async function getContentGuideImage(level, className) {
   const params = new URLSearchParams();
@@ -613,18 +1189,9 @@ export async function deleteContentGuideImage(level, className) {
   }, 'DELETE');
 }
 
-export async function uploadProfilePicture(formData) {
-  return apiCall('profile-picture', 'upload', formData, 'POST', true);
-}
-
-export async function deleteProfilePicture() {
-  return apiCall('profile-picture', 'picture', {});
-}
-
-export async function getProfilePicture(userId) {
-  const params = userId ? `?user_id=${encodeURIComponent(userId)}` : '';
-  return getRequest('profile-picture', 'picture', params);
-}
+// ============================================
+// UPLOAD ENDPOINTS
+// ============================================
 
 export async function uploadUserFile(formData) {
   return apiCall('upload', 'file', formData, 'POST', true);
