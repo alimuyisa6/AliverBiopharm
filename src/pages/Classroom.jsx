@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
@@ -116,8 +116,16 @@ export default function Classroom() {
                       <i className="fa-solid fa-chalkboard-user"></i>
                     </div>
                   )}
-                  {isHard && <span className="card-media-ribbon ribbon-hard">Hard Topic</span>}
-                  {isPremium && !isHard && <span className="card-media-ribbon ribbon-premium">Premium</span>}
+                  {isHard && (
+                    <span className="card-media-ribbon ribbon-hard">
+                      <i className="fa-solid fa-triangle-exclamation"></i> Hard Topic
+                    </span>
+                  )}
+                  {isPremium && !isHard && (
+                    <span className="card-media-ribbon ribbon-premium">
+                      <i className="fa-solid fa-crown"></i> Premium
+                    </span>
+                  )}
                 </div>
                 <div className="room-status-bar" style={{ backgroundColor: status.color }}>
                   <i className={`fa-solid ${status.icon}`}></i>
@@ -126,13 +134,14 @@ export default function Classroom() {
                 <div className="room-body">
                   <h3 className="room-title">{room.title}</h3>
                   <div className="room-meta">
-                    <span><i className="fa-solid fa-book"></i> {room.topic_name}</span>
-                    <span><i className="fa-solid fa-user-graduate"></i> {room.class_name}</span>
+                    <span><i className="fa-solid fa-book" style={{ color: 'var(--clr-cyan)' }}></i> {room.topic_name}</span>
+                    <span><i className="fa-solid fa-user-graduate" style={{ color: 'var(--clr-blue)' }}></i> {room.class_name}</span>
                   </div>
                   <div className="room-stats">
-                    <span><i className="fa-solid fa-users"></i> {room.participant_count || 0} participants</span>
+                    <span><i className="fa-solid fa-users" style={{ color: 'var(--clr-purple)' }}></i> {room.participant_count || 0} participants</span>
                     {room.room_type !== 'free' && (
                       <span className={`room-type-badge ${room.room_type}`}>
+                        <i className={`fa-solid ${room.room_type === 'hard_topic' ? 'fa-triangle-exclamation' : 'fa-crown'}`}></i>
                         {room.room_type === 'hard_topic' ? 'Hard Topic' : 'Premium'}
                       </span>
                     )}
@@ -156,7 +165,7 @@ export default function Classroom() {
                   )}
                   {room.status === 'upcoming' && room.scheduled_at && (
                     <button className="btn-secondary" disabled>
-                      <i className="fa-solid fa-clock"></i> {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <i className="fa-solid fa-clock" style={{ color: 'var(--clr-orange)' }}></i> {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </button>
                   )}
                   {room.status === 'open_floor' && (
@@ -182,4 +191,4 @@ export default function Classroom() {
       )}
     </div>
   );
-}
+} 
