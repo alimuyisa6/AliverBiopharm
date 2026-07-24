@@ -15,6 +15,8 @@ import './styles/bioRecall.css';
 import './styles/Tutor.css';
 import './styles/Dashboard.css';
 import './styles/Profile.css';
+import './styles/Profile.css';
+import './styles/Notes.css';
 import './styles/home.css';
 import LoadingProvider from './loading/LoadingProvider';
 
