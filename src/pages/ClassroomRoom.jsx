@@ -140,12 +140,16 @@ export default function ClassroomRoom() {
     <>
       <div className="room-topbar">
         <button className="room-back-btn" onClick={handleLeaveRoom}>
-          <i className="fa-solid fa-arrow-left"></i>
+          <i className="fa-solid fa-arrow-left" style={{ color: 'var(--clr-blue)' }}></i>
         </button>
         <div className="room-info">
           <h2>{room.title}</h2>
-          <span className="room-topic-badge">{room.topic_name}</span>
-          <span className="room-class-badge">{room.class_name}</span>
+          <span className="room-topic-badge">
+            <i className="fa-solid fa-book" style={{ color: 'var(--clr-cyan)' }}></i> {room.topic_name}
+          </span>
+          <span className="room-class-badge">
+            <i className="fa-solid fa-user-graduate" style={{ color: 'var(--clr-blue)' }}></i> {room.class_name}
+          </span>
         </div>
         <div className="room-status-indicator">
           <span className="status-dot live"></span>
@@ -164,7 +168,7 @@ export default function ClassroomRoom() {
               <div key={msg.id} className={`room-message ${msg.user_id === user?.id ? 'own' : ''} ${msg.message_type}`}>
                 {msg.message_type === 'system' ? (
                   <div className="system-message">
-                    <i className="fa-solid fa-circle-info"></i> {msg.content}
+                    <i className="fa-solid fa-circle-info" style={{ color: 'var(--clr-blue)' }}></i> {msg.content}
                   </div>
                 ) : msg.message_type === 'resource' ? (
                   <div className="resource-message">
@@ -173,7 +177,7 @@ export default function ClassroomRoom() {
                       <span className="msg-time">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <div className="resource-content">
-                      <i className="fa-solid fa-file"></i>
+                      <i className="fa-solid fa-file" style={{ color: 'var(--clr-blue)' }}></i>
                       <a href={msg.file_url} target="_blank" rel="noreferrer" download={msg.file_name}>
                         {msg.file_name}
                       </a>
@@ -208,7 +212,7 @@ export default function ClassroomRoom() {
 
         <div className="room-sidebar">
           <div className="sidebar-section">
-            <h4><i className="fa-solid fa-users"></i> Participants ({participants.length})</h4>
+            <h4><i className="fa-solid fa-users" style={{ color: 'var(--clr-purple)' }}></i> Participants ({participants.length})</h4>
             <div className="participants-list">
               {participants.map(p => (
                 <div key={p.id || p.user_id} className={`participant ${p.role}`}>
@@ -231,7 +235,7 @@ export default function ClassroomRoom() {
           </div>
 
           <div className="sidebar-section">
-            <h4><i className="fa-solid fa-circle-info"></i> Room Info</h4>
+            <h4><i className="fa-solid fa-circle-info" style={{ color: 'var(--clr-blue)' }}></i> Room Info</h4>
             <div className="room-details">
               <p><strong>Level:</strong> {room.level}</p>
               <p><strong>Class:</strong> {room.class_name}</p>
