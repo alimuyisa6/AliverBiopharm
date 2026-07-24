@@ -1,4 +1,4 @@
- .classroom-level-grid {
+.classroom-level-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
@@ -640,6 +640,9 @@ body.dark-mode .classroom-card:hover {
 }
 
 .room-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   padding: 0.15rem 0.5rem;
   border-radius: 20px;
   font-weight: 700;
@@ -734,6 +737,9 @@ body.dark-mode .classroom-card:hover {
 
 .room-topic-badge,
 .room-class-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   padding: 0.2rem 0.6rem;
   border-radius: 20px;
   font-family: var(--font-mono);
@@ -1047,6 +1053,7 @@ body.dark-mode .classroom-card:hover {
 }
 
 .participant.student .participant-avatar {
+  color: var(--clr-cyan);
   box-shadow: 0 0 0 2px var(--clr-cyan);
 }
 
@@ -1156,6 +1163,10 @@ body.dark-mode .classroom-card:hover {
 .control-btn.raise-hand {
   padding: 0.5rem 1.5rem;
   font-size: var(--text-base);
+}
+
+.control-btn.raise-hand:not(.active) i {
+  color: var(--clr-purple);
 }
 
 .control-btn.raise-hand.active {
@@ -1522,3 +1533,4 @@ body.dark-mode .classroom-card:hover {
     animation: none;
   }
 }
+ 
