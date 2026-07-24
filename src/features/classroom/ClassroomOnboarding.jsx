@@ -1,7 +1,14 @@
  import React, { useState, useEffect } from 'react';
 import { getClassroomLevels, getClassroomTopics } from '../../api/cachedClient';
 
-const CARD_COLOR_CLASS = ['level-card-cyan', 'level-card-magenta', 'level-card-blue'];
+const CARD_COLOR_CLASS = [
+  'level-card-cyan',
+  'level-card-magenta',
+  'level-card-blue',
+  'level-card-green',
+  'level-card-purple',
+  'level-card-orange',
+];
 
 export function ClassroomOnboarding({ onComplete }) {
   const [step, setStep] = useState(1);
@@ -74,11 +81,18 @@ export function ClassroomOnboarding({ onComplete }) {
             {levels.map((lvl, i) => (
               <button
                 key={lvl.key}
-                className={`onboarding-card ${CARD_COLOR_CLASS[i % 3]} ${selectedLevel?.key === lvl.key ? 'selected' : ''}`}
+                className={`onboarding-card ${CARD_COLOR_CLASS[i % CARD_COLOR_CLASS.length]} ${selectedLevel?.key === lvl.key ? 'selected' : ''}`}
                 onClick={() => handleLevelSelect(lvl)}
               >
-                <i className={`fa-solid ${lvl.icon}`}></i>
-                <span>{lvl.key}</span>
+                {lvl.image_url && (
+                  <div className="onboarding-card-media">
+                    <img src={lvl.image_url} alt={lvl.key} loading="lazy" />
+                  </div>
+                )}
+                <div className="onboarding-card-body">
+                  <i className={`fa-solid ${lvl.icon}`}></i>
+                  <span>{lvl.key}</span>
+                </div>
               </button>
             ))}
           </div>
@@ -90,18 +104,26 @@ export function ClassroomOnboarding({ onComplete }) {
           <button className="onboarding-back" onClick={handleBack}><i className="fa-solid fa-arrow-left"></i> Back</button>
           <h3>Select Your Class</h3>
           <div className="onboarding-grid">
-            {selectedLevel.classes.map((cls) => {
+            {selectedLevel.classes.map((cls, i) => {
               const isObj = typeof cls !== 'string';
               const key = isObj ? cls.id : cls;
               const label = isObj ? cls.name : cls;
+              const imageUrl = isObj ? cls.image_url : null;
               return (
                 <button
                   key={key}
-                  className={`onboarding-card level-card-cyan ${selectedClass === cls ? 'selected' : ''}`}
+                  className={`onboarding-card ${CARD_COLOR_CLASS[i % CARD_COLOR_CLASS.length]} ${selectedClass === cls ? 'selected' : ''}`}
                   onClick={() => handleClassSelect(cls)}
                 >
-                  <i className={`fa-solid ${isObj ? cls.icon || 'fa-mortar-pestle' : selectedLevel.icon}`}></i>
-                  <span>{label}</span>
+                  {imageUrl && (
+                    <div className="onboarding-card-media">
+                      <img src={imageUrl} alt={label} loading="lazy" />
+                    </div>
+                  )}
+                  <div className="onboarding-card-body">
+                    <i className={`fa-solid ${isObj ? cls.icon || 'fa-mortar-pestle' : selectedLevel.icon}`}></i>
+                    <span>{label}</span>
+                  </div>
                 </button>
               );
             })}
