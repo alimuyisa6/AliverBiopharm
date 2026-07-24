@@ -4,13 +4,13 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   getGlossaryTerms,
   getGlossaryTerm,
-  getGlossaryCategories,
-  getSelectedLevel
+  getGlossaryCategories
 } from '../api/client';
+import { useLevelFilter } from '../hooks/useLevelFilter';
 
 export default function Glossary() {
   const { user } = useAuth();
-  const [selectedLevel, setSelectedLevel] = useState('A-Level');
+  const { level, class_name } = useLevelFilter();
   const [terms, setTerms] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -22,22 +22,14 @@ export default function Glossary() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    getSelectedLevel()
-      .then(res => {
-        if (res?.selected_level) setSelectedLevel(res.selected_level);
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    getGlossaryCategories(selectedLevel)
+    getGlossaryCategories(level, class_name)
       .then(setCategories)
       .catch(() => setCategories([]));
-  }, [selectedLevel]);
+  }, [level, class_name]);
 
   const fetchTerms = useCallback(() => {
     setLoading(true);
-    getGlossaryTerms(selectedLevel, selectedCategory || undefined, searchQuery || undefined)
+    getGlossaryTerms(level, selectedCategory || undefined, searchQuery || undefined, class_name)
       .then(data => {
         setTerms(data || []);
         setActiveTerm(null);
@@ -45,7 +37,7 @@ export default function Glossary() {
       })
       .catch(() => setTerms([]))
       .finally(() => setLoading(false));
-  }, [selectedLevel, selectedCategory, searchQuery]);
+  }, [level, selectedCategory, searchQuery, class_name]);
 
   useEffect(() => {
     fetchTerms();
@@ -56,26 +48,19 @@ export default function Glossary() {
     setTermLoading(true);
     setTermContent(null);
     try {
-      const data = await getGlossaryTerm(term.slug, selectedLevel);
+      const data = await getGlossaryTerm(term.slug, level, class_name);
       setTermContent(data);
     } catch {
       setTermContent(null);
     } finally {
       setTermLoading(false);
     }
-  }, [selectedLevel]);
+  }, [level, class_name]);
 
-  const handleLevelChange = (level) => {
-    setSelectedLevel(level);
-    setActiveTerm(null);
-    setTermContent(null);
-    setSelectedCategory('');
-  };
-
-  const getLevelColor = (level) => {
-    if (level === 'O-Level') return '#0ab5b5';
-    if (level === 'A-Level') return '#b8873a';
-    if (level === 'Pharmacy') return '#10b981';
+  const getLevelColor = (lvl) => {
+    if (lvl === 'O-Level') return '#0ab5b5';
+    if (lvl === 'A-Level') return '#b8873a';
+    if (lvl === 'Pharmacy') return '#10b981';
     return 'var(--clr-cyan)';
   };
 
@@ -89,7 +74,8 @@ export default function Glossary() {
   return (
     <GlossaryView
       user={user}
-      selectedLevel={selectedLevel}
+      selectedLevel={level}
+      selectedClass={class_name}
       terms={terms}
       categories={categories}
       selectedCategory={selectedCategory}
@@ -101,7 +87,6 @@ export default function Glossary() {
       sidebarOpen={sidebarOpen}
       groupedTerms={groupedTerms}
       getLevelColor={getLevelColor}
-      onLevelChange={handleLevelChange}
       onCategoryChange={setSelectedCategory}
       onSearchChange={setSearchQuery}
       onTermClick={handleTermClick}
