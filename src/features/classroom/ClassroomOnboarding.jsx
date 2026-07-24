@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { getClassroomLevels, getClassroomTopics } from '../../api/cachedClient';
 
 const CARD_COLOR_CLASS = [
@@ -63,7 +63,7 @@ export function ClassroomOnboarding({ onComplete }) {
   };
 
   if (loadingLevels) {
-    return <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>;
+    return <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--clr-cyan)' }}></i></div>;
   }
 
   return (
@@ -154,7 +154,7 @@ export function ClassroomOnboarding({ onComplete }) {
           </button>
           <h3>Select a Topic</h3>
           {loadingTopics ? (
-            <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>
+            <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--clr-cyan)' }}></i></div>
           ) : topics.length === 0 ? (
             <div className="onboarding-empty">No topics available for this class.</div>
           ) : (
@@ -191,4 +191,3 @@ export function ClassroomOnboarding({ onComplete }) {
     </div>
   );
 }
- 
