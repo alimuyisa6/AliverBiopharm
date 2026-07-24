@@ -1,5 +1,4 @@
-/* Card color classes - using your defined color variables */
-.level-card-cyan {
+ .level-card-cyan {
   background: var(--clr-cyan);
   border-color: var(--clr-cyan);
 }
@@ -29,10 +28,9 @@
   border-color: var(--clr-orange);
 }
 
-/* Onboarding card styles */
 .onboarding-card {
   position: relative;
-  border: 2px solid transparent;
+  border: 3px solid transparent;
   border-radius: var(--radius-md);
   padding: 0;
   overflow: hidden;
@@ -42,6 +40,8 @@
   max-width: 200px;
   min-height: 180px;
   box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
 }
 
 .onboarding-card:hover {
@@ -50,8 +50,8 @@
 }
 
 .onboarding-card.selected {
-  border-color: #fff;
-  box-shadow: 0 0 0 3px #fff, 0 12px 28px rgba(0, 0, 0, 0.2);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px #ffffff, 0 12px 28px rgba(0, 0, 0, 0.2);
   transform: scale(1.03);
 }
 
@@ -60,6 +60,7 @@
   height: 120px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
 }
 
 .onboarding-card-media img {
@@ -73,24 +74,27 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #fff;
   font-weight: 500;
+  flex: 1;
+  min-height: 60px;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .onboarding-card-body i {
   font-size: 20px;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
 .onboarding-card-body span {
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
 }
 
-/* Topic card styles */
 .onboarding-topic-list {
   display: flex;
   flex-direction: column;
@@ -110,18 +114,18 @@
 }
 
 .onboarding-topic-card:hover {
-  background: rgba(10, 126, 126, 0.08);
+  background: var(--clr-cyan-light);
   border-color: var(--clr-cyan);
 }
 
 .onboarding-topic-card.selected {
   background: var(--clr-cyan);
   border-color: var(--clr-cyan);
-  color: #fff;
+  color: #ffffff;
 }
 
 .onboarding-topic-card.selected .topic-name {
-  color: #fff;
+  color: #ffffff;
 }
 
 .topic-card-content {
@@ -143,14 +147,13 @@
 
 .topic-badge.hard {
   background: var(--clr-red);
-  color: #fff;
+  color: #ffffff;
   padding: 2px 10px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
 }
 
-/* Onboarding grid layout */
 .onboarding-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -158,7 +161,6 @@
   margin-top: 20px;
 }
 
-/* Onboarding steps */
 .onboarding-steps {
   display: flex;
   align-items: center;
@@ -205,7 +207,6 @@
   margin: 0 8px;
 }
 
-/* Onboarding body */
 .onboarding-body {
   padding: 0 0 20px;
 }
@@ -229,17 +230,20 @@
   gap: 8px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
   color: var(--clr-text-dim);
   margin-bottom: 16px;
 }
 
 .onboarding-back:hover {
-  background: rgba(10, 126, 126, 0.08);
+  background: var(--clr-cyan-light);
   color: var(--clr-cyan);
 }
 
-/* Loading state */
+.onboarding-back i {
+  color: var(--clr-cyan);
+}
+
 .classroom-loading {
   display: flex;
   justify-content: center;
@@ -252,7 +256,6 @@
   color: var(--clr-cyan);
 }
 
-/* Empty state */
 .onboarding-empty {
   text-align: center;
   padding: 40px 20px;
@@ -263,7 +266,6 @@
   border: 1px solid var(--clr-border-glow);
 }
 
-/* Footer */
 .onboarding-footer {
   padding: 20px 0 0;
   border-top: 1px solid var(--clr-border-glow);
@@ -272,10 +274,9 @@
   margin-top: 20px;
 }
 
-/* Override primary button for onboarding */
 .onboarding-footer .btn-primary {
   background: var(--clr-cyan);
-  color: #fff;
+  color: #ffffff;
   border: none;
   padding: 12px 32px;
   border-radius: 50px;
@@ -294,7 +295,6 @@
   box-shadow: 0 8px 24px rgba(10, 126, 126, 0.3);
 }
 
-/* Onboarding container if needed */
 .classroom-onboarding {
   background: var(--clr-navy-card);
   border: 1px solid var(--clr-border-glow);
@@ -305,7 +305,6 @@
   box-shadow: var(--shadow-card);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .onboarding-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -356,4 +355,4 @@
   .onboarding-card-media {
     height: 90px;
   }
-} 
+}
