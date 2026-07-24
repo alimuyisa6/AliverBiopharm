@@ -8,6 +8,14 @@ import { ClassroomSection as ClassroomSectionComponent } from '../features/class
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import { listClassrooms, getClassroomLevels, getClassroomTopics } from '../api/client';
 
+const STATUS_META = {
+  live: { icon: 'fa-circle', color: 'var(--clr-green)', label: 'Live' },
+  upcoming: { icon: 'fa-clock', color: 'var(--clr-orange)', label: 'Upcoming' },
+  open_floor: { icon: 'fa-users', color: 'var(--clr-blue)', label: 'Open Floor' },
+  ended: { icon: 'fa-circle-check', color: '#94a3b8', label: 'Ended' },
+  offline: { icon: 'fa-circle', color: '#64748b', label: 'Offline' },
+};
+
 export default function Classroom() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -37,14 +45,6 @@ export default function Classroom() {
       console.error(err);
     }
     setLoading(false);
-  };
-
-  const statusIcons = {
-    live: { icon: 'fa-circle', color: '#10b981', label: 'Live' },
-    upcoming: { icon: 'fa-clock', color: '#f59e0b', label: 'Upcoming' },
-    open_floor: { icon: 'fa-users', color: '#3b82f6', label: 'Open Floor' },
-    ended: { icon: 'fa-circle-check', color: '#94a3b8', label: 'Ended' },
-    offline: { icon: 'fa-circle', color: '#64748b', label: 'Offline' },
   };
 
   if (!isReady || access.isPending) {
@@ -103,9 +103,22 @@ export default function Classroom() {
       {!loading && !error && rooms.length > 0 && (
         <div className="classroom-grid">
           {rooms.map(room => {
-            const status = statusIcons[room.status] || statusIcons.offline;
+            const status = STATUS_META[room.status] || STATUS_META.offline;
+            const isPremium = room.room_type === 'premium';
+            const isHard = room.room_type === 'hard_topic';
             return (
-              <div key={room.id} className={`classroom-card ${room.status}`}>
+              <div key={room.id} className={`classroom-card ${room.status}`} style={{ '--card-accent': status.color }}>
+                <div className="card-media">
+                  {room.cover_image_url ? (
+                    <img src={room.cover_image_url} alt={room.title} loading="lazy" />
+                  ) : (
+                    <div className="card-media-fallback">
+                      <i className="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                  )}
+                  {isHard && <span className="card-media-ribbon ribbon-hard">Hard Topic</span>}
+                  {isPremium && !isHard && <span className="card-media-ribbon ribbon-premium">Premium</span>}
+                </div>
                 <div className="room-status-bar" style={{ backgroundColor: status.color }}>
                   <i className={`fa-solid ${status.icon}`}></i>
                   <span>{status.label}</span>
@@ -126,7 +139,11 @@ export default function Classroom() {
                   </div>
                   {room.tutor_name && (
                     <div className="room-tutor">
-                      <i className="fa-solid fa-chalkboard-user"></i>
+                      {room.tutor_avatar_url ? (
+                        <img src={room.tutor_avatar_url} alt={room.tutor_name} className="room-tutor-avatar" />
+                      ) : (
+                        <i className="fa-solid fa-chalkboard-user"></i>
+                      )}
                       <span>{room.tutor_name}</span>
                     </div>
                   )}
