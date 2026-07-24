@@ -1,4 +1,4 @@
-  import { useState, useEffect, useRef } from 'react';
+ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -213,7 +213,11 @@ export default function ClassroomRoom() {
               {participants.map(p => (
                 <div key={p.id || p.user_id} className={`participant ${p.role}`}>
                   <div className="participant-avatar">
-                    <i className={`fa-solid ${p.role === 'tutor' ? 'fa-chalkboard-user' : p.role === 'admin' ? 'fa-shield-halved' : 'fa-user'}`}></i>
+                    {p.avatar_url ? (
+                      <img src={p.avatar_url} alt={p.user_name || 'User'} loading="lazy" />
+                    ) : (
+                      <i className={`fa-solid ${p.role === 'tutor' ? 'fa-chalkboard-user' : p.role === 'admin' ? 'fa-shield-halved' : 'fa-user'}`}></i>
+                    )}
                   </div>
                   <div className="participant-info">
                     <span className="participant-name">{p.user_name || 'User'}</span>
