@@ -1,4 +1,8 @@
- let csrfToken = null;
+ // ============================================
+// CORE
+// ============================================
+
+let csrfToken = null;
 const API_BASE = '/api/server';
 
 const pendingRequests = new Map();
@@ -126,7 +130,7 @@ async function getRequest(module, path, params = {}) {
 export { getRequest, apiCall };
 
 // ============================================
-// AUTH ENDPOINTS
+// AUTH
 // ============================================
 
 export async function signin(email, password, turnstile_token, mfa_code) { 
@@ -162,21 +166,15 @@ export async function exchangeHandoff(token) {
 }
 
 // ============================================
-// PROFILE PICTURE ENDPOINTS (RESTful)
+// PROFILE PICTURE (RESTful)
 // ============================================
 
-/**
- * Upload a profile picture
- * @param {FormData} formData - FormData containing the file
- * @returns {Promise<Object>} - Returns { success, profile_picture_url }
- */
 export async function uploadProfilePicture(formData) {
   try {
     const response = await fetch('/api/server/upload', {
       method: 'POST',
       credentials: 'include',
       body: formData
-      // Don't set Content-Type - browser sets it with boundary for FormData
     });
 
     const json = await response.json();
@@ -197,17 +195,11 @@ export async function uploadProfilePicture(formData) {
   }
 }
 
-/**
- * Delete the current user's profile picture
- * @returns {Promise<Object>} - Returns { success }
- */
 export async function deleteProfilePicture() {
   try {
     const response = await fetch('/api/server/picture', {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
     });
 
@@ -229,11 +221,6 @@ export async function deleteProfilePicture() {
   }
 }
 
-/**
- * Get a user's profile picture URL
- * @param {string} userId - Optional user ID (defaults to current user)
- * @returns {Promise<Object>} - Returns { profile_picture_url }
- */
 export async function getProfilePicture(userId) {
   try {
     const url = userId 
@@ -264,7 +251,7 @@ export async function getProfilePicture(userId) {
 }
 
 // ============================================
-// PROFILE ENDPOINTS
+// PROFILE
 // ============================================
 
 export async function getProfile() { 
@@ -304,7 +291,7 @@ export async function adminUpdateProfile(user_id, track, class_name) {
 }
 
 // ============================================
-// SITE ENDPOINTS
+// SITE
 // ============================================
 
 export async function getAllSiteSections() { 
@@ -336,7 +323,7 @@ export async function updateInfoSection(section, data) {
 }
 
 // ============================================
-// RESOURCES ENDPOINTS
+// RESOURCES
 // ============================================
 
 export async function getResources(filters = {}) { 
@@ -414,7 +401,7 @@ export async function getAllRatings() {
 }
 
 // ============================================
-// QUIZ ENDPOINTS
+// QUIZ
 // ============================================
 
 export async function getQuizTopics({ level, class_name }) { 
@@ -458,7 +445,7 @@ export async function getQuizSessionStatus() {
 }
 
 // ============================================
-// INTERACTIONS ENDPOINTS
+// INTERACTIONS
 // ============================================
 
 export async function getPlatformStats() { 
@@ -570,7 +557,7 @@ export async function getLeaderboard(level, limit = 20) {
 }
 
 // ============================================
-// PAST PAPERS ENDPOINTS
+// PAST PAPERS
 // ============================================
 
 export async function getPastPapers(filters = {}) { 
@@ -606,7 +593,7 @@ export async function trackPastPaperDownload(id) {
 }
 
 // ============================================
-// ADMIN ENDPOINTS
+// ADMIN
 // ============================================
 
 export async function getAdminStats() { 
@@ -686,7 +673,7 @@ export async function disableMfa(userId) {
 }
 
 // ============================================
-// CONTACT ENDPOINTS
+// CONTACT
 // ============================================
 
 export async function submitContact(formData) { 
@@ -698,7 +685,7 @@ export async function subscribeNewsletter(email) {
 }
 
 // ============================================
-// CHAT ENDPOINTS
+// CHAT
 // ============================================
 
 export async function requestChat() { 
@@ -746,7 +733,7 @@ export async function adminGetActiveChats() {
 }
 
 // ============================================
-// WEEKLY CHALLENGE ENDPOINTS
+// WEEKLY CHALLENGE
 // ============================================
 
 export async function submitWeeklyChallenge(weekStart, selectedOption) { 
@@ -758,7 +745,7 @@ export async function getWeeklyChallengeStatus(weekStart) {
 }
 
 // ============================================
-// FLASHCARDS ENDPOINTS
+// FLASHCARDS
 // ============================================
 
 export async function getFlashcards(filters = {}) {
@@ -876,7 +863,7 @@ export async function getFlashcardProgress() {
 }
 
 // ============================================
-// COMMUNITY ENDPOINTS
+// COMMUNITY
 // ============================================
 
 export async function getCommunityActivity() { 
@@ -884,7 +871,7 @@ export async function getCommunityActivity() {
 }
 
 // ============================================
-// RECALL ENDPOINTS
+// RECALL
 // ============================================
 
 export async function getRecallSession({ level, topic }) { 
@@ -936,7 +923,7 @@ export async function setSelectedLevel(level) {
 }
 
 // ============================================
-// NOTIFICATIONS ENDPOINTS
+// NOTIFICATIONS
 // ============================================
 
 export async function getNotifications(params = {}) { 
@@ -964,7 +951,7 @@ export async function updateNotificationPreferences(preferences) {
 }
 
 // ============================================
-// GLOSSARY ENDPOINTS
+// GLOSSARY
 // ============================================
 
 export async function getGlossaryTerms(level, category, search, class_name) {
@@ -988,7 +975,7 @@ export async function getGlossaryCategories(level, class_name) {
 }
 
 // ============================================
-// LAB ENDPOINTS
+// LAB
 // ============================================
 
 export async function fetchLabTools() { 
@@ -1038,7 +1025,7 @@ export async function fetchLabFormulas(level, drug) {
 }
 
 // ============================================
-// CLASSROOM ENDPOINTS
+// CLASSROOM
 // ============================================
 
 export async function getClassroomTopics(level, class_name) {
@@ -1150,7 +1137,7 @@ export async function adminEndClassroom(room_id) {
 }
 
 // ============================================
-// SEARCH ENDPOINTS
+// SEARCH
 // ============================================
 
 export async function globalSearch(query) {
@@ -1158,7 +1145,7 @@ export async function globalSearch(query) {
 }
 
 // ============================================
-// CONTENT GUIDE ENDPOINTS
+// CONTENT GUIDE
 // ============================================
 
 export async function getContentGuideImage(level, className) {
@@ -1190,7 +1177,7 @@ export async function deleteContentGuideImage(level, className) {
 }
 
 // ============================================
-// UPLOAD ENDPOINTS
+// UPLOAD
 // ============================================
 
 export async function uploadUserFile(formData) {
