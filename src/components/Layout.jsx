@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -173,7 +173,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
       setScrolled(window.scrollY > 10);
       setShowBackToTop(window.scrollY > 400);
     }, 100);
-    
+
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -355,7 +355,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               aria-label="Search"
               aria-expanded={searchOpen}
             >
-              {searchOpen ? <FaXmark /> : <FaMagnifyingGlass />}
+              {searchOpen ? <FaXmark /> : <FaMagnifyingGlass style={{ color: 'var(--clr-cyan)' }} />}
             </button>
 
             {isAuthenticated ? (
@@ -374,10 +374,10 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                 </button>
                 <div className={`user-dropdown-menu${userDropdownOpen ? ' open' : ''}`}>
                   <Link to="/dashboard" onClick={() => setUserDropdownOpen(false)}>
-                    <FaGaugeHigh /> Dashboard
+                    <FaGaugeHigh style={{ color: 'var(--clr-blue)' }} /> Dashboard
                   </Link>
                   <Link to="/profile" onClick={() => setUserDropdownOpen(false)}>
-                    <FaGear /> Profile
+                    <FaGear style={{ color: 'var(--clr-purple)' }} /> Profile
                   </Link>
                   <button
                     onClick={() => {
@@ -389,7 +389,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                     {signingOut ? (
                       <FaSpinner className="icon-spin" />
                     ) : (
-                      <FaRightFromBracket />
+                      <FaRightFromBracket style={{ color: 'var(--clr-red)' }} />
                     )}
                     {signingOut ? 'Signing out...' : 'Sign Out'}
                   </button>
@@ -402,7 +402,11 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? <FaSun /> : <FaMoon />}
+              {theme === 'dark' ? (
+                <FaSun style={{ color: 'var(--clr-orange)' }} />
+              ) : (
+                <FaMoon style={{ color: 'var(--clr-purple)' }} />
+              )}
             </button>
 
             <button
@@ -457,7 +461,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                           {signingOut ? (
                             <FaSpinner className="icon-spin" />
                           ) : (
-                            <FaRightFromBracket />
+                            <FaRightFromBracket style={{ color: 'var(--clr-red)' }} />
                           )}
                           {signingOut ? 'Signing out...' : 'Sign Out'}
                         </button>
@@ -500,10 +504,10 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                     <>
                       <div className="mobile-nav-divider" />
                       <Link to="/dashboard" onClick={closeMobileMenu}>
-                        <FaGaugeHigh /> Dashboard
+                        <FaGaugeHigh style={{ color: 'var(--clr-blue)' }} /> Dashboard
                       </Link>
                       <Link to="/profile" onClick={closeMobileMenu}>
-                        <FaGear /> Profile
+                        <FaGear style={{ color: 'var(--clr-purple)' }} /> Profile
                       </Link>
                     </>
                   )}
@@ -609,71 +613,65 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
       )}
 
       <button
-        className={`back-to-top${showBackToTop ? ' visible' : ''}`}
+        className="back-to-top-btn"
+        data-visible={showBackToTop}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Back to top"
-        style={{
-          background: 'linear-gradient(135deg, #00BCD4 0%, #E91E63 33%, #FF9800 66%, #2196F3 100%)',
-          border: 'none',
-          boxShadow: '0 4px 15px rgba(0, 188, 212, 0.4), 0 0 20px rgba(233, 30, 99, 0.2)',
-          transition: 'all 0.3s ease',
-          position: 'fixed',
-          bottom: '2rem',
-          right: '2rem',
-          zIndex: 1000,
-          width: '3rem',
-          height: '3rem',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          opacity: showBackToTop ? 1 : 0,
-          transform: showBackToTop ? 'translateY(0)' : 'translateY(20px)',
-          pointerEvents: showBackToTop ? 'auto' : 'none',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 188, 212, 0.6), 0 0 30px rgba(233, 30, 99, 0.4), 0 0 40px rgba(255, 152, 0, 0.2)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 188, 212, 0.4), 0 0 20px rgba(233, 30, 99, 0.2)';
-        }}
       >
-        <FaArrowUp style={{ color: '#FFFFFF', fontSize: '1.2rem' }} />
+        <FaArrowUp />
       </button>
 
       <style>{`
-        .back-to-top {
-          animation: gradientShift 3s ease infinite;
-          background-size: 200% 200% !important;
+        .back-to-top-btn {
+          position: fixed;
+          bottom: 2rem;
+          right: 2rem;
+          z-index: 1000;
+          width: 3rem;
+          height: 3rem;
+          border-radius: 50%;
+          border: none;
+          background: var(--clr-cyan);
+          color: #fff;
+          font-size: 1.2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          opacity: 0;
+          transform: translateY(20px);
+          pointer-events: none;
+          box-shadow: 0 4px 16px rgba(10, 126, 126, 0.35);
+          transition: transform 0.25s ease, opacity 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
         }
 
-        @keyframes gradientShift {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
+        .back-to-top-btn[data-visible="true"] {
+          opacity: 1;
+          transform: translateY(0);
+          pointer-events: auto;
+          animation: backToTopEnter 0.3s ease;
         }
 
-        .back-to-top.visible {
-          animation: gradientShift 3s ease infinite, fadeInUp 0.3s ease;
+        .back-to-top-btn:hover {
+          background: var(--clr-magenta);
+          transform: translateY(-3px) scale(1.06);
+          box-shadow:
+            0 0 0 4px rgba(10, 126, 126, 0.22),
+            0 0 0 8px rgba(184, 135, 58, 0.18),
+            0 0 0 12px rgba(59, 111, 212, 0.14),
+            0 0 0 16px rgba(245, 158, 11, 0.1),
+            0 8px 22px rgba(184, 135, 58, 0.4);
         }
 
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
+        @keyframes backToTopEnter {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .back-to-top-btn {
+            transition: none;
+            animation: none;
           }
         }
       `}</style>
