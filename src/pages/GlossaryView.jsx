@@ -1,67 +1,26 @@
- import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import {
-  getGlossaryTerms,
-  getGlossaryCategories,
-  getGlossaryTerm
-} from '../api/client';
+ import { Link } from 'react-router-dom';
 
-export default function Glossary() {
-  const { user } = useAuth();
-  const [selectedLevel, setSelectedLevel] = useState('O-Level');
-  const [terms, setTerms] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTerm, setActiveTerm] = useState(null);
-  const [termContent, setTermContent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [termLoading, setTermLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const levels = ['O-Level', 'A-Level', 'Pharmacy'];
-
-  useEffect(() => {
-    setLoading(true);
-    getGlossaryTerms(selectedLevel, selectedCategory || undefined, searchQuery || undefined)
-      .then(data => setTerms(data?.terms || data || []))
-      .catch(() => setTerms([]))
-      .finally(() => setLoading(false));
-  }, [selectedLevel, selectedCategory, searchQuery]);
-
-  useEffect(() => {
-    getGlossaryCategories(selectedLevel)
-      .then(data => setCategories(data?.categories || data || []))
-      .catch(() => setCategories([]));
-  }, [selectedLevel]);
-
-  const groupedTerms = terms.reduce((acc, term) => {
-    const cat = term.category || 'Uncategorized';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(term);
-    return acc;
-  }, {});
-
-  function getLevelColor(level) {
-    if (level === 'O-Level') return '#0ab5b5';
-    if (level === 'A-Level') return '#b8873a';
-    if (level === 'Pharmacy') return '#10b981';
-    return 'var(--clr-cyan)';
-  }
-
-  async function handleTermClick(term) {
-    setActiveTerm(term);
-    setTermLoading(true);
-    try {
-      const data = await getGlossaryTerm(term.slug || term.id, selectedLevel);
-      setTermContent(data);
-    } catch {
-      setTermContent(null);
-    }
-    setTermLoading(false);
-  }
-
+export default function GlossaryView({
+  user,
+  selectedLevel,
+  selectedClass,
+  terms,
+  categories,
+  selectedCategory,
+  searchQuery,
+  activeTerm,
+  termContent,
+  loading,
+  termLoading,
+  sidebarOpen,
+  groupedTerms,
+  getLevelColor,
+  onCategoryChange,
+  onSearchChange,
+  onTermClick,
+  onToggleSidebar,
+  onClearSearch
+}) {
   if (loading && terms.length === 0) {
     return (
       <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -74,6 +33,8 @@ export default function Glossary() {
     );
   }
 
+  const levelColor = getLevelColor(selectedLevel);
+
   return (
     <div className="glossary-page" style={{ paddingTop: '20px' }}>
       <div className="glossary-header">
@@ -85,30 +46,25 @@ export default function Glossary() {
           <p className="glossary-subtitle">
             Master every term with linked quizzes, notes, flashcards, and past papers — all in one place.
           </p>
+          {selectedClass && (
+            <div className="glossary-class-badge" style={{ borderColor: levelColor, color: levelColor }}>
+              <span className="glossary-class-badge-label">Class:</span>
+              <span className="glossary-class-badge-value">{selectedClass}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="glossary-level-bar">
-        {levels.map(level => (
-          <button
-            key={level}
-            className={`glossary-level-btn ${selectedLevel === level ? 'active' : ''}`}
-            onClick={() => { setSelectedLevel(level); setSelectedCategory(''); setActiveTerm(null); setTermContent(null); }}
-            style={{
-              borderColor: selectedLevel === level ? getLevelColor(level) : 'var(--clr-border-glow)',
-              background: selectedLevel === level ? getLevelColor(level) : 'transparent',
-              color: selectedLevel === level ? '#fff' : 'var(--clr-white)'
-            }}
-          >
-            {level}
-          </button>
-        ))}
+      <div className="breadcrumb">
+        <Link to="/"><i className="fa-solid fa-house breadcrumb-icon"></i> Home</Link>
+        <span>›</span>
+        <span>Glossary</span>
       </div>
 
       <div className="glossary-main-layout">
         <button
           className="glossary-sidebar-toggle"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
+          onClick={onToggleSidebar}
           aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
           <i className={`fa-solid fa-${sidebarOpen ? 'chevron-left' : 'chevron-right'}`}></i>
@@ -116,7 +72,7 @@ export default function Glossary() {
         </button>
 
         <div className={`glossary-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-          <div className="glossary-sidebar-inner" style={{ '--sidebar-accent': getLevelColor(selectedLevel) }}>
+          <div className="glossary-sidebar-inner" style={{ '--sidebar-accent': levelColor }}>
             <div className="glossary-search-area">
               <div className="glossary-search-input-wrap">
                 <i className="fa-solid fa-magnifying-glass glossary-search-icon"></i>
@@ -125,12 +81,12 @@ export default function Glossary() {
                   className="glossary-search-input"
                   placeholder="Search terms..."
                   value={searchQuery}
-                  onChange={e => { setSearchQuery(e.target.value); setActiveTerm(null); setTermContent(null); }}
+                  onChange={e => onSearchChange(e.target.value)}
                 />
                 {searchQuery && (
                   <button
                     className="glossary-search-clear"
-                    onClick={() => { setSearchQuery(''); setActiveTerm(null); setTermContent(null); }}
+                    onClick={onClearSearch}
                     aria-label="Clear search"
                   >
                     <i className="fa-solid fa-xmark"></i>
@@ -142,7 +98,7 @@ export default function Glossary() {
                 <select
                   className="glossary-category-select"
                   value={selectedCategory}
-                  onChange={e => { setSelectedCategory(e.target.value); setActiveTerm(null); setTermContent(null); }}
+                  onChange={e => onCategoryChange(e.target.value)}
                 >
                   <option value="">All Categories</option>
                   {categories.map(cat => (
@@ -167,7 +123,7 @@ export default function Glossary() {
                   <i className="fa-solid fa-book-open"></i>
                   <p>No terms found{searchQuery ? ` for "${searchQuery}"` : ''}.</p>
                   {searchQuery && (
-                    <button className="btn-primary" onClick={() => { setSearchQuery(''); setActiveTerm(null); setTermContent(null); }}>
+                    <button className="btn-primary" onClick={onClearSearch}>
                       Clear Search
                     </button>
                   )}
@@ -180,11 +136,9 @@ export default function Glossary() {
                       <button
                         key={term.id}
                         className={`glossary-term-btn ${activeTerm?.id === term.id ? 'active' : ''}`}
-                        onClick={() => handleTermClick(term)}
+                        onClick={() => onTermClick(term)}
                         style={{
-                          borderLeftColor: activeTerm?.id === term.id
-                            ? getLevelColor(selectedLevel)
-                            : 'transparent'
+                          borderLeftColor: activeTerm?.id === term.id ? levelColor : 'transparent'
                         }}
                       >
                         <span className="glossary-term-btn-text">{term.term}</span>
@@ -218,8 +172,8 @@ export default function Glossary() {
                   <span className="glossary-welcome-stat-label">Categories</span>
                 </div>
                 <div className="glossary-welcome-stat stat-blue">
-                  <span className="glossary-welcome-stat-number">{selectedLevel}</span>
-                  <span className="glossary-welcome-stat-label">Level</span>
+                  <span className="glossary-welcome-stat-number">{selectedClass || selectedLevel}</span>
+                  <span className="glossary-welcome-stat-label">Class</span>
                 </div>
               </div>
             </div>
@@ -234,7 +188,7 @@ export default function Glossary() {
             </div>
           ) : termContent ? (
             <div className="glossary-term-detail">
-              <div className="glossary-term-hero" style={{ '--hero-accent': getLevelColor(selectedLevel) }}>
+              <div className="glossary-term-hero" style={{ '--hero-accent': levelColor }}>
                 <div className="glossary-term-breadcrumb">
                   <span className="glossary-term-category-badge">
                     {termContent.term.category}
@@ -285,7 +239,7 @@ export default function Glossary() {
               </div>
 
               <div className="glossary-routes">
-                {termContent.content.quizzes.length > 0 && (
+                {termContent.content.quizzes && termContent.content.quizzes.length > 0 && (
                   <div className="glossary-route-section route-quiz">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-circle-question"></i>
@@ -296,7 +250,7 @@ export default function Glossary() {
                       {termContent.content.quizzes.map(quiz => (
                         <Link
                           key={quiz.id}
-                          to={`/quiz?topic=${encodeURIComponent(quiz.subject || quiz.category)}`}
+                          to={`/quiz?topic=${encodeURIComponent(quiz.subject || quiz.category || '')}`}
                           className="glossary-route-card"
                         >
                           <div className="glossary-route-card-icon quiz-icon">
@@ -315,7 +269,7 @@ export default function Glossary() {
                   </div>
                 )}
 
-                {termContent.content.pdfs.length > 0 && (
+                {termContent.content.pdfs && termContent.content.pdfs.length > 0 && (
                   <div className="glossary-route-section route-pdf">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-file-pdf"></i>
@@ -347,7 +301,7 @@ export default function Glossary() {
                   </div>
                 )}
 
-                {termContent.content.notes.length > 0 && (
+                {termContent.content.notes && termContent.content.notes.length > 0 && (
                   <div className="glossary-route-section route-notes">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-file-lines"></i>
@@ -377,7 +331,7 @@ export default function Glossary() {
                   </div>
                 )}
 
-                {termContent.content.flashcards.length > 0 && (
+                {termContent.content.flashcards && termContent.content.flashcards.length > 0 && (
                   <div className="glossary-route-section route-flashcard">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-layer-group"></i>
@@ -388,7 +342,7 @@ export default function Glossary() {
                       {termContent.content.flashcards.map(deck => (
                         <Link
                           key={deck.id}
-                          to="/#flashcards"
+                          to="/flashcards"
                           className="glossary-route-card"
                         >
                           <div className="glossary-route-card-icon flashcard-icon">
@@ -405,7 +359,7 @@ export default function Glossary() {
                   </div>
                 )}
 
-                {termContent.content.past_papers.length > 0 && (
+                {termContent.content.past_papers && termContent.content.past_papers.length > 0 && (
                   <div className="glossary-route-section route-paper">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-file-signature"></i>
@@ -435,7 +389,7 @@ export default function Glossary() {
                   </div>
                 )}
 
-                {termContent.content.recall_questions.length > 0 && (
+                {termContent.content.recall_questions && termContent.content.recall_questions.length > 0 && (
                   <div className="glossary-route-section route-recall">
                     <div className="glossary-route-header">
                       <i className="fa-solid fa-brain"></i>
@@ -446,14 +400,14 @@ export default function Glossary() {
                       {termContent.content.recall_questions.map(q => (
                         <Link
                           key={q.id}
-                          to={`/recall?topic=${encodeURIComponent(q.topic)}`}
+                          to={`/recall?topic=${encodeURIComponent(q.topic || '')}`}
                           className="glossary-route-card"
                         >
                           <div className="glossary-route-card-icon recall-icon">
                             <i className="fa-solid fa-brain"></i>
                           </div>
                           <div className="glossary-route-card-body">
-                            <h4>{q.question_text.length > 80 ? q.question_text.substring(0, 77) + '...' : q.question_text}</h4>
+                            <h4>{q.question_text && q.question_text.length > 80 ? q.question_text.substring(0, 77) + '...' : q.question_text}</h4>
                             <span className="glossary-route-card-meta">
                               {q.topic}{q.difficulty && ` · ${q.difficulty}`}
                             </span>
@@ -483,7 +437,7 @@ export default function Glossary() {
                               slug: related.slug,
                               plain_definition: related.plain_definition
                             };
-                            handleTermClick(relatedTerm);
+                            onTermClick(relatedTerm);
                           }}
                         >
                           <span>{related.term}</span>
