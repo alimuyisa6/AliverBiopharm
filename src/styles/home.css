@@ -1,4 +1,4 @@
-.content-guide-section {
+ .content-guide-section {
   padding: 2rem 0;
 }
 
@@ -6,11 +6,10 @@
   background: var(--clr-navy-card);
   border: 1px solid var(--clr-border-glow);
   border-radius: var(--radius-lg);
-  padding: 2rem;
-  border-top: 4px solid var(--clr-cyan);
   box-shadow: var(--shadow-card);
   max-width: 900px;
   margin: 0 auto;
+  padding: 0 0 2rem 0;
   transition: all var(--transition-smooth);
   overflow: hidden;
 }
@@ -29,32 +28,29 @@
 
 .content-guide-visual {
   position: relative;
-  border-radius: var(--radius-md);
   overflow: hidden;
-  min-height: 180px;
+  min-height: 220px;
   background: var(--clr-deep-space);
-  border: 1px solid var(--clr-border-glow);
   flex-shrink: 0;
 }
 
 .content-guide-image {
   width: 100%;
   height: 100%;
-  min-height: 180px;
-  max-height: 220px;
+  min-height: 220px;
   object-fit: cover;
   display: block;
   transition: transform 0.4s ease;
 }
 
 .content-guide-card:hover .content-guide-image {
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
 .content-guide-loading {
   width: 100%;
   height: 100%;
-  min-height: 180px;
+  min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,13 +64,12 @@
 .content-guide-image-fallback {
   width: 100%;
   height: 100%;
-  min-height: 180px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius-md);
 }
 
 .content-guide-fallback-icon {
@@ -102,6 +97,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding-right: 2rem;
+  padding-top: 2rem;
 }
 
 .content-guide-header {
@@ -225,31 +222,47 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
+/* Small card margins on left and right */
+@media (min-width: 769px) {
+  .content-guide-card {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .content-guide-card {
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+    padding: 0 0 1.25rem 0;
+  }
+
   .content-guide-grid {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+    gap: 0;
   }
 
   .content-guide-visual {
-    min-height: 140px;
-    max-height: 200px;
+    min-height: 200px;
+    max-height: 260px;
+    border-radius: 0;
   }
 
   .content-guide-image {
-    min-height: 140px;
+    min-height: 200px;
+    max-height: 260px;
   }
 
   .content-guide-loading {
-    min-height: 140px;
+    min-height: 200px;
   }
 
   .content-guide-image-fallback {
-    min-height: 140px;
+    min-height: 200px;
   }
 
-  .content-guide-card {
-    padding: 1.25rem;
+  .content-guide-content {
+    padding: 1.25rem 1.25rem 0 1.25rem;
   }
 
   .content-guide-header {
@@ -267,25 +280,36 @@
 }
 
 @media (max-width: 480px) {
+  .content-guide-card {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    padding: 0 0 1rem 0;
+  }
+
   .content-guide-visual {
-    min-height: 100px;
-    max-height: 140px;
+    min-height: 160px;
+    max-height: 200px;
   }
 
   .content-guide-image {
-    min-height: 100px;
+    min-height: 160px;
+    max-height: 200px;
   }
 
   .content-guide-loading {
-    min-height: 100px;
+    min-height: 160px;
   }
 
   .content-guide-image-fallback {
-    min-height: 100px;
+    min-height: 160px;
   }
 
   .content-guide-fallback-icon {
     font-size: 2rem;
+  }
+
+  .content-guide-content {
+    padding: 1rem 1rem 0 1rem;
   }
 
   .content-guide-info {
