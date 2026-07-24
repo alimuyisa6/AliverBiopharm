@@ -10,6 +10,12 @@ function formatDuration(seconds) {
   return `${hrs}h ${mins % 60}m`;
 }
 
+const STATUS_CLASS = {
+  live: 'classroom-status-live',
+  open_floor: 'classroom-status-open',
+  upcoming: 'classroom-status-upcoming',
+};
+
 export function ClassroomSection({ user }) {
   const navigate = useNavigate();
   const [feed, setFeed] = useState([]);
@@ -40,23 +46,50 @@ export function ClassroomSection({ user }) {
         </div>
       ) : (
         <div className="classroom-level-grid">
-          {feed.map(room => (
-            <div key={room.id} className={`classroom-level-card classroom-status-${room.status === 'open_floor' ? 'open' : room.status}`}>
-              <div className="room-status-bar">
-                <i className={`fa-solid ${room.status === 'live' || room.status === 'open_floor' ? 'fa-tower-broadcast' : 'fa-clock'}`}></i>
-                <span>{room.status === 'open_floor' ? 'Open Floor' : room.status === 'live' ? 'Live' : 'Upcoming'}</span>
+          {feed.map(room => {
+            const statusClass = STATUS_CLASS[room.status] || '';
+            const isPremium = room.room_type === 'premium';
+            const isHard = room.room_type === 'hard_topic';
+            return (
+              <div key={room.id} className={`classroom-level-card ${statusClass}`}>
+                <div className="card-media">
+                  {room.image_url ? (
+                    <img src={room.image_url} alt={room.topic_name} loading="lazy" />
+                  ) : (
+                    <div className="card-media-fallback">
+                      <i className="fa-solid fa-dna"></i>
+                    </div>
+                  )}
+                  {isHard && <span className="card-media-ribbon ribbon-hard">Hard Topic</span>}
+                  {isPremium && !isHard && <span className="card-media-ribbon ribbon-premium">Premium</span>}
+                </div>
+                <div className="room-status-bar" style={{ backgroundColor: 'var(--card-accent, var(--clr-cyan))' }}>
+                  <i className={`fa-solid ${room.status === 'live' || room.status === 'open_floor' ? 'fa-tower-broadcast' : 'fa-clock'}`}></i>
+                  <span>{room.status === 'open_floor' ? 'Open Floor' : room.status === 'live' ? 'Live' : 'Upcoming'}</span>
+                </div>
+                <div className="classroom-level-body">
+                  <h3 className="classroom-level-title">{room.topic_name}</h3>
+                  <p className="classroom-level-classes">{room.level} · {room.class_name}</p>
+                  {room.tutor_name && (
+                    <p className="room-tutor-line">
+                      {room.tutor_avatar_url ? (
+                        <img src={room.tutor_avatar_url} alt={room.tutor_name} className="room-tutor-avatar" />
+                      ) : (
+                        <i className="fa-solid fa-user-tie"></i>
+                      )}
+                      {room.tutor_name}
+                    </p>
+                  )}
+                  {room.live_duration_seconds !== undefined && (
+                    <p className="room-duration-line"><i className="fa-solid fa-hourglass-half"></i> Running {formatDuration(room.live_duration_seconds)}</p>
+                  )}
+                  {room.starts_in_seconds !== undefined && (
+                    <p className="room-duration-line"><i className="fa-solid fa-clock"></i> Starts in {formatDuration(room.starts_in_seconds)}</p>
+                  )}
+                </div>
               </div>
-              <h3 className="classroom-level-title">{room.topic_name}</h3>
-              <p className="classroom-level-classes">{room.level} · {room.class_name}</p>
-              {room.tutor_name && <p className="room-tutor-line"><i className="fa-solid fa-user-tie"></i> {room.tutor_name}</p>}
-              {room.live_duration_seconds !== undefined && (
-                <p className="room-duration-line"><i className="fa-solid fa-hourglass-half"></i> Running {formatDuration(room.live_duration_seconds)}</p>
-              )}
-              {room.starts_in_seconds !== undefined && (
-                <p className="room-duration-line"><i className="fa-solid fa-clock"></i> Starts in {formatDuration(room.starts_in_seconds)}</p>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
