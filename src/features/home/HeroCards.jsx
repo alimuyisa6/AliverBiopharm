@@ -66,10 +66,14 @@ function HeroCard({ card, index, total }) {
   );
 }
 
-export function HeroCards({ cards, user }) {
+export function HeroCards({ cards, user, backgroundImage }) {
+  const bgStyle = backgroundImage
+    ? { '--hero-bg-image': `url(${backgroundImage})` }
+    : undefined;
+
   if (!user) {
     return (
-      <section id="home" className="hero-cards-section">
+      <section id="home" className="hero-cards-section" style={bgStyle}>
         <div className="hero-cards-glow" />
         <div className="hero-gate-card">
           <h1 className="hero-gate-title">Welcome to AliverBiopharm</h1>
@@ -88,7 +92,7 @@ export function HeroCards({ cards, user }) {
   if (!cards?.length) return null;
 
   return (
-    <section id="home" className="hero-cards-section">
+    <section id="home" className="hero-cards-section" style={bgStyle}>
       <div className="hero-cards-glow" />
       <div className="hero-ring">
         <div className="hero-ring-inner">
