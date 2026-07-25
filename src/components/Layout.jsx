@@ -69,7 +69,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const isMounted = useRef(true);
 
   const {
-    logo, siteName, navigation, footer, loading, theme,
+    logo, siteName, navigation, footer, loading, authLoading, theme,
     toggleTheme, isAuthenticated, refreshUser, user,
   } = useLayout();
 
@@ -346,7 +346,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           </nav>
 
           <div className="nav-actions">
-            {isHomepage && <NotificationBell user={user} />}
+            {isHomepage && !authLoading && <NotificationBell user={user} />}
             {headerExtras}
 
             <button
@@ -358,7 +358,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
               {searchOpen ? <FaXmark /> : <FaMagnifyingGlass style={{ color: 'var(--clr-cyan)' }} />}
             </button>
 
-            {isAuthenticated ? (
+            {!authLoading && isAuthenticated ? (
               <div className="user-dropdown">
                 <button
                   className="user-dropdown-trigger"
@@ -395,6 +395,15 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                   </button>
                 </div>
               </div>
+            ) : !authLoading && !isAuthenticated ? (
+              <>
+                <Link to="/login" className="nav-signin-btn">
+                  <FaRightToBracket /> Sign In
+                </Link>
+                <Link to="/register" className="nav-signup-btn">
+                  <FaUserPlus /> Sign Up
+                </Link>
+              </>
             ) : null}
 
             <button
@@ -452,7 +461,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                 <div className="mobile-nav-header">
                   <div className="mobile-nav-header-row">
                     <div className="mobile-auth-top">
-                      {isAuthenticated ? (
+                      {!authLoading && isAuthenticated ? (
                         <button
                           className="mobile-signout-btn"
                           onClick={handleSignout}
@@ -465,7 +474,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                           )}
                           {signingOut ? 'Signing out...' : 'Sign Out'}
                         </button>
-                      ) : (
+                      ) : !authLoading && !isAuthenticated ? (
                         <>
                           <Link
                             to="/login"
@@ -482,7 +491,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                             <FaUserPlus /> Sign Up
                           </Link>
                         </>
-                      )}
+                      ) : null}
                     </div>
                     <button
                       className="mobile-close-btn"
@@ -500,7 +509,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                 </div>
                 <nav className="mobile-nav-links">
                   {navigation.map(renderMobileNavLink)}
-                  {isAuthenticated && (
+                  {!authLoading && isAuthenticated && (
                     <>
                       <div className="mobile-nav-divider" />
                       <Link to="/dashboard" onClick={closeMobileMenu}>
@@ -622,6 +631,42 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
       </button>
 
       <style>{`
+        .nav-signin-btn,
+        .nav-signup-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 1rem;
+          border-radius: 2rem;
+          font-size: 0.9rem;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.25s ease;
+          white-space: nowrap;
+        }
+
+        .nav-signin-btn {
+          color: var(--clr-cyan);
+          border: 1.5px solid var(--clr-cyan);
+          background: transparent;
+        }
+
+        .nav-signin-btn:hover {
+          background: var(--clr-cyan);
+          color: #fff;
+        }
+
+        .nav-signup-btn {
+          background: var(--clr-cyan);
+          color: #fff;
+        }
+
+        .nav-signup-btn:hover {
+          background: var(--clr-magenta);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(184, 135, 58, 0.3);
+        }
+
         .back-to-top-btn {
           position: fixed;
           bottom: 2rem;
@@ -672,6 +717,13 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
           .back-to-top-btn {
             transition: none;
             animation: none;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .nav-signin-btn,
+          .nav-signup-btn {
+            display: none;
           }
         }
       `}</style>
