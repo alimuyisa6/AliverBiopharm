@@ -1,4 +1,4 @@
-export function flattenCardFrames(card) {
+ export function flattenCardFrames(card) {
   const frames = [];
   function walk(node, depth) {
     frames.push({
