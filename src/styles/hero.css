@@ -7,6 +7,10 @@
   margin-top: 60px;
   overflow: hidden;
   min-height: 520px;
+  background-image: var(--hero-bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .hero-cards-glow {
@@ -71,7 +75,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--card-accent);
   cursor: pointer;
   outline: none;
-  animation: heroCardBreathe 3.6s ease-in-out infinite;
+  animation: heroCardBounce 3.6s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
   animation-delay: calc(var(--i) * -0.25s);
   transition: box-shadow 250ms ease;
 }
@@ -79,20 +83,46 @@
 .hero-card:hover,
 .hero-card:focus-visible {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3), 0 0 30px var(--card-accent);
+  animation-play-state: paused;
 }
 
 @keyframes heroRingSpin { to { transform: rotate(360deg); } }
 @keyframes heroRingCounterSpin { to { transform: rotate(-360deg); } }
 
-@keyframes heroCardBreathe {
-  0%, 100% { scale: 1; }
-  50% { scale: 1.035; }
+@keyframes heroCardBounce {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  12% { transform: translateY(-16px) scale(0.94, 1.08); }
+  24% { transform: translateY(2px) scale(1.1, 0.86); }
+  36% { transform: translateY(-8px) scale(0.97, 1.04); }
+  48% { transform: translateY(0) scale(1.03, 0.97); }
+  60% { transform: translateY(0) scale(1, 1); }
 }
 
 .hero-card-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.8) 100%);
+}
+
+.hero-card-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  font-size: 22px;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 0 0 12px var(--card-accent), 0 0 26px var(--card-accent);
+  animation: heroCardSpark 3.6s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  animation-delay: calc(var(--i) * -0.25s);
+}
+
+@keyframes heroCardSpark {
+  0%, 20%, 100% { opacity: 0; transform: scale(0.4) rotate(-10deg); }
+  24% { opacity: 1; transform: scale(1.35) rotate(8deg); }
+  30% { opacity: 0; transform: scale(0.7) rotate(0deg); }
 }
 
 .hero-card-content {
@@ -210,22 +240,9 @@
   .hero-ring-inner,
   .hero-card-counter,
   .hero-card,
+  .hero-card-spark,
   .hero-cards-glow,
   .hero-card-content {
     animation: none !important;
   }
-}
-
-.hero-cards-section {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 80px 20px;
-  margin-top: 60px;
-  overflow: hidden;
-  min-height: 520px;
-  background-image: var(--hero-bg-image, none);
-  background-size: cover;
-  background-position: center;
 }
