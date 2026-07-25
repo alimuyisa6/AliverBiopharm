@@ -49,6 +49,9 @@ function HeroCard({ card, index, total }) {
           }}
         >
           <span className="hero-card-overlay" />
+          <span className="hero-card-spark" aria-hidden="true">
+            <i className="fa-solid fa-atom"></i>
+          </span>
           {frames.length > 1 && (
             <span className="hero-card-depth-dot">
               {frames.map((f, i) => (
