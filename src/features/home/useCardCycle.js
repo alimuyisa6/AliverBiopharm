@@ -11,14 +11,20 @@ export function useCardCycle(frames, index, intervalMs = 2400) {
 
   useEffect(() => {
     if (frames.length <= 1 || reducedMotion.current) return;
+
     const stagger = (index % 5) * 350;
+    let intervalId;
+
     const startTimeout = setTimeout(() => {
-      const id = setInterval(() => {
+      intervalId = setInterval(() => {
         setFrameIndex(prev => (prev + 1) % frames.length);
       }, intervalMs);
-      return () => clearInterval(id);
     }, stagger);
-    return () => clearTimeout(startTimeout);
+
+    return () => {
+      clearTimeout(startTimeout);
+      clearInterval(intervalId);
+    };
   }, [frames.length, index, intervalMs]);
 
   return frames[frameIndex] || frames[0];
