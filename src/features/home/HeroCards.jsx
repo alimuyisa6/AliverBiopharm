@@ -1,7 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useHeroCards } from './useHeroCards';
-
+ import React from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { flattenCardFrames } from './heroFrames';
+import { useCardCycle } from './useCardCycle';
+import './hero.css';
 
 const ACCENT_VARS = {
   cyan: 'var(--clr-cyan)',
@@ -12,9 +13,60 @@ const ACCENT_VARS = {
   orange: 'var(--clr-orange)'
 };
 
-export function HeroCards({ cards, user }) {
-  const { spread, isTouch, handleEnter, handleLeave } = useHeroCards();
+function HeroCard({ card, index, total }) {
+  const navigate = useNavigate();
+  const frames = React.useMemo(() => flattenCardFrames(card), [card]);
+  const frame = useCardCycle(frames, index);
+  const accentColor = ACCENT_VARS[frame.accent] || 'var(--clr-cyan)';
 
+  function handleActivate() {
+    navigate(frame.link);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleActivate();
+    }
+  }
+
+  return (
+    <div
+      className="hero-card-slot"
+      style={{ '--i': index, '--total': total }}
+    >
+      <div className="hero-card-counter">
+        <div
+          className="hero-card"
+          role="button"
+          tabIndex={0}
+          onClick={handleActivate}
+          onKeyDown={handleKeyDown}
+          style={{
+            '--i': index,
+            '--card-accent': accentColor,
+            backgroundImage: frame.image_url ? `url(${frame.image_url})` : undefined
+          }}
+        >
+          <span className="hero-card-overlay" />
+          {frames.length > 1 && (
+            <span className="hero-card-depth-dot">
+              {frames.map((f, i) => (
+                <span key={i} className={i === frames.indexOf(frame) ? 'active' : ''} />
+              ))}
+            </span>
+          )}
+          <span className="hero-card-content" key={frame.title}>
+            <span className="hero-card-title">{frame.title}</span>
+            {frame.subtitle && <span className="hero-card-subtitle">{frame.subtitle}</span>}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function HeroCards({ cards, user }) {
   if (!user) {
     return (
       <section id="home" className="hero-cards-section">
@@ -38,36 +90,12 @@ export function HeroCards({ cards, user }) {
   return (
     <section id="home" className="hero-cards-section">
       <div className="hero-cards-glow" />
-      <div
-        className={`hero-cards-stack ${spread || isTouch ? 'is-spread' : ''}`}
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
-        onFocus={handleEnter}
-        onBlur={handleLeave}
-      >
-        {cards.slice(0, 6).map((card, idx) => {
-          const accentColor = ACCENT_VARS[card.accent] || 'var(--clr-cyan)';
-          return (
-            <Link
-              key={card.slug || idx}
-              to={card.link}
-              className="hero-card"
-              style={{
-                '--card-index': idx,
-                '--grid-col': idx % 3,
-                '--grid-row': Math.floor(idx / 3),
-                '--card-accent': accentColor,
-                backgroundImage: card.image_url ? `url(${card.image_url})` : undefined
-              }}
-            >
-              <span className="hero-card-overlay" />
-              <span className="hero-card-content">
-                <span className="hero-card-title">{card.title}</span>
-                {card.subtitle && <span className="hero-card-subtitle">{card.subtitle}</span>}
-              </span>
-            </Link>
-          );
-        })}
+      <div className="hero-ring">
+        <div className="hero-ring-inner">
+          {cards.map((card, idx) => (
+            <HeroCard key={card.slug || idx} card={card} index={idx} total={cards.length} />
+          ))}
+        </div>
       </div>
     </section>
   );
