@@ -274,6 +274,7 @@ export default function HomeView() {
       <HeroCards
         cards={sections?.hero_cards}
         user={user}
+        backgroundImage={sections?.hero_cards_bg?.image_url}
       />
 
       <InteractiveShowcase />
