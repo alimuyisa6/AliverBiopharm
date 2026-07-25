@@ -215,3 +215,17 @@
     animation: none !important;
   }
 }
+
+.hero-cards-section {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px;
+  margin-top: 60px;
+  overflow: hidden;
+  min-height: 520px;
+  background-image: var(--hero-bg-image, none);
+  background-size: cover;
+  background-position: center;
+}
