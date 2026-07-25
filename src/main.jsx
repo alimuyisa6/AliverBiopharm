@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './styles/global.css';
 import './styles/component-bundle.css';
+import './styles/hero.css';
 import './styles/quiz.css';
 import './styles/glossary.css';
 import './loading/Loading.css';
