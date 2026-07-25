@@ -1,0 +1,179 @@
+.hero-cards-section {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px;
+  margin-top: 60px;
+  overflow: hidden;
+  min-height: 460px;
+}
+
+.hero-cards-glow {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(10, 126, 126, 0.35), transparent 60%),
+    radial-gradient(circle at 70% 70%, rgba(184, 135, 58, 0.3), transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(59, 111, 212, 0.25), transparent 65%);
+  filter: blur(60px);
+  animation: heroGlowPulse 8s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes heroGlowPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+.hero-cards-stack {
+  --hero-card-w: 200px;
+  --hero-card-h: 260px;
+  --hero-gap: 24px;
+  position: relative;
+  z-index: 1;
+  width: calc(var(--hero-card-w) * 3 + var(--hero-gap) * 2);
+  height: calc(var(--hero-card-h) * 2 + var(--hero-gap));
+}
+
+.hero-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--hero-card-w);
+  height: var(--hero-card-h);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--card-accent);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--card-accent);
+  cursor: pointer;
+  display: block;
+  text-decoration: none;
+  outline: none;
+  translate: calc(var(--card-index) * 8px) calc(var(--card-index) * 6px);
+  rotate: calc(var(--card-index) * 4deg - 10deg);
+  scale: 0.94;
+  z-index: calc(var(--card-index) + 1);
+  transition: translate 480ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    rotate 480ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    scale 480ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 300ms ease;
+  transition-delay: calc(var(--card-index) * 55ms);
+  animation: heroCardFloat 6s ease-in-out infinite;
+  animation-delay: calc(var(--card-index) * -0.6s);
+}
+
+.hero-card:hover,
+.hero-card:focus-visible {
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3), 0 0 26px var(--card-accent);
+}
+
+.hero-cards-stack.is-spread .hero-card {
+  translate: calc(var(--grid-col) * (var(--hero-card-w) + var(--hero-gap)))
+    calc(var(--grid-row) * (var(--hero-card-h) + var(--hero-gap)));
+  rotate: 0deg;
+  scale: 1;
+  z-index: 10;
+  animation: none;
+}
+
+@keyframes heroCardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.hero-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.78) 100%);
+}
+
+.hero-card-content {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hero-card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-md);
+  color: #fff;
+  line-height: var(--lh-snug);
+}
+
+.hero-card-subtitle {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--ls-wide);
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+}
+
+.hero-gate-card {
+  position: relative;
+  z-index: 1;
+  background: var(--clr-navy-card);
+  border: 1px solid var(--clr-border-glow);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+
+.hero-gate-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h1);
+  font-weight: 800;
+  color: var(--clr-white);
+  margin-bottom: 0.5rem;
+}
+
+.hero-gate-subtitle {
+  font-family: var(--font-body);
+  color: var(--clr-text-dim);
+  margin-bottom: 1.5rem;
+  line-height: var(--lh-relaxed);
+}
+
+.hero-gate-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .hero-cards-section {
+    min-height: auto;
+    padding: 60px 16px;
+  }
+  .hero-cards-stack {
+    --hero-card-w: 104px;
+    --hero-card-h: 138px;
+    --hero-gap: 12px;
+  }
+  .hero-card-title {
+    font-size: var(--text-sm);
+  }
+  .hero-card-subtitle {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card,
+  .hero-cards-glow {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
