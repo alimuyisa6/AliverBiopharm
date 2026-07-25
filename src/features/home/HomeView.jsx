@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useLevelFilter } from '../../hooks/useLevelFilter';
 import { useContentAccess } from '../../hooks/useContentAccess';
 
-import { HeroCarousel } from './HeroCarousel';
+import { HeroCards } from './HeroCards';
 import { StatsGrid } from './StatsGrid';
 import { TeamScroll } from './TeamScroll';
 import { TestimonialSlider } from './TestimonialSlider';
@@ -52,7 +52,6 @@ export default function HomeView() {
   const [sections, setSections] = useState({});
   const [publicStats, setPublicStats] = useState(null);
   const [communityActivity, setCommunityActivity] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [contactStatus, setContactStatus] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -80,14 +79,6 @@ export default function HomeView() {
     if (access.isPending) return;
     loadInitialData();
   }, [access.isPending, level]);
-
-  useEffect(() => {
-    if (!sections?.hero_carousel?.slides?.length) return;
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % sections.hero_carousel.slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [sections]);
 
   const loadInitialData = async () => {
     setLoading(true);
@@ -270,9 +261,9 @@ export default function HomeView() {
 
   return (
     <div className="home-page">
-      <HeroCarousel
-        slides={sections?.hero_carousel?.slides || []}
-        currentSlide={currentSlide}
+      <HeroCards
+        cards={sections?.hero_cards}
+        user={user}
       />
 
       <InteractiveShowcase />
