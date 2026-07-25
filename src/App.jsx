@@ -1,5 +1,5 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+ import { useEffect, useRef } from 'react';
+import { Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import { LayoutProvider } from './contexts/LayoutContext';
@@ -25,68 +25,52 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import OnboardingFlow from './pages/OnboardingFlow';
 
-const scrollPositions = {};
-const scrollRestoreDelay = 100;
-const maxRestoreAttempts = 10;
-
 function ScrollManager() {
   const location = useLocation();
+  const navType = useNavigationType();
   const prevPathRef = useRef(null);
-  const restoreTimeoutRef = useRef(null);
 
-  const restoreScroll = useCallback((target) => {
-    if (restoreTimeoutRef.current) clearTimeout(restoreTimeoutRef.current);
-    
-    restoreTimeoutRef.current = setTimeout(() => {
-      const maxHeight = Math.max(
-        document.documentElement.scrollHeight,
-        document.body.scrollHeight
-      );
-      const viewportHeight = window.innerHeight;
-      const maxScrollY = Math.max(0, maxHeight - viewportHeight);
-      const safeTarget = Math.min(target, maxScrollY);
-      
-      if (window.scrollY !== safeTarget) {
-        window.scrollTo(0, safeTarget);
-      }
-    }, scrollRestoreDelay);
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
   }, []);
 
   useEffect(() => {
     const key = location.pathname;
     const prevPath = prevPathRef.current;
-    
+
     if (prevPath && prevPath !== key) {
-      scrollPositions[prevPath] = window.scrollY;
-    }
-    
-    prevPathRef.current = key;
-    const savedY = scrollPositions[key];
-    
-    if (savedY !== undefined && savedY > 0) {
-      restoreScroll(savedY);
-    } else {
-      if (restoreTimeoutRef.current) clearTimeout(restoreTimeoutRef.current);
-      window.scrollTo(0, 0);
+      sessionStorage.setItem(`scroll:${prevPath}`, String(window.scrollY));
     }
 
-    return () => {
-      if (restoreTimeoutRef.current) clearTimeout(restoreTimeoutRef.current);
-    };
-  }, [location.pathname, restoreScroll]);
+    prevPathRef.current = key;
+
+    if (navType === 'POP') {
+      const saved = sessionStorage.getItem(`scroll:${key}`);
+      const target = saved ? parseInt(saved, 10) : 0;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, target);
+        });
+      });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, navType]);
 
   useEffect(() => {
     let saveTimeout;
-    
+
     const handleScroll = () => {
       clearTimeout(saveTimeout);
       saveTimeout = setTimeout(() => {
-        scrollPositions[location.pathname] = window.scrollY;
+        sessionStorage.setItem(`scroll:${location.pathname}`, String(window.scrollY));
       }, 250);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(saveTimeout);
