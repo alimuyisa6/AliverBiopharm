@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+ import { useState, useEffect, useRef } from 'react';
 
 export function useCardCycle(frames, index, intervalMs = 2400) {
   const [frameIndex, setFrameIndex] = useState(0);
