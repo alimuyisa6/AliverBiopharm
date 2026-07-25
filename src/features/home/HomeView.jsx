@@ -42,16 +42,18 @@ import {
 } from '../../api/client';
 import { getSections } from '../../api/sections';
 
+let homeDataCache = null;
+
 export default function HomeView() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const access = useContentAccess();
   const { level, class_name, showAll } = useLevelFilter();
 
-  const [loading, setLoading] = useState(true);
-  const [sections, setSections] = useState({});
-  const [publicStats, setPublicStats] = useState(null);
-  const [communityActivity, setCommunityActivity] = useState([]);
+  const [loading, setLoading] = useState(!homeDataCache);
+  const [sections, setSections] = useState(homeDataCache?.sections || {});
+  const [publicStats, setPublicStats] = useState(homeDataCache?.publicStats || null);
+  const [communityActivity, setCommunityActivity] = useState(homeDataCache?.communityActivity || []);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [contactStatus, setContactStatus] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -61,10 +63,10 @@ export default function HomeView() {
   const [moodMessage, setMoodMessage] = useState('');
   const [moodSubmitted, setMoodSubmitted] = useState(false);
   const [continueLearning, setContinueLearning] = useState([]);
-  const [pdfs, setPdfs] = useState([]);
+  const [pdfs, setPdfs] = useState(homeDataCache?.pdfs || []);
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [previewPdf, setPreviewPdf] = useState(null);
-  const [groupedNotes, setGroupedNotes] = useState({});
+  const [groupedNotes, setGroupedNotes] = useState(homeDataCache?.groupedNotes || {});
   const [notesContent, setNotesContent] = useState(null);
   const [notesReactions, setNotesReactions] = useState(null);
   const [notesComments, setNotesComments] = useState([]);
@@ -81,7 +83,7 @@ export default function HomeView() {
   }, [access.isPending, level]);
 
   const loadInitialData = async () => {
-    setLoading(true);
+    if (!homeDataCache) setLoading(true);
     try {
       const effectiveLevel = showAll ? null : level;
       const effectiveClass = showAll ? null : class_name;
@@ -132,6 +134,14 @@ export default function HomeView() {
       setGroupedNotes(notesGrouped);
 
       setSections(sectionsData || {});
+
+      homeDataCache = {
+        sections: sectionsData || {},
+        publicStats: stats,
+        communityActivity: activity,
+        pdfs: pdfData?.pdfs || [],
+        groupedNotes: notesGrouped
+      };
 
     } catch (err) {
       console.error('Failed to load data:', err);
