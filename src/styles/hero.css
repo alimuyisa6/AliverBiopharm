@@ -46,6 +46,7 @@
   width: 1px;
   height: 1px;
   animation: heroRingSpin 48s linear infinite;
+  transition: transform 550ms ease;
 }
 
 .hero-card-slot {
@@ -55,10 +56,32 @@
   width: 1px;
   height: 1px;
   transform: rotate(calc(360deg / var(--total) * var(--i))) translateX(var(--radius, 320px));
+  transition: transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hero-card-counter {
   animation: heroRingCounterSpin 48s linear infinite;
+  transition: transform 550ms ease;
+}
+
+/* Aligned state: hover (desktop) or tap (touch) */
+.hero-ring-inner.is-spread {
+  animation: none;
+  transform: rotate(0deg);
+}
+
+.hero-ring-inner.is-spread .hero-card-slot {
+  transform: translateX(calc((var(--i) - (var(--total) - 1) / 2) * 180px));
+}
+
+.hero-ring-inner.is-spread .hero-card-counter {
+  animation: none;
+  transform: rotate(0deg);
+}
+
+.hero-ring-inner.is-spread .hero-card,
+.hero-ring-inner.is-spread .hero-card-spark {
+  animation-play-state: paused;
 }
 
 .hero-card {
@@ -221,6 +244,9 @@
   }
   .hero-card-slot {
     transform: rotate(calc(360deg / var(--total) * var(--i))) translateX(var(--radius-mobile, 170px));
+  }
+  .hero-ring-inner.is-spread .hero-card-slot {
+    transform: translateX(calc((var(--i) - (var(--total) - 1) / 2) * 96px));
   }
   .hero-card {
     width: 108px;
