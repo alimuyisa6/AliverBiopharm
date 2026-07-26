@@ -29,6 +29,7 @@
   --clr-error-light: rgba(231, 76, 60, 0.12);
   --clr-accent-light: #e6d5b8;
   --clr-accent-dark: #7a5a1a;
+ --clr-on-dark: #fff;
   --shadow-card: 0 4px 16px rgba(10, 110, 110, 0.06);
   --shadow-magenta: 0 6px 18px rgba(184, 135, 58, 0.15);
   --shadow-blue: 0 6px 18px rgba(59, 111, 212, 0.18);
