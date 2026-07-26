@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { flattenCardFrames } from './heroFrames';
 import { useCardCycle } from './useCardCycle';
 import { useHeroCards } from './useHeroCards';
-import './hero.css';
+
 
 const ACCENT_VARS = {
   cyan: 'var(--clr-cyan)',
