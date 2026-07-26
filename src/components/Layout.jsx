@@ -10,6 +10,7 @@ import { useLayout } from '../contexts/LayoutContext';
 import { signout } from '../api/client';
 import NotificationBell from './NotificationBell';
 import SearchOverlay from './SearchOverlay';
+import SplashScreen from './SplashScreen';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -297,21 +298,11 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {loading ? (
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '1rem',
-          fontFamily: 'var(--font-body)',
-          color: 'var(--clr-text-dim)',
-        }}>
-          <FaSpinner className="icon-spin" size={32} color="var(--clr-cyan)" />
-          <p>Loading {siteName}...</p>
-        </div>
-      ) : (
+      <AnimatePresence mode="wait">
+        {loading && <SplashScreen key="splash" />}
+      </AnimatePresence>
+
+      {!loading && (
         <>
           <a href="#main-content" className="skip-link">
             Skip to main content
