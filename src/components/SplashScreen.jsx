@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import './SplashScreen.css';
 
 const DEFAULT_MESSAGES = [
   'Checking your profile',
