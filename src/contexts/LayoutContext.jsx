@@ -45,6 +45,7 @@ export function LayoutProvider({ children }) {
     sections,
     user,
     loading: sectionsLoading || authLoading,
+    authLoading,
     theme,
     toggleTheme,
     refreshUser,
