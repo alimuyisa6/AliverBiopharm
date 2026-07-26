@@ -15,6 +15,7 @@ import './styles/Liveroom.css';
 import './styles/bioRecall.css';
 import './styles/Tutor.css';
 import './styles/Dashboard.css';
+import './styles/SplashScreen.css';
 import './styles/past-papers.css';
 import './styles/Profile.css';
 import './styles/Profile.css';
