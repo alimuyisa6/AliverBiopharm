@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+ import { useState, useEffect } from 'react';
 
 export function useHeroCards() {
   const [spread, setSpread] = useState(false);
@@ -17,5 +17,9 @@ export function useHeroCards() {
     if (!isTouch) setSpread(false);
   }
 
-  return { spread, isTouch, handleEnter, handleLeave };
+  function handleTap() {
+    if (isTouch) setSpread(prev => !prev);
+  }
+
+  return { spread, isTouch, handleEnter, handleLeave, handleTap };
 }
