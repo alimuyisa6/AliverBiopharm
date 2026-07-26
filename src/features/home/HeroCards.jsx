@@ -2,7 +2,8 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { flattenCardFrames } from './heroFrames';
 import { useCardCycle } from './useCardCycle';
-
+import { useHeroCards } from './useHeroCards';
+import './hero.css';
 
 const ACCENT_VARS = {
   cyan: 'var(--clr-cyan)',
@@ -70,6 +71,7 @@ function HeroCard({ card, index, total }) {
 }
 
 export function HeroCards({ cards, user, backgroundImage }) {
+  const { spread, handleEnter, handleLeave, handleTap } = useHeroCards();
   const bgStyle = backgroundImage
     ? { '--hero-bg-image': `url(${backgroundImage})` }
     : undefined;
@@ -97,8 +99,13 @@ export function HeroCards({ cards, user, backgroundImage }) {
   return (
     <section id="home" className="hero-cards-section" style={bgStyle}>
       <div className="hero-cards-glow" />
-      <div className="hero-ring">
-        <div className="hero-ring-inner">
+      <div
+        className="hero-ring"
+        onMouseEnter={handleEnter}
+        onMouseLeave={handleLeave}
+        onClick={handleTap}
+      >
+        <div className={`hero-ring-inner${spread ? ' is-spread' : ''}`}>
           {cards.map((card, idx) => (
             <HeroCard key={card.slug || idx} card={card} index={idx} total={cards.length} />
           ))}
