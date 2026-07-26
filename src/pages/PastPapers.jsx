@@ -19,7 +19,6 @@ import {
   FaXmark,
   FaHouse
 } from 'react-icons/fa6';
-import './past-papers.css';
 
 const LEVEL_ACCENTS = {
   'O-Level': 'var(--clr-cyan)',
