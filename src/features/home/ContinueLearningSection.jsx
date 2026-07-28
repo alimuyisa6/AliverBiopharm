@@ -1,11 +1,13 @@
-// features/home/ContinueLearningSection.jsx
-import React from 'react';
+ import React from 'react';
+import { Link } from 'react-router-dom';
 
 export function ContinueLearningSection({ continueLearning, user }) {
   if (!user || !continueLearning) return null;
 
-  const { views, favorites, streak } = continueLearning;
-  const hasContent = (views?.length > 0) || (favorites?.length > 0) || streak > 0;
+  const views = continueLearning.views || [];
+  const favorites = continueLearning.favorites || [];
+  const streak = continueLearning.streak || 0;
+  const hasContent = views.length > 0 || favorites.length > 0 || streak > 0;
   if (!hasContent) return null;
 
   return (
@@ -16,22 +18,24 @@ export function ContinueLearningSection({ continueLearning, user }) {
       <div className="continue-learning-grid">
         {streak > 0 && (
           <div className="continue-card">
-            <i className="fa-solid fa-fire continue-streak-icon"></i>
+            <i className="fa-solid fa-fire continue-streak-icon" />
             <strong>{streak}-Day Streak</strong>
             <p>Keep it up!</p>
           </div>
         )}
-        {views?.length > 0 && (
+        {views.length > 0 && (
           <div className="continue-card">
             <strong>Recent Views</strong>
             <ul className="continue-list">
               {views.filter(Boolean).map(v => (
-                <li key={v.resource_id}><a href="#" className="continue-link">{v.title}</a></li>
+                <li key={v.resource_id}>
+                  <Link to={`/notes/read?id=${v.resource_id}`} className="continue-link">{v.title}</Link>
+                </li>
               ))}
             </ul>
           </div>
         )}
-        {favorites?.length > 0 && (
+        {favorites.length > 0 && (
           <div className="continue-card">
             <strong>Favorites</strong>
             <ul className="continue-list">
