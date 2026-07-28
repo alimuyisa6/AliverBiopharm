@@ -1,4 +1,4 @@
- import { setCorsHeaders, generateCsrfToken, getClientIp } from './lib/core.js';
+ import { setCorsHeaders, generateCsrfToken, getClientIp } from '../lib/core.js';
 import { enforceSecurityHeaders, createAuthenticatedContext, enforceCsrf, rateLimiter, sanitizeError, SecurityError } from './lib/security-middleware.js';
 
 const MODULE_MAP = {
