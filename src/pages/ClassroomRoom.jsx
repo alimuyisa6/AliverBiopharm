@@ -129,7 +129,7 @@ export default function ClassroomRoom() {
   if (error || !room) {
     return (
       <div className="classroom-error">
-        <i className="fa-solid fa-triangle-exclamation" style={{ color: 'var(--clr-red)' }}></i>
+        <i className="fa-solid fa-triangle-exclamation classroom-error-icon"></i>
         <p>{error || 'Room not found'}</p>
         <button className="btn-secondary" onClick={() => navigate('/classroom')}>Back to Classrooms</button>
       </div>
@@ -140,16 +140,16 @@ export default function ClassroomRoom() {
     <>
       <div className="room-topbar">
         <button className="room-back-btn" onClick={handleLeaveRoom}>
-          <i className="fa-solid fa-arrow-left" style={{ color: 'var(--clr-blue)' }}></i>
+          <i className="fa-solid fa-arrow-left room-back-icon"></i>
         </button>
         <div className="room-info">
           <h2>{room.title}</h2>
           <span className="room-topic-badge">
-            <i className="fa-solid fa-book" style={{ color: 'var(--clr-cyan)' }}></i>
+            <i className="fa-solid fa-book room-topic-icon"></i>
             {room.topic_name}
           </span>
           <span className="room-class-badge">
-            <i className="fa-solid fa-user-graduate" style={{ color: 'var(--clr-blue)' }}></i>
+            <i className="fa-solid fa-user-graduate room-class-icon"></i>
             {room.class_name}
           </span>
         </div>
@@ -170,7 +170,7 @@ export default function ClassroomRoom() {
               <div key={msg.id} className={`room-message ${msg.user_id === user?.id ? 'own' : ''} ${msg.message_type}`}>
                 {msg.message_type === 'system' ? (
                   <div className="system-message">
-                    <i className="fa-solid fa-circle-info" style={{ color: 'var(--clr-blue)' }}></i>
+                    <i className="fa-solid fa-circle-info system-msg-icon"></i>
                     {msg.content}
                   </div>
                 ) : msg.message_type === 'resource' ? (
@@ -180,7 +180,7 @@ export default function ClassroomRoom() {
                       <span className="msg-time">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <div className="resource-content">
-                      <i className="fa-solid fa-file" style={{ color: 'var(--clr-blue)' }}></i>
+                      <i className="fa-solid fa-file resource-file-icon"></i>
                       <a href={msg.file_url} target="_blank" rel="noreferrer" download={msg.file_name}>
                         {msg.file_name}
                       </a>
@@ -216,7 +216,7 @@ export default function ClassroomRoom() {
         <div className="room-sidebar">
           <div className="sidebar-section">
             <h4>
-              <i className="fa-solid fa-users" style={{ color: 'var(--clr-purple)' }}></i>
+              <i className="fa-solid fa-users sidebar-section-icon-purple"></i>
               Participants ({participants.length})
             </h4>
             <div className="participants-list">
@@ -226,15 +226,15 @@ export default function ClassroomRoom() {
                     {p.avatar_url ? (
                       <img src={p.avatar_url} alt={p.user_name || 'User'} loading="lazy" />
                     ) : (
-                      <i className={`fa-solid ${p.role === 'tutor' ? 'fa-chalkboard-user' : p.role === 'admin' ? 'fa-shield-halved' : 'fa-user'}`} style={{ color: p.role === 'tutor' ? 'var(--clr-magenta)' : p.role === 'admin' ? 'var(--clr-orange)' : 'var(--clr-blue)' }}></i>
+                      <i className={`fa-solid ${p.role === 'tutor' ? 'fa-chalkboard-user' : p.role === 'admin' ? 'fa-shield-halved' : 'fa-user'} participant-role-icon ${p.role}`}></i>
                     )}
                   </div>
                   <div className="participant-info">
                     <span className="participant-name">{p.user_name || 'User'}</span>
                     <span className="participant-role">{p.role}</span>
                   </div>
-                  {p.is_muted && <i className="fa-solid fa-microphone-slash muted-icon" style={{ color: 'var(--clr-red)' }}></i>}
-                  {p.hand_raised && <i className="fa-solid fa-hand raised-icon" style={{ color: 'var(--clr-orange)' }}></i>}
+                  {p.is_muted && <i className="fa-solid fa-microphone-slash muted-icon"></i>}
+                  {p.hand_raised && <i className="fa-solid fa-hand raised-icon"></i>}
                 </div>
               ))}
             </div>
@@ -242,7 +242,7 @@ export default function ClassroomRoom() {
 
           <div className="sidebar-section">
             <h4>
-              <i className="fa-solid fa-circle-info" style={{ color: 'var(--clr-blue)' }}></i>
+              <i className="fa-solid fa-circle-info sidebar-section-icon-blue"></i>
               Room Info
             </h4>
             <div className="room-details">
@@ -263,7 +263,7 @@ export default function ClassroomRoom() {
             disabled
             title="Mute controlled by tutor"
           >
-            <i className={`fa-solid ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'}`} style={{ color: isMuted ? 'var(--clr-red)' : 'var(--clr-green)' }}></i>
+            <i className={`fa-solid ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} control-btn-icon ${isMuted ? 'muted-icon' : 'unmuted-icon'}`}></i>
             {isMuted ? 'Muted' : 'Unmuted'}
           </button>
         </div>
@@ -272,13 +272,13 @@ export default function ClassroomRoom() {
             className={`control-btn raise-hand ${handRaised ? 'active' : ''}`}
             onClick={handleRaiseHand}
           >
-            <i className="fa-solid fa-hand" style={{ color: handRaised ? 'var(--clr-orange)' : 'var(--clr-blue)' }}></i>
+            <i className={`fa-solid fa-hand ${handRaised ? 'raise-hand-active' : ''}`}></i>
             {handRaised ? 'Hand Raised' : 'Raise Hand'}
           </button>
         </div>
         <div className="controls-right">
           <button className="control-btn leave" onClick={handleLeaveRoom}>
-            <i className="fa-solid fa-right-from-bracket" style={{ color: 'var(--clr-red)' }}></i>
+            <i className="fa-solid fa-right-from-bracket leave-icon"></i>
             Leave
           </button>
         </div>
