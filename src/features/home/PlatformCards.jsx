@@ -10,6 +10,7 @@ export function PlatformCards() {
 
   return (
     <section className="platform-cards-section">
+      <span className="sec-label">Platforms</span>
       <h2 className="section-title">Explore Our Platforms</h2>
       <p className="section-subtitle">Choose your path and start learning today</p>
       <div className="platform-cards-grid">
@@ -18,7 +19,9 @@ export function PlatformCards() {
             key={group.id}
             className="platform-card"
             onClick={() => navigate(`/level/${group.level_id}/group/${group.id}`)}
-            style={{ cursor: 'pointer' }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && navigate(`/level/${group.level_id}/group/${group.id}`)}
           >
             <div className="platform-card-image-wrapper">
               <i className={`fas ${group.icon || 'fa-book'}`} />
