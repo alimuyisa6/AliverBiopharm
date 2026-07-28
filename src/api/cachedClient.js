@@ -1,4 +1,4 @@
-import { getCached, setCache, invalidateCache, invalidateCacheByPattern } from '../utils/cache';
+ import { getCached, setCache, invalidateCache, invalidateCacheByPattern } from '../utils/cache';
 import * as api from './client';
 
 function withCache(key, fetcher, cacheEnabled = true) {
@@ -42,20 +42,20 @@ export const getResources = (filters = {}) =>
 export const getFilterOptions = () =>
   withCache('filter_options', api.getFilterOptions)();
 
-export const getPdfsByLevel = (level) =>
-  withCache(`pdfs_${level}`, () => api.getPdfsByLevel(level))();
+export const getPdfsByLevel = (unitId) =>
+  withCache(`pdfs_${unitId}`, () => api.getPdfsByLevel(unitId))();
 
-export const getNotesStructure = () =>
-  withCache('notes_structure', api.getNotesStructure)();
+export const getNotesStructure = (unitId) =>
+  withCache(`notes_structure_${unitId}`, () => api.getNotesStructure(unitId))();
 
-export const getNoteContent = (subtopicId) =>
-  withCache(`note_${subtopicId}`, () => api.getNoteContent(subtopicId), false)();
+export const getNoteContent = (noteId) =>
+  withCache(`note_content_${noteId}`, () => api.getNoteContent(noteId), false)();
 
-export const getNotePreview = (subtopicId) =>
-  withCache(`note_preview_${subtopicId}`, () => api.getNotePreview(subtopicId))();
+export const getNotePreview = (noteId) =>
+  withCache(`note_preview_${noteId}`, () => api.getNotePreview(noteId))();
 
-export const getQuizTopics = ({ level }) =>
-  withCache(`quiz_topics_${level}`, () => api.getQuizTopics({ level }))();
+export const getQuizTopics = (unitId) =>
+  withCache(`quiz_topics_${unitId}`, () => api.getQuizTopics(unitId))();
 
 export const getPastPapers = (filters = {}) =>
   withArgsCache((f) => `past_papers_${JSON.stringify(f)}`, api.getPastPapers)(filters);
@@ -108,8 +108,8 @@ export const getPublicStats = () =>
 export const getLeaderboard = (level, limit = 20) =>
   withCache(`leaderboard_${level}_${limit}`, () => api.getLeaderboard(level, limit))();
 
-export const getRecallTopics = (level) =>
-  withCache(`recall_topics_${level}`, () => api.getRecallTopics(level))();
+export const getRecallTopics = (groupId) =>
+  withCache(`recall_topics_${groupId}`, () => api.getRecallTopics(groupId))();
 
 export const getRecallStats = () =>
   withCache('recall_stats', api.getRecallStats, false)();
@@ -144,11 +144,11 @@ export const getChatMessages = (roomId) =>
 export const checkAdminOnline = () =>
   withCache('admin_online', api.checkAdminOnline, false)();
 
-export const getClassroomTopics = (level, class_name) =>
-  withCache(`classroom_topics_${level}_${class_name}`, () => api.getClassroomTopics(level, class_name))();
+export const getClassroomTopics = (groupId, level) =>
+  withArgsCache((g, l) => `classroom_topics_${g}_${l || ''}`, api.getClassroomTopics)(groupId, level);
 
-export const listClassrooms = (level, class_name, topic_id) =>
-  withArgsCache((l, c, t) => `classroom_list_${l}_${c}_${t || ''}`, api.listClassrooms)(level, class_name, topic_id);
+export const listClassrooms = (unitId, groupId) =>
+  withArgsCache((u, g) => `classroom_list_${u}_${g || ''}`, api.listClassrooms)(unitId, groupId);
 
 export const getLiveClassroomFeed = () =>
   withCache('classroom_live_feed', api.getLiveClassroomFeed)();
@@ -168,14 +168,14 @@ export const getClassroomParticipants = (room_id) =>
 export const getTutorStatus = () =>
   api.getTutorStatus();
 
-export const startQuizSession = (level, topic, blockNumber, state = {}) =>
-  api.startQuizSession(level, topic, blockNumber, state);
+export const startQuizSession = (unitId, blockNumber, state = {}) =>
+  api.startQuizSession(unitId, blockNumber, state);
 
-export const trackTabSwitch = (level, topic, blockNumber) =>
-  api.trackTabSwitch(level, topic, blockNumber);
+export const trackTabSwitch = (unitId, blockNumber) =>
+  api.trackTabSwitch(unitId, blockNumber);
 
-export const submitQuizWithSession = (level, topic, blockNumber, answers, timeTaken) =>
-  api.submitQuizWithSession(level, topic, blockNumber, answers, timeTaken);
+export const submitQuizWithSession = (unitId, blockNumber, answers, timeTaken) =>
+  api.submitQuizWithSession(unitId, blockNumber, answers, timeTaken);
 
 export const getQuizSessionStatus = () =>
   api.getQuizSessionStatus();
@@ -192,7 +192,7 @@ export const confirmMfa = (code) =>
 export const disableMfa = (userId) =>
   api.disableMfa(userId);
 
-export function invalidateNoteCache(id) { invalidateCache(`note_${id}`); }
+export function invalidateNoteCache(id) { invalidateCache(`note_content_${id}`); }
 export function invalidateChatCache(roomId) { invalidateCache(`chat_${roomId}`); }
 export function invalidateClassroomCache(room_id) {
   invalidateCache(`classroom_room_${room_id}`);
@@ -228,7 +228,6 @@ export {
   getQuizBlock,
   checkDailyRetry,
   checkQuizAnswer,
-  submitQuizBlock,
   addQuizQuestionsBatch,
   getPlatformStats,
   getUserDashboard,
