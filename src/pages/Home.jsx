@@ -46,12 +46,10 @@ export default function Home() {
   const { groups } = useLayout();
   const navigate = useNavigate();
 
-  // General sections
+  // All state variables initialised to safe defaults
   const [sections, setSections] = useState({});
   const [publicStats, setPublicStats] = useState(null);
   const [communityActivity, setCommunityActivity] = useState([]);
-
-  // Flashcard state
   const [flashcards, setFlashcards] = useState([]);
   const [flashcardDecks, setFlashcardDecks] = useState([]);
   const [flashcardShuffled, setFlashcardShuffled] = useState({});
@@ -62,15 +60,11 @@ export default function Home() {
   const [flippedCards, setFlippedCards] = useState({});
   const [flashcardSelectedLevel, setFlashcardSelectedLevel] = useState('');
   const [flashcardDeckProgress, setFlashcardDeckProgress] = useState({});
-
-  // PDF state
   const [pdfs, setPdfs] = useState([]);
   const [pdfLevel, setPdfLevel] = useState('O-Level');
   const [pdfSelectedTopic, setPdfSelectedTopic] = useState(null);
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [previewPdf, setPreviewPdf] = useState(null);
-
-  // Notes state
   const [notesStructure, setNotesStructure] = useState(null);
   const [notesSelectedLevel, setNotesSelectedLevel] = useState(null);
   const [notesSelectedTopic, setNotesSelectedTopic] = useState(null);
@@ -80,37 +74,26 @@ export default function Home() {
   const [notesComments, setNotesComments] = useState([]);
   const [notesCommentInput, setNotesCommentInput] = useState('');
   const [groupedNotes, setGroupedNotes] = useState({});
-
-  // Mood & Community
   const [moodSelected, setMoodSelected] = useState(null);
   const [moodMessage, setMoodMessage] = useState('');
   const [moodSubmitted, setMoodSubmitted] = useState(false);
   const [weeklyChallengeAnswer, setWeeklyChallengeAnswer] = useState(null);
-
-  // Continue learning
   const [continueLearning, setContinueLearning] = useState([]);
   const [streak, setStreak] = useState(0);
-
-  // Chat
   const [chatRoomId, setChatRoomId] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [adminOnline, setAdminOnline] = useState(false);
   const chatBodyRef = useState(null);
-
-  // Contact & Newsletter
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [contactStatus, setContactStatus] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState(null);
-
-  // Slide (if any hero slides from sections)
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const currentYear = new Date().getFullYear();
 
-  // Load sections and public data
   useEffect(() => {
     getSections().then(setSections).catch(() => {});
     getPublicStats().then(setPublicStats).catch(() => {});
@@ -127,14 +110,12 @@ export default function Home() {
     }
   }, [user]);
 
-  // Load level-specific content when groups are available
   useEffect(() => {
-    if (!groups || groups.length === 0) return;
+    if (!groups || !Array.isArray(groups) || groups.length === 0) return;
     const primaryGroup = groups[0];
     loadGroupContent(primaryGroup.id);
   }, [groups]);
 
-  // Auto-slide hero if sections.hero.slides exists
   useEffect(() => {
     if (!sections?.hero?.slides?.length) return;
     const interval = setInterval(() => {
@@ -143,7 +124,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [sections]);
 
-  // Shuffle flashcards when loaded
   useEffect(() => {
     if (flashcards.length > 0) {
       const shuffled = {};
@@ -159,16 +139,13 @@ export default function Home() {
     }
   }, [flashcards]);
 
-  // ─── helpers ──────────────────────────────────────────────────
-
   const loadGroupContent = useCallback(async (groupId) => {
     try {
       const { getUnits } = await import('../api/client');
       const units = await getUnits({ group_id: groupId });
-      if (!units || units.length === 0) return;
+      if (!units || !Array.isArray(units) || units.length === 0) return;
       const unitId = units[0].id;
 
-      // Load all content for the first unit of the primary group
       Promise.all([
         getFlashcards({ unit_id: unitId }),
         getFlashcardDecks({ unit_id: unitId }),
@@ -177,16 +154,15 @@ export default function Home() {
         getPdfsByLevel(unitId),
         getNotesStructure(unitId),
       ]).then(([flashRes, deckRes, knownRes, progRes, pdfRes, notesRes]) => {
-        setFlashcards(flashRes || []);
-        setFlashcardDecks(deckRes || []);
-        setKnownFlashcardIds(knownRes || []);
+        setFlashcards(Array.isArray(flashRes) ? flashRes : []);
+        setFlashcardDecks(Array.isArray(deckRes) ? deckRes : []);
+        setKnownFlashcardIds(Array.isArray(knownRes) ? knownRes : []);
         setFlashcardDeckProgress(progRes || {});
-        setPdfs(pdfRes?.pdfs || []);
-        setNotesStructure(notesRes || []);
+        setPdfs(Array.isArray(pdfRes?.pdfs) ? pdfRes.pdfs : []);
+        setNotesStructure(Array.isArray(notesRes) ? notesRes : []);
 
-        // Group notes by title
         const grouped = {};
-        (notesRes || []).forEach(item => {
+        (Array.isArray(notesRes) ? notesRes : []).forEach(item => {
           const key = item.title || item.slug || 'Untitled';
           if (!grouped[key]) grouped[key] = [];
           grouped[key].push(item);
@@ -205,7 +181,6 @@ export default function Home() {
     return 'var(--clr-cyan)';
   }
 
-  // Flashcard handlers
   function shuffleFlashcards() {
     setFlashcardShuffled(prev => {
       const next = { ...prev };
@@ -229,9 +204,7 @@ export default function Home() {
   }
 
   async function rateFlashcardHandler(cardId, difficulty) {
-    try {
-      await rateFlashcard(cardId, difficulty);
-    } catch (e) { console.error(e); }
+    try { await rateFlashcard(cardId, difficulty); } catch (e) {}
   }
 
   async function checkFlashcardAnswerHandler(cardId, userAnswer) {
@@ -241,9 +214,7 @@ export default function Home() {
   }
 
   async function toggleFlashcardBookmarkHandler(cardId) {
-    try {
-      await toggleFlashcardBookmark(cardId);
-    } catch (e) { console.error(e); }
+    try { await toggleFlashcardBookmark(cardId); } catch (e) {}
   }
 
   function speakText(text) {
@@ -255,12 +226,11 @@ export default function Home() {
     }
   }
 
-  // PDF handlers
   async function fetchPdfsByLevel(level) {
     try {
       const res = await getPdfsByLevel(level);
-      setPdfs(res?.pdfs || []);
-    } catch (e) { console.error(e); }
+      setPdfs(Array.isArray(res?.pdfs) ? res.pdfs : []);
+    } catch (e) {}
   }
 
   function handlePdfPreview(pdf) {
@@ -272,16 +242,15 @@ export default function Home() {
     window.open(pdf.file_url, '_blank');
   }
 
-  // Notes handlers
   async function loadNoteContent(noteId) {
     try {
       const { getNoteContent } = await import('../api/client');
       const content = await getNoteContent(noteId);
       const reactions = await getNoteReactions(noteId);
       const interactions = await getResourceInteractions(noteId);
-      setNotesContent({ ...content, id: noteId });
+      setNotesContent(content);
       setNotesReactions(reactions);
-      setNotesComments(interactions?.comments || []);
+      setNotesComments(Array.isArray(interactions?.comments) ? interactions.comments : []);
     } catch (e) { console.error(e); }
   }
 
@@ -300,29 +269,26 @@ export default function Home() {
       await commentResource(noteId, notesCommentInput);
       setNotesCommentInput('');
       const interactions = await getResourceInteractions(noteId);
-      setNotesComments(interactions?.comments || []);
+      setNotesComments(Array.isArray(interactions?.comments) ? interactions.comments : []);
     } catch (e) { console.error(e); }
   }
 
-  // Mood
   async function handleMoodSubmit() {
     if (!moodSelected) return;
     try {
       await submitMood(moodSelected, moodMessage);
       setMoodSubmitted(true);
-    } catch (e) { console.error(e); }
+    } catch (e) {}
   }
 
-  // Weekly challenge
   async function handleWeeklyChallengeSubmit(i, correct, explanation) {
     if (!user) return;
     setWeeklyChallengeAnswer({ correct: i === correct, explanation });
     try {
       await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), i);
-    } catch (e) { console.error(e); }
+    } catch (e) {}
   }
 
-  // Contact
   async function handleContactSubmit(e) {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) return;
@@ -335,7 +301,6 @@ export default function Home() {
     }
   }
 
-  // Newsletter
   async function handleNewsletterSubmit(e) {
     e.preventDefault();
     if (!newsletterEmail) return;
@@ -348,7 +313,6 @@ export default function Home() {
     }
   }
 
-  // Chat
   async function requestChatRoom() {
     if (!user) return;
     try {
@@ -357,7 +321,7 @@ export default function Home() {
       setChatOpen(true);
       if (res?.room_id) {
         const messages = await getChatMessages(res.room_id);
-        setChatMessages(messages || []);
+        setChatMessages(Array.isArray(messages) ? messages : []);
       }
     } catch (e) { console.error(e); }
   }
@@ -368,7 +332,7 @@ export default function Home() {
       await sendChatMessage(chatRoomId, chatInput);
       setChatInput('');
       const messages = await getChatMessages(chatRoomId);
-      setChatMessages(messages || []);
+      setChatMessages(Array.isArray(messages) ? messages : []);
     } catch (e) { console.error(e); }
   }
 
@@ -376,11 +340,9 @@ export default function Home() {
     try {
       await deleteChatMessage(msgId);
       const messages = await getChatMessages(chatRoomId);
-      setChatMessages(messages || []);
+      setChatMessages(Array.isArray(messages) ? messages : []);
     } catch (e) { console.error(e); }
   }
-
-  // ─── Render ────────────────────────────────────────────────────
 
   return (
     <HomeView
