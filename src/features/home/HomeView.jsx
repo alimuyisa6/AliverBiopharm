@@ -16,6 +16,10 @@ import { NewsletterForm } from './NewsletterForm';
 export default function HomeView(props) {
   const {
     sections,
+    user,
+    navigate,
+    activeLevelName,
+    activeGroupName,
     flashcards,
     flashcardDecks,
     flashcardShuffled,
@@ -59,9 +63,6 @@ export default function HomeView(props) {
     notesComments,
     notesCommentInput,
     groupedNotes,
-    getLevelColor,
-    user,
-    navigate,
     currentYear,
     handleWeeklyChallengeSubmit,
     handleContactSubmit,
@@ -104,16 +105,39 @@ export default function HomeView(props) {
 
   return (
     <div className="home-page">
+      {/* ── Dynamic welcome banner ────────────────── */}
+      {user ? (
+        <section className="section welcome-section">
+          <div className="welcome-banner">
+            <h1 className="welcome-title">
+              Welcome to{activeLevelName && <><br />{activeLevelName}</>}
+            </h1>
+            {activeGroupName && (
+              <p className="welcome-subtitle">
+                You are currently studying <strong>{activeGroupName}</strong>
+              </p>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section className="section welcome-section">
+          <div className="welcome-banner">
+            <h1 className="welcome-title">Welcome to<br />AliverBiopharm</h1>
+            <p className="welcome-subtitle">
+              Explore our comprehensive learning resources across O-Level, A-Level, and Pharmacy.
+            </p>
+          </div>
+        </section>
+      )}
+
       <PlatformCards />
 
-      <StatsGrid
-        stats={{
-          resources_count: publicStats?.resources_count || 0,
-          users_count: publicStats?.users_count || 0,
-          downloads_count: publicStats?.downloads_count || 0,
-          quiz_attempts: publicStats?.quiz_attempts || 0,
-        }}
-      />
+      <StatsGrid stats={{
+        resources_count: publicStats?.resources_count || 0,
+        users_count: publicStats?.users_count || 0,
+        downloads_count: publicStats?.downloads_count || 0,
+        quiz_attempts: publicStats?.quiz_attempts || 0,
+      }} />
 
       <ContinueLearningSection
         continueLearning={continueLearning}
@@ -124,7 +148,7 @@ export default function HomeView(props) {
       <FlashcardSection
         headingTitle={sections?.section_headings?.flashcards_title || 'Study Flashcards'}
         headingSubtitle={sections?.section_headings?.flashcards_subtitle || 'Reinforce your knowledge'}
-        onStartStudy={() => (user ? navigate('/flashcards') : navigate('/login'))}
+        onStartStudy={() => user ? navigate('/flashcards') : navigate('/login')}
         onBrowseDecks={() => navigate('/flashcards')}
         user={user}
         flashcards={flashcards}
@@ -181,7 +205,6 @@ export default function HomeView(props) {
         setNotesSelectedLevel={setNotesSelectedLevel}
         setNotesSelectedTopic={setNotesSelectedTopic}
         setNotesFilterVisible={setNotesFilterVisible}
-        getLevelColor={getLevelColor}
         user={user}
       />
 
