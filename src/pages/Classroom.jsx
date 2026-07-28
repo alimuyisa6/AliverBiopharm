@@ -4,16 +4,16 @@ import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
-import { ClassroomSection as ClassroomSectionComponent } from '../features/classroom/ClassroomSection';
+import { useLayout } from '../contexts/LayoutContext';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
-import { listClassrooms, getClassroomLevels, getClassroomTopics } from '../api/client';
+import { listClassrooms, getUnits } from '../api/client';
 
-const STATUS_META = {
-  live: { icon: 'fa-circle', color: 'var(--clr-green)', label: 'Live' },
-  upcoming: { icon: 'fa-clock', color: 'var(--clr-orange)', label: 'Upcoming' },
-  open_floor: { icon: 'fa-users', color: 'var(--clr-blue)', label: 'Open Floor' },
-  ended: { icon: 'fa-circle-check', color: '#94a3b8', label: 'Ended' },
-  offline: { icon: 'fa-circle', color: '#64748b', label: 'Offline' },
+const STATUS_CLASSES = {
+  live: 'room-status-live',
+  upcoming: 'room-status-upcoming',
+  open_floor: 'room-status-open',
+  ended: 'room-status-ended',
+  offline: 'room-status-offline',
 };
 
 export default function Classroom() {
@@ -22,23 +22,36 @@ export default function Classroom() {
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
   const { level, class_name, showAll } = useLevelFilter();
+  const { groups } = useLayout();
 
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeUnitId, setActiveUnitId] = useState(null);
+
+  // Determine the active unit id from the user's active group, or fallback to the first group's first unit
+  useEffect(() => {
+    if (!groups || !Array.isArray(groups) || groups.length === 0) return;
+    const groupId = user?.profile?.active_group_id || groups[0]?.id;
+    if (!groupId) return;
+    getUnits({ group_id: groupId }).then(units => {
+      if (units && units.length > 0) {
+        setActiveUnitId(units[0].id);
+      }
+    }).catch(() => {});
+  }, [groups, user]);
 
   useEffect(() => {
-    if (!isReady || !access.canAccess || access.isPending) return;
+    if (!isReady || !access.canAccess || access.isPending || !activeUnitId) return;
     fetchRooms();
-  }, [isReady, access.canAccess, access.isPending, level, class_name]);
+  }, [isReady, access.canAccess, access.isPending, activeUnitId]);
 
   const fetchRooms = async () => {
     setLoading(true);
     setError(null);
     try {
-      const effectiveLevel = showAll ? null : level;
-      const effectiveClass = showAll ? null : class_name;
-      const data = await listClassrooms(effectiveLevel, effectiveClass, null);
+      // Use unit_id for classroom listing (new endpoint)
+      const data = await listClassrooms(activeUnitId, null);
       setRooms(data || []);
     } catch (err) {
       setError('Failed to load classrooms');
@@ -103,7 +116,7 @@ export default function Classroom() {
       {!loading && !error && rooms.length > 0 && (
         <div className="classroom-grid">
           {rooms.map(room => {
-            const status = STATUS_META[room.status] || STATUS_META.offline;
+            const statusClass = STATUS_CLASSES[room.status] || 'room-status-offline';
             const isPremium = room.room_type === 'premium';
             const isHard = room.room_type === 'hard_topic';
             return (
@@ -127,25 +140,25 @@ export default function Classroom() {
                     </span>
                   )}
                 </div>
-                <div className="room-status-bar" style={{ backgroundColor: status.color }}>
-                  <i className={`fa-solid ${status.icon}`}></i>
-                  <span>{status.label}</span>
+                <div className={`room-status-bar ${statusClass}`}>
+                  <i className={`fa-solid ${STATUS_META_ICONS[room.status] || 'fa-circle'}`}></i>
+                  <span>{STATUS_META_LABELS[room.status] || 'Offline'}</span>
                 </div>
                 <div className="room-body">
                   <h3 className="room-title">{room.title}</h3>
                   <div className="room-meta">
                     <span>
-                      <i className="fa-solid fa-book" style={{ color: 'var(--clr-cyan)' }}></i>
+                      <i className="fa-solid fa-book room-meta-icon-cyan"></i>
                       {room.topic_name}
                     </span>
                     <span>
-                      <i className="fa-solid fa-user-graduate" style={{ color: 'var(--clr-blue)' }}></i>
+                      <i className="fa-solid fa-user-graduate room-meta-icon-blue"></i>
                       {room.class_name}
                     </span>
                   </div>
                   <div className="room-stats">
                     <span>
-                      <i className="fa-solid fa-users" style={{ color: 'var(--clr-purple)' }}></i>
+                      <i className="fa-solid fa-users room-stats-icon-purple"></i>
                       {room.participant_count || 0} participants
                     </span>
                     {room.room_type !== 'free' && (
@@ -174,7 +187,7 @@ export default function Classroom() {
                   )}
                   {room.status === 'upcoming' && room.scheduled_at && (
                     <button className="btn-secondary" disabled>
-                      <i className="fa-solid fa-clock" style={{ color: 'var(--clr-orange)' }}></i>
+                      <i className="fa-solid fa-clock room-status-icon-orange"></i>
                       {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </button>
                   )}
@@ -202,3 +215,20 @@ export default function Classroom() {
     </div>
   );
 }
+
+// Icon and label maps for status
+const STATUS_META_ICONS = {
+  live: 'fa-circle',
+  upcoming: 'fa-clock',
+  open_floor: 'fa-users',
+  ended: 'fa-circle-check',
+  offline: 'fa-circle',
+};
+
+const STATUS_META_LABELS = {
+  live: 'Live',
+  upcoming: 'Upcoming',
+  open_floor: 'Open Floor',
+  ended: 'Ended',
+  offline: 'Offline',
+};
