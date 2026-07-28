@@ -1,17 +1,31 @@
 import { getCached, setCache, invalidateCache, invalidateCacheByPattern } from '../utils/cache';
 import * as api from './client';
 
+// Tracks promises for requests currently in flight, keyed the same way as the cache.
+// Prevents duplicate network calls when the same key is requested again before
+// the first call resolves (e.g. StrictMode double-invoke, multiple mounting
+// components wanting the same data, a fast re-render re-firing an effect).
+const inFlight = new Map();
+
 function withCache(key, fetcher, cacheEnabled = true) {
   return async (...args) => {
     if (cacheEnabled) {
       const cached = getCached(key);
       if (cached) return cached;
+      if (inFlight.has(key)) return inFlight.get(key);
     }
-    const data = await fetcher(...args);
-    if (cacheEnabled && data) {
-      setCache(key, data);
-    }
-    return data;
+
+    const promise = fetcher(...args)
+      .then((data) => {
+        if (cacheEnabled && data) setCache(key, data);
+        return data;
+      })
+      .finally(() => {
+        inFlight.delete(key);
+      });
+
+    if (cacheEnabled) inFlight.set(key, promise);
+    return promise;
   };
 }
 
@@ -21,12 +35,20 @@ function withArgsCache(keyFn, fetcher, cacheEnabled = true) {
     if (cacheEnabled) {
       const cached = getCached(key);
       if (cached) return cached;
+      if (inFlight.has(key)) return inFlight.get(key);
     }
-    const data = await fetcher(...args);
-    if (cacheEnabled && data) {
-      setCache(key, data);
-    }
-    return data;
+
+    const promise = fetcher(...args)
+      .then((data) => {
+        if (cacheEnabled && data) setCache(key, data);
+        return data;
+      })
+      .finally(() => {
+        inFlight.delete(key);
+      });
+
+    if (cacheEnabled) inFlight.set(key, promise);
+    return promise;
   };
 }
 
