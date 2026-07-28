@@ -1,13 +1,11 @@
  import React from 'react';
 import { Link } from 'react-router-dom';
 
-export function ContinueLearningSection({ continueLearning, user }) {
-  if (!user || !continueLearning) return null;
+export function ContinueLearningSection({ continueLearning, user, streak }) {
+  if (!user) return null;
 
-  const views = continueLearning.views || [];
-  const favorites = continueLearning.favorites || [];
-  const streak = continueLearning.streak || 0;
-  const hasContent = views.length > 0 || favorites.length > 0 || streak > 0;
+  const views = Array.isArray(continueLearning) ? continueLearning : [];
+  const hasContent = views.length > 0 || streak > 0;
   if (!hasContent) return null;
 
   return (
@@ -28,19 +26,10 @@ export function ContinueLearningSection({ continueLearning, user }) {
             <strong>Recent Views</strong>
             <ul className="continue-list">
               {views.filter(Boolean).map(v => (
-                <li key={v.resource_id}>
-                  <Link to={`/notes/read?id=${v.resource_id}`} className="continue-link">{v.title}</Link>
+                <li key={v.note_id}>
+                  <Link to={`/notes/read?id=${v.note_id}`} className="continue-link">{v.title}</Link>
+                  {v.topic && <span className="continue-topic"> · {v.topic}</span>}
                 </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {favorites.length > 0 && (
-          <div className="continue-card">
-            <strong>Favorites</strong>
-            <ul className="continue-list">
-              {favorites.slice(0, 3).filter(Boolean).map(f => (
-                <li key={f.resource_id}>{f.title}</li>
               ))}
             </ul>
           </div>
