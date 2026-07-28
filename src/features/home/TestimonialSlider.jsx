@@ -1,5 +1,4 @@
-// features/home/TestimonialSlider.jsx
-import React from 'react';
+ import React from 'react';
 
 export function TestimonialSlider({ quotes }) {
   if (!quotes || quotes.length === 0) return null;
@@ -12,7 +11,7 @@ export function TestimonialSlider({ quotes }) {
         Real results from learners who transformed how they study Biology and Pharmacy.
       </p>
       <div className="testimonial-slider">
-        <blockquote className="testimonial-quote">"{quotes[0].text}"</blockquote>
+        <blockquote className="testimonial-quote">&ldquo;{quotes[0].text}&rdquo;</blockquote>
         <cite className="testimonial-author">— {quotes[0].author}</cite>
       </div>
     </section>
