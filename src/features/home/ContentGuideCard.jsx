@@ -19,16 +19,10 @@ const LEVEL_ICONS = {
   'Pharmacy': FaCapsules
 };
 
-const LEVEL_COLORS = {
-  'O-Level': '#0a7e7e',
-  'A-Level': '#b8873a',
-  'Pharmacy': '#10b981'
-};
-
 const LEVEL_DISPLAY = {
   'O-Level': 'Secondary School Biology',
   'A-Level': 'Advanced Secondary Biology',
-  'Pharmacy': 'Pharmacy & Pharmaceutical Sciences'
+  'Pharmacy': 'Pharmacy &amp; Pharmaceutical Sciences'
 };
 
 export function ContentGuideCard({ user }) {
@@ -42,7 +36,6 @@ export function ContentGuideCard({ user }) {
         setLoading(false);
         return;
       }
-
       try {
         const data = await getContentGuideImage(
           user.profile.track,
@@ -55,7 +48,6 @@ export function ContentGuideCard({ user }) {
         setLoading(false);
       }
     };
-
     fetchImage();
   }, [user?.profile?.track, user?.profile?.class_name]);
 
@@ -64,20 +56,18 @@ export function ContentGuideCard({ user }) {
   const level = user.profile.track;
   const className = user.profile.class_name || 'Not set';
   const displayName = LEVEL_DISPLAY[level] || level;
-  const color = imageData?.fallback_color || LEVEL_COLORS[level] || '#0a7e7e';
   const Icon = LEVEL_ICONS[level] || FaBookOpen;
   const classLabel = level === 'Pharmacy' ? 'Programme' : 'Class';
-
   const hasImage = imageData?.image_url && !imageError;
 
   return (
     <section className="content-guide-section">
-      <div className="content-guide-card" style={{ borderColor: color }}>
+      <div className="content-guide-card">
         <div className="content-guide-grid">
           <div className="content-guide-visual">
             {loading ? (
               <div className="content-guide-loading">
-                <FaSpinner className="icon-spin" style={{ color }} />
+                <FaSpinner className="icon-spin" />
               </div>
             ) : hasImage ? (
               <img
@@ -88,11 +78,8 @@ export function ContentGuideCard({ user }) {
                 onError={() => setImageError(true)}
               />
             ) : (
-              <div
-                className="content-guide-image-fallback"
-                style={{ backgroundColor: `${color}15` }}
-              >
-                <Icon className="content-guide-fallback-icon" style={{ color }} />
+              <div className="content-guide-image-fallback">
+                <Icon className="content-guide-fallback-icon" />
                 <span className="content-guide-fallback-text">
                   {level} · {className}
                 </span>
@@ -105,7 +92,7 @@ export function ContentGuideCard({ user }) {
 
           <div className="content-guide-content">
             <div className="content-guide-header">
-              <div className="content-guide-level-badge" style={{ backgroundColor: color }}>
+              <div className="content-guide-level-badge">
                 <Icon className="content-guide-icon" />
                 <span>{level}</span>
               </div>
@@ -115,12 +102,12 @@ export function ContentGuideCard({ user }) {
             <div className="content-guide-body">
               <div className="content-guide-info">
                 <div className="content-guide-row">
-                  <FaGraduationCap className="content-guide-row-icon" style={{ color }} />
+                  <FaGraduationCap className="content-guide-row-icon" />
                   <span className="content-guide-label">Current {classLabel}:</span>
                   <span className="content-guide-value">{className}</span>
                 </div>
                 <div className="content-guide-row">
-                  <FaBookOpen className="content-guide-row-icon" style={{ color }} />
+                  <FaBookOpen className="content-guide-row-icon" />
                   <span className="content-guide-label">Content Available:</span>
                   <span className="content-guide-value">All {level} materials for {className}</span>
                 </div>
@@ -128,12 +115,12 @@ export function ContentGuideCard({ user }) {
 
               <div className="content-guide-actions">
                 <div className="content-guide-search-hint">
-                  <FaMagnifyingGlass className="content-guide-search-icon" style={{ color }} />
+                  <FaMagnifyingGlass className="content-guide-search-icon" />
                   <span>
                     To see content for a different {classLabel.toLowerCase()}, update your profile
                   </span>
                 </div>
-                <Link to="/profile" className="content-guide-btn" style={{ backgroundColor: color }}>
+                <Link to="/profile" className="content-guide-btn">
                   <FaUserGear />
                   Change {classLabel}
                   <FaArrowRight />
