@@ -2,7 +2,6 @@
 import { Link } from 'react-router-dom';
 import { getSections } from '../api/sections';
 import { FaEnvelope, FaLocationDot, FaLinkedinIn, FaXTwitter, FaInstagram, FaGlobe } from 'react-icons/fa6';
-import '../styles/About.css';
 
 function RichText({ text }) {
   const TOKEN_RE = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})|((https?:\/\/)[^\s<>"']+)/g;
@@ -19,7 +18,7 @@ function RichText({ text }) {
         href={isEmail ? `mailto:${raw}` : raw}
         target={isEmail ? undefined : '_blank'}
         rel={isEmail ? undefined : 'noopener noreferrer'}
-        style={{ color: 'var(--clr-cyan)', textDecoration: 'underline', wordBreak: 'break-all' }}
+        className="inline-link"
       >
         {raw}
       </a>
@@ -55,7 +54,7 @@ function TeamCard({ member }) {
             {Object.entries(member.social).map(([platform, url]) => {
               const Icon = socialIcons[platform] || FaGlobe;
               return (
-                <a key={platform} href={url} target="_blank" rel="noopener noreferrer" aria-label={platform}>
+                <a key={platform} href={url} target="_blank" rel="noopener noreferrer" aria-label={platform} className="team-social-link">
                   <Icon />
                 </a>
               );
@@ -98,16 +97,14 @@ export default function AboutPage() {
     <>
       {page?.hero && (
         <section
-          className="about-hero"
+          className={`about-hero${page.hero.image_url ? ' about-hero-bg' : ''}`}
           style={page.hero.image_url ? {
-            backgroundImage: `linear-gradient(rgba(10,20,35,0.85), rgba(10,20,35,0.9)), url(${page.hero.image_url})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          } : {}}
+            backgroundImage: `linear-gradient(rgba(10,20,35,0.85), rgba(10,20,35,0.9)), url(${page.hero.image_url})`
+          } : undefined}
         >
           <div className="about-hero-content">
-            <h1>{page.hero.heading || page.title}</h1>
-            {page.hero.subtext && <p>{page.hero.subtext}</p>}
+            <h1 className="about-hero-title">{page.hero.heading || page.title}</h1>
+            {page.hero.subtext && <p className="about-hero-subtext">{page.hero.subtext}</p>}
           </div>
         </section>
       )}
@@ -120,7 +117,7 @@ export default function AboutPage() {
 
           {page?.mission && (
             <div className="about-block">
-              {page.mission.heading && <h2>{page.mission.heading}</h2>}
+              {page.mission.heading && <h2 className="about-block-heading">{page.mission.heading}</h2>}
               {page.mission.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -129,7 +126,7 @@ export default function AboutPage() {
 
           {page?.vision && (
             <div className="about-block">
-              {page.vision.heading && <h2>{page.vision.heading}</h2>}
+              {page.vision.heading && <h2 className="about-block-heading">{page.vision.heading}</h2>}
               {page.vision.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -138,7 +135,7 @@ export default function AboutPage() {
 
           {page?.story && (
             <div className="about-block">
-              {page.story.heading && <h2>{page.story.heading}</h2>}
+              {page.story.heading && <h2 className="about-block-heading">{page.story.heading}</h2>}
               {page.story.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -147,7 +144,7 @@ export default function AboutPage() {
 
           {page?.why_choose_us && (
             <div className="about-block">
-              {page.why_choose_us.heading && <h2>{page.why_choose_us.heading}</h2>}
+              {page.why_choose_us.heading && <h2 className="about-block-heading">{page.why_choose_us.heading}</h2>}
               {page.why_choose_us.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -156,7 +153,7 @@ export default function AboutPage() {
 
           {page?.learning_philosophy && (
             <div className="about-block">
-              {page.learning_philosophy.heading && <h2>{page.learning_philosophy.heading}</h2>}
+              {page.learning_philosophy.heading && <h2 className="about-block-heading">{page.learning_philosophy.heading}</h2>}
               {page.learning_philosophy.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -165,7 +162,7 @@ export default function AboutPage() {
 
           {page?.founders && (
             <div className="about-block">
-              {page.founders.heading && <h2>{page.founders.heading}</h2>}
+              {page.founders.heading && <h2 className="about-block-heading">{page.founders.heading}</h2>}
               {page.founders.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -174,7 +171,7 @@ export default function AboutPage() {
 
           {page?.values && (
             <div className="about-block">
-              {page.values.heading && <h2>{page.values.heading}</h2>}
+              {page.values.heading && <h2 className="about-block-heading">{page.values.heading}</h2>}
               {page.values.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -183,7 +180,7 @@ export default function AboutPage() {
 
           {page?.team?.length > 0 && (
             <div className="about-block">
-              <h2>{page.team_heading || 'Meet Our Team'}</h2>
+              <h2 className="about-block-heading">{page.team_heading || 'Meet Our Team'}</h2>
               <div className="team-grid">
                 {page.team.map((member, idx) => (
                   <TeamCard key={idx} member={member} />
@@ -194,7 +191,7 @@ export default function AboutPage() {
 
           {page?.contributors?.length > 0 && (
             <div className="about-block">
-              <h2>{page.contributors_heading || 'Contributors & Reviewers'}</h2>
+              <h2 className="about-block-heading">{page.contributors_heading || 'Contributors & Reviewers'}</h2>
               <div className="contributors-grid">
                 {page.contributors.map((contributor, idx) => (
                   <ContributorCard key={idx} contributor={contributor} />
@@ -205,7 +202,7 @@ export default function AboutPage() {
 
           {page?.commitment_to_quality && (
             <div className="about-block">
-              {page.commitment_to_quality.heading && <h2>{page.commitment_to_quality.heading}</h2>}
+              {page.commitment_to_quality.heading && <h2 className="about-block-heading">{page.commitment_to_quality.heading}</h2>}
               {page.commitment_to_quality.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -214,7 +211,7 @@ export default function AboutPage() {
 
           {page?.future && (
             <div className="about-block">
-              {page.future.heading && <h2>{page.future.heading}</h2>}
+              {page.future.heading && <h2 className="about-block-heading">{page.future.heading}</h2>}
               {page.future.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -223,7 +220,7 @@ export default function AboutPage() {
 
           {page?.legal && (
             <div className="about-block">
-              {page.legal.heading && <h2>{page.legal.heading}</h2>}
+              {page.legal.heading && <h2 className="about-block-heading">{page.legal.heading}</h2>}
               {page.legal.content.split('\n\n').map((para, i) => (
                 <p key={i}><RichText text={para} /></p>
               ))}
@@ -232,7 +229,7 @@ export default function AboutPage() {
 
           {page?.faq && (
             <div className="about-block">
-              {page.faq.heading && <h2>{page.faq.heading}</h2>}
+              {page.faq.heading && <h2 className="about-block-heading">{page.faq.heading}</h2>}
               <div className="faq-list">
                 {(page.faq.questions || []).map((item, idx) => (
                   <details key={idx} className="faq-item">
@@ -246,8 +243,8 @@ export default function AboutPage() {
 
           {page?.contact && (
             <div className="about-block about-contact">
-              {page.contact.heading && <h2>{page.contact.heading}</h2>}
-              {page.contact.subtext && <p style={{ marginBottom: '20px' }}><RichText text={page.contact.subtext} /></p>}
+              {page.contact.heading && <h2 className="about-block-heading">{page.contact.heading}</h2>}
+              {page.contact.subtext && <p className="about-contact-subtext"><RichText text={page.contact.subtext} /></p>}
               <div className="about-contact-details">
                 {page.contact.email && (
                   <a href={`mailto:${page.contact.email}`} className="about-contact-item">
@@ -278,23 +275,13 @@ export default function AboutPage() {
           )}
 
           {page?.call_to_action && (
-            <div className="about-block about-cta" style={{ textAlign: 'center', background: 'var(--clr-navy-card)', border: '1px solid var(--clr-border-glow)', borderRadius: '12px', padding: '40px 20px', marginTop: '40px' }}>
-              <h2>{page.call_to_action.heading || 'Start Your Learning Journey'}</h2>
-              {page.call_to_action.content && <p style={{ maxWidth: '600px', margin: '16px auto' }}><RichText text={page.call_to_action.content} /></p>}
+            <div className="about-block about-cta">
+              <h2 className="about-block-heading">{page.call_to_action.heading || 'Start Your Learning Journey'}</h2>
+              {page.call_to_action.content && <p className="about-cta-text"><RichText text={page.call_to_action.content} /></p>}
               {page.call_to_action.button_text && (
                 <Link
                   to={page.call_to_action.button_url || '/register'}
-                  style={{
-                    display: 'inline-block',
-                    marginTop: '16px',
-                    padding: '14px 32px',
-                    background: 'var(--clr-cyan)',
-                    color: 'var(--clr-navy)',
-                    borderRadius: '8px',
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                    fontSize: '1rem'
-                  }}
+                  className="about-cta-button"
                 >
                   {page.call_to_action.button_text}
                 </Link>
