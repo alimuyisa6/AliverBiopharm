@@ -24,6 +24,7 @@ contentguide: new URL('../lib/content-guide.js', import.meta.url).href,
 'profile-picture': new URL('../lib/profile-picture.js', import.meta.url).href,
 'upload': new URL('../lib/upload.js', import.meta.url).href,
 curriculum: new URL('../lib/curriculum.js', import.meta.url).href,
+premium: new URL('../lib/premium.js', import.meta.url).href,
 };
 
 
