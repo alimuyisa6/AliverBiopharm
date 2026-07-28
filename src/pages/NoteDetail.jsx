@@ -1,25 +1,28 @@
  import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { useLevelFilter } from '../hooks/useLevelFilter';
+import { useLayout } from '../contexts/LayoutContext';
 import {
-  getNoteContent,
-  getNoteReactions,
-  toggleNoteReaction,
-  getResourceInteractions,
-  commentResource,
+  getNoteDetail,
+  getContentDetail,
+  getReactions,
+  toggleReaction,
+  addComment,
+  getComments,
   saveReadingProgress,
   getReadingProgress
 } from '../api/client';
 
 export default function NoteDetail() {
   const { user } = useAuth();
-  const { level, class_name } = useLevelFilter();
+  const { groups } = useLayout();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const subtopicId = searchParams.get('id');
+  const noteId = searchParams.get('id');
+
   const [note, setNote] = useState(null);
-  const [reactions, setReactions] = useState(null);
+  const [breadcrumb, setBreadcrumb] = useState([]);
+  const [reactions, setReactions] = useState({ counts: {}, user: [] });
   const [comments, setComments] = useState([]);
   const [commentInput, setCommentInput] = useState('');
   const [readProgress, setReadProgress] = useState(0);
@@ -29,35 +32,45 @@ export default function NoteDetail() {
   const startTime = useRef(Date.now());
 
   useEffect(() => {
-    if (!subtopicId) {
+    if (!noteId) {
       navigate('/notes');
       return;
     }
     const init = async () => {
       try {
-        const [content, reactionData, interactions] = await Promise.all([
-          getNoteContent(subtopicId),
-          getNoteReactions(subtopicId),
-          getResourceInteractions(subtopicId)
+        const data = await getNoteDetail(noteId);
+        setNote(data);
+        if (data.breadcrumb) setBreadcrumb(data.breadcrumb);
+        else if (data.unit_title) {
+          setBreadcrumb([
+            { label: 'Home', href: '/' },
+            ...(data.unit_title.group_name ? [{ label: data.unit_title.group_name, href: `/group/${data.unit_id}` }] : []),
+            { label: data.unit_title.unit_name, href: null }
+          ]);
+        }
+
+        const [reactionData, commentData] = await Promise.all([
+          getReactions('note', data.id),
+          getComments('note', data.id)
         ]);
-        setNote(content);
         setReactions(reactionData);
-        setComments(interactions?.comments || []);
+        setComments(commentData?.comments || []);
+
         if (user) {
-          const progress = await getReadingProgress(subtopicId);
+          const progress = await getReadingProgress(noteId);
           if (progress?.scroll_position) {
             setTimeout(() => window.scrollTo({ top: progress.scroll_position, behavior: 'smooth' }), 500);
           }
         }
       } catch (err) {
-        document.title = 'ERR: ' + err.message;
+        console.error(err);
       }
     };
     init();
     return () => {
       if (progressTimer.current) clearTimeout(progressTimer.current);
     };
-  }, [subtopicId, navigate, user]);
+  }, [noteId, navigate, user]);
 
   useEffect(() => {
     if (!user || !note) return;
@@ -70,7 +83,7 @@ export default function NoteDetail() {
       progressTimer.current = setTimeout(async () => {
         const timeSpent = Math.round((Date.now() - startTime.current) / 1000);
         try {
-          await saveReadingProgress(subtopicId, pct, scrollTop, timeSpent, pct >= 90);
+          await saveReadingProgress(noteId, pct, scrollTop, timeSpent, pct >= 90);
           setProgressSaved(true);
           setTimeout(() => setProgressSaved(false), 2000);
         } catch (err) {
@@ -80,7 +93,7 @@ export default function NoteDetail() {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [user, note, subtopicId]);
+  }, [user, note, noteId]);
 
   async function handleReaction(reactionType) {
     if (!user) {
@@ -88,8 +101,8 @@ export default function NoteDetail() {
       return;
     }
     try {
-      await toggleNoteReaction(subtopicId, reactionType);
-      const updated = await getNoteReactions(subtopicId);
+      await toggleReaction('note', noteId, reactionType);
+      const updated = await getReactions('note', noteId);
       setReactions(updated);
     } catch (err) {
       console.error(err);
@@ -103,17 +116,17 @@ export default function NoteDetail() {
     }
     if (!commentInput.trim()) return;
     try {
-      await commentResource(subtopicId, commentInput);
+      await addComment('note', noteId, commentInput.trim());
       setCommentInput('');
-      const interactions = await getResourceInteractions(subtopicId);
-      setComments(interactions?.comments || []);
+      const updated = await getComments('note', noteId);
+      setComments(updated?.comments || []);
     } catch (err) {
       console.error(err);
     }
   }
 
   function handleBack() {
-    navigate(`/notes?highlight=${subtopicId}`);
+    navigate(`/notes?highlight=${noteId}`);
   }
 
   return (
@@ -127,49 +140,35 @@ export default function NoteDetail() {
           </button>
           {user && (
             <div className="note-progress-indicator">
-              <i className="fa-solid fa-circle-check" style={{ color: progressSaved ? 'var(--clr-success)' : 'var(--clr-border-glow)' }}></i>
+              <i className={`fa-solid fa-circle-check ${progressSaved ? 'progress-saved' : 'progress-unsaved'}`}></i>
               {readProgress}% read {progressSaved && '· saved'}
             </div>
           )}
         </div>
 
         <div className="breadcrumb note-breadcrumb">
-          <Link to="/">Home</Link>
-          <span>›</span>
-          <Link to="/notes" className="breadcrumb-link">Notes</Link>
-          <span>›</span>
-          {note?.level && (
-            <>
-              <span>{note.level}</span>
-              <span>›</span>
-            </>
-          )}
-          {note?.topic && (
-            <>
-              <span>{note.topic}</span>
-              <span>›</span>
-            </>
-          )}
-          <span className="breadcrumb-current">{note?.title || note?.subtopic_name || 'Note'}</span>
-          {class_name && (
-            <span className="note-class-badge">{class_name}</span>
+          {breadcrumb.map((crumb, i) => (
+            <span key={i}>
+              {crumb.href ? <Link to={crumb.href} className="breadcrumb-link">{crumb.label}</Link> : <span className="breadcrumb-current">{crumb.label}</span>}
+              {i < breadcrumb.length - 1 && <span className="breadcrumb-sep">›</span>}
+            </span>
+          ))}
+          {note?.unit_title?.group_name && (
+            <span className="note-class-badge">{note.unit_title.group_name}</span>
           )}
         </div>
 
         <article ref={contentRef} className="note-article">
           <div className="note-meta-tags">
-            {note?.level && (
-              <span className="note-tag note-tag-level">{note.level}</span>
+            {note?.unit_title?.group_name && (
+              <span className="note-tag note-tag-group">{note.unit_title.group_name}</span>
             )}
-            {note?.topic && (
-              <span className="note-tag note-tag-topic">{note.topic}</span>
-            )}
-            {class_name && (
-              <span className="note-tag note-tag-class">{class_name}</span>
+            {note?.unit_title?.unit_name && (
+              <span className="note-tag note-tag-unit">{note.unit_title.unit_name}</span>
             )}
           </div>
 
-          <h1 className="note-title">{note?.title || note?.subtopic_name}</h1>
+          <h1 className="note-title">{note?.title || note?.unit_title?.unit_name || 'Note'}</h1>
 
           <div
             className="notes-content-container"
@@ -187,11 +186,11 @@ export default function NoteDetail() {
             ].map(({ type, icon, label }) => (
               <button
                 key={type}
-                className="note-reaction-btn"
+                className={`note-reaction-btn ${reactions.user.includes(type) ? 'active' : ''}`}
                 onClick={() => handleReaction(type)}
               >
                 <i className={`fa-regular ${icon}`}></i> {label}
-                <span className="note-reaction-count">{reactions?.counts?.[type] || 0}</span>
+                <span className="note-reaction-count">{reactions.counts?.[type] || 0}</span>
               </button>
             ))}
           </div>
@@ -228,13 +227,13 @@ export default function NoteDetail() {
             {comments.length === 0 ? (
               <p className="note-comments-empty">No comments yet. Be the first to share your thoughts.</p>
             ) : (
-              comments.filter(Boolean).map((c, idx) => (
-                <div key={idx} className="note-comment-item">
+              comments.filter(Boolean).map((c) => (
+                <div key={c.id || c.created_at} className="note-comment-item">
                   <div className="note-comment-header">
                     <strong className="note-comment-author">{c.user_name}</strong>
                     <span className="note-comment-date">{new Date(c.created_at).toLocaleDateString()}</span>
                   </div>
-                  <p className="note-comment-text">{c.comment}</p>
+                  <p className="note-comment-text">{c.body || c.comment}</p>
                 </div>
               ))
             )}
