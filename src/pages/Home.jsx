@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HomeView from '../features/home/HomeView';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,6 +11,7 @@ import {
   submitMood,
   submitContact,
   subscribeNewsletter,
+  submitWeeklyChallenge,
   requestChat,
   getChatMessages,
   sendChatMessage,
@@ -84,7 +85,7 @@ export default function Home() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [adminOnline, setAdminOnline] = useState(false);
-  const chatBodyRef = useState(null);
+  const chatBodyRef = useRef(null);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [contactStatus, setContactStatus] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
