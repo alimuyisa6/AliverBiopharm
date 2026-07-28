@@ -1,4 +1,4 @@
- import { createContext, useContext, useState, useEffect } from 'react';
+ import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { bootstrapPlatform } from '../api/cachedClient';
 
@@ -23,24 +23,59 @@ export function LayoutProvider({ children }) {
       .finally(() => setLoading(false));
   }, [user?.profile?.track]);
 
-  const value = {
-    loading: loading || authLoading,
-    universal: bootstrap?.universal,
-    logo: bootstrap?.universal?.logo_url,
-    platform: bootstrap?.platform,
-    header: bootstrap?.header,
-    footer: bootstrap?.footer,
-    landing: bootstrap?.landing,
-    onboardingConfig: bootstrap?.onboarding_config,
-    groups: bootstrap?.groups || [],
-    level: bootstrap?.level,
-    user,
-    isAuthenticated: !!user,
-    primaryColor: bootstrap?.platform?.primary_color || '#0a7e7e',
-    accentColor: bootstrap?.platform?.accent_color || '#b8873a',
-    fontFamily: bootstrap?.platform?.font_family || 'Inter',
-    levelIcon: bootstrap?.level?.icon || 'fa-seedling',
-  };
+  const value = useMemo(() => {
+    const isReady = !loading && !authLoading;
+    const fallback = {
+      universal: null,
+      logo: null,
+      platform: null,
+      header: {},
+      footer: {},
+      landing: null,
+      onboardingConfig: null,
+      groups: [],
+      level: null,
+      user,
+      isAuthenticated: !!user,
+      primaryColor: '#0a7e7e',
+      accentColor: '#b8873a',
+      fontFamily: 'Inter',
+      levelIcon: 'fa-seedling',
+      navItems: [],
+      navigation: [],
+      socialLinks: [],
+      footerLinks: [],
+    };
 
-  return <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>;
+    if (!isReady || !bootstrap) return fallback;
+
+    return {
+      loading: false,
+      universal: bootstrap.universal,
+      logo: bootstrap.universal?.logo_url,
+      platform: bootstrap.platform,
+      header: bootstrap.header || {},
+      footer: bootstrap.footer || {},
+      landing: bootstrap.landing,
+      onboardingConfig: bootstrap.onboarding_config,
+      groups: bootstrap.groups || [],
+      level: bootstrap.level,
+      user,
+      isAuthenticated: !!user,
+      primaryColor: bootstrap.platform?.primary_color || '#0a7e7e',
+      accentColor: bootstrap.platform?.accent_color || '#b8873a',
+      fontFamily: bootstrap.platform?.font_family || 'Inter',
+      levelIcon: bootstrap.level?.icon || 'fa-seedling',
+      navItems: bootstrap.header?.nav_items || [],
+      navigation: bootstrap.header?.nav_items || [],
+      socialLinks: bootstrap.footer?.social_links || {},
+      footerLinks: bootstrap.footer?.quick_links || [],
+    };
+  }, [bootstrap, loading, authLoading, user]);
+
+  return (
+    <LayoutContext.Provider value={value}>
+      {children}
+    </LayoutContext.Provider>
+  );
 }
