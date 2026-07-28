@@ -30,6 +30,9 @@ function withArgsCache(keyFn, fetcher, cacheEnabled = true) {
   };
 }
 
+export const bootstrapPlatform = (level) =>
+  withCache(`bootstrap_${level}`, () => api.bootstrapPlatform(level))();
+
 export const getAllSiteSections = () =>
   withCache('site_sections', api.getAllSiteSections)();
 
