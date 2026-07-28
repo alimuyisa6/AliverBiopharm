@@ -20,19 +20,14 @@ import {
 } from 'react-icons/fa6';
 
 const TRACKS = [
-  { value: 'O-Level', icon: FaSeedling, label: 'O-Level', description: 'Senior 1 – 4', color: '#0a7e7e' },
-  { value: 'A-Level', icon: FaFlask, label: 'A-Level', description: 'Senior 5 – 6', color: '#b8873a' },
-  { value: 'Pharmacy', icon: FaCapsules, label: 'Pharmacy', description: 'Certificate, Diploma, Degree', color: '#10b981' }
+  { value: 'O-Level', icon: FaSeedling, label: 'O-Level', description: 'Senior 1 – 4', colorClass: 'olevel' },
+  { value: 'A-Level', icon: FaFlask, label: 'A-Level', description: 'Senior 5 – 6', colorClass: 'alevel' },
+  { value: 'Pharmacy', icon: FaCapsules, label: 'Pharmacy', description: 'Certificate, Diploma, Degree', colorClass: 'pharmacy' }
 ];
 
 const ROLE_ICONS = {
   student: FaUserGraduate,
   teacher: FaChalkboardUser
-};
-
-const ROLE_COLORS = {
-  student: '#0a7e7e',
-  teacher: '#b8873a'
 };
 
 export default function OnboardingFlow() {
@@ -49,10 +44,11 @@ export default function OnboardingFlow() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const effectiveTrack = isClassOnly ? user?.profile?.track : track;
+
   useEffect(() => {
-    const targetTrack = isClassOnly ? user.profile.track : track;
-    if (targetTrack) {
-      if (targetTrack === 'Pharmacy') {
+    if (effectiveTrack) {
+      if (effectiveTrack === 'Pharmacy') {
         getPharmacyPrograms()
           .then(data => {
             setClasses((data || []).map(p => ({
@@ -64,7 +60,7 @@ export default function OnboardingFlow() {
           })
           .catch(() => setClasses([]));
       } else {
-        getClassSequence(targetTrack)
+        getClassSequence(effectiveTrack)
           .then(data => {
             setClasses((data || []).map(c => ({
               value: c.class_name,
@@ -75,7 +71,7 @@ export default function OnboardingFlow() {
           .catch(() => setClasses([]));
       }
     }
-  }, [track, isClassOnly, user]);
+  }, [effectiveTrack]);
 
   async function handleFinish() {
     setLoading(true);
@@ -101,11 +97,16 @@ export default function OnboardingFlow() {
     return 100;
   }
 
+  const trackColorClass = TRACKS.find(t => t.value === effectiveTrack)?.colorClass || '';
+
   return (
     <div className="onboarding-page">
       <div className="onboarding-container">
         <div className="onboarding-progress-track">
-          <div className="onboarding-progress-fill" style={{ width: `${progressPct()}%` }} />
+          <div
+            className="onboarding-progress-fill"
+            style={{ '--progress-width': `${progressPct()}%` }}
+          />
         </div>
 
         {!isClassOnly && step === 0 && (
@@ -116,19 +117,14 @@ export default function OnboardingFlow() {
             <div className="onboarding-role-grid">
               {['student', 'teacher'].map((r) => {
                 const Icon = ROLE_ICONS[r];
-                const color = ROLE_COLORS[r];
                 const isSelected = role === r;
                 return (
                   <button
                     key={r}
-                    className={`onboarding-role-btn ${isSelected ? 'selected' : ''}`}
-                    style={{
-                      borderColor: isSelected ? color : 'var(--clr-border)',
-                      backgroundColor: isSelected ? `${color}18` : 'transparent'
-                    }}
+                    className={`onboarding-role-btn ${r} ${isSelected ? 'selected' : ''}`}
                     onClick={() => { setRole(r); setStep(1); }}
                   >
-                    <Icon className="onboarding-role-icon" style={{ color: isSelected ? color : 'var(--clr-text-muted)' }} />
+                    <Icon className="onboarding-role-icon" />
                     <span className="onboarding-role-label">{r.charAt(0).toUpperCase() + r.slice(1)}</span>
                     <span className="onboarding-role-sub">
                       {r === 'student' ? "I'm here to learn" : "I'm here to teach or contribute"}
@@ -152,14 +148,10 @@ export default function OnboardingFlow() {
                 return (
                   <button
                     key={t.value}
-                    className={`onboarding-track-btn ${isSelected ? 'selected' : ''}`}
-                    style={{
-                      borderColor: isSelected ? t.color : 'var(--clr-border)',
-                      backgroundColor: isSelected ? `${t.color}18` : 'transparent'
-                    }}
+                    className={`onboarding-track-btn ${t.colorClass} ${isSelected ? 'selected' : ''}`}
                     onClick={() => { setTrack(t.value); setClassName(null); setStep(2); }}
                   >
-                    <Icon className="onboarding-track-icon" style={{ color: isSelected ? t.color : 'var(--clr-text-muted)' }} />
+                    <Icon className="onboarding-track-icon" />
                     <span className="onboarding-track-label">{t.label}</span>
                     <span className="onboarding-track-sub">{t.description}</span>
                   </button>
@@ -175,34 +167,27 @@ export default function OnboardingFlow() {
         )}
 
         {(isClassOnly || step === 2) && (
-          <div className="onboarding-step">
+          <div className={`onboarding-step track-${trackColorClass}`}>
             <span className="onboarding-step-label">{isClassOnly ? 'Update Your Class' : 'Step 3 of 3'}</span>
             <h1 className="onboarding-step-title">
-              {track === 'Pharmacy' || (isClassOnly && user.profile.track === 'Pharmacy')
-                ? 'Select Your Programme'
-                : 'Select Your Class'}
+              {effectiveTrack === 'Pharmacy' ? 'Select Your Programme' : 'Select Your Class'}
             </h1>
             <p className="onboarding-step-subtitle">
-              {track === 'Pharmacy' || (isClassOnly && user.profile.track === 'Pharmacy')
+              {effectiveTrack === 'Pharmacy'
                 ? 'Which pharmacy programme are you enrolled in?'
-                : `Which ${track || user.profile.track} class are you in?`}
+                : `Which ${effectiveTrack} class are you in?`}
             </p>
             <div className="onboarding-class-grid">
               {classes.map(c => {
                 const Icon = c.icon || FaBookOpen;
                 const isSelected = className === c.value;
-                const trackColor = track === 'Pharmacy' ? '#10b981' : track === 'A-Level' ? '#b8873a' : '#0a7e7e';
                 return (
                   <button
                     key={c.value}
                     className={`onboarding-class-btn ${isSelected ? 'selected' : ''}`}
-                    style={{
-                      borderColor: isSelected ? trackColor : 'var(--clr-border)',
-                      backgroundColor: isSelected ? `${trackColor}18` : 'transparent'
-                    }}
                     onClick={() => setClassName(c.value)}
                   >
-                    <Icon className="onboarding-class-icon" style={{ color: isSelected ? trackColor : 'var(--clr-text-muted)' }} />
+                    <Icon className="onboarding-class-icon" />
                     <span className="onboarding-class-label">{c.label}</span>
                     {c.description && (
                       <span className="onboarding-class-sub">{c.description}</span>
@@ -222,10 +207,6 @@ export default function OnboardingFlow() {
                 className="onboarding-btn-primary"
                 onClick={handleFinish}
                 disabled={!className || loading}
-                style={{
-                  opacity: (!className || loading) ? 0.5 : 1,
-                  cursor: (!className || loading) ? 'not-allowed' : 'pointer'
-                }}
               >
                 {loading ? (
                   <>
