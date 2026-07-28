@@ -1,4 +1,4 @@
-import React from 'react';
+ import React from 'react';
 import { useLayout } from '../../contexts/LayoutContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +6,7 @@ export function PlatformCards() {
   const { groups } = useLayout();
   const navigate = useNavigate();
 
-  if (!groups || groups.length === 0) return null;
+  if (!groups || !Array.isArray(groups) || groups.length === 0) return null;
 
   return (
     <section className="platform-cards-section">
