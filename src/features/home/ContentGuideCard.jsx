@@ -22,7 +22,7 @@ const LEVEL_ICONS = {
 const LEVEL_DISPLAY = {
   'O-Level': 'Secondary School Biology',
   'A-Level': 'Advanced Secondary Biology',
-  'Pharmacy': 'Pharmacy &amp; Pharmaceutical Sciences'
+  'Pharmacy': 'Pharmacy & Pharmaceutical Sciences'
 };
 
 export function ContentGuideCard({ user }) {
