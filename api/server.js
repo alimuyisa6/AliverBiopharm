@@ -1,34 +1,46 @@
- import { setCorsHeaders, generateCsrfToken, getClientIp } from '../lib/core.js';
-import { enforceSecurityHeaders, createAuthenticatedContext, enforceCsrf, rateLimiter, sanitizeError, SecurityError } from '../lib/security-middleware.js';
+  import {
+  setCorsHeaders,
+  generateCsrfToken,
+  getClientIp
+} from '../lib/core.js';
+
+import {
+  enforceSecurityHeaders,
+  createAuthenticatedContext,
+  enforceCsrf,
+  rateLimiter,
+  sanitizeError,
+  SecurityError
+} from '../lib/security-middleware.js';
 
 const MODULE_MAP = {
-  auth:              new URL('./lib/auth.js', import.meta.url).href,
-  admin:             new URL('./lib/admin.js', import.meta.url).href,
-  chat:              new URL('./lib/chat.js', import.meta.url).href,
-  classroom:         new URL('./lib/classroom.js', import.meta.url).href,
-  community:         new URL('./lib/community.js', import.meta.url).href,
-  contact:           new URL('./lib/contact.js', import.meta.url).href,
-  content:           new URL('./lib/content.js', import.meta.url).href,
-  contentguide:      new URL('./lib/content-guide.js', import.meta.url).href,
-  curriculum:        new URL('./lib/curriculum.js', import.meta.url).href,
-  flashcards:        new URL('./lib/flashcards.js', import.meta.url).href,
-  glossary:          new URL('./lib/glossary.js', import.meta.url).href,
-  interactions:      new URL('./lib/interactions.js', import.meta.url).href,
-  lab:               new URL('./lib/lab.js', import.meta.url).href,
-  level:             new URL('./lib/level.js', import.meta.url).href,
-  notes:             new URL('./lib/notes.js', import.meta.url).href,
-  'past-papers':     new URL('./lib/past-papers.js', import.meta.url).href,
-  platform:          new URL('./lib/platform.js', import.meta.url).href,
-  premium:           new URL('./lib/premium.js', import.meta.url).href,
-  profile:           new URL('./lib/profile.js', import.meta.url).href,
-  'profile-picture': new URL('./lib/profile-picture.js', import.meta.url).href,
-  quiz:              new URL('./lib/quiz.js', import.meta.url).href,
-  recall:            new URL('./lib/recall.js', import.meta.url).href,
-  resources:         new URL('./lib/resources.js', import.meta.url).href,
-  search:            new URL('./lib/search.js', import.meta.url).href,
-  site:              new URL('./lib/site.js', import.meta.url).href,
-  upload:            new URL('./lib/upload.js', import.meta.url).href,
-  'weekly-challenge':new URL('./lib/weekly-challenge.js', import.meta.url).href,
+  auth:              new URL('../lib/auth.js', import.meta.url).href,
+  admin:             new URL('../lib/admin.js', import.meta.url).href,
+  chat:              new URL('../lib/chat.js', import.meta.url).href,
+  classroom:         new URL('../lib/classroom.js', import.meta.url).href,
+  community:         new URL('../lib/community.js', import.meta.url).href,
+  contact:           new URL('../lib/contact.js', import.meta.url).href,
+  content:           new URL('../lib/content.js', import.meta.url).href,
+  contentguide:      new URL('../lib/content-guide.js', import.meta.url).href,
+  curriculum:        new URL('../lib/curriculum.js', import.meta.url).href,
+  flashcards:        new URL('../lib/flashcards.js', import.meta.url).href,
+  glossary:          new URL('../lib/glossary.js', import.meta.url).href,
+  interactions:      new URL('../lib/interactions.js', import.meta.url).href,
+  lab:               new URL('../lib/lab.js', import.meta.url).href,
+  level:             new URL('../lib/level.js', import.meta.url).href,
+  notes:             new URL('../lib/notes.js', import.meta.url).href,
+  'past-papers':     new URL('../lib/past-papers.js', import.meta.url).href,
+  platform:          new URL('../lib/platform.js', import.meta.url).href,
+  premium:           new URL('../lib/premium.js', import.meta.url).href,
+  profile:           new URL('../lib/profile.js', import.meta.url).href,
+  'profile-picture': new URL('../lib/profile-picture.js', import.meta.url).href,
+  quiz:              new URL('../lib/quiz.js', import.meta.url).href,
+  recall:            new URL('../lib/recall.js', import.meta.url).href,
+  resources:         new URL('../lib/resources.js', import.meta.url).href,
+  search:            new URL('../lib/search.js', import.meta.url).href,
+  site:              new URL('../lib/site.js', import.meta.url).href,
+  upload:            new URL('../lib/upload.js', import.meta.url).href,
+  'weekly-challenge':new URL('../lib/weekly-challenge.js', import.meta.url).href,
 };
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
