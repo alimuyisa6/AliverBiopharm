@@ -1,7 +1,9 @@
-// features/home/FaqAccordion.jsx
-import React from 'react';
+ import React, { useState } from 'react';
 
 export function FaqAccordion({ items }) {
+  const [activeIndex, setActiveIndex] = useState(null);
+  if (!items || !Array.isArray(items)) return null;
+
   return (
     <section id="faq" className="section reveal">
       <span className="sec-label">FAQ</span>
@@ -10,9 +12,12 @@ export function FaqAccordion({ items }) {
         Straightforward answers about our platform, resources, tools, and membership options.
       </p>
       <div className="faq-list">
-        {(items || []).filter(Boolean).map((item, idx) => (
-          <div key={idx} className="faq-item">
-            <button className="faq-question" onClick={e => e.currentTarget.parentElement.classList.toggle('active')}>
+        {items.filter(Boolean).map((item, idx) => (
+          <div key={idx} className={`faq-item${activeIndex === idx ? ' active' : ''}`}>
+            <button
+              className="faq-question"
+              onClick={() => setActiveIndex(activeIndex === idx ? null : idx)}
+            >
               <span>{item.question}</span>
               <span className="faq-plus">+</span>
             </button>
