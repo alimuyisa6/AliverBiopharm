@@ -1,6 +1,6 @@
- import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { getAllSiteSections } from '../api/cachedClient';
+ import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { bootstrapPlatform } from '../api/cachedClient';
 
 const LayoutContext = createContext(null);
 
@@ -11,49 +11,35 @@ export function useLayout() {
 }
 
 export function LayoutProvider({ children }) {
-  const [sections, setSections] = useState(null);
-  const [sectionsLoading, setSectionsLoading] = useState(true);
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
-
-  const { user, loading: authLoading, refresh: refreshUser } = useAuth();
-
-  const toggleTheme = useCallback(() => {
-    setTheme(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', next);
-      return next;
-    });
-  }, []);
+  const [bootstrap, setBootstrap] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    getAllSiteSections()
-      .then(setSections)
+    const level = user?.profile?.track || 'O-Level';
+    bootstrapPlatform(level)
+      .then(data => setBootstrap(data))
       .catch(() => {})
-      .finally(() => setSectionsLoading(false));
-  }, []);
-
-  useEffect(() => {
-    document.body.classList.toggle('dark-mode', theme === 'dark');
-    document.body.classList.toggle('light-mode', theme !== 'dark');
-  }, [theme]);
+      .finally(() => setLoading(false));
+  }, [user?.profile?.track]);
 
   const value = {
-    sections,
+    loading: loading || authLoading,
+    universal: bootstrap?.universal,
+    logo: bootstrap?.universal?.logo_url,
+    platform: bootstrap?.platform,
+    header: bootstrap?.header,
+    footer: bootstrap?.footer,
+    landing: bootstrap?.landing,
+    onboardingConfig: bootstrap?.onboarding_config,
+    groups: bootstrap?.groups || [],
+    level: bootstrap?.level,
     user,
-    loading: sectionsLoading || authLoading,
-    authLoading,
-    theme,
-    toggleTheme,
-    refreshUser,
     isAuthenticated: !!user,
-    logo: sections?.site_config?.logo_url,
-    siteName: sections?.site_config?.site_name || 'AliverBiopharm',
-    navigation: sections?.navigation?.links || [],
-    footer: sections?.footer || { social_links: [], columns: [] },
+    primaryColor: bootstrap?.platform?.primary_color || '#0a7e7e',
+    accentColor: bootstrap?.platform?.accent_color || '#b8873a',
+    fontFamily: bootstrap?.platform?.font_family || 'Inter',
+    levelIcon: bootstrap?.level?.icon || 'fa-seedling',
   };
 
   return <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>;
