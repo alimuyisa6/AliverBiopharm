@@ -1,4 +1,4 @@
- import { useState, useEffect, useCallback } from 'react';
+ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HomeView from '../features/home/HomeView';
 import { useAuth } from '../contexts/AuthContext';
@@ -43,13 +43,15 @@ function shuffleArray(arr) {
 
 export default function Home() {
   const { user } = useAuth();
-  const { groups } = useLayout();
+  const { level, groups } = useLayout();
   const navigate = useNavigate();
 
-  // All state variables initialised to safe defaults
+  // ── General state ─────────────────────────────────
   const [sections, setSections] = useState({});
   const [publicStats, setPublicStats] = useState(null);
   const [communityActivity, setCommunityActivity] = useState([]);
+
+  // ── Flashcard state ──────────────────────────────
   const [flashcards, setFlashcards] = useState([]);
   const [flashcardDecks, setFlashcardDecks] = useState([]);
   const [flashcardShuffled, setFlashcardShuffled] = useState({});
@@ -60,11 +62,15 @@ export default function Home() {
   const [flippedCards, setFlippedCards] = useState({});
   const [flashcardSelectedLevel, setFlashcardSelectedLevel] = useState('');
   const [flashcardDeckProgress, setFlashcardDeckProgress] = useState({});
+
+  // ── PDF state ─────────────────────────────────────
   const [pdfs, setPdfs] = useState([]);
   const [pdfLevel, setPdfLevel] = useState('O-Level');
   const [pdfSelectedTopic, setPdfSelectedTopic] = useState(null);
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [previewPdf, setPreviewPdf] = useState(null);
+
+  // ── Notes state ───────────────────────────────────
   const [notesStructure, setNotesStructure] = useState(null);
   const [notesSelectedLevel, setNotesSelectedLevel] = useState(null);
   const [notesSelectedTopic, setNotesSelectedTopic] = useState(null);
@@ -74,26 +80,42 @@ export default function Home() {
   const [notesComments, setNotesComments] = useState([]);
   const [notesCommentInput, setNotesCommentInput] = useState('');
   const [groupedNotes, setGroupedNotes] = useState({});
+
+  // ── Mood & Community ──────────────────────────────
   const [moodSelected, setMoodSelected] = useState(null);
   const [moodMessage, setMoodMessage] = useState('');
   const [moodSubmitted, setMoodSubmitted] = useState(false);
   const [weeklyChallengeAnswer, setWeeklyChallengeAnswer] = useState(null);
+
+  // ── Continue learning ─────────────────────────────
   const [continueLearning, setContinueLearning] = useState([]);
   const [streak, setStreak] = useState(0);
+
+  // ── Chat ──────────────────────────────────────────
   const [chatRoomId, setChatRoomId] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [adminOnline, setAdminOnline] = useState(false);
   const chatBodyRef = useState(null);
+
+  // ── Contact & Newsletter ──────────────────────────
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [contactStatus, setContactStatus] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
 
+  const [currentSlide, setCurrentSlide] = useState(0);
   const currentYear = new Date().getFullYear();
 
+  // Derive active group name from user profile & groups
+  const activeGroupName = useMemo(() => {
+    if (!user?.profile?.active_group_id || !groups?.length) return null;
+    const found = groups.find(g => g.id === user.profile.active_group_id);
+    return found ? found.name : null;
+  }, [user, groups]);
+
+  // ── Effects ───────────────────────────────────────
   useEffect(() => {
     getSections().then(setSections).catch(() => {});
     getPublicStats().then(setPublicStats).catch(() => {});
@@ -101,12 +123,12 @@ export default function Home() {
     checkAdminOnline().then(res => setAdminOnline(res?.online)).catch(() => {});
 
     if (user) {
-      getContinueReading().then(data => {
-        setContinueLearning(Array.isArray(data) ? data : []);
-      }).catch(() => {});
-      getUserStreak().then(res => {
-        setStreak(res?.count || 0);
-      }).catch(() => {});
+      getContinueReading()
+        .then(data => setContinueLearning(Array.isArray(data) ? data : []))
+        .catch(() => {});
+      getUserStreak()
+        .then(res => setStreak(res?.count || 0))
+        .catch(() => {});
     }
   }, [user]);
 
@@ -174,19 +196,13 @@ export default function Home() {
     }
   }, []);
 
-  function getLevelColor(level) {
-    if (level === 'O-Level') return '#0ab5b5';
-    if (level === 'A-Level') return '#b8873a';
-    if (level === 'Pharmacy') return '#10b981';
-    return 'var(--clr-cyan)';
-  }
+  // ── Handlers ──────────────────────────────────────
 
+  // Flashcard handlers
   function shuffleFlashcards() {
     setFlashcardShuffled(prev => {
       const next = { ...prev };
-      Object.keys(next).forEach(key => {
-        next[key] = shuffleArray(next[key]);
-      });
+      Object.keys(next).forEach(key => { next[key] = shuffleArray(next[key]); });
       return next;
     });
   }
@@ -204,17 +220,16 @@ export default function Home() {
   }
 
   async function rateFlashcardHandler(cardId, difficulty) {
-    try { await rateFlashcard(cardId, difficulty); } catch (e) {}
+    try { await rateFlashcard(cardId, difficulty); } catch (e) { console.error(e); }
   }
 
   async function checkFlashcardAnswerHandler(cardId, userAnswer) {
-    try {
-      return await checkFlashcardAnswer(cardId, userAnswer);
-    } catch (e) { return { correct: false, correct_answer: 'Error' }; }
+    try { return await checkFlashcardAnswer(cardId, userAnswer); }
+    catch (e) { return { correct: false, correct_answer: 'Error' }; }
   }
 
   async function toggleFlashcardBookmarkHandler(cardId) {
-    try { await toggleFlashcardBookmark(cardId); } catch (e) {}
+    try { await toggleFlashcardBookmark(cardId); } catch (e) { console.error(e); }
   }
 
   function speakText(text) {
@@ -226,29 +241,25 @@ export default function Home() {
     }
   }
 
+  // PDF handlers
   async function fetchPdfsByLevel(level) {
     try {
       const res = await getPdfsByLevel(level);
       setPdfs(Array.isArray(res?.pdfs) ? res.pdfs : []);
-    } catch (e) {}
+    } catch (e) { console.error(e); }
   }
 
-  function handlePdfPreview(pdf) {
-    setPreviewPdf(pdf);
-    setPdfPreviewOpen(true);
-  }
+  function handlePdfPreview(pdf) { setPreviewPdf(pdf); setPdfPreviewOpen(true); }
+  function handlePdfDownload(pdf) { window.open(pdf.file_url, '_blank'); }
 
-  function handlePdfDownload(pdf) {
-    window.open(pdf.file_url, '_blank');
-  }
-
+  // Notes handlers
   async function loadNoteContent(noteId) {
     try {
       const { getNoteContent } = await import('../api/client');
       const content = await getNoteContent(noteId);
       const reactions = await getNoteReactions(noteId);
       const interactions = await getResourceInteractions(noteId);
-      setNotesContent(content);
+      setNotesContent({ ...content, id: noteId });
       setNotesReactions(reactions);
       setNotesComments(Array.isArray(interactions?.comments) ? interactions.comments : []);
     } catch (e) { console.error(e); }
@@ -273,22 +284,21 @@ export default function Home() {
     } catch (e) { console.error(e); }
   }
 
+  // Mood & Weekly challenge
   async function handleMoodSubmit() {
     if (!moodSelected) return;
-    try {
-      await submitMood(moodSelected, moodMessage);
-      setMoodSubmitted(true);
-    } catch (e) {}
+    try { await submitMood(moodSelected, moodMessage); setMoodSubmitted(true); }
+    catch (e) { console.error(e); }
   }
 
   async function handleWeeklyChallengeSubmit(i, correct, explanation) {
     if (!user) return;
     setWeeklyChallengeAnswer({ correct: i === correct, explanation });
-    try {
-      await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), i);
-    } catch (e) {}
+    try { await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), i); }
+    catch (e) { console.error(e); }
   }
 
+  // Contact & Newsletter
   async function handleContactSubmit(e) {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) return;
@@ -296,9 +306,7 @@ export default function Home() {
       await submitContact(contactForm);
       setContactStatus({ success: true, message: 'Message sent!' });
       setContactForm({ name: '', email: '', subject: '', message: '' });
-    } catch (e) {
-      setContactStatus({ success: false, message: e.message });
-    }
+    } catch (e) { setContactStatus({ success: false, message: e.message }); }
   }
 
   async function handleNewsletterSubmit(e) {
@@ -308,11 +316,10 @@ export default function Home() {
       await subscribeNewsletter(newsletterEmail);
       setNewsletterStatus({ success: true, message: 'Subscribed!' });
       setNewsletterEmail('');
-    } catch (e) {
-      setNewsletterStatus({ success: false, message: e.message });
-    }
+    } catch (e) { setNewsletterStatus({ success: false, message: e.message }); }
   }
 
+  // Chat
   async function requestChatRoom() {
     if (!user) return;
     try {
@@ -344,9 +351,14 @@ export default function Home() {
     } catch (e) { console.error(e); }
   }
 
+  // ── Render ────────────────────────────────────────
   return (
     <HomeView
       sections={sections}
+      user={user}
+      navigate={navigate}
+      activeLevelName={level?.display_name || user?.profile?.track || ''}
+      activeGroupName={activeGroupName}
       flashcards={flashcards}
       flashcardDecks={flashcardDecks}
       flashcardShuffled={flashcardShuffled}
@@ -391,10 +403,8 @@ export default function Home() {
       notesComments={notesComments}
       notesCommentInput={notesCommentInput}
       groupedNotes={groupedNotes}
-      getLevelColor={getLevelColor}
-      user={user}
-      navigate={navigate}
       currentYear={currentYear}
+      // handlers
       handleWeeklyChallengeSubmit={handleWeeklyChallengeSubmit}
       handleContactSubmit={handleContactSubmit}
       handleNewsletterSubmit={handleNewsletterSubmit}
