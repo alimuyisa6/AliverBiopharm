@@ -1,35 +1,13 @@
  import { useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-
-const LEVEL_CONFIG = {
-  'O-Level': {
-    displayName: 'Secondary School Biology',
-    classLabel: 'Class',
-    options: ['Form 1', 'Form 2', 'Form 3', 'Form 4'],
-    icon: 'fa-seedling',
-    color: '#0a7e7e'
-  },
-  'A-Level': {
-    displayName: 'Advanced Secondary Biology',
-    classLabel: 'Class',
-    options: ['Form 5', 'Form 6'],
-    icon: 'fa-flask',
-    color: '#b8873a'
-  },
-  'Pharmacy': {
-    displayName: 'Pharmacy & Pharmaceutical Sciences',
-    classLabel: 'Programme',
-    options: ['Certificate', 'Diploma', 'Degree'],
-    icon: 'fa-capsules',
-    color: '#10b981'
-  }
-};
+import { useLayout } from '../contexts/LayoutContext';
 
 export function useLevelFilter() {
   const { user } = useAuth();
+  const { groups, level, platform } = useLayout();
 
   return useMemo(() => {
-    if (!user?.profile) {
+    if (!user?.profile || !groups) {
       return {
         level: null,
         class_name: null,
@@ -37,13 +15,13 @@ export function useLevelFilter() {
         isAdmin: false,
         config: null,
         displayName: null,
-        classLabel: 'Class',
-        classOptions: []
+        classLabel: platform?.group_label || 'Class',
+        classOptions: [],
       };
     }
 
     const profile = user.profile;
-    const config = LEVEL_CONFIG[profile.track] || null;
+    const config = platform || {};
 
     if (profile.role === 'student') {
       return {
@@ -52,9 +30,9 @@ export function useLevelFilter() {
         showAll: false,
         isAdmin: false,
         config,
-        displayName: config?.displayName || profile.track,
-        classLabel: config?.classLabel || 'Class',
-        classOptions: config?.options || []
+        displayName: level?.display_name || profile.track,
+        classLabel: config.group_label || 'Class',
+        classOptions: groups.map(g => g.name),
       };
     }
 
@@ -68,10 +46,9 @@ export function useLevelFilter() {
           config: null,
           displayName: null,
           classLabel: 'Class',
-          classOptions: []
+          classOptions: [],
         };
       }
-
       if (profile.approved_track === 'ALL') {
         return {
           level: null,
@@ -81,20 +58,19 @@ export function useLevelFilter() {
           config: null,
           displayName: 'All Levels',
           classLabel: 'Class',
-          classOptions: []
+          classOptions: [],
         };
       }
-
-      const teacherConfig = LEVEL_CONFIG[profile.approved_track || profile.track] || null;
+      const teacherTrack = profile.approved_track || profile.track;
       return {
-        level: profile.approved_track || profile.track,
+        level: teacherTrack,
         class_name: profile.class_name,
         showAll: false,
         isAdmin: false,
-        config: teacherConfig,
-        displayName: teacherConfig?.displayName || profile.track,
-        classLabel: teacherConfig?.classLabel || 'Class',
-        classOptions: teacherConfig?.options || []
+        config: platform,
+        displayName: level?.display_name || teacherTrack,
+        classLabel: config.group_label || 'Class',
+        classOptions: groups.filter(g => g.level_id === teacherTrack).map(g => g.name),
       };
     }
 
@@ -106,7 +82,7 @@ export function useLevelFilter() {
       config: null,
       displayName: null,
       classLabel: 'Class',
-      classOptions: []
+      classOptions: [],
     };
-  }, [user]);
+  }, [user, groups, level, platform]);
 }
