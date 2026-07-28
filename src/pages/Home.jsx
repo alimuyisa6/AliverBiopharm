@@ -1,26 +1,13 @@
- import { useState, useEffect } from 'react';
+ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HomeView from '../features/home/HomeView';
-import { getSections } from '../api/sections';
 import { useAuth } from '../contexts/AuthContext';
+import { useLayout } from '../contexts/LayoutContext';
 import {
-  getFlashcards,
-  getFlashcardDecks,
-  getKnownFlashcards,
-  getFlashcardProgress,
-  getPdfsByLevel,
-  getNotesStructure,
-  getNoteContent,
-  getNoteReactions,
-  toggleNoteReaction,
-  getResourceInteractions,
-  commentResource,
   getPublicStats,
   getCommunityActivity,
   getContinueReading,
-  getUserFavorites,
   getUserStreak,
-  submitWeeklyChallenge,
   submitMood,
   submitContact,
   subscribeNewsletter,
@@ -29,10 +16,21 @@ import {
   sendChatMessage,
   deleteChatMessage,
   checkAdminOnline,
-  rateFlashcard as apiRateFlashcard,
-  checkFlashcardAnswer as apiCheckFlashcardAnswer,
-  toggleFlashcardBookmark as apiToggleFlashcardBookmark,
+  getNotesStructure,
+  getNoteReactions,
+  toggleNoteReaction,
+  getResourceInteractions,
+  commentResource,
+  getFlashcards,
+  getFlashcardDecks,
+  getKnownFlashcards,
+  getFlashcardProgress,
+  getPdfsByLevel,
+  rateFlashcard,
+  checkFlashcardAnswer,
+  toggleFlashcardBookmark,
 } from '../api/cachedClient';
+import { getSections } from '../api/sections';
 
 function shuffleArray(arr) {
   const a = [...arr];
@@ -45,9 +43,15 @@ function shuffleArray(arr) {
 
 export default function Home() {
   const { user } = useAuth();
+  const { groups } = useLayout();
   const navigate = useNavigate();
 
-  const [sections, setSections] = useState(null);
+  // General sections
+  const [sections, setSections] = useState({});
+  const [publicStats, setPublicStats] = useState(null);
+  const [communityActivity, setCommunityActivity] = useState([]);
+
+  // Flashcard state
   const [flashcards, setFlashcards] = useState([]);
   const [flashcardDecks, setFlashcardDecks] = useState([]);
   const [flashcardShuffled, setFlashcardShuffled] = useState({});
@@ -58,68 +62,88 @@ export default function Home() {
   const [flippedCards, setFlippedCards] = useState({});
   const [flashcardSelectedLevel, setFlashcardSelectedLevel] = useState('');
   const [flashcardDeckProgress, setFlashcardDeckProgress] = useState({});
+
+  // PDF state
   const [pdfs, setPdfs] = useState([]);
   const [pdfLevel, setPdfLevel] = useState('O-Level');
   const [pdfSelectedTopic, setPdfSelectedTopic] = useState(null);
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+  const [previewPdf, setPreviewPdf] = useState(null);
+
+  // Notes state
   const [notesStructure, setNotesStructure] = useState(null);
   const [notesSelectedLevel, setNotesSelectedLevel] = useState(null);
   const [notesSelectedTopic, setNotesSelectedTopic] = useState(null);
   const [notesFilterVisible, setNotesFilterVisible] = useState(false);
-  const [publicStats, setPublicStats] = useState(null);
-  const [communityActivity, setCommunityActivity] = useState([]);
-  const [weeklyChallengeAnswer, setWeeklyChallengeAnswer] = useState(null);
-  const [moodSelected, setMoodSelected] = useState(null);
-  const [moodMessage, setMoodMessage] = useState('');
-  const [moodSubmitted, setMoodSubmitted] = useState(false);
-  const [continueLearning, setContinueLearning] = useState({ views: [], favorites: [], streak: 0 });
-  const [chatRoomId, setChatRoomId] = useState(null);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatInput, setChatInput] = useState('');
-  const [adminOnline, setAdminOnline] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
-  const [contactStatus, setContactStatus] = useState(null);
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterStatus, setNewsletterStatus] = useState(null);
-  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
-  const [previewPdf, setPreviewPdf] = useState(null);
   const [notesContent, setNotesContent] = useState(null);
   const [notesReactions, setNotesReactions] = useState(null);
   const [notesComments, setNotesComments] = useState([]);
   const [notesCommentInput, setNotesCommentInput] = useState('');
   const [groupedNotes, setGroupedNotes] = useState({});
+
+  // Mood & Community
+  const [moodSelected, setMoodSelected] = useState(null);
+  const [moodMessage, setMoodMessage] = useState('');
+  const [moodSubmitted, setMoodSubmitted] = useState(false);
+  const [weeklyChallengeAnswer, setWeeklyChallengeAnswer] = useState(null);
+
+  // Continue learning
+  const [continueLearning, setContinueLearning] = useState([]);
+  const [streak, setStreak] = useState(0);
+
+  // Chat
+  const [chatRoomId, setChatRoomId] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [adminOnline, setAdminOnline] = useState(false);
   const chatBodyRef = useState(null);
+
+  // Contact & Newsletter
+  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [contactStatus, setContactStatus] = useState(null);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState(null);
+
+  // Slide (if any hero slides from sections)
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const currentYear = new Date().getFullYear();
 
+  // Load sections and public data
   useEffect(() => {
     getSections().then(setSections).catch(() => {});
     getPublicStats().then(setPublicStats).catch(() => {});
     getCommunityActivity().then(setCommunityActivity).catch(() => {});
-    getFlashcards().then(setFlashcards).catch(() => {});
-    getFlashcardDecks().then(setFlashcardDecks).catch(() => {});
-    getKnownFlashcards().then(setKnownFlashcardIds).catch(() => {});
-    getFlashcardProgress().then(setFlashcardDeckProgress).catch(() => {});
-    getPdfsByLevel('O-Level').then(res => setPdfs(res?.pdfs || [])).catch(() => {});
-    getNotesStructure().then(data => {
-      setNotesStructure(data);
-      const grouped = {};
-      (data || []).filter(Boolean).forEach(item => {
-        if (!grouped[item.level]) grouped[item.level] = {};
-        if (!grouped[item.level][item.topic]) grouped[item.level][item.topic] = [];
-        grouped[item.level][item.topic].push(item);
-      });
-      setGroupedNotes(grouped);
-    }).catch(() => {});
-    if (user) {
-      getContinueReading().then(data => setContinueLearning({ views: data || [], favorites: [], streak: 0 })).catch(() => {});
-      getUserFavorites().then(favs => setContinueLearning(prev => ({ ...prev, favorites: favs || [] }))).catch(() => {});
-      getUserStreak().then(res => setContinueLearning(prev => ({ ...prev, streak: res?.count || 0 }))).catch(() => {});
-    }
     checkAdminOnline().then(res => setAdminOnline(res?.online)).catch(() => {});
+
+    if (user) {
+      getContinueReading().then(data => {
+        setContinueLearning(Array.isArray(data) ? data : []);
+      }).catch(() => {});
+      getUserStreak().then(res => {
+        setStreak(res?.count || 0);
+      }).catch(() => {});
+    }
   }, [user]);
 
+  // Load level-specific content when groups are available
+  useEffect(() => {
+    if (!groups || groups.length === 0) return;
+    const primaryGroup = groups[0];
+    loadGroupContent(primaryGroup.id);
+  }, [groups]);
+
+  // Auto-slide hero if sections.hero.slides exists
+  useEffect(() => {
+    if (!sections?.hero?.slides?.length) return;
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % sections.hero.slides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [sections]);
+
+  // Shuffle flashcards when loaded
   useEffect(() => {
     if (flashcards.length > 0) {
       const shuffled = {};
@@ -135,13 +159,44 @@ export default function Home() {
     }
   }, [flashcards]);
 
-  useEffect(() => {
-    if (!sections?.hero?.slides?.length) return;
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % sections.hero.slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [sections]);
+  // ─── helpers ──────────────────────────────────────────────────
+
+  const loadGroupContent = useCallback(async (groupId) => {
+    try {
+      const { getUnits } = await import('../api/client');
+      const units = await getUnits({ group_id: groupId });
+      if (!units || units.length === 0) return;
+      const unitId = units[0].id;
+
+      // Load all content for the first unit of the primary group
+      Promise.all([
+        getFlashcards({ unit_id: unitId }),
+        getFlashcardDecks({ unit_id: unitId }),
+        getKnownFlashcards(),
+        getFlashcardProgress(),
+        getPdfsByLevel(unitId),
+        getNotesStructure(unitId),
+      ]).then(([flashRes, deckRes, knownRes, progRes, pdfRes, notesRes]) => {
+        setFlashcards(flashRes || []);
+        setFlashcardDecks(deckRes || []);
+        setKnownFlashcardIds(knownRes || []);
+        setFlashcardDeckProgress(progRes || {});
+        setPdfs(pdfRes?.pdfs || []);
+        setNotesStructure(notesRes || []);
+
+        // Group notes by title
+        const grouped = {};
+        (notesRes || []).forEach(item => {
+          const key = item.title || item.slug || 'Untitled';
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(item);
+        });
+        setGroupedNotes(grouped);
+      }).catch(() => {});
+    } catch (err) {
+      console.error('Failed to load group content:', err);
+    }
+  }, []);
 
   function getLevelColor(level) {
     if (level === 'O-Level') return '#0ab5b5';
@@ -150,46 +205,7 @@ export default function Home() {
     return 'var(--clr-cyan)';
   }
 
-  async function handleWeeklyChallengeSubmit(i, correct, explanation) {
-    if (!user) return;
-    setWeeklyChallengeAnswer({ correct: i === correct, explanation });
-    try {
-      await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), i);
-    } catch (e) { console.error(e); }
-  }
-
-  async function handleContactSubmit(e) {
-    e.preventDefault();
-    if (!contactForm.name || !contactForm.email || !contactForm.message) return;
-    try {
-      await submitContact(contactForm);
-      setContactStatus({ success: true, message: 'Message sent successfully!' });
-      setContactForm({ name: '', email: '', subject: '', message: '' });
-    } catch (e) {
-      setContactStatus({ success: false, message: e.message });
-    }
-  }
-
-  async function handleNewsletterSubmit(e) {
-    e.preventDefault();
-    if (!newsletterEmail) return;
-    try {
-      await subscribeNewsletter(newsletterEmail);
-      setNewsletterStatus({ success: true, message: 'Subscribed successfully!' });
-      setNewsletterEmail('');
-    } catch (e) {
-      setNewsletterStatus({ success: false, message: e.message });
-    }
-  }
-
-  async function handleMoodSubmit() {
-    if (!moodSelected) return;
-    try {
-      await submitMood(moodSelected, moodMessage);
-      setMoodSubmitted(true);
-    } catch (e) { console.error(e); }
-  }
-
+  // Flashcard handlers
   function shuffleFlashcards() {
     setFlashcardShuffled(prev => {
       const next = { ...prev };
@@ -206,6 +222,40 @@ export default function Home() {
     setFlashcardCurrentDeck(deckName);
   }
 
+  function toggleKnown(cardId) {
+    setKnownFlashcardIds(prev =>
+      prev.includes(cardId) ? prev.filter(id => id !== cardId) : [...prev, cardId]
+    );
+  }
+
+  async function rateFlashcardHandler(cardId, difficulty) {
+    try {
+      await rateFlashcard(cardId, difficulty);
+    } catch (e) { console.error(e); }
+  }
+
+  async function checkFlashcardAnswerHandler(cardId, userAnswer) {
+    try {
+      return await checkFlashcardAnswer(cardId, userAnswer);
+    } catch (e) { return { correct: false, correct_answer: 'Error' }; }
+  }
+
+  async function toggleFlashcardBookmarkHandler(cardId) {
+    try {
+      await toggleFlashcardBookmark(cardId);
+    } catch (e) { console.error(e); }
+  }
+
+  function speakText(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  // PDF handlers
   async function fetchPdfsByLevel(level) {
     try {
       const res = await getPdfsByLevel(level);
@@ -222,12 +272,14 @@ export default function Home() {
     window.open(pdf.file_url, '_blank');
   }
 
-  async function loadNoteContent(subtopicId) {
+  // Notes handlers
+  async function loadNoteContent(noteId) {
     try {
-      const content = await getNoteContent(subtopicId);
-      const reactions = await getNoteReactions(subtopicId);
-      const interactions = await getResourceInteractions(subtopicId);
-      setNotesContent({ ...content, subtopicId, subtopicName: content?.title || content?.subtopic_name });
+      const { getNoteContent } = await import('../api/client');
+      const content = await getNoteContent(noteId);
+      const reactions = await getNoteReactions(noteId);
+      const interactions = await getResourceInteractions(noteId);
+      setNotesContent({ ...content, id: noteId });
       setNotesReactions(reactions);
       setNotesComments(interactions?.comments || []);
     } catch (e) { console.error(e); }
@@ -252,40 +304,51 @@ export default function Home() {
     } catch (e) { console.error(e); }
   }
 
-  function toggleKnown(cardId) {
-    setKnownFlashcardIds(prev => {
-      if (prev.includes(cardId)) return prev.filter(id => id !== cardId);
-      return [...prev, cardId];
-    });
-  }
-
-  async function rateFlashcard(cardId, difficulty) {
+  // Mood
+  async function handleMoodSubmit() {
+    if (!moodSelected) return;
     try {
-      await apiRateFlashcard(cardId, difficulty);
+      await submitMood(moodSelected, moodMessage);
+      setMoodSubmitted(true);
     } catch (e) { console.error(e); }
   }
 
-  async function checkFlashcardAnswer(cardId, userAnswer) {
+  // Weekly challenge
+  async function handleWeeklyChallengeSubmit(i, correct, explanation) {
+    if (!user) return;
+    setWeeklyChallengeAnswer({ correct: i === correct, explanation });
     try {
-      return await apiCheckFlashcardAnswer(cardId, userAnswer);
-    } catch (e) { return { correct: false, correct_answer: 'Error' }; }
-  }
-
-  async function toggleFlashcardBookmark(cardId) {
-    try {
-      await apiToggleFlashcardBookmark(cardId);
+      await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), i);
     } catch (e) { console.error(e); }
   }
 
-  function speakText(text) {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
+  // Contact
+  async function handleContactSubmit(e) {
+    e.preventDefault();
+    if (!contactForm.name || !contactForm.email || !contactForm.message) return;
+    try {
+      await submitContact(contactForm);
+      setContactStatus({ success: true, message: 'Message sent!' });
+      setContactForm({ name: '', email: '', subject: '', message: '' });
+    } catch (e) {
+      setContactStatus({ success: false, message: e.message });
     }
   }
 
+  // Newsletter
+  async function handleNewsletterSubmit(e) {
+    e.preventDefault();
+    if (!newsletterEmail) return;
+    try {
+      await subscribeNewsletter(newsletterEmail);
+      setNewsletterStatus({ success: true, message: 'Subscribed!' });
+      setNewsletterEmail('');
+    } catch (e) {
+      setNewsletterStatus({ success: false, message: e.message });
+    }
+  }
+
+  // Chat
   async function requestChatRoom() {
     if (!user) return;
     try {
@@ -317,6 +380,8 @@ export default function Home() {
     } catch (e) { console.error(e); }
   }
 
+  // ─── Render ────────────────────────────────────────────────────
+
   return (
     <HomeView
       sections={sections}
@@ -346,6 +411,7 @@ export default function Home() {
       setMoodMessage={setMoodMessage}
       moodSubmitted={moodSubmitted}
       continueLearning={continueLearning}
+      streak={streak}
       chatRoomId={chatRoomId}
       chatMessages={chatMessages}
       chatOpen={chatOpen}
@@ -384,9 +450,9 @@ export default function Home() {
       handleNoteReaction={handleNoteReaction}
       handleNoteComment={handleNoteComment}
       toggleKnown={toggleKnown}
-      rateFlashcard={rateFlashcard}
-      checkFlashcardAnswer={checkFlashcardAnswer}
-      toggleFlashcardBookmark={toggleFlashcardBookmark}
+      rateFlashcard={rateFlashcardHandler}
+      checkFlashcardAnswer={checkFlashcardAnswerHandler}
+      toggleFlashcardBookmark={toggleFlashcardBookmarkHandler}
       speakText={speakText}
       requestChatRoom={requestChatRoom}
       sendChat={sendChat}
