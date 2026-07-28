@@ -1,5 +1,4 @@
- // features/home/StatsGrid.jsx
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 
 export function StatsGrid({ stats }) {
   const items = [
@@ -37,41 +36,28 @@ function AnimatedNumber({ target, label, icon }) {
           started.current = true;
           const duration = 2000;
           const startTime = performance.now();
-
           const animate = (currentTime) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3);
             setCount(Math.floor(eased * target));
-
-            if (progress < 1) {
-              requestAnimationFrame(animate);
-            }
+            if (progress < 1) requestAnimationFrame(animate);
           };
-
           requestAnimationFrame(animate);
         }
       },
       { threshold: 0.3 }
     );
-
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [target]);
 
-  const formatNumber = (num) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k+';
-    }
-    return num;
-  };
+  const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k+' : num);
 
   return (
-    <div ref={ref}>
-      <div className="stat-number">
-        <i className={`fa-solid ${icon}`} style={{ fontSize: '1.2rem', marginRight: '8px', opacity: 0.7 }}></i>
-        {formatNumber(count)}
-      </div>
+    <div className="stat-card" ref={ref}>
+      <div className="stat-icon"><i className={`fa-solid ${icon}`} /></div>
+      <div className="stat-number">{formatNumber(count)}</div>
       <div className="stat-label">{label}</div>
     </div>
   );
