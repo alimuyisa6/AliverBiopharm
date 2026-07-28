@@ -1,4 +1,4 @@
-import { getCached, setCache, invalidateCache, invalidateCacheByPattern } from '../utils/cache';
+ import { getCached, setCache, invalidateCache, invalidateCacheByPattern } from '../utils/cache';
 import * as api from './client';
 
 function withCache(key, fetcher, cacheEnabled = true) {
@@ -215,6 +215,7 @@ export function invalidateFlashcardCache() {
   invalidateCacheByPattern('flashcard');
 }
 
+// Re-export everything except the ones already defined above
 export {
   signup,
   signin,
@@ -398,8 +399,6 @@ export {
   deleteProfilePicture,
   getProfilePicture,
   getGlossaryTerm,
-  getPastPaper,
-  getPastPaperFilterOptions,
   getAdminStats,
   globalSearch,
   getAllRatings,
