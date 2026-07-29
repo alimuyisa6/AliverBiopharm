@@ -1,4 +1,4 @@
-.platform-cards-section {
+ .platform-cards-section {
   padding: 4rem 1.5rem;
   max-width: var(--max-width);
   margin: 0 auto;
@@ -29,12 +29,12 @@
 
 .platform-card:hover {
   transform: translateY(-6px);
-  border-color: var(--clr-cyan);
-  box-shadow: 0 16px 36px rgba(10, 126, 126, 0.18), 0 6px 16px rgba(184, 135, 58, 0.08);
+  border-color: var(--platform-primary-color, var(--clr-cyan));
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--platform-primary-color, var(--clr-cyan)) 18%, transparent), 0 6px 16px color-mix(in srgb, var(--platform-accent-color, var(--clr-magenta)) 8%, transparent);
 }
 
 .platform-card:focus-visible {
-  outline: 2px solid var(--clr-cyan);
+  outline: 2px solid var(--platform-primary-color, var(--clr-cyan));
   outline-offset: 2px;
 }
 
@@ -45,15 +45,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--clr-cyan-light), var(--clr-magenta-light));
-  color: var(--clr-cyan);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--platform-primary-color, var(--clr-cyan)) 25%, transparent), color-mix(in srgb, var(--platform-accent-color, var(--clr-magenta)) 25%, transparent));
+  color: var(--platform-primary-color, var(--clr-cyan));
   font-size: 2.2rem;
   flex-shrink: 0;
   transition: background var(--transition-fast), transform var(--transition-fast);
 }
 
 .platform-card:hover .platform-card-image-wrapper {
-  background: linear-gradient(135deg, var(--clr-cyan), var(--clr-magenta));
+  background: linear-gradient(135deg, var(--platform-primary-color, var(--clr-cyan)), var(--platform-accent-color, var(--clr-magenta)));
   color: #fff;
   transform: scale(1.05);
 }
