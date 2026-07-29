@@ -1,17 +1,63 @@
-import React from 'react';
+ import React from 'react';
 import { PlatformCards } from './PlatformCards';
 import { StatsGrid } from './StatsGrid';
 import { TestimonialSlider } from './TestimonialSlider';
 import { ContinueLearningSection } from './ContinueLearningSection';
-import { FlashcardSection } from '../flashcards/FlashcardSection';
-import { PdfLibrarySection } from '../pdfs/PdfLibrarySection';
-import { PdfPreviewModal } from '../pdfs/PdfPreviewModal';
-import { NotesSection } from '../Notes/NotesSection';
 import { MoodCheckSection } from '../mood/MoodCheckSection';
 import { CommunitySection } from '../community/CommunitySection';
 import { ContactSection } from '../contact/ContactSection';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
+
+const CONTENT_TYPES = [
+  { key: 'notes', label: 'Notes', description: 'Read structured topic notes with diagrams and summaries', icon: 'fa-book-open', route: '/notes' },
+  { key: 'flashcards', label: 'Flashcards', description: 'Drill key terms and structures until they stick', icon: 'fa-layer-group', route: '/flashcards' },
+  { key: 'pdfs', label: 'PDF Library', description: 'Download printable guides and reference sheets', icon: 'fa-file-pdf', route: '/pdfs' },
+  { key: 'quizzes', label: 'Quizzes', description: 'Test yourself block by block across every unit', icon: 'fa-circle-question', route: '/quiz' },
+  { key: 'past_papers', label: 'Past Papers', description: 'Practice with real exam papers by year and board', icon: 'fa-file-lines', route: '/past-papers' },
+  { key: 'recall', label: 'Recall', description: 'Daily spaced-repetition sessions to build long-term memory', icon: 'fa-brain', route: '/recall' },
+];
+
+function ContentTypeCards({ navigate, user, sections }) {
+  return (
+    <section className="section content-types-section">
+      <div className="section-header">
+        <h2 className="section-title">{sections?.section_headings?.content_types_title || 'Explore by Content Type'}</h2>
+        <p className="section-subtitle">{sections?.section_headings?.content_types_subtitle || 'Pick where you want to start'}</p>
+      </div>
+      <div className="content-type-grid">
+        {CONTENT_TYPES.map((type) => {
+          const imageUrl = sections?.content_type_images?.[type.key];
+          return (
+            <div
+              key={type.key}
+              className="content-type-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate(user ? type.route : '/login')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(user ? type.route : '/login'); } }}
+              style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined}
+            >
+              <span className="content-type-overlay" />
+              <span className="content-type-icon"><i className={`fa-solid ${type.icon}`} /></span>
+              <span className="content-type-body">
+                <span className="content-type-label">{type.label}</span>
+                <span className="content-type-description">{type.description}</span>
+              </span>
+              <button
+                type="button"
+                className="btn-primary content-type-btn"
+                onClick={(e) => { e.stopPropagation(); navigate(user ? type.route : '/login'); }}
+              >
+                Browse {type.label}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 export default function HomeView(props) {
   const {
@@ -20,23 +66,6 @@ export default function HomeView(props) {
     navigate,
     activeLevelName,
     activeGroupName,
-    flashcards,
-    flashcardDecks,
-    flashcardShuffled,
-    knownFlashcardIds,
-    flashcardMode,
-    flashcardCurrentDeck,
-    flashcardCurrentIndex,
-    flippedCards,
-    flashcardSelectedLevel,
-    flashcardDeckProgress,
-    pdfs,
-    pdfLevel,
-    pdfSelectedTopic,
-    notesStructure,
-    notesSelectedLevel,
-    notesSelectedTopic,
-    notesFilterVisible,
     publicStats,
     communityActivity,
     weeklyChallengeAnswer,
@@ -51,55 +80,21 @@ export default function HomeView(props) {
     chatMessages,
     chatInput,
     adminOnline,
-    currentSlide,
     contactForm,
     contactStatus,
     newsletterEmail,
     newsletterStatus,
-    pdfPreviewOpen,
-    previewPdf,
-    notesContent,
-    notesReactions,
-    notesComments,
-    notesCommentInput,
-    groupedNotes,
     currentYear,
     handleWeeklyChallengeSubmit,
     handleContactSubmit,
     handleNewsletterSubmit,
     handleMoodSubmit,
-    shuffleFlashcards,
-    setFlashcardMode,
-    setFlashcardCurrentDeck,
-    setFlashcardCurrentIndex,
-    toggleCardFlip,
-    setFlashcardSelectedLevel,
-    fetchPdfsByLevel,
-    handlePdfPreview,
-    handlePdfDownload,
-    loadNoteContent,
-    handleNoteReaction,
-    handleNoteComment,
-    toggleKnown,
-    rateFlashcard,
-    checkFlashcardAnswer,
-    toggleFlashcardBookmark,
-    speakText,
-    requestChatRoom,
     sendChat,
     deleteChatMsg,
     setChatOpen,
     setChatInput,
     setContactForm,
     setNewsletterEmail,
-    setPdfPreviewOpen,
-    setPdfLevel,
-    setPdfSelectedTopic,
-    setNotesSelectedLevel,
-    setNotesSelectedTopic,
-    setNotesFilterVisible,
-    setNotesContent,
-    setNotesCommentInput,
     chatBodyRef,
   } = props;
 
@@ -144,68 +139,7 @@ export default function HomeView(props) {
         streak={streak}
       />
 
-      <FlashcardSection
-        headingTitle={sections?.section_headings?.flashcards_title || 'Study Flashcards'}
-        headingSubtitle={sections?.section_headings?.flashcards_subtitle || 'Reinforce your knowledge'}
-        onStartStudy={() => user ? navigate('/flashcards') : navigate('/login')}
-        onBrowseDecks={() => navigate('/flashcards')}
-        user={user}
-        flashcards={flashcards}
-        flashcardDecks={flashcardDecks}
-        flashcardShuffled={flashcardShuffled}
-        knownFlashcardIds={knownFlashcardIds}
-        flashcardMode={flashcardMode}
-        flashcardCurrentDeck={flashcardCurrentDeck}
-        flashcardCurrentIndex={flashcardCurrentIndex}
-        flippedCards={flippedCards}
-        flashcardSelectedLevel={flashcardSelectedLevel}
-        flashcardDeckProgress={flashcardDeckProgress}
-        shuffleFlashcards={shuffleFlashcards}
-        setFlashcardMode={setFlashcardMode}
-        setFlashcardCurrentDeck={setFlashcardCurrentDeck}
-        setFlashcardCurrentIndex={setFlashcardCurrentIndex}
-        toggleCardFlip={toggleCardFlip}
-        setFlashcardSelectedLevel={setFlashcardSelectedLevel}
-        toggleKnown={toggleKnown}
-        rateFlashcard={rateFlashcard}
-        checkFlashcardAnswer={checkFlashcardAnswer}
-        toggleFlashcardBookmark={toggleFlashcardBookmark}
-        speakText={speakText}
-      />
-
-      <PdfLibrarySection
-        pdfs={pdfs}
-        pdfLevel={pdfLevel}
-        pdfSelectedTopic={pdfSelectedTopic}
-        onPreview={handlePdfPreview}
-        onDownload={handlePdfDownload}
-        fetchPdfsByLevel={fetchPdfsByLevel}
-        setPdfLevel={setPdfLevel}
-        setPdfSelectedTopic={setPdfSelectedTopic}
-      />
-
-      <NotesSection
-        groupedNotes={groupedNotes}
-        notesStructure={notesStructure}
-        notesSelectedLevel={notesSelectedLevel}
-        notesSelectedTopic={notesSelectedTopic}
-        notesFilterVisible={notesFilterVisible}
-        notesContent={notesContent}
-        notesReactions={notesReactions}
-        notesComments={notesComments}
-        notesCommentInput={notesCommentInput}
-        onReadNote={(id) => {
-          if (id) navigate(`/notes/read?id=${id}`);
-          else setNotesContent(null);
-        }}
-        onReaction={handleNoteReaction}
-        onComment={handleNoteComment}
-        onCommentInputChange={setNotesCommentInput}
-        setNotesSelectedLevel={setNotesSelectedLevel}
-        setNotesSelectedTopic={setNotesSelectedTopic}
-        setNotesFilterVisible={setNotesFilterVisible}
-        user={user}
-      />
+      <ContentTypeCards navigate={navigate} user={user} sections={sections} />
 
       <CommunitySection
         activity={communityActivity}
@@ -251,14 +185,6 @@ export default function HomeView(props) {
         onDeleteMsg={deleteChatMsg}
         chatBodyRef={chatBodyRef}
       />
-
-      {pdfPreviewOpen && (
-        <PdfPreviewModal
-          pdf={previewPdf}
-          onClose={() => setPdfPreviewOpen(false)}
-          onDownload={handlePdfDownload}
-        />
-      )}
     </div>
   );
 }
