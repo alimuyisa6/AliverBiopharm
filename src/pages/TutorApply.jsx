@@ -1,5 +1,4 @@
- // pages/TutorApply.jsx
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,6 +23,7 @@ export default function TutorApply() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     level: '',
+    group_id: '',
     class_name: '',
     subjects: [],
     qualifications: '',
@@ -60,10 +60,10 @@ export default function TutorApply() {
     } catch {}
   };
 
-  const fetchTopics = async (level, className) => {
+  const fetchTopics = async (groupId) => {
     setLoadingTopics(true);
     try {
-      const data = await getClassroomTopics(level, className);
+      const data = await getClassroomTopics(groupId);
       setTopics(data || []);
     } catch {
       setTopics([]);
@@ -73,14 +73,15 @@ export default function TutorApply() {
   };
 
   const handleLevelSelect = (level) => {
-    setForm(prev => ({ ...prev, level: level.key, class_name: '', subjects: [] }));
+    setForm(prev => ({ ...prev, level: level.key, group_id: '', class_name: '', subjects: [] }));
     setStep(2);
   };
 
   const handleClassSelect = (cls) => {
-    const className = typeof cls === 'string' ? cls : cls.id;
-    setForm(prev => ({ ...prev, class_name: className, subjects: [] }));
-    fetchTopics(form.level, className);
+    const groupId = typeof cls === 'string' ? cls : cls.id;
+    const className = typeof cls === 'string' ? cls : cls.name;
+    setForm(prev => ({ ...prev, group_id: groupId, class_name: className, subjects: [] }));
+    fetchTopics(groupId);
     setStep(3);
   };
 
@@ -254,7 +255,7 @@ export default function TutorApply() {
               return (
                 <button
                   key={key}
-                  className={`apply-card ${CARD_COLOR_CLASS[i % 3]} ${form.class_name === key ? 'selected' : ''}`}
+                  className={`apply-card ${CARD_COLOR_CLASS[i % 3]} ${form.group_id === key ? 'selected' : ''}`}
                   onClick={() => handleClassSelect(cls)}
                 >
                   <i className={`fa-solid ${icon}`}></i>
