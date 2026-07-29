@@ -4,6 +4,14 @@ import { bootstrapPlatform } from '../api/cachedClient';
 
 const LayoutContext = createContext(null);
 
+const DEFAULT_COLOR_THEME = {
+  theme: { primary_color: '#0a7e7e' },
+  navigation: {},
+  search_config: {},
+  branding: {},
+  features: {}
+};
+
 export function useLayout() {
   const context = useContext(LayoutContext);
   if (!context) throw new Error('useLayout must be used within LayoutProvider');
@@ -45,9 +53,13 @@ export function LayoutProvider({ children }) {
       navigation: [],
       socialLinks: [],
       footerLinks: [],
+      colorTheme: DEFAULT_COLOR_THEME,
     };
 
     if (!isReady || !bootstrap) return fallback;
+
+    const colorTheme = bootstrap.theme || DEFAULT_COLOR_THEME;
+    const themeColors = colorTheme.theme || {};
 
     return {
       loading: false,
@@ -62,14 +74,15 @@ export function LayoutProvider({ children }) {
       level: bootstrap.level,
       user,
       isAuthenticated: !!user,
-      primaryColor: bootstrap.platform?.primary_color || '#0a7e7e',
-      accentColor: bootstrap.platform?.accent_color || '#b8873a',
-      fontFamily: bootstrap.platform?.font_family || 'Inter',
+      primaryColor: themeColors.primary_color || bootstrap.platform?.primary_color || '#0a7e7e',
+      accentColor: themeColors.accent_color || bootstrap.platform?.accent_color || '#b8873a',
+      fontFamily: themeColors.font_family || bootstrap.platform?.font_family || 'Inter',
       levelIcon: bootstrap.level?.icon || 'fa-seedling',
       navItems: bootstrap.header?.nav_items || [],
       navigation: bootstrap.header?.nav_items || [],
       socialLinks: bootstrap.footer?.social_links || {},
       footerLinks: bootstrap.footer?.quick_links || [],
+      colorTheme,
     };
   }, [bootstrap, loading, authLoading, user]);
 
