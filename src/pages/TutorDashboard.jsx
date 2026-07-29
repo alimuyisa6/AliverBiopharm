@@ -30,6 +30,7 @@ export default function TutorDashboard() {
   const [form, setForm] = useState({
     title: '',
     level: '',
+    group_id: '',
     class_name: '',
     topic_id: '',
     topic_name: '',
@@ -107,10 +108,10 @@ export default function TutorDashboard() {
     }
   };
 
-  const fetchTopics = async (level, className) => {
+  const fetchTopics = async (groupId) => {
     setLoadingTopics(true);
     try {
-      const data = await getClassroomTopics(level, className);
+      const data = await getClassroomTopics(groupId);
       setTopics(data || []);
     } catch {
       setTopics([]);
@@ -132,13 +133,19 @@ export default function TutorDashboard() {
     setCreateError(null);
     setCreateSuccess(null);
     try {
-      await createClassroom(form);
+      await createClassroom({
+        title: form.title,
+        unit_id: form.topic_id,
+        room_type: form.room_type,
+        scheduled_at: form.scheduled_at || null,
+      });
 
       setCreateSuccess('Classroom created successfully!');
       setShowCreateForm(false);
       setForm({
         title: '',
         level: '',
+        group_id: '',
         class_name: '',
         topic_id: '',
         topic_name: '',
@@ -449,7 +456,7 @@ export default function TutorDashboard() {
                       className="tutor-form-select"
                       value={form.level}
                       onChange={e => {
-                        setForm(prev => ({ ...prev, level: e.target.value, class_name: '', topic_id: '', topic_name: '' }));
+                        setForm(prev => ({ ...prev, level: e.target.value, group_id: '', class_name: '', topic_id: '', topic_name: '' }));
                         setTopics([]);
                       }}
                     >
@@ -466,11 +473,14 @@ export default function TutorDashboard() {
                     </label>
                     <select
                       className="tutor-form-select"
-                      value={form.class_name}
+                      value={form.group_id}
                       onChange={e => {
-                        const cls = e.target.value;
-                        setForm(prev => ({ ...prev, class_name: cls, topic_id: '', topic_name: '' }));
-                        if (form.level && cls) fetchTopics(form.level, cls);
+                        const groupId = e.target.value;
+                        const classesForLevel = levels.find(l => l.key === form.level)?.classes || [];
+                        const matched = classesForLevel.find(c => (typeof c === 'string' ? c : c.id) === groupId);
+                        const className = matched ? (typeof matched === 'string' ? matched : matched.name) : '';
+                        setForm(prev => ({ ...prev, group_id: groupId, class_name: className, topic_id: '', topic_name: '' }));
+                        if (groupId) fetchTopics(groupId);
                       }}
                       disabled={!form.level}
                     >
@@ -499,7 +509,7 @@ export default function TutorDashboard() {
                         topic_name: selected?.topic_name || '',
                       }));
                     }}
-                    disabled={!form.class_name || loadingTopics}
+                    disabled={!form.group_id || loadingTopics}
                   >
                     <option value="">
                       {loadingTopics ? 'Loading topics...' : 'Choose topic...'}
