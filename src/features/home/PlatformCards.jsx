@@ -12,15 +12,11 @@ export function PlatformCards() {
   const primaryColor = themeColors.primary_color || '#0a7e7e';
   const secondaryColor = themeColors.secondary_color || primaryColor;
   const accentColor = themeColors.accent_color || primaryColor;
-  const cardBg = themeColors.card_background || '#ffffff';
-  const cardTextColor = themeColors.card_text_color || '#1a1a1a';
 
   const sectionStyle = {
     '--platform-primary-color': primaryColor,
     '--platform-secondary-color': secondaryColor,
-    '--platform-accent-color': accentColor,
-    '--platform-card-bg': cardBg,
-    '--platform-card-text': cardTextColor
+    '--platform-accent-color': accentColor
   };
 
   return (
