@@ -3,13 +3,28 @@ import { useLayout } from '../../contexts/LayoutContext';
 import { useNavigate } from 'react-router-dom';
 
 export function PlatformCards() {
-  const { groups } = useLayout();
+  const { groups, colorTheme } = useLayout();
   const navigate = useNavigate();
 
   if (!groups || !Array.isArray(groups) || groups.length === 0) return null;
 
+  const themeColors = colorTheme?.theme || {};
+  const primaryColor = themeColors.primary_color || '#0a7e7e';
+  const secondaryColor = themeColors.secondary_color || primaryColor;
+  const accentColor = themeColors.accent_color || primaryColor;
+  const cardBg = themeColors.card_background || '#ffffff';
+  const cardTextColor = themeColors.card_text_color || '#1a1a1a';
+
+  const sectionStyle = {
+    '--platform-primary-color': primaryColor,
+    '--platform-secondary-color': secondaryColor,
+    '--platform-accent-color': accentColor,
+    '--platform-card-bg': cardBg,
+    '--platform-card-text': cardTextColor
+  };
+
   return (
-    <section className="platform-cards-section">
+    <section className="platform-cards-section" style={sectionStyle}>
       <span className="sec-label">Platforms</span>
       <h2 className="section-title">Explore Our Platforms</h2>
       <p className="section-subtitle">Choose your path and start learning today</p>
