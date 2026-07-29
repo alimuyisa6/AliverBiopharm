@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+ import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { getUser, signin, signout, getProfile } from '../api/client';
 import { Navigate, useLocation } from 'react-router-dom';
 import { FaSpinner } from 'react-icons/fa6';
@@ -63,11 +63,11 @@ export function AuthProvider({ children }) {
 
     const resetInactivityTimer = () => {
       lastActivityRef.current = Date.now();
-      
+
       if (inactivityTimeoutRef.current) {
         clearTimeout(inactivityTimeoutRef.current);
       }
-      
+
       inactivityTimeoutRef.current = setTimeout(() => {
         setUser(null);
       }, INACTIVITY_TIMEOUT);
