@@ -76,13 +76,10 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     toggleTheme, isAuthenticated, refreshUser, user,
   } = useLayout();
 
-  // ---- Determine if we are on an authentication page ----
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-
   const currentYear = new Date().getFullYear();
   const isHomepage = location.pathname === '/';
 
-  // ---- Favicon effect (unchanged) ----
   useEffect(() => {
     if (!logo) return;
     let cancelled = false;
@@ -149,7 +146,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
   useEffect(() => { return () => { isMounted.current = false; }; }, []);
 
-  // ---- Scroll listener (unchanged) ----
   useEffect(() => {
     const onScroll = throttle(() => {
       setScrolled(window.scrollY > 10);
@@ -159,7 +155,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // ---- Close mobile menu on route change ----
   useEffect(() => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
@@ -174,7 +169,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => clearTimeout(timeoutId);
   }, [location.pathname]);
 
-  // ---- Click outside dropdown ----
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userDropdownOpen && !e.target.closest('.user-dropdown')) {
@@ -200,7 +194,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen, searchOpen]);
 
-  // ---- Handlers ----
   const handleSignout = useCallback(async () => {
     setSigningOut(true);
     setUserDropdownOpen(false);
@@ -223,7 +216,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return <Link key={link.href} to={link.href} onClick={closeMobileMenu}>{link.label}</Link>;
   };
 
-  // ---- Render ----
   return (
     <div className="app-layout">
       <AnimatePresence mode="wait">
@@ -234,7 +226,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         <>
           <a href="#main-content" className="skip-link">Skip to main content</a>
 
-          {/* Header – hidden on auth pages */}
           {!isAuthPage && (
             <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
               <div className="header-container">
@@ -289,10 +280,8 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             </header>
           )}
 
-          {/* Search Overlay */}
           <SearchOverlay isOpen={searchOpen} onClose={closeSearch} />
 
-          {/* Mobile Menu */}
           <AnimatePresence>
             {mobileMenuOpen && (
               <>
@@ -333,7 +322,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             )}
           </AnimatePresence>
 
-          {/* Main content – add auth class when on auth pages */}
           <motion.main
             id="main-content"
             className={`main-content${isHomepage ? ' main-content-home' : ''}${isAuthPage ? ' main-content-auth' : ''}`}
@@ -347,7 +335,6 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             {children}
           </motion.main>
 
-          {/* Footer – hidden on auth pages */}
           {!isAuthPage && showFooter && (
             <footer className="footer-fat">
               <div className="footer-inner">
@@ -406,23 +393,21 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                 )}
               </div>
               <div className="footer-bottom">
-                {/* Smaller copyright text */}
                 <p className="footer-bottom-copy">&copy; {currentYear} {siteName}. All rights reserved.</p>
                 <nav className="footer-bottom-nav">
                   <Link to="/privacy">Privacy Policy</Link>
-                  <span className="footer-separator">•</span>
                   <Link to="/terms">Terms of Use</Link>
-                  <span className="footer-separator">•</span>
                   <Link to="/about">About Us</Link>
                 </nav>
               </div>
             </footer>
           )}
 
-          {/* Back to Top Button */}
-          <button className={`back-to-top-btn${showBackToTop ? ' visible' : ''}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
-            <FaArrowUp />
-          </button>
+          {!isAuthPage && showBackToTop && (
+            <button className="back-to-top-btn visible" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
+              <FaArrowUp />
+            </button>
+          )}
         </>
       )}
     </div>
