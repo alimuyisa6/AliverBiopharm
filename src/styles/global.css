@@ -63,7 +63,11 @@
   --space-lg: 1.25rem;
   --space-xl: 2rem;
   --space-2xl: 3rem;
-}
+--ls-tight: -0.02em;
+--ls-snug: -0.01em;
+--ls-normal: 0;
+--ls-wide: 0.08em;
+ }
 
 *,
 *::before,
