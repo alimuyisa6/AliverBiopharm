@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -68,17 +68,21 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const isMounted = useRef(true);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const {
     logo, siteName, navigation, footer, loading, authLoading, theme,
     toggleTheme, isAuthenticated, refreshUser, user,
   } = useLayout();
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  // ---- Determine if we are on an authentication page ----
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
   const currentYear = new Date().getFullYear();
   const isHomepage = location.pathname === '/';
 
+  // ---- Favicon effect (unchanged) ----
   useEffect(() => {
     if (!logo) return;
     let cancelled = false;
@@ -145,6 +149,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
 
   useEffect(() => { return () => { isMounted.current = false; }; }, []);
 
+  // ---- Scroll listener (unchanged) ----
   useEffect(() => {
     const onScroll = throttle(() => {
       setScrolled(window.scrollY > 10);
@@ -154,6 +159,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // ---- Close mobile menu on route change ----
   useEffect(() => {
     setMobileMenuOpen(false);
     setUserDropdownOpen(false);
@@ -168,6 +174,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => clearTimeout(timeoutId);
   }, [location.pathname]);
 
+  // ---- Click outside dropdown ----
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userDropdownOpen && !e.target.closest('.user-dropdown')) {
@@ -193,6 +200,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen, searchOpen]);
 
+  // ---- Handlers ----
   const handleSignout = useCallback(async () => {
     setSigningOut(true);
     setUserDropdownOpen(false);
@@ -215,6 +223,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
     return <Link key={link.href} to={link.href} onClick={closeMobileMenu}>{link.label}</Link>;
   };
 
+  // ---- Render ----
   return (
     <div className="app-layout">
       <AnimatePresence mode="wait">
@@ -225,60 +234,65 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
         <>
           <a href="#main-content" className="skip-link">Skip to main content</a>
 
-          <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
-            <div className="header-container">
-              <Link to="/" className="logo-link" aria-label={`${siteName} Home`}>
-                {logo ? <img src={logo} alt={siteName} loading="eager" /> : <span className="logo-text">{siteName}</span>}
-              </Link>
+          {/* Header – hidden on auth pages */}
+          {!isAuthPage && (
+            <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
+              <div className="header-container">
+                <Link to="/" className="logo-link" aria-label={`${siteName} Home`}>
+                  {logo ? <img src={logo} alt={siteName} loading="eager" /> : <span className="logo-text">{siteName}</span>}
+                </Link>
 
-              <nav aria-label="Main navigation">
-                <ul className="main-nav">
-                  {navigation.map((link) => <li key={link.href}>{renderNavLink(link)}</li>)}
-                </ul>
-              </nav>
+                <nav aria-label="Main navigation">
+                  <ul className="main-nav">
+                    {navigation.map((link) => <li key={link.href}>{renderNavLink(link)}</li>)}
+                  </ul>
+                </nav>
 
-              <div className="nav-actions">
-                {isHomepage && !authLoading && <NotificationBell user={user} />}
-                {headerExtras}
+                <div className="nav-actions">
+                  {isHomepage && !authLoading && <NotificationBell user={user} />}
+                  {headerExtras}
 
-                <button className={`search-toggle${searchOpen ? ' active' : ''}`} onClick={toggleSearch} aria-label="Search" aria-expanded={searchOpen}>
-                  {searchOpen ? <FaXmark /> : <FaMagnifyingGlass className="icon-cyan" />}
-                </button>
+                  <button className={`search-toggle${searchOpen ? ' active' : ''}`} onClick={toggleSearch} aria-label="Search" aria-expanded={searchOpen}>
+                    {searchOpen ? <FaXmark /> : <FaMagnifyingGlass className="icon-cyan" />}
+                  </button>
 
-                {!authLoading && isAuthenticated ? (
-                  <div className="user-dropdown">
-                    <button className="user-dropdown-trigger" onClick={(e) => { e.stopPropagation(); setUserDropdownOpen(!userDropdownOpen); }} aria-expanded={userDropdownOpen} aria-haspopup="true">
-                      <FaUser /> <FaChevronDown size={10} />
-                    </button>
-                    <div className={`user-dropdown-menu${userDropdownOpen ? ' open' : ''}`}>
-                      <Link to="/dashboard" onClick={() => setUserDropdownOpen(false)}><FaGaugeHigh className="icon-blue" /> Dashboard</Link>
-                      <Link to="/profile" onClick={() => setUserDropdownOpen(false)}><FaGear className="icon-purple" /> Profile</Link>
-                      <button onClick={() => { setUserDropdownOpen(false); handleSignout(); }} disabled={signingOut}>
-                        {signingOut ? <FaSpinner className="icon-spin" /> : <FaRightFromBracket className="icon-red" />}
-                        {signingOut ? 'Signing out...' : 'Sign Out'}
+                  {!authLoading && isAuthenticated ? (
+                    <div className="user-dropdown">
+                      <button className="user-dropdown-trigger" onClick={(e) => { e.stopPropagation(); setUserDropdownOpen(!userDropdownOpen); }} aria-expanded={userDropdownOpen} aria-haspopup="true">
+                        <FaUser /> <FaChevronDown size={10} />
                       </button>
+                      <div className={`user-dropdown-menu${userDropdownOpen ? ' open' : ''}`}>
+                        <Link to="/dashboard" onClick={() => setUserDropdownOpen(false)}><FaGaugeHigh className="icon-blue" /> Dashboard</Link>
+                        <Link to="/profile" onClick={() => setUserDropdownOpen(false)}><FaGear className="icon-purple" /> Profile</Link>
+                        <button onClick={() => { setUserDropdownOpen(false); handleSignout(); }} disabled={signingOut}>
+                          {signingOut ? <FaSpinner className="icon-spin" /> : <FaRightFromBracket className="icon-red" />}
+                          {signingOut ? 'Signing out...' : 'Sign Out'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : !authLoading && !isAuthenticated ? (
-                  <>
-                    <Link to="/login" className="nav-signin-btn"><FaRightToBracket /> Sign In</Link>
-                    <Link to="/register" className="nav-signup-btn"><FaUserPlus /> Sign Up</Link>
-                  </>
-                ) : null}
+                  ) : !authLoading && !isAuthenticated ? (
+                    <>
+                      <Link to="/login" className="nav-signin-btn"><FaRightToBracket /> Sign In</Link>
+                      <Link to="/register" className="nav-signup-btn"><FaUserPlus /> Sign Up</Link>
+                    </>
+                  ) : null}
 
-                <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-                  {theme === 'dark' ? <FaSun className="icon-orange" /> : <FaMoon className="icon-purple" />}
-                </button>
+                  <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+                    {theme === 'dark' ? <FaSun className="icon-orange" /> : <FaMoon className="icon-purple" />}
+                  </button>
 
-                <button className="mobile-toggle" onClick={(e) => { e.stopPropagation(); setSearchOpen(false); setMobileMenuOpen(true); }} aria-label="Open menu" aria-expanded={mobileMenuOpen}>
-                  <FaBars />
-                </button>
+                  <button className="mobile-toggle" onClick={(e) => { e.stopPropagation(); setSearchOpen(false); setMobileMenuOpen(true); }} aria-label="Open menu" aria-expanded={mobileMenuOpen}>
+                    <FaBars />
+                  </button>
+                </div>
               </div>
-            </div>
-          </header>
+            </header>
+          )}
 
+          {/* Search Overlay */}
           <SearchOverlay isOpen={searchOpen} onClose={closeSearch} />
 
+          {/* Mobile Menu */}
           <AnimatePresence>
             {mobileMenuOpen && (
               <>
@@ -319,11 +333,22 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             )}
           </AnimatePresence>
 
-          <motion.main id="main-content" className={`main-content${isHomepage ? ' main-content-home' : ''}`} variants={pageVariants} initial="initial" animate="in" exit="out" transition={pageTransition} key={location.pathname}>
+          {/* Main content – add auth class when on auth pages */}
+          <motion.main
+            id="main-content"
+            className={`main-content${isHomepage ? ' main-content-home' : ''}${isAuthPage ? ' main-content-auth' : ''}`}
+            variants={pageVariants}
+            initial="initial"
+            animate="in"
+            exit="out"
+            transition={pageTransition}
+            key={location.pathname}
+          >
             {children}
           </motion.main>
 
-          {showFooter && (
+          {/* Footer – hidden on auth pages */}
+          {!isAuthPage && showFooter && (
             <footer className="footer-fat">
               <div className="footer-inner">
                 <div className="footer-brand">
@@ -381,7 +406,8 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                 )}
               </div>
               <div className="footer-bottom">
-                <p>&copy; {currentYear} {siteName}. All rights reserved.</p>
+                {/* Smaller copyright text */}
+                <p className="footer-bottom-copy">&copy; {currentYear} {siteName}. All rights reserved.</p>
                 <nav className="footer-bottom-nav">
                   <Link to="/privacy">Privacy Policy</Link>
                   <span className="footer-separator">•</span>
@@ -393,6 +419,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
             </footer>
           )}
 
+          {/* Back to Top Button */}
           <button className={`back-to-top-btn${showBackToTop ? ' visible' : ''}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
             <FaArrowUp />
           </button>
