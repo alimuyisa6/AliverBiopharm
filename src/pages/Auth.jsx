@@ -400,8 +400,8 @@ export default function Auth() {
               <h2 className="auth-title">Complete Your Profile</h2>
               <p className="auth-subtitle">Help us personalise your learning experience</p>
             </div>
-            <div className="fc-progress-track">
-              <div className="fc-progress-fill" style={{ '--progress-width': `${progressPct()}%` }} />
+            <div style={{ marginBottom: '1.5rem', width: '100%', height: '4px', background: 'var(--clr-navy-light)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${progressPct()}%`, background: 'linear-gradient(90deg, var(--clr-cyan), var(--clr-magenta))', borderRadius: '4px', transition: 'width 0.3s' }} />
             </div>
             <AnimatePresence>
               {error && (
@@ -416,83 +416,87 @@ export default function Auth() {
               )}
             </AnimatePresence>
             {onboardingStep === 1 && (
-              <div className="fc-step">
-                <span className="fc-step-label">Step 1 of 3</span>
-                <h3 className="fc-step-title">I am a...</h3>
-                <div className="fc-option-grid fc-cols-1">
-                  <button
-                    className={`fc-option-btn ${role === 'student' ? 'fc-selected' : ''}`}
-                    onClick={() => { setRole('student'); setOnboardingStep(2); }}
-                  >
-                    <FaUserGraduate className="fc-option-icon" />
-                    <span className="fc-option-label">Student</span>
-                    <span className="fc-option-sub">I'm here to learn</span>
-                  </button>
-                  <button
-                    className={`fc-option-btn ${role === 'teacher' ? 'fc-selected' : ''}`}
-                    onClick={() => { setRole('teacher'); setOnboardingStep(2); }}
-                  >
-                    <FaChalkboardUser className="fc-option-icon" />
-                    <span className="fc-option-label">Teacher</span>
-                    <span className="fc-option-sub">I'm here to teach or contribute content</span>
-                  </button>
+              <div className="auth-form">
+                <div className="form-group">
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', fontWeight: 600, letterSpacing: 'var(--ls-wider)', color: 'var(--clr-cyan)', textTransform: 'uppercase' }}>Step 1 of 3</span>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-h3)', fontWeight: 700, color: 'var(--clr-white)', margin: '0.5rem 0' }}>I am a...</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <button
+                      className={`auth-submit`}
+                      style={{ background: role === 'student' ? 'linear-gradient(135deg, var(--clr-cyan), var(--clr-blue))' : 'var(--clr-deep-space)', border: '2px solid var(--clr-border-glow)', justifyContent: 'flex-start', padding: '1rem', fontSize: '1rem' }}
+                      onClick={() => { setRole('student'); setOnboardingStep(2); }}
+                    >
+                      <FaUserGraduate style={{ marginRight: '0.5rem' }} /> Student
+                    </button>
+                    <button
+                      className={`auth-submit`}
+                      style={{ background: role === 'teacher' ? 'linear-gradient(135deg, var(--clr-cyan), var(--clr-blue))' : 'var(--clr-deep-space)', border: '2px solid var(--clr-border-glow)', justifyContent: 'flex-start', padding: '1rem', fontSize: '1rem' }}
+                      onClick={() => { setRole('teacher'); setOnboardingStep(2); }}
+                    >
+                      <FaChalkboardUser style={{ marginRight: '0.5rem' }} /> Teacher
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
             {onboardingStep === 2 && (
-              <div className="fc-step">
-                <span className="fc-step-label">Step 2 of 3</span>
-                <h3 className="fc-step-title">Select your track</h3>
-                <div className="fc-option-grid fc-cols-1">
-                  {TRACKS.map(t => {
-                    const Icon = t.icon;
-                    return (
-                      <button
-                        key={t.value}
-                        className={`fc-option-btn ${track === t.value ? 'fc-selected' : ''}`}
-                        onClick={() => { setTrack(t.value); setClassName(null); setOnboardingStep(3); }}
-                      >
-                        <Icon className="fc-option-icon" />
-                        <span className="fc-option-label">{t.label}</span>
-                        <span className="fc-option-sub">{t.description}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="fc-nav-back">
-                  <button className="fc-btn fc-btn-ghost" onClick={() => { setOnboardingStep(1); setTrack(null); }}>
-                    <FaArrowLeft /> Back
-                  </button>
+              <div className="auth-form">
+                <div className="form-group">
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', fontWeight: 600, letterSpacing: 'var(--ls-wider)', color: 'var(--clr-cyan)', textTransform: 'uppercase' }}>Step 2 of 3</span>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-h3)', fontWeight: 700, color: 'var(--clr-white)', margin: '0.5rem 0' }}>Select your track</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {TRACKS.map(t => {
+                      const Icon = t.icon;
+                      return (
+                        <button
+                          key={t.value}
+                          className={`auth-submit`}
+                          style={{ background: track === t.value ? 'linear-gradient(135deg, var(--clr-cyan), var(--clr-blue))' : 'var(--clr-deep-space)', border: '2px solid var(--clr-border-glow)', justifyContent: 'flex-start', padding: '1rem', fontSize: '1rem' }}
+                          onClick={() => { setTrack(t.value); setClassName(null); setOnboardingStep(3); }}
+                        >
+                          <Icon style={{ marginRight: '0.5rem' }} /> {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div style={{ marginTop: '1rem' }}>
+                    <button className="auth-link" onClick={() => { setOnboardingStep(1); setTrack(null); }}>
+                      <FaArrowLeft /> Back
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
             {onboardingStep === 3 && (
-              <div className="fc-step">
-                <span className="fc-step-label">Step 3 of 3</span>
-                <h3 className="fc-step-title">{track === 'Pharmacy' ? 'Select your programme' : 'Select your class'}</h3>
-                <div className="fc-option-grid fc-cols-1">
-                  {classes.map(c => (
-                    <button
-                      key={c.value}
-                      className={`fc-option-btn ${className === c.value ? 'fc-selected' : ''}`}
-                      onClick={() => setClassName(c.value)}
-                    >
-                      <span className="fc-option-label">{c.label}</span>
-                      {c.description && <span className="fc-option-sub">{c.description}</span>}
+              <div className="auth-form">
+                <div className="form-group">
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', fontWeight: 600, letterSpacing: 'var(--ls-wider)', color: 'var(--clr-cyan)', textTransform: 'uppercase' }}>Step 3 of 3</span>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-h3)', fontWeight: 700, color: 'var(--clr-white)', margin: '0.5rem 0' }}>{track === 'Pharmacy' ? 'Select your programme' : 'Select your class'}</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {classes.map(c => (
+                      <button
+                        key={c.value}
+                        className={`auth-submit`}
+                        style={{ background: className === c.value ? 'linear-gradient(135deg, var(--clr-cyan), var(--clr-blue))' : 'var(--clr-deep-space)', border: '2px solid var(--clr-border-glow)', justifyContent: 'flex-start', padding: '1rem', fontSize: '1rem' }}
+                        onClick={() => setClassName(c.value)}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <button className="auth-link" onClick={() => setOnboardingStep(2)}>
+                      <FaArrowLeft /> Back
                     </button>
-                  ))}
-                </div>
-                <div className="fc-nav">
-                  <button className="fc-btn fc-btn-ghost" onClick={() => setOnboardingStep(2)}>
-                    <FaArrowLeft /> Back
-                  </button>
-                  <button
-                    className="btn-primary auth-submit"
-                    onClick={handleOnboardingFinish}
-                    disabled={!className || submitting}
-                  >
-                    {submitting ? <><InlineSpinner /> Creating account...</> : <><FaCheck /> Complete Registration</>}
-                  </button>
+                    <button
+                      className={`btn-primary auth-submit${submitting ? ' loading' : ''}`}
+                      onClick={handleOnboardingFinish}
+                      disabled={!className || submitting}
+                      style={{ minWidth: 'auto' }}
+                    >
+                      {submitting ? <><InlineSpinner /> Creating...</> : <><FaCheck /> Complete</>}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
