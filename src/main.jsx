@@ -22,6 +22,7 @@ import './styles/Profile.css';
 import './styles/Notes.css';
 import './styles/home.css';
 import './styles/auth.css';
+import './PlatformCards.css';
 import LoadingProvider from './loading/LoadingProvider';
 
 function showFatalError(title, message, stack) {
