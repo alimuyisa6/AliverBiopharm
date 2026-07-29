@@ -73,6 +73,7 @@ export default function Auth() {
   const { login } = useAuth();
   const turnstileRef = useRef(null);
   const widgetIdRef = useRef(null);
+  const widgetReadyRef = useRef(false);
   const [captchaHome, setCaptchaHome] = useState(null);
   const [captchaSlot, setCaptchaSlot] = useState(null);
   const { show, hide } = useLoading();
@@ -95,6 +96,39 @@ export default function Auth() {
     }
   }, [track]);
 
+  const renderWidget = useCallback(() => {
+    if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) return;
+    try {
+      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: () => {
+          widgetReadyRef.current = true;
+        },
+        'expired-callback': () => {
+          widgetReadyRef.current = false;
+          if (window.turnstile && widgetIdRef.current) {
+            try {
+              window.turnstile.reset(widgetIdRef.current);
+            } catch {}
+          }
+        },
+        'error-callback': () => {
+          widgetReadyRef.current = false;
+          if (window.turnstile && widgetIdRef.current) {
+            try {
+              window.turnstile.reset(widgetIdRef.current);
+            } catch {}
+          }
+          return false;
+        }
+      });
+      widgetReadyRef.current = true;
+    } catch {
+      widgetIdRef.current = null;
+      widgetReadyRef.current = false;
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     if (!document.querySelector('script[src*="turnstile"]')) {
@@ -110,18 +144,7 @@ export default function Auth() {
       attempts++;
       if (cancelled) return;
       if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
-        widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-          sitekey: TURNSTILE_SITE_KEY,
-          'expired-callback': () => {
-            if (window.turnstile && widgetIdRef.current)
-              window.turnstile.reset(widgetIdRef.current);
-          },
-          'error-callback': () => {
-            if (window.turnstile && widgetIdRef.current)
-              window.turnstile.reset(widgetIdRef.current);
-            return false;
-          }
-        });
+        renderWidget();
         clearInterval(interval);
       }
       if (attempts > 50) clearInterval(interval);
@@ -130,17 +153,41 @@ export default function Auth() {
       cancelled = true;
       clearInterval(interval);
       if (window.turnstile && widgetIdRef.current) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {}
       }
+      widgetIdRef.current = null;
+      widgetReadyRef.current = false;
     };
-  }, []);
+  }, [renderWidget]);
 
   const switchMode = useCallback((nextMode) => {
     navigate(nextMode === 'register' ? '/register' : '/login', { state: location.state, replace: true });
   }, [navigate, location.state]);
 
-  const getTurnstileToken = () => window.turnstile && widgetIdRef.current ? window.turnstile.getResponse(widgetIdRef.current) : '';
+  const getTurnstileToken = () => {
+    if (!window.turnstile || !widgetIdRef.current || !widgetReadyRef.current) return '';
+    try {
+      return window.turnstile.getResponse(widgetIdRef.current) || '';
+    } catch {
+      widgetIdRef.current = null;
+      widgetReadyRef.current = false;
+      renderWidget();
+      return '';
+    }
+  };
+
+  const resetTurnstile = () => {
+    if (!window.turnstile || !widgetIdRef.current) return;
+    try {
+      window.turnstile.reset(widgetIdRef.current);
+    } catch {
+      widgetIdRef.current = null;
+      widgetReadyRef.current = false;
+      renderWidget();
+    }
+  };
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -158,8 +205,7 @@ export default function Auth() {
         hide();
         setSubmitting(false);
         setMfaStep(true);
-        if (window.turnstile && widgetIdRef.current)
-          window.turnstile.reset(widgetIdRef.current);
+        resetTurnstile();
         return;
       }
       hide();
@@ -167,8 +213,7 @@ export default function Auth() {
     } catch (err) {
       setError(err.message || 'Login failed.');
       hide();
-      if (window.turnstile && widgetIdRef.current)
-        window.turnstile.reset(widgetIdRef.current);
+      resetTurnstile();
     } finally {
       setSubmitting(false);
     }
@@ -193,8 +238,7 @@ export default function Auth() {
       if (result?.mfa_required) {
         setMfaError('Incorrect code. Please try again.');
         hide();
-        if (window.turnstile && widgetIdRef.current)
-          window.turnstile.reset(widgetIdRef.current);
+        resetTurnstile();
         return;
       }
       hide();
@@ -202,8 +246,7 @@ export default function Auth() {
     } catch (err) {
       setMfaError(err.message || 'Verification failed.');
       hide();
-      if (window.turnstile && widgetIdRef.current)
-        window.turnstile.reset(widgetIdRef.current);
+      resetTurnstile();
     } finally {
       setSubmitting(false);
     }
@@ -213,8 +256,7 @@ export default function Auth() {
     setMfaStep(false);
     setMfaCode('');
     setMfaError('');
-    if (window.turnstile && widgetIdRef.current)
-      window.turnstile.reset(widgetIdRef.current);
+    resetTurnstile();
   }
 
   async function handleRegister(e) {
@@ -265,8 +307,7 @@ export default function Auth() {
     } catch (err) {
       setError(err.message || 'Registration failed.');
       hide();
-      if (window.turnstile && widgetIdRef.current)
-        window.turnstile.reset(widgetIdRef.current);
+      resetTurnstile();
     } finally {
       setSubmitting(false);
     }
@@ -512,221 +553,3 @@ export default function Auth() {
     );
   } else {
     content = (
-      <motion.div
-        className="auth-page"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      >
-        <div className="auth-brand-panel">
-          <div className="auth-brand-content">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="auth-brand-badge"
-            >
-              <FaGraduationCap />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="auth-label"
-            >
-              ALIVER BIOPHARM
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="auth-brand-title"
-            >
-              {mode === 'login' ? 'Welcome Back' : 'Start Your Journey'}
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="auth-brand-description"
-            >
-              {mode === 'login' ? 'Sign in to continue your learning journey' : 'Create an account and start learning today'}
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="auth-features"
-            >
-              <div className="auth-feature">
-                <FaRocket className="feature-icon feature-icon-cyan" />
-                <span>Personalized learning</span>
-              </div>
-              <div className="auth-feature">
-                <FaBook className="feature-icon feature-icon-magenta" />
-                <span>Expert resources</span>
-              </div>
-              <div className="auth-feature">
-                <FaShield className="feature-icon feature-icon-blue" />
-                <span>Secure & private</span>
-              </div>
-              <div className="auth-feature">
-                <FaUsers className="feature-icon feature-icon-orange" />
-                <span>Community learning</span>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-        <div className="auth-form-panel">
-          <motion.div
-            className="auth-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="auth-header">
-              <h2 className="auth-title">{mode === 'login' ? 'Sign In' : 'Create Account'}</h2>
-              <p className="auth-subtitle">{mode === 'login' ? 'Access your account securely' : 'Join thousands of learners worldwide'}</p>
-            </div>
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="auth-error"
-                >
-                  <span className="error-icon">⚠</span>{error}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="auth-form">
-              {mode === 'register' && (
-                <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <div className="input-wrapper">
-                    <input
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={fullName}
-                      onChange={e => setFullName(e.target.value)}
-                      onFocus={() => setFocused('name')}
-                      onBlur={() => setFocused(null)}
-                      className={`form-input${focused === 'name' ? ' input-focused' : ''}`}
-                      required
-                      disabled={submitting}
-                    />
-                    <div className="input-highlight" />
-                  </div>
-                </div>
-              )}
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
-                <div className="input-wrapper">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    onFocus={() => setFocused('email')}
-                    onBlur={() => setFocused(null)}
-                    className={`form-input${focused === 'email' ? ' input-focused' : ''}`}
-                    required
-                    disabled={submitting}
-                  />
-                  <div className="input-highlight" />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <div className="input-wrapper password-wrapper">
-                  <input
-                    type={showPassword.password ? 'text' : 'password'}
-                    placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    onFocus={() => setFocused('password')}
-                    onBlur={() => setFocused(null)}
-                    className={`form-input${focused === 'password' ? ' input-focused' : ''}`}
-                    required
-                    disabled={submitting}
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle"
-                    onClick={() => setShowPassword(prev => ({ ...prev, password: !prev.password }))}
-                    disabled={submitting}
-                  >
-                    {showPassword.password ? <FaEyeSlash /> : <FaEye />}
-                  </button>
-                  <div className="input-highlight" />
-                </div>
-                {mode === 'register' && <span className="input-hint">Minimum 8 characters</span>}
-              </div>
-              {mode === 'register' && (
-                <div className="form-group">
-                  <label className="form-label">Confirm Password</label>
-                  <div className="input-wrapper password-wrapper">
-                    <input
-                      type={showPassword.confirm ? 'text' : 'password'}
-                      placeholder="Confirm your password"
-                      value={confirm}
-                      onChange={e => setConfirm(e.target.value)}
-                      onFocus={() => setFocused('confirm')}
-                      onBlur={() => setFocused(null)}
-                      className={`form-input${focused === 'confirm' ? ' input-focused' : ''}`}
-                      required
-                      disabled={submitting}
-                    />
-                    <button
-                      type="button"
-                      className="password-toggle"
-                      onClick={() => setShowPassword(prev => ({ ...prev, confirm: !prev.confirm }))}
-                      disabled={submitting}
-                    >
-                      {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                    <div className="input-highlight" />
-                  </div>
-                </div>
-              )}
-              <div ref={setCaptchaSlot} className="auth-captcha" />
-              <motion.button
-                type="submit"
-                className={`btn-primary auth-submit${submitting ? ' loading' : ''}`}
-                disabled={submitting}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {submitting ? (
-                  <><InlineSpinner />{mode === 'login' ? 'Signing in...' : 'Creating account...'}</>
-                ) : (
-                  <>{mode === 'login' ? <><FaRightToBracket /> Sign In</> : <><FaUserPlus /> Create Account</>}</>
-                )}
-              </motion.button>
-            </form>
-            <div className="auth-footer">
-              <p className="auth-footer-text">
-                {mode === 'login' ? (
-                  <>Don't have an account? <button type="button" className="auth-link" onClick={() => switchMode('register')}>Sign Up <FaArrowRight /></button></>
-                ) : (
-                  <>Already have an account? <button type="button" className="auth-link" onClick={() => switchMode('login')}><FaArrowLeft /> Sign In</button></>
-                )}
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  return (
-    <>
-      <div ref={setCaptchaHome} style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: 0, height: 0, overflow: 'hidden', pointerEvents: 'none' }} />
-      {captchaPortal}
-      {content}
-    </>
-  );
-}
