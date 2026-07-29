@@ -1,7 +1,7 @@
  import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { saveOnboarding, getClassSequence, getPharmacyPrograms } from '../api/client';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   FaUserGraduate,
   FaChalkboardUser,
@@ -13,10 +13,7 @@ import {
   FaSpinner,
   FaCheck,
   FaGraduationCap,
-  FaBookOpen,
-  FaMicroscope,
-  FaPills,
-  FaDna
+  FaBookOpen
 } from 'react-icons/fa6';
 
 const TRACKS = [
@@ -33,10 +30,8 @@ const ROLE_ICONS = {
 export default function OnboardingFlow() {
   const { user, refresh } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const isClassOnly = searchParams.get('classOnly') === 'true' && user?.profile?.track;
 
-  const [step, setStep] = useState(isClassOnly ? 2 : 0);
+  const [step, setStep] = useState(0);
   const [role, setRole] = useState(null);
   const [track, setTrack] = useState(null);
   const [className, setClassName] = useState(null);
@@ -44,11 +39,9 @@ export default function OnboardingFlow() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const effectiveTrack = isClassOnly ? user?.profile?.track : track;
-
   useEffect(() => {
-    if (effectiveTrack) {
-      if (effectiveTrack === 'Pharmacy') {
+    if (track) {
+      if (track === 'Pharmacy') {
         getPharmacyPrograms()
           .then(data => {
             setClasses((data || []).map(p => ({
@@ -60,7 +53,7 @@ export default function OnboardingFlow() {
           })
           .catch(() => setClasses([]));
       } else {
-        getClassSequence(effectiveTrack)
+        getClassSequence(track)
           .then(data => {
             setClasses((data || []).map(c => ({
               value: c.class_name,
@@ -71,16 +64,13 @@ export default function OnboardingFlow() {
           .catch(() => setClasses([]));
       }
     }
-  }, [effectiveTrack]);
+  }, [track]);
 
   async function handleFinish() {
     setLoading(true);
     setError('');
     try {
-      const payload = isClassOnly
-        ? { class_name: className }
-        : { role, track, class_name: className };
-      await saveOnboarding(payload);
+      await saveOnboarding({ role, track, class_name: className });
       await refresh();
       navigate('/dashboard', { replace: true });
     } catch (err) {
@@ -97,7 +87,7 @@ export default function OnboardingFlow() {
     return 100;
   }
 
-  const trackColorClass = TRACKS.find(t => t.value === effectiveTrack)?.colorClass || '';
+  const trackColorClass = TRACKS.find(t => t.value === track)?.colorClass || '';
 
   return (
     <div className="onboarding-page">
@@ -109,7 +99,7 @@ export default function OnboardingFlow() {
           />
         </div>
 
-        {!isClassOnly && step === 0 && (
+        {step === 0 && (
           <div className="onboarding-step">
             <span className="onboarding-step-label">Step 1 of 3</span>
             <h1 className="onboarding-step-title">Choose Your Role</h1>
@@ -136,7 +126,7 @@ export default function OnboardingFlow() {
           </div>
         )}
 
-        {!isClassOnly && step === 1 && (
+        {step === 1 && (
           <div className="onboarding-step">
             <span className="onboarding-step-label">Step 2 of 3</span>
             <h1 className="onboarding-step-title">Select Your Track</h1>
@@ -166,16 +156,16 @@ export default function OnboardingFlow() {
           </div>
         )}
 
-        {(isClassOnly || step === 2) && (
+        {step === 2 && (
           <div className={`onboarding-step track-${trackColorClass}`}>
-            <span className="onboarding-step-label">{isClassOnly ? 'Update Your Class' : 'Step 3 of 3'}</span>
+            <span className="onboarding-step-label">Step 3 of 3</span>
             <h1 className="onboarding-step-title">
-              {effectiveTrack === 'Pharmacy' ? 'Select Your Programme' : 'Select Your Class'}
+              {track === 'Pharmacy' ? 'Select Your Programme' : 'Select Your Class'}
             </h1>
             <p className="onboarding-step-subtitle">
-              {effectiveTrack === 'Pharmacy'
+              {track === 'Pharmacy'
                 ? 'Which pharmacy programme are you enrolled in?'
-                : `Which ${effectiveTrack} class are you in?`}
+                : `Which ${track} class are you in?`}
             </p>
             <div className="onboarding-class-grid">
               {classes.map(c => {
@@ -198,11 +188,9 @@ export default function OnboardingFlow() {
             </div>
             {error && <div className="onboarding-error">{error}</div>}
             <div className="onboarding-nav onboarding-nav-final">
-              {!isClassOnly && (
-                <button className="onboarding-btn-ghost" onClick={() => setStep(1)}>
-                  <FaArrowLeft /> Back
-                </button>
-              )}
+              <button className="onboarding-btn-ghost" onClick={() => setStep(1)}>
+                <FaArrowLeft /> Back
+              </button>
               <button
                 className="onboarding-btn-primary"
                 onClick={handleFinish}
@@ -216,7 +204,7 @@ export default function OnboardingFlow() {
                 ) : (
                   <>
                     <FaCheck />
-                    {isClassOnly ? 'Update Class' : 'Complete Setup'}
+                    Complete Setup
                   </>
                 )}
               </button>
