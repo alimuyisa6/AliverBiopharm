@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLayout } from '../contexts/LayoutContext';
-import { updateProfile, changePassword, requestLevelChange, getProfile } from '../api/client';
+import { updateProfile, changePassword, updateClass, requestLevelChange, getProfile, getClassSequence, getPharmacyPrograms } from '../api/client';
 import {
   FaUser, FaEnvelope, FaLock, FaCircleCheck,
   FaSpinner, FaShield, FaKey, FaIdCard, FaFloppyDisk,
@@ -15,6 +15,8 @@ const pageVariants = {
   initial: { opacity: 0, y: 20 },
   in: { opacity: 1, y: 0 },
 };
+
+const TRACKS = ['O-Level', 'A-Level', 'Pharmacy'];
 
 function getPasswordStrength(password) {
   if (!password) return { score: 0, label: '', colorClass: '' };
@@ -46,10 +48,16 @@ export default function Profile() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState({ current: false, new: false, confirm: false });
 
-  const [changeRequestClass, setChangeRequestClass] = useState('');
-  const [changeRequestReason, setChangeRequestReason] = useState('');
-  const [changeRequestLoading, setChangeRequestLoading] = useState(false);
-  const [changeRequestMessage, setChangeRequestMessage] = useState('');
+  const [newClass, setNewClass] = useState('');
+  const [classSaving, setClassSaving] = useState(false);
+  const [classMessage, setClassMessage] = useState('');
+
+  const [levelReqTrack, setLevelReqTrack] = useState('');
+  const [levelReqClasses, setLevelReqClasses] = useState([]);
+  const [levelReqClass, setLevelReqClass] = useState('');
+  const [levelReqReason, setLevelReqReason] = useState('');
+  const [levelReqLoading, setLevelReqLoading] = useState(false);
+  const [levelReqMessage, setLevelReqMessage] = useState('');
 
   const [profileMeta, setProfileMeta] = useState(null);
   const [profileMetaError, setProfileMetaError] = useState('');
@@ -74,6 +82,23 @@ export default function Profile() {
     if (user) loadProfileMeta();
     return () => { cancelled = true; };
   }, [user]);
+
+  useEffect(() => {
+    if (!levelReqTrack) {
+      setLevelReqClasses([]);
+      return;
+    }
+    setLevelReqClass('');
+    if (levelReqTrack === 'Pharmacy') {
+      getPharmacyPrograms()
+        .then(data => setLevelReqClasses((data || []).map(p => p.program_name)))
+        .catch(() => setLevelReqClasses([]));
+    } else {
+      getClassSequence(levelReqTrack)
+        .then(data => setLevelReqClasses((data || []).map(c => c.class_name)))
+        .catch(() => setLevelReqClasses([]));
+    }
+  }, [levelReqTrack]);
 
   const passwordStrength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
 
@@ -130,19 +155,37 @@ export default function Profile() {
     }
   }
 
+  async function handleClassSubmit(e) {
+    e.preventDefault();
+    setClassSaving(true);
+    setClassMessage('');
+    try {
+      await updateClass(newClass);
+      const refreshed = await getProfile();
+      setProfileMeta(refreshed);
+      setClassMessage('Class updated.');
+      setNewClass('');
+    } catch (err) {
+      setClassMessage(err.message || 'Failed to update class.');
+    } finally {
+      setClassSaving(false);
+    }
+  }
+
   async function handleRequestLevelChange(e) {
     e.preventDefault();
-    setChangeRequestLoading(true);
-    setChangeRequestMessage('');
+    setLevelReqLoading(true);
+    setLevelReqMessage('');
     try {
-      await requestLevelChange(profileMeta?.track, changeRequestClass, changeRequestReason);
-      setChangeRequestMessage('Request submitted for admin review.');
-      setChangeRequestClass('');
-      setChangeRequestReason('');
+      await requestLevelChange(levelReqTrack, levelReqClass, levelReqReason);
+      setLevelReqMessage('Request submitted for admin review.');
+      setLevelReqTrack('');
+      setLevelReqClass('');
+      setLevelReqReason('');
     } catch (err) {
-      setChangeRequestMessage(err.message || 'Failed to submit request.');
+      setLevelReqMessage(err.message || 'Failed to submit request.');
     } finally {
-      setChangeRequestLoading(false);
+      setLevelReqLoading(false);
     }
   }
 
@@ -159,10 +202,9 @@ export default function Profile() {
   const currentLevel = profileMeta?.level_display_name || profileMeta?.track || 'Not set';
   const currentClass = profileMeta?.class_name || 'Not set';
   const classLabel = profileMeta?.class_label || 'Class';
-  const classOptions = profileMeta?.class_options || [];
+  const classOptions = (profileMeta?.class_options || []).filter(c => c !== currentClass);
   const isTeacher = profileMeta?.role === 'teacher';
 
-  // Determine ring color class based on track
   const trackRingClass = profileMeta?.track
     ? (profileMeta.track === 'O-Level' ? 'profile-ring-olevel' : profileMeta.track === 'A-Level' ? 'profile-ring-alevel' : 'profile-ring-pharmacy')
     : 'profile-ring-blue';
@@ -190,14 +232,15 @@ export default function Profile() {
                 {profileMeta?.is_approved_teacher ? 'Approved Teacher' : 'Pending Approval'}
               </span>
             )}
+            {isTeacher && profileMeta?.approved_track === 'ALL' && (
+              <span className="chip chip-green">All Levels Access</span>
+            )}
           </div>
         </div>
         <div className={`profile-avatar-ring ${trackRingClass}`}>
           <ProfilePictureUpload
             currentUrl={user?.profile?.profile_picture_url}
-            onUpdate={(url) => {
-              refreshUser();
-            }}
+            onUpdate={() => refreshUser()}
             size={80}
           />
         </div>
@@ -503,76 +546,146 @@ export default function Profile() {
                 <span className="profile-info-label">Current {classLabel}</span>
                 <span className="profile-info-value">{currentClass}</span>
               </div>
-              <div className="profile-info-row">
-                <span className="profile-info-label">Available {classLabel}s</span>
-                <span className="profile-info-value">{classOptions.join(', ') || '—'}</span>
-              </div>
             </div>
 
-            <div className="profile-divider"></div>
+            {!isTeacher || (isTeacher && profileMeta?.approved_track !== 'ALL') ? (
+              <>
+                <div className="profile-divider"></div>
 
-            <div className="profile-change-section">
-              <h3 className="profile-change-title">
-                <FaArrowRightArrowLeft className="label-icon label-icon-orange" />
-                Request {classLabel} Change
-              </h3>
-              <p className="profile-change-hint">
-                Submit a request to change your {classLabel.toLowerCase()}.
-                An admin will review and approve it.
-              </p>
+                <div className="profile-change-section">
+                  <h3 className="profile-change-title">
+                    <FaArrowRightArrowLeft className="label-icon label-icon-cyan" />
+                    Change {classLabel}
+                  </h3>
+                  <p className="profile-change-hint">
+                    Switch to another {classLabel.toLowerCase()} within your current level. This takes effect immediately.
+                  </p>
 
-              <form onSubmit={handleRequestLevelChange} className="profile-change-form">
-                <div className="form-group">
-                  <label className="form-label">New {classLabel}</label>
-                  <select
-                    value={changeRequestClass}
-                    onChange={e => setChangeRequestClass(e.target.value)}
-                    className="form-input"
-                    required
-                    disabled={classOptions.length === 0}
-                  >
-                    <option value="">Select {classLabel}</option>
-                    {classOptions.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
+                  <form onSubmit={handleClassSubmit} className="profile-change-form">
+                    <div className="form-group">
+                      <label className="form-label">New {classLabel}</label>
+                      <select
+                        value={newClass}
+                        onChange={e => setNewClass(e.target.value)}
+                        className="form-input"
+                        required
+                        disabled={classOptions.length === 0}
+                      >
+                        <option value="">Select {classLabel}</option>
+                        {classOptions.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {classMessage && (
+                      <div className={`alert ${classMessage.includes('updated') ? 'alert-success' : 'alert-error'}`}>
+                        {classMessage}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="btn-primary profile-change-btn"
+                      disabled={classSaving || !newClass}
+                    >
+                      {classSaving ? (
+                        <>
+                          <FaSpinner className="icon-spin" /> Updating...
+                        </>
+                      ) : (
+                        <>
+                          <FaArrowRightArrowLeft /> Update {classLabel}
+                        </>
+                      )}
+                    </button>
+                  </form>
                 </div>
+              </>
+            ) : null}
 
-                <div className="form-group">
-                  <label className="form-label">Reason for Change</label>
-                  <textarea
-                    value={changeRequestReason}
-                    onChange={e => setChangeRequestReason(e.target.value)}
-                    className="form-input"
-                    rows="3"
-                    placeholder="Why do you want to change your class?"
-                    required
-                  />
+            {!isTeacher && (
+              <>
+                <div className="profile-divider"></div>
+
+                <div className="profile-change-section">
+                  <h3 className="profile-change-title">
+                    <FaArrowRightArrowLeft className="label-icon label-icon-orange" />
+                    Request Level Change
+                  </h3>
+                  <p className="profile-change-hint">
+                    Moving to a different level (O-Level, A-Level, Pharmacy) requires admin approval.
+                  </p>
+
+                  <form onSubmit={handleRequestLevelChange} className="profile-change-form">
+                    <div className="form-group">
+                      <label className="form-label">New Level</label>
+                      <select
+                        value={levelReqTrack}
+                        onChange={e => setLevelReqTrack(e.target.value)}
+                        className="form-input"
+                        required
+                      >
+                        <option value="">Select Level</option>
+                        {TRACKS.map(t => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">New Class/Programme</label>
+                      <select
+                        value={levelReqClass}
+                        onChange={e => setLevelReqClass(e.target.value)}
+                        className="form-input"
+                        required
+                        disabled={levelReqClasses.length === 0}
+                      >
+                        <option value="">Select Class</option>
+                        {levelReqClasses.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Reason for Change</label>
+                      <textarea
+                        value={levelReqReason}
+                        onChange={e => setLevelReqReason(e.target.value)}
+                        className="form-input"
+                        rows="3"
+                        placeholder="Why do you want to change your level?"
+                        required
+                      />
+                    </div>
+
+                    {levelReqMessage && (
+                      <div className={`alert ${levelReqMessage.includes('submitted') ? 'alert-success' : 'alert-error'}`}>
+                        {levelReqMessage}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="btn-primary profile-change-btn"
+                      disabled={levelReqLoading || !levelReqTrack || !levelReqClass}
+                    >
+                      {levelReqLoading ? (
+                        <>
+                          <FaSpinner className="icon-spin" /> Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <FaArrowRightArrowLeft /> Request Level Change
+                        </>
+                      )}
+                    </button>
+                  </form>
                 </div>
-
-                {changeRequestMessage && (
-                  <div className={`alert ${changeRequestMessage.includes('submitted') ? 'alert-success' : 'alert-error'}`}>
-                    {changeRequestMessage}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="btn-primary profile-change-btn"
-                  disabled={changeRequestLoading || !changeRequestClass}
-                >
-                  {changeRequestLoading ? (
-                    <>
-                      <FaSpinner className="icon-spin" /> Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <FaArrowRightArrowLeft /> Request {classLabel} Change
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
+              </>
+            )}
           </div>
         </motion.div>
       </div>
