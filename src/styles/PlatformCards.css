@@ -14,7 +14,7 @@
 
 .platform-card {
   background: var(--clr-navy-card);
-  border: 1px solid var(--clr-border-glow);
+  border: 1px solid color-mix(in srgb, var(--platform-primary-color, var(--clr-cyan)) 30%, var(--clr-border-glow));
   border-radius: var(--radius-lg);
   padding: 2rem 1.5rem;
   transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
