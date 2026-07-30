@@ -1,6 +1,6 @@
- import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { bootstrapPlatform } from '../api/cachedClient';
+import { bootstrapPlatform, switchClass as switchClassApi } from '../api/cachedClient';
 
 const LayoutContext = createContext(null);
 
@@ -21,15 +21,29 @@ export function useLayout() {
 export function LayoutProvider({ children }) {
   const [bootstrap, setBootstrap] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user, loading: authLoading } = useAuth();
+  const [switching, setSwitching] = useState(false);
+  const { user, loading: authLoading, refreshUser } = useAuth();
+
+  const effectiveLevel = user?.profile?.active_level_id || user?.profile?.track || 'O-Level';
+  const activeGroupId = user?.profile?.active_group_id || null;
 
   useEffect(() => {
-    const level = user?.profile?.track || 'O-Level';
-    bootstrapPlatform(level)
+    setLoading(true);
+    bootstrapPlatform(effectiveLevel)
       .then(data => setBootstrap(data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [user?.profile?.track]);
+  }, [effectiveLevel, activeGroupId]);
+
+  const switchClass = useCallback(async (groupId) => {
+    setSwitching(true);
+    try {
+      await switchClassApi(groupId);
+      await refreshUser();
+    } finally {
+      setSwitching(false);
+    }
+  }, [refreshUser]);
 
   const value = useMemo(() => {
     const isReady = !loading && !authLoading;
@@ -54,6 +68,11 @@ export function LayoutProvider({ children }) {
       socialLinks: [],
       footerLinks: [],
       colorTheme: DEFAULT_COLOR_THEME,
+      authLoading,
+      refreshUser,
+      switchClass,
+      switching,
+      activeGroupId
     };
 
     if (!isReady || !bootstrap) return fallback;
@@ -83,12 +102,17 @@ export function LayoutProvider({ children }) {
       socialLinks: bootstrap.footer?.social_links || {},
       footerLinks: bootstrap.footer?.quick_links || [],
       colorTheme,
+      authLoading,
+      refreshUser,
+      switchClass,
+      switching,
+      activeGroupId
     };
-  }, [bootstrap, loading, authLoading, user]);
+  }, [bootstrap, loading, authLoading, user, refreshUser, switchClass, switching, activeGroupId]);
 
   return (
     <LayoutContext.Provider value={value}>
       {children}
     </LayoutContext.Provider>
   );
-}
+} 
