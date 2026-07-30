@@ -1,88 +1,28 @@
+ /* hooks/useContentAccess.js */
 import { useAuth } from '../contexts/AuthContext';
 
 export function useContentAccess() {
   const { user } = useAuth();
 
   if (!user?.profile) {
-    return {
-      canAccess: false,
-      reason: 'no_profile',
-      level: null,
-      showAll: false,
-      isTeacher: false,
-      isStudent: false,
-      isPending: false,
-      isApproved: false
-    };
+    return { canAccess: false, reason: 'no_profile', level: null, showAll: false, isPending: false };
   }
 
-  const profile = user.profile;
-  const isStudent = profile.role === 'student';
-  const isTeacher = profile.role === 'teacher';
-  const isApproved = profile.is_approved_teacher === true;
-  const track = profile.track;
-  const approvedTrack = profile.approved_track;
+  const { role, track, is_approved_teacher, approved_track } = user.profile;
 
-  if (isStudent) {
-    return {
-      canAccess: true,
-      reason: 'student',
-      level: track,
-      showAll: false,
-      isTeacher: false,
-      isStudent: true,
-      isPending: false,
-      isApproved: false
-    };
+  if (role === 'student') {
+    return { canAccess: true, reason: 'student', level: track, showAll: false, isPending: false };
   }
 
-  if (isTeacher) {
-    if (!isApproved) {
-      return {
-        canAccess: false,
-        reason: 'pending_approval',
-        level: null,
-        showAll: false,
-        isTeacher: true,
-        isStudent: false,
-        isPending: true,
-        isApproved: false
-      };
+  if (role === 'teacher') {
+    if (!is_approved_teacher) {
+      return { canAccess: false, reason: 'pending_approval', level: null, showAll: false, isPending: true };
     }
-
-    if (approvedTrack === 'ALL') {
-      return {
-        canAccess: true,
-        reason: 'approved_teacher_all',
-        level: null,
-        showAll: true,
-        isTeacher: true,
-        isStudent: false,
-        isPending: false,
-        isApproved: true
-      };
+    if (approved_track === 'ALL') {
+      return { canAccess: true, reason: 'approved_teacher_all', level: null, showAll: true, isPending: false };
     }
-
-    return {
-      canAccess: true,
-      reason: 'approved_teacher',
-      level: approvedTrack || track,
-      showAll: false,
-      isTeacher: true,
-      isStudent: false,
-      isPending: false,
-      isApproved: true
-    };
+    return { canAccess: true, reason: 'approved_teacher', level: approved_track || track, showAll: false, isPending: false };
   }
 
-  return {
-    canAccess: false,
-    reason: 'unknown',
-    level: null,
-    showAll: false,
-    isTeacher: false,
-    isStudent: false,
-    isPending: false,
-    isApproved: false
-  };
+  return { canAccess: false, reason: 'unknown', level: null, showAll: false, isPending: false };
 }
