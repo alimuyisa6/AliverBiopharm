@@ -49,6 +49,12 @@ const overlayVariants = {
   exit: { opacity: 0 },
 };
 
+const LEVEL_BODY_CLASS = {
+  'O-Level': 'level-olevel',
+  'A-Level': 'level-alevel',
+  'Pharmacy': 'level-pharmacy'
+};
+
 const throttle = (fn, limit) => {
   let inThrottle;
   return function(...args) {
@@ -80,6 +86,17 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
   const currentYear = new Date().getFullYear();
   const isHomepage = location.pathname === '/';
+
+  useEffect(() => {
+    const track = user?.profile?.track;
+    const allClasses = Object.values(LEVEL_BODY_CLASS);
+    document.body.classList.remove(...allClasses);
+    const targetClass = LEVEL_BODY_CLASS[track];
+    if (targetClass) document.body.classList.add(targetClass);
+    return () => {
+      document.body.classList.remove(...allClasses);
+    };
+  }, [user?.profile?.track]);
 
   useEffect(() => {
     if (!logo) return;
