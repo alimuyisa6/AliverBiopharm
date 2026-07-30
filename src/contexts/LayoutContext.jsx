@@ -1,44 +1,45 @@
+/* contexts/LayoutContext.jsx */
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { bootstrapPlatform, switchClass as switchClassApi } from '../api/cachedClient';
+import { bootstrapPlatform, switchClass } from '../api/cachedClient';
 
-const LayoutContext = createContext(null);
-
-const DEFAULT_COLOR_THEME = {
-  theme: { primary_color: '#0a7e7e' },
-  navigation: {},
-  search_config: {},
-  branding: {},
-  features: {}
-};
-
-export function useLayout() {
-  const context = useContext(LayoutContext);
-  if (!context) throw new Error('useLayout must be used within LayoutProvider');
-  return context;
-}
+export const LayoutContext = createContext(null);
 
 export function LayoutProvider({ children }) {
+  const { user, loading: authLoading, refresh } = useAuth();
   const [bootstrap, setBootstrap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState(false);
-  const { user, loading: authLoading, refresh } = useAuth();
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
   const effectiveLevel = user?.profile?.active_level_id || user?.profile?.track || 'O-Level';
   const activeGroupId = user?.profile?.active_group_id || null;
 
   useEffect(() => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
     setLoading(true);
     bootstrapPlatform(effectiveLevel)
-      .then(data => setBootstrap(data))
+      .then(setBootstrap)
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [effectiveLevel, activeGroupId]);
 
-  const switchClass = useCallback(async (groupId) => {
+  const toggleTheme = useCallback(() => {
+    setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+  }, []);
+
+  const handleSwitchClass = useCallback(async (groupId) => {
     setSwitching(true);
     try {
-      await switchClassApi(groupId);
+      await switchClass(groupId);
       await refresh();
     } finally {
       setSwitching(false);
@@ -47,72 +48,46 @@ export function LayoutProvider({ children }) {
 
   const value = useMemo(() => {
     const isReady = !loading && !authLoading;
-    const fallback = {
-      universal: null,
-      logo: null,
-      platform: null,
-      header: {},
-      footer: {},
-      landing: null,
-      onboardingConfig: null,
-      groups: [],
-      level: null,
-      user,
-      isAuthenticated: !!user,
-      primaryColor: '#0a7e7e',
-      accentColor: '#b8873a',
-      fontFamily: 'Inter',
-      levelIcon: 'fa-seedling',
-      navItems: [],
-      navigation: [],
-      socialLinks: [],
-      footerLinks: [],
-      colorTheme: DEFAULT_COLOR_THEME,
-      authLoading,
-      refreshUser: refresh,
-      switchClass,
-      switching,
-      activeGroupId
-    };
-
-    if (!isReady || !bootstrap) return fallback;
-
-    const colorTheme = bootstrap.theme || DEFAULT_COLOR_THEME;
-    const themeColors = colorTheme.theme || {};
+    if (!isReady || !bootstrap) {
+      return {
+        loading: true, logo: null, siteName: 'AliverBiopharm', navigation: [],
+        footer: { quick_links: [], resource_links: [], community_links: [], social_links: {} },
+        groups: [], level: null, user, isAuthenticated: !!user,
+        colorTheme: {}, theme, toggleTheme, authLoading,
+        refreshUser: refresh, switchClass: handleSwitchClass, switching, activeGroupId,
+      };
+    }
 
     return {
       loading: false,
-      universal: bootstrap.universal,
-      logo: bootstrap.universal?.logo_url,
-      platform: bootstrap.platform,
-      header: bootstrap.header || {},
-      footer: bootstrap.footer || {},
-      landing: bootstrap.landing,
-      onboardingConfig: bootstrap.onboarding_config,
+      logo: bootstrap.universal?.logo_url || null,
+      siteName: bootstrap.universal?.site_name || 'AliverBiopharm',
+      navigation: bootstrap.header?.nav_items || [],
+      footer: bootstrap.footer || { quick_links: [], resource_links: [], community_links: [], social_links: {} },
       groups: bootstrap.groups || [],
       level: bootstrap.level,
       user,
       isAuthenticated: !!user,
-      primaryColor: themeColors.primary_color || bootstrap.platform?.primary_color || '#0a7e7e',
-      accentColor: themeColors.accent_color || bootstrap.platform?.accent_color || '#b8873a',
-      fontFamily: themeColors.font_family || bootstrap.platform?.font_family || 'Inter',
-      levelIcon: bootstrap.level?.icon || 'fa-seedling',
-      navItems: bootstrap.header?.nav_items || [],
-      navigation: bootstrap.header?.nav_items || [],
-      socialLinks: bootstrap.footer?.social_links || {},
-      footerLinks: bootstrap.footer?.quick_links || [],
-      colorTheme,
+      colorTheme: bootstrap.theme || {},
+      theme,
+      toggleTheme,
       authLoading,
       refreshUser: refresh,
-      switchClass,
+      switchClass: handleSwitchClass,
       switching,
-      activeGroupId
+      activeGroupId,
     };
-  }, [bootstrap, loading, authLoading, user, refresh, switchClass, switching, activeGroupId]);
+  }, [bootstrap, loading, authLoading, user, theme, toggleTheme, refresh, handleSwitchClass, switching, activeGroupId]);
 
   return (
     <LayoutContext.Provider value={value}>
       {children}
     </LayoutContext.Provider>
   );
+}
+
+export function useLayout() {
+  const ctx = useContext(LayoutContext);
+  if (!ctx) throw new Error('useLayout must be used within LayoutProvider');
+  return ctx;
 } 
