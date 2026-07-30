@@ -269,6 +269,7 @@ export async function globalSearch(q) { return getRequest('search', 'global', { 
 export async function getProfile() { return getRequest('profile', 'get_profile'); }
 export async function saveOnboarding(payload) { return apiCall('profile', 'save_onboarding', payload); }
 export async function updateClass(class_name) { return apiCall('profile', 'update_class', { class_name }); }
+export async function switchClass(group_id) { return apiCall('profile', 'switch_class', { group_id }); }
 export async function requestLevelChange(track, className, reason) { return apiCall('profile', 'request_level_change', { requested_track: track, requested_class: className, reason }); }
 export async function getClassSequence(track) { return getRequest('profile', 'class_sequence', { track }); }
 export async function getPharmacyPrograms() { return getRequest('profile', 'pharmacy_programs'); }
