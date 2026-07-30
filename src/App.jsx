@@ -14,8 +14,7 @@ import BioRecall from './pages/Recall';
 import LegalPage from './pages/LegalPage';
 import Glossary from './pages/Glossary';
 import AboutPage from './pages/AboutPage';
-import InfoPage from './pages/PageInfo';
-import LearningLab from './pages/LearningLab';
+ 
 import FlashcardsPage from './pages/FlashcardsPage';
 import Classroom from './pages/Classroom';
 import ClassroomRoom from './pages/ClassroomRoom';
@@ -107,7 +106,7 @@ function AnimatedRoutes() {
         <Route path="/classroom/:roomId" element={<Layout><ProtectedRoute><ClassroomRoom /></ProtectedRoute></Layout>} />
         <Route path="/tutor/apply" element={<Layout><ProtectedRoute><TutorApply /></ProtectedRoute></Layout>} />
         <Route path="/tutor/dashboard" element={<Layout><ProtectedRoute><TutorDashboard /></ProtectedRoute></Layout>} />
-        <Route path="/info/:slug" element={<Layout><InfoPage /></Layout>} />
+         
         <Route path="*" element={<Layout><div className="section" style={{ textAlign: 'center', paddingTop: '6rem' }}><h1 className="section-title">404</h1><p className="section-subtitle">Page not found</p></div></Layout>} />
       </Routes>
     </AnimatePresence>
