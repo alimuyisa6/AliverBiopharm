@@ -1,4 +1,4 @@
- import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
@@ -97,7 +97,7 @@ function AnimatedRoutes() {
         <Route path="/notes/read" element={<Layout><ProtectedRoute><NoteDetail /></ProtectedRoute></Layout>} />
         <Route path="/glossary/:slug" element={<Layout><ProtectedRoute><Glossary /></ProtectedRoute></Layout>} />
         <Route path="/glossary" element={<Layout><ProtectedRoute><Glossary /></ProtectedRoute></Layout>} />
-        <Route path="/lab" element={<Layout><ProtectedRoute><LearningLab /></ProtectedRoute></Layout>} />
+        
         <Route path="/about" element={<Layout><AboutPage /></Layout>} />
         <Route path="/flashcards" element={<Layout><ProtectedRoute><FlashcardsPage /></ProtectedRoute></Layout>} />
         <Route path="/terms" element={<Layout><LegalPage type="terms" /></Layout>} />
@@ -124,4 +124,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 
