@@ -11,6 +11,7 @@ import { signout } from '../api/client';
 import NotificationBell from './NotificationBell';
 import SearchOverlay from './SearchOverlay';
 import SplashScreen from './SplashScreen';
+import ClassSwitcher from './ClassSwitcher';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -240,6 +241,7 @@ export default function Layout({ children, headerExtras, showFooter = true }) {
                 </nav>
 
                 <div className="nav-actions">
+                  {!authLoading && isAuthenticated && <ClassSwitcher />}
                   {isHomepage && !authLoading && <NotificationBell user={user} />}
                   {headerExtras}
 
