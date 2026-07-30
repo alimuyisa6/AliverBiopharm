@@ -1,36 +1,36 @@
- import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+/* contexts/AuthContext.jsx */
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getUser, signin, signout, getProfile } from '../api/client';
-import { Navigate, useLocation } from 'react-router-dom';
-import { FaSpinner } from 'react-icons/fa6';
+import Spinner from '../components/Spinner/Spinner';
 
 export const AuthContext = createContext(null);
 
-const SESSION_REFRESH_INTERVAL = 12 * 60 * 1000;
+const REFRESH_INTERVAL = 12 * 60 * 1000;
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const refreshIntervalRef = useRef(null);
-  const inactivityTimeoutRef = useRef(null);
+  const refreshRef = useRef(null);
+  const inactivityRef = useRef(null);
   const lastActivityRef = useRef(Date.now());
 
   const checkAuth = useCallback(async () => {
     try {
       const data = await getUser();
       if (data?.user) {
-        const profileData = await getProfile();
+        const profile = await getProfile();
         setUser({
           ...data.user,
-          profile: profileData || {
+          profile: profile || {
             role: 'student',
             track: null,
             class_name: null,
             onboarding_completed: false,
             is_approved_teacher: false,
             approved_track: null,
-            approval_notes: null
-          }
+          },
         });
         lastActivityRef.current = Date.now();
       } else {
@@ -49,111 +49,92 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!user) {
-      if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
-      if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
+      clearInterval(refreshRef.current);
+      clearTimeout(inactivityRef.current);
       return;
     }
 
-    refreshIntervalRef.current = setInterval(() => {
-      const timeSinceLastActivity = Date.now() - lastActivityRef.current;
-      if (timeSinceLastActivity < INACTIVITY_TIMEOUT) {
+    refreshRef.current = setInterval(() => {
+      if (Date.now() - lastActivityRef.current < INACTIVITY_TIMEOUT) {
         checkAuth();
       }
-    }, SESSION_REFRESH_INTERVAL);
+    }, REFRESH_INTERVAL);
 
-    const resetInactivityTimer = () => {
+    const resetTimer = () => {
       lastActivityRef.current = Date.now();
-
-      if (inactivityTimeoutRef.current) {
-        clearTimeout(inactivityTimeoutRef.current);
-      }
-
-      inactivityTimeoutRef.current = setTimeout(() => {
-        setUser(null);
-      }, INACTIVITY_TIMEOUT);
+      clearTimeout(inactivityRef.current);
+      inactivityRef.current = setTimeout(() => setUser(null), INACTIVITY_TIMEOUT);
     };
 
-    const events = ['mousedown', 'keydown', 'touchstart', 'mousemove'];
-    events.forEach(event => {
-      window.addEventListener(event, resetInactivityTimer, { passive: true });
-    });
+    ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((ev) =>
+      window.addEventListener(ev, resetTimer, { passive: true })
+    );
 
-    resetInactivityTimer();
+    resetTimer();
 
     return () => {
-      if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
-      if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
-      events.forEach(event => {
-        window.removeEventListener(event, resetInactivityTimer);
-      });
+      ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((ev) =>
+        window.removeEventListener(ev, resetTimer)
+      );
     };
   }, [user, checkAuth]);
 
   const login = useCallback(async (email, password, turnstileToken, mfaCode) => {
     const result = await signin(email, password, turnstileToken, mfaCode);
-    if (result?.mfa_required) {
-      return result;
-    }
+    if (result?.mfa_required) return result;
     await checkAuth();
     return result;
   }, [checkAuth]);
 
   const logout = useCallback(async () => {
-    if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
-    if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current);
-    try {
-      await signout();
-    } catch {}
+    clearInterval(refreshRef.current);
+    clearTimeout(inactivityRef.current);
+    try { await signout(); } catch {}
     setUser(null);
   }, []);
 
-  const refresh = useCallback(async () => {
-    await checkAuth();
-  }, [checkAuth]);
+  const refresh = useCallback(() => checkAuth(), [checkAuth]);
 
-  const value = {
-    user,
-    loading,
-    isAuthenticated: !!user,
-    login,
-    logout,
-    refresh,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, logout, refresh }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
 }
 
 export function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
-      <div className="protected-loading">
-        <FaSpinner className="icon-spin" />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <Spinner size="lg" />
       </div>
     );
   }
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    navigate('/login', { replace: true, state: { from: location } });
+    return null;
   }
 
-  if (!user.profile?.onboarding_completed && location.pathname !== '/onboarding' && location.pathname !== '/profile') {
-    return <Navigate to="/onboarding" replace />;
+  if (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') {
+    navigate('/onboarding', { replace: true });
+    return null;
   }
 
   if (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding') {
-    return <Navigate to="/onboarding" replace />;
+    navigate('/onboarding', { replace: true });
+    return null;
   }
 
   return children;
-}
+} 
