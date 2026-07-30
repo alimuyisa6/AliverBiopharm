@@ -1,0 +1,41 @@
+/* styles/progress.css */
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--ease-smooth);
+}
+
+.progress-primary .progress-fill { background: var(--primary); }
+.progress-success .progress-fill { background: var(--success); }
+.progress-warning .progress-fill { background: var(--warning); }
+.progress-accent .progress-fill { background: var(--accent); }
+.progress-gradient .progress-fill {
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--border-default) 25%, var(--bg-card-hover) 50%, var(--border-default) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-sm { width: 16px; height: 16px; border-width: 2px; }
+.spinner-lg { width: 40px; height: 40px; border-width: 4px; }
