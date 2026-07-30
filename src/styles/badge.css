@@ -1,0 +1,46 @@
+/* styles/badge.css */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.badge-primary { background: var(--primary-light); color: var(--primary); }
+.badge-secondary { background: var(--secondary-light); color: var(--secondary); }
+.badge-accent { background: var(--accent-light); color: var(--accent); }
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-warning { background: var(--warning-light); color: var(--warning); }
+.badge-error { background: var(--error-light); color: var(--error); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  border: 1px solid var(--border-default);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot-success { background: var(--success); }
+.status-dot-warning { background: var(--warning); }
+.status-dot-error { background: var(--error); }
+.status-dot-info { background: var(--info); }
+
+.level-badge-olevel { background: var(--level-olevel); color: #fff; }
+.level-badge-alevel { background: var(--level-alevel); color: #fff; }
+.level-badge-pharmacy { background: var(--level-pharmacy); color: #fff; }
