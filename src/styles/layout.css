@@ -1,4 +1,4 @@
-/* styles/layout.css */
+ /* styles/layout.css */
 .site-header {
   position: fixed;
   top: 0;
@@ -258,4 +258,15 @@ body.dark-mode .site-header {
   transition: all var(--ease-fast);
 }
 
-.f
+.footer-social-link:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .main-nav { display: none; }
+  .hamburger-btn { display: flex; }
+  .footer-inner { grid-template-columns: 1fr; gap: var(--space-8); }
+  .footer-bottom { flex-direction: column; gap: var(--space-4); text-align: center; }
+}
