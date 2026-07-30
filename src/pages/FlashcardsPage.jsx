@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
-import FlashcardSubjectSelect from '../components/FlashcardSubjectSelect';
+ 
 import FlashcardDeckView from '../components/FlashcardDeckView';
 import FlashcardProgress from '../components/Flashcardprogress';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
