@@ -220,6 +220,14 @@ export function invalidateClassroomCache(room_id) {
   invalidateCache(`classroom_messages_${room_id}`);
   invalidateCache(`classroom_participants_${room_id}`);
 }
+
+export const switchClass = async (groupId) => {
+  const result = await api.switchClass(groupId);
+  invalidateCacheByPattern('bootstrap_');
+  invalidateCacheByPattern('units_');
+  invalidateCacheByPattern('user_');
+  return result;
+};
 export function invalidateRecallCache() {
   invalidateCacheByPattern('recall_');
 }
