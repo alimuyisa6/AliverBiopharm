@@ -1,29 +1,23 @@
- import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+ /* pages/Home.jsx */
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HomeView from '../features/home/HomeView';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import {
-  getPublicStats,
-  getCommunityActivity,
-  getContinueReading,
-  getUserStreak,
-  submitMood,
-  submitContact,
-  subscribeNewsletter,
-  submitWeeklyChallenge,
-  requestChat,
-  getChatMessages,
-  sendChatMessage,
-  deleteChatMessage,
-  checkAdminOnline,
+  getPublicStats, getCommunityActivity, getContinueReading,
+  getUserStreak, submitMood, submitContact, subscribeNewsletter,
+  submitWeeklyChallenge, requestChat, getChatMessages, sendChatMessage,
+  deleteChatMessage, checkAdminOnline,
 } from '../api/cachedClient';
 import { getSections } from '../api/sections';
+import HomeView from '../features/home/HomeView';
 
 export default function Home() {
   const { user } = useAuth();
   const { level, groups } = useLayout();
   const navigate = useNavigate();
+  const chatBodyRef = useRef(null);
+  const currentYear = new Date().getFullYear();
 
   const [sections, setSections] = useState({});
   const [publicStats, setPublicStats] = useState(null);
@@ -39,12 +33,10 @@ export default function Home() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [adminOnline, setAdminOnline] = useState(false);
-  const chatBodyRef = useRef(null);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [contactStatus, setContactStatus] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState(null);
-  const currentYear = new Date().getFullYear();
 
   const activeGroupName = useMemo(() => {
     if (!user?.profile?.active_group_id || !groups?.length) return null;
@@ -58,49 +50,48 @@ export default function Home() {
     getPublicStats().then(setPublicStats).catch(() => {});
     getCommunityActivity().then(setCommunityActivity).catch(() => {});
     checkAdminOnline().then(res => setAdminOnline(res?.online)).catch(() => {});
-
     if (user) {
-      getContinueReading()
-        .then(data => setContinueLearning(Array.isArray(data) ? data : []))
-        .catch(() => {});
-      getUserStreak()
-        .then(res => setStreak(res?.count || 0))
-        .catch(() => {});
+      getContinueReading().then(data => setContinueLearning(Array.isArray(data) ? data : [])).catch(() => {});
+      getUserStreak().then(res => setStreak(res?.count || 0)).catch(() => {});
     }
   }, [user, level]);
 
-  async function handleMoodSubmit() {
+  const handleMoodSubmit = useCallback(async () => {
     if (!moodSelected) return;
-    try { await submitMood(moodSelected, moodMessage); setMoodSubmitted(true); } catch (e) {}
-  }
+    try { await submitMood(moodSelected, moodMessage); setMoodSubmitted(true); } catch {}
+  }, [moodSelected, moodMessage]);
 
-  async function handleWeeklyChallengeSubmit(i, correct, explanation) {
+  const handleWeeklyChallengeSubmit = useCallback(async (i, correct, explanation) => {
     if (!user) return;
     setWeeklyChallengeAnswer({ correct: i === correct, explanation });
-    try { await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), i); } catch (e) {}
-  }
+    try { await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), i); } catch {}
+  }, [user]);
 
-  async function handleContactSubmit(e) {
+  const handleContactSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) return;
     try {
       await submitContact(contactForm);
       setContactStatus({ success: true, message: 'Message sent!' });
       setContactForm({ name: '', email: '', subject: '', message: '' });
-    } catch (e) { setContactStatus({ success: false, message: e.message }); }
-  }
+    } catch (err) {
+      setContactStatus({ success: false, message: err.message });
+    }
+  }, [contactForm]);
 
-  async function handleNewsletterSubmit(e) {
+  const handleNewsletterSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!newsletterEmail) return;
     try {
       await subscribeNewsletter(newsletterEmail);
       setNewsletterStatus({ success: true, message: 'Subscribed!' });
       setNewsletterEmail('');
-    } catch (e) { setNewsletterStatus({ success: false, message: e.message }); }
-  }
+    } catch (err) {
+      setNewsletterStatus({ success: false, message: err.message });
+    }
+  }, [newsletterEmail]);
 
-  async function requestChatRoom() {
+  const handleRequestChat = useCallback(async () => {
     if (!user) return;
     try {
       const res = await requestChat();
@@ -110,26 +101,26 @@ export default function Home() {
         const messages = await getChatMessages(res.room_id);
         setChatMessages(Array.isArray(messages) ? messages : []);
       }
-    } catch (e) {}
-  }
+    } catch {}
+  }, [user]);
 
-  async function sendChat() {
+  const handleSendChat = useCallback(async () => {
     if (!chatInput.trim() || !chatRoomId) return;
     try {
       await sendChatMessage(chatRoomId, chatInput);
       setChatInput('');
       const messages = await getChatMessages(chatRoomId);
       setChatMessages(Array.isArray(messages) ? messages : []);
-    } catch (e) {}
-  }
+    } catch {}
+  }, [chatInput, chatRoomId]);
 
-  async function deleteChatMsg(msgId) {
+  const handleDeleteChatMsg = useCallback(async (msgId) => {
     try {
       await deleteChatMessage(msgId);
       const messages = await getChatMessages(chatRoomId);
       setChatMessages(Array.isArray(messages) ? messages : []);
-    } catch (e) {}
-  }
+    } catch {}
+  }, [chatRoomId]);
 
   return (
     <HomeView
@@ -162,9 +153,9 @@ export default function Home() {
       handleContactSubmit={handleContactSubmit}
       handleNewsletterSubmit={handleNewsletterSubmit}
       handleMoodSubmit={handleMoodSubmit}
-      requestChatRoom={requestChatRoom}
-      sendChat={sendChat}
-      deleteChatMsg={deleteChatMsg}
+      requestChatRoom={handleRequestChat}
+      sendChat={handleSendChat}
+      deleteChatMsg={handleDeleteChatMsg}
       setChatOpen={setChatOpen}
       setChatInput={setChatInput}
       setContactForm={setContactForm}
