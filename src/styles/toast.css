@@ -1,0 +1,30 @@
+/* styles/toast.css */
+.toast-container {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-3);
+  max-width: 400px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  animation: slideUp var(--ease-smooth) forwards;
+}
+
+.toast-success { background: var(--success); }
+.toast-error { background: var(--error); }
+.toast-warning { background: var(--warning); color: var(--slate-900); }
+.toast-info { background: var(--info); }
