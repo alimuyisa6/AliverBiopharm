@@ -22,7 +22,7 @@ export function LayoutProvider({ children }) {
   const [bootstrap, setBootstrap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState(false);
-  const { user, loading: authLoading, refreshUser } = useAuth();
+  const { user, loading: authLoading, refresh } = useAuth();
 
   const effectiveLevel = user?.profile?.active_level_id || user?.profile?.track || 'O-Level';
   const activeGroupId = user?.profile?.active_group_id || null;
@@ -39,11 +39,11 @@ export function LayoutProvider({ children }) {
     setSwitching(true);
     try {
       await switchClassApi(groupId);
-      await refreshUser();
+      await refresh();
     } finally {
       setSwitching(false);
     }
-  }, [refreshUser]);
+  }, [refresh]);
 
   const value = useMemo(() => {
     const isReady = !loading && !authLoading;
@@ -69,7 +69,7 @@ export function LayoutProvider({ children }) {
       footerLinks: [],
       colorTheme: DEFAULT_COLOR_THEME,
       authLoading,
-      refreshUser,
+      refreshUser: refresh,
       switchClass,
       switching,
       activeGroupId
@@ -103,12 +103,12 @@ export function LayoutProvider({ children }) {
       footerLinks: bootstrap.footer?.quick_links || [],
       colorTheme,
       authLoading,
-      refreshUser,
+      refreshUser: refresh,
       switchClass,
       switching,
       activeGroupId
     };
-  }, [bootstrap, loading, authLoading, user, refreshUser, switchClass, switching, activeGroupId]);
+  }, [bootstrap, loading, authLoading, user, refresh, switchClass, switching, activeGroupId]);
 
   return (
     <LayoutContext.Provider value={value}>
