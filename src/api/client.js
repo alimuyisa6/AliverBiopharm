@@ -264,7 +264,10 @@ export async function adminListComplaints(status) { return getRequest('classroom
 export async function adminResolveComplaint(complaint_id, status, resolution) { return apiCall('classroom', 'admin_resolve_complaint', { complaint_id, status, resolution }); }
 export async function adminEndClassroom(room_id) { return apiCall('classroom', 'end_room', { room_id }); }
 
-export async function globalSearch(q) { return getRequest('search', 'global', { q }); }
+ export async function globalSearch(q, extraParams = {}) {
+  const params = new URLSearchParams({ q, ...extraParams }).toString();
+  return getRequest('search', `global?${params}`);
+ }
 
 export async function getProfile() { return getRequest('profile', 'get_profile'); }
 export async function saveOnboarding(payload) { return apiCall('profile', 'save_onboarding', payload); }
