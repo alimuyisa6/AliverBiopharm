@@ -108,12 +108,27 @@ h4 { font-size: var(--text-xl); }
   top: var(--space-3);
 }
 
- .reveal {
-  transition: transform 0.8s ease;
+  .reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .reveal.in {
+  opacity: 1;
   transform: translateY(0);
+}
+
+/* Fallback: if not revealed within 1s, show anyway */
+.reveal:not(.in) {
+  animation: forceVisible 1s ease 1s forwards;
+}
+
+@keyframes forceVisible {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .section {
