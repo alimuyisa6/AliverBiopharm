@@ -2,6 +2,21 @@
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 
+const LEVEL_COLOR_MAP = {
+  'o-level': 'blue',
+  olevel: 'blue',
+  'a-level': 'teal',
+  alevel: 'teal',
+  pharmacy: 'violet',
+};
+
+const FALLBACK_COLORS = ['blue', 'teal', 'violet', 'amber', 'emerald'];
+
+function getCardColor(group, index) {
+  const key = group.level_id?.toLowerCase?.() || group.id?.toLowerCase?.();
+  return LEVEL_COLOR_MAP[key] || FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+}
+
 export function PlatformCards() {
   const { groups, bootstrap } = useLayout();
   const navigate = useNavigate();
@@ -22,12 +37,13 @@ export function PlatformCards() {
       <h2 className="section-title">Explore Our Platforms</h2>
       <p className="section-subtitle">Choose your path and start learning today.</p>
       <div className="grid grid-cols-3">
-        {groups.map((group) => {
+        {groups.map((group, index) => {
           const imageUrl = getImage(group.id);
+          const color = getCardColor(group, index);
           return (
             <button
               key={group.id}
-              className="card card-clickable"
+              className={`card card-${color} card-clickable`}
               onClick={() => navigate(`/level/${group.level_id}/group/${group.id}`)}
             >
               {imageUrl ? (
