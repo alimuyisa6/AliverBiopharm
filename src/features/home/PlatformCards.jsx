@@ -1,47 +1,33 @@
- import React from 'react';
+ /* features/home/PlatformCards.jsx */
 import { useLayout } from '../../contexts/LayoutContext';
 import { useNavigate } from 'react-router-dom';
+import Icon from '../../components/Icon/Icon';
 
 export function PlatformCards() {
-  const { groups, colorTheme } = useLayout();
+  const { groups } = useLayout();
   const navigate = useNavigate();
-
-  if (!groups || !Array.isArray(groups) || groups.length === 0) return null;
-
-  const themeColors = colorTheme?.theme || {};
-  const primaryColor = themeColors.primary_color || '#0a7e7e';
-  const secondaryColor = themeColors.secondary_color || primaryColor;
-  const accentColor = themeColors.accent_color || primaryColor;
-
-  const sectionStyle = {
-    '--platform-primary-color': primaryColor,
-    '--platform-secondary-color': secondaryColor,
-    '--platform-accent-color': accentColor
-  };
+  if (!groups?.length) return null;
 
   return (
-    <section className="platform-cards-section" style={sectionStyle}>
+    <section className="section reveal">
       <span className="sec-label">Platforms</span>
       <h2 className="section-title">Explore Our Platforms</h2>
-      <p className="section-subtitle">Choose your path and start learning today</p>
-      <div className="platform-cards-grid">
-        {groups.map(group => (
-          <div
+      <p className="section-subtitle">Choose your path and start learning today.</p>
+      <div className="grid grid-cols-3">
+        {groups.map((group) => (
+          <button
             key={group.id}
-            className="platform-card"
+            className="card card-clickable"
             onClick={() => navigate(`/level/${group.level_id}/group/${group.id}`)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && navigate(`/level/${group.level_id}/group/${group.id}`)}
           >
-            <div className="platform-card-image-wrapper">
-              <i className={`fas ${group.icon || 'fa-book'}`} />
+            <div className="card-image-placeholder">
+              <Icon name={group.icon || 'book-open'} />
             </div>
-            <div className="platform-card-body">
-              <h3>{group.name}</h3>
-              <p>{group.description || 'Comprehensive learning resources tailored for you'}</p>
+            <div className="card-body">
+              <h3 className="card-title">{group.name}</h3>
+              <p className="card-text">{group.description || 'Comprehensive learning resources tailored for you.'}</p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </section>
