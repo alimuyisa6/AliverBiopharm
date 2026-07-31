@@ -1,21 +1,25 @@
- import { useState, useEffect, useRef } from 'react';
+ /* pages/ClassroomRoom.jsx */
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLevelFilter } from '../hooks/useLevelFilter';
 import {
-  joinClassroom,
-  leaveClassroom,
-  getClassroomRoom,
-  getClassroomMessages,
-  getClassroomParticipants,
-  sendClassroomMessage,
-  raiseHand,
+  joinClassroom, leaveClassroom, getClassroomRoom,
+  getClassroomMessages, getClassroomParticipants,
+  sendClassroomMessage, raiseHand,
 } from '../api/client';
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
+import Button from '../components/Button/Button';
+import EmptyState from '../components/EmptyState/EmptyState';
 
 export default function ClassroomRoom() {
   const { roomId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { displayName, class_name } = useLevelFilter();
   const chatBodyRef = useRef(null);
+
   const [room, setRoom] = useState(null);
   const [messages, setMessages] = useState([]);
   const [participants, setParticipants] = useState([]);
@@ -48,15 +52,11 @@ export default function ClassroomRoom() {
   }, [messages]);
 
   const doJoinRoom = async () => {
-    try {
-      await joinClassroom(roomId);
-    } catch {}
+    try { await joinClassroom(roomId); } catch {}
   };
 
   const leaveRoomSilent = async () => {
-    try {
-      await leaveClassroom(roomId);
-    } catch {}
+    try { await leaveClassroom(roomId); } catch {}
   };
 
   const fetchRoom = async () => {
@@ -119,170 +119,156 @@ export default function ClassroomRoom() {
 
   if (loading) {
     return (
-      <div className="classroom-loading">
-        <i className="fa-solid fa-spinner fa-spin"></i>
-        <p>Entering classroom...</p>
+      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Spinner size="lg" />
       </div>
     );
   }
 
   if (error || !room) {
     return (
-      <div className="classroom-error">
-        <i className="fa-solid fa-triangle-exclamation classroom-error-icon"></i>
-        <p>{error || 'Room not found'}</p>
-        <button className="btn-secondary" onClick={() => navigate('/classroom')}>Back to Classrooms</button>
+      <div className="section" style={{ textAlign: 'center', paddingTop: 'var(--space-16)' }}>
+        <EmptyState
+          icon="exclamation-triangle"
+          title="Room Not Found"
+          description={error || 'The classroom does not exist or has ended.'}
+          action={
+            <Button onClick={() => navigate('/classroom')}>
+              <Icon name="arrow-left" /> Back to Classrooms
+            </Button>
+          }
+        />
       </div>
     );
   }
 
+  const levelName = displayName || room.level || '';
+  const roomClass = room.class_name || class_name || '';
+
   return (
-    <>
-      <div className="room-topbar">
-        <button className="room-back-btn" onClick={handleLeaveRoom}>
-          <i className="fa-solid fa-arrow-left room-back-icon"></i>
-        </button>
-        <div className="room-info">
-          <h2>{room.title}</h2>
-          <span className="room-topic-badge">
-            <i className="fa-solid fa-book room-topic-icon"></i>
-            {room.topic_name}
-          </span>
-          <span className="room-class-badge">
-            <i className="fa-solid fa-user-graduate room-class-icon"></i>
-            {room.class_name}
-          </span>
+    <div className="classroom-room-page">
+      <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border-default)', padding: 'var(--space-4) var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+        <Button variant="ghost" size="sm" icon onClick={handleLeaveRoom}>
+          <Icon name="arrow-left" />
+        </Button>
+        <div style={{ flex: 1 }}>
+          <h2 style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-1)' }}>{room.title}</h2>
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            {room.topic_name && <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>{room.topic_name}</span>}
+            {roomClass && <span className="chip" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>{roomClass}</span>}
+            {levelName && <span className="chip" style={{ background: 'var(--secondary-light)', color: 'var(--secondary)' }}>{levelName}</span>}
+          </div>
         </div>
-        <div className="room-status-indicator">
-          <span className="status-dot live"></span>
-          Live
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <span className="status-dot status-dot-success" />
+          <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>Live</span>
         </div>
       </div>
 
-      <div className="room-main">
-        <div className="room-chat-section">
-          <div className="room-chat-header">
-            <span>Discussion</span>
-            <span className="msg-count">{messages.length} messages</span>
-          </div>
-          <div className="room-chat-body" ref={chatBodyRef}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', height: 'calc(100vh - 140px)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-4)' }} ref={chatBodyRef}>
             {messages.map(msg => (
-              <div key={msg.id} className={`room-message ${msg.user_id === user?.id ? 'own' : ''} ${msg.message_type}`}>
+              <div key={msg.id} style={{ marginBottom: 'var(--space-3)' }}>
                 {msg.message_type === 'system' ? (
-                  <div className="system-message">
-                    <i className="fa-solid fa-circle-info system-msg-icon"></i>
+                  <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 'var(--text-sm)', fontStyle: 'italic' }}>
+                    <Icon name="circle-info" style={{ marginRight: 'var(--space-2)' }} />
                     {msg.content}
                   </div>
                 ) : msg.message_type === 'resource' ? (
-                  <div className="resource-message">
-                    <div className="resource-header">
+                  <div className="card" style={{ padding: 'var(--space-4)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
                       <strong>{msg.sender_name || 'Tutor'}</strong>
-                      <span className="msg-time">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
-                    <div className="resource-content">
-                      <i className="fa-solid fa-file resource-file-icon"></i>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                      <Icon name="file-pdf" style={{ color: 'var(--error)' }} />
                       <a href={msg.file_url} target="_blank" rel="noreferrer" download={msg.file_name}>
                         {msg.file_name}
                       </a>
                     </div>
                   </div>
                 ) : (
-                  <div className="chat-message">
-                    <div className="msg-header">
-                      <strong>{msg.sender_name || 'User'}</strong>
-                      <span className="msg-time">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.user_id === user?.id ? 'flex-end' : 'flex-start' }}>
+                    <div style={{ maxWidth: '70%', padding: 'var(--space-3) var(--space-4)', borderRadius: 'var(--radius-lg)', background: msg.user_id === user?.id ? 'var(--primary-light)' : 'var(--bg-card-hover)' }}>
+                      <div style={{ fontWeight: 600, fontSize: 'var(--text-xs)', marginBottom: 'var(--space-1)' }}>
+                        {msg.sender_name || 'User'}
+                        <span style={{ marginLeft: 'var(--space-3)', fontWeight: 400, color: 'var(--text-muted)' }}>
+                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 'var(--text-sm)' }}>{msg.content}</p>
                     </div>
-                    <p className="msg-content">{msg.content}</p>
                   </div>
                 )}
               </div>
             ))}
           </div>
-          <div className="room-chat-input">
+          <div style={{ borderTop: '1px solid var(--border-default)', padding: 'var(--space-3)', display: 'flex', gap: 'var(--space-3)' }}>
             <textarea
+              className="form-textarea"
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
-              rows="1"
-              maxLength="1000"
+              rows={1}
+              maxLength={1000}
+              style={{ minHeight: 40 }}
             />
-            <button className="btn-send" onClick={handleSendMessage} disabled={!chatInput.trim()}>
-              <i className="fa-solid fa-paper-plane"></i>
-            </button>
+            <Button onClick={handleSendMessage} disabled={!chatInput.trim()} icon>
+              <Icon name="paper-plane" />
+            </Button>
           </div>
         </div>
 
-        <div className="room-sidebar">
-          <div className="sidebar-section">
-            <h4>
-              <i className="fa-solid fa-users sidebar-section-icon-purple"></i>
-              Participants ({participants.length})
-            </h4>
-            <div className="participants-list">
-              {participants.map(p => (
-                <div key={p.id || p.user_id} className={`participant ${p.role}`}>
-                  <div className="participant-avatar">
-                    {p.avatar_url ? (
-                      <img src={p.avatar_url} alt={p.user_name || 'User'} loading="lazy" />
-                    ) : (
-                      <i className={`fa-solid ${p.role === 'tutor' ? 'fa-chalkboard-user' : p.role === 'admin' ? 'fa-shield-halved' : 'fa-user'} participant-role-icon ${p.role}`}></i>
-                    )}
-                  </div>
-                  <div className="participant-info">
-                    <span className="participant-name">{p.user_name || 'User'}</span>
-                    <span className="participant-role">{p.role}</span>
-                  </div>
-                  {p.is_muted && <i className="fa-solid fa-microphone-slash muted-icon"></i>}
-                  {p.hand_raised && <i className="fa-solid fa-hand raised-icon"></i>}
+        <div style={{ borderLeft: '1px solid var(--border-default)', padding: 'var(--space-4)', overflowY: 'auto' }}>
+          <h4 style={{ marginBottom: 'var(--space-4)' }}>
+            <Icon name="users" style={{ marginRight: 'var(--space-3)', color: 'var(--accent)' }} />
+            Participants ({participants.length})
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            {participants.map(p => (
+              <div key={p.id || p.user_id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <Icon name={p.role === 'tutor' ? 'user-graduate' : p.role === 'admin' ? 'shield-halved' : 'user'} style={{ color: 'var(--text-muted)' }} />
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 'var(--text-sm)' }}>{p.user_name || 'User'}</div>
+                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{p.role}</div>
                 </div>
-              ))}
-            </div>
+                {p.is_muted && <Icon name="microphone-slash" style={{ color: 'var(--error)', marginLeft: 'auto' }} />}
+                {p.hand_raised && <Icon name="hand" style={{ color: 'var(--warm)', marginLeft: 'auto' }} />}
+              </div>
+            ))}
           </div>
 
-          <div className="sidebar-section">
-            <h4>
-              <i className="fa-solid fa-circle-info sidebar-section-icon-blue"></i>
-              Room Info
-            </h4>
-            <div className="room-details">
-              <p><strong>Level:</strong> {room.level}</p>
-              <p><strong>Class:</strong> {room.class_name}</p>
-              <p><strong>Topic:</strong> {room.topic_name}</p>
-              <p><strong>Type:</strong> {room.room_type === 'free' ? 'Free Discussion' : room.room_type === 'hard_topic' ? 'Hard Topic' : 'Premium'}</p>
-              {room.tutor_name && <p><strong>Tutor:</strong> {room.tutor_name}</p>}
-            </div>
+          <h4 style={{ marginTop: 'var(--space-8)', marginBottom: 'var(--space-4)' }}>
+            <Icon name="circle-info" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />
+            Room Info
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--text-sm)' }}>
+            {room.level && <p><strong>Level:</strong> {room.level}</p>}
+            {roomClass && <p><strong>Class:</strong> {roomClass}</p>}
+            {room.topic_name && <p><strong>Topic:</strong> {room.topic_name}</p>}
+            <p><strong>Type:</strong> {room.room_type === 'free' ? 'Free Discussion' : room.room_type === 'hard_topic' ? 'Hard Topic' : 'Premium'}</p>
+            {room.tutor_name && <p><strong>Tutor:</strong> {room.tutor_name}</p>}
           </div>
         </div>
       </div>
 
-      <div className="room-controls">
-        <div className="controls-left">
-          <button
-            className={`control-btn ${isMuted ? 'muted' : 'unmuted'}`}
-            disabled
-            title="Mute controlled by tutor"
-          >
-            <i className={`fa-solid ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} control-btn-icon ${isMuted ? 'muted-icon' : 'unmuted-icon'}`}></i>
-            {isMuted ? 'Muted' : 'Unmuted'}
-          </button>
-        </div>
-        <div className="controls-center">
-          <button
-            className={`control-btn raise-hand ${handRaised ? 'active' : ''}`}
-            onClick={handleRaiseHand}
-          >
-            <i className={`fa-solid fa-hand ${handRaised ? 'raise-hand-active' : ''}`}></i>
-            {handRaised ? 'Hand Raised' : 'Raise Hand'}
-          </button>
-        </div>
-        <div className="controls-right">
-          <button className="control-btn leave" onClick={handleLeaveRoom}>
-            <i className="fa-solid fa-right-from-bracket leave-icon"></i>
-            Leave
-          </button>
-        </div>
+      <div style={{ borderTop: '1px solid var(--border-default)', padding: 'var(--space-3) var(--space-6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card)' }}>
+        <Button variant={isMuted ? 'ghost' : 'primary'} size="sm" disabled title="Mute controlled by tutor">
+          <Icon name={isMuted ? 'microphone-slash' : 'microphone'} />
+          {isMuted ? 'Muted' : 'Unmuted'}
+        </Button>
+        <Button variant={handRaised ? 'warm' : 'secondary'} size="sm" onClick={handleRaiseHand}>
+          <Icon name="hand" />
+          {handRaised ? 'Hand Raised' : 'Raise Hand'}
+        </Button>
+        <Button variant="danger" size="sm" onClick={handleLeaveRoom}>
+          <Icon name="right-from-bracket" /> Leave
+        </Button>
       </div>
-    </>
+    </div>
   );
 }
