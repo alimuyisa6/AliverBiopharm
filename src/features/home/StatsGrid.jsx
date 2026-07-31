@@ -1,28 +1,13 @@
- import React, { useState, useEffect, useRef } from 'react';
+ /* features/home/StatsGrid.jsx */
+import { useState, useEffect, useRef } from 'react';
+import Icon from '../../components/Icon/Icon';
 
-export function StatsGrid({ stats }) {
-  const items = [
-    { key: 'resources_count', label: 'Resources', icon: 'fa-book-open' },
-    { key: 'users_count', label: 'Learners', icon: 'fa-users' },
-    { key: 'downloads_count', label: 'Downloads', icon: 'fa-download' },
-    { key: 'quiz_attempts', label: 'Quiz Attempts', icon: 'fa-pen-to-square' },
-  ];
-
-  return (
-    <section id="stats" className="section reveal">
-      <span className="sec-label">Our Impact</span>
-      <h2 className="section-title">The Numbers Behind Our Community</h2>
-      <p className="section-subtitle">
-        Every number here represents a learner who chose to study smarter with AliverBiopharm.
-      </p>
-      <div className="stats-grid">
-        {items.map(item => (
-          <AnimatedNumber key={item.key} target={stats?.[item.key] || 0} label={item.label} icon={item.icon} />
-        ))}
-      </div>
-    </section>
-  );
-}
+const ITEMS = [
+  { key: 'resources_count', label: 'Resources', icon: 'book-open' },
+  { key: 'users_count', label: 'Learners', icon: 'users' },
+  { key: 'downloads_count', label: 'Downloads', icon: 'download' },
+  { key: 'quiz_attempts', label: 'Quiz Attempts', icon: 'pen-to-square' },
+];
 
 function AnimatedNumber({ target, label, icon }) {
   const [count, setCount] = useState(0);
@@ -52,13 +37,28 @@ function AnimatedNumber({ target, label, icon }) {
     return () => observer.disconnect();
   }, [target]);
 
-  const formatNumber = (num) => (num >= 1000 ? (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k+' : num);
+  const format = (num) => (num >= 1000 ? (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k+' : num);
 
   return (
     <div className="stat-card" ref={ref}>
-      <div className="stat-icon"><i className={`fa-solid ${icon}`} /></div>
-      <div className="stat-number">{formatNumber(count)}</div>
+      <Icon name={icon} className="stat-icon" style={{ color: 'var(--primary)' }} />
+      <div className="stat-value">{format(count)}</div>
       <div className="stat-label">{label}</div>
     </div>
+  );
+}
+
+export function StatsGrid({ stats = {} }) {
+  return (
+    <section className="section reveal">
+      <span className="sec-label">Our Impact</span>
+      <h2 className="section-title">Trusted by Learners Across Levels</h2>
+      <p className="section-subtitle">Every number represents a student who chose to study smarter.</p>
+      <div className="grid grid-cols-4">
+        {ITEMS.map((item) => (
+          <AnimatedNumber key={item.key} target={stats[item.key] || 0} label={item.label} icon={item.icon} />
+        ))}
+      </div>
+    </section>
   );
 }
