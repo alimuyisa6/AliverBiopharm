@@ -16,7 +16,7 @@ export function MoodCheckSection({ moodSelected, moodMessage, moodSubmitted, onM
       <span className="sec-label">Mood Check</span>
       <h2 className="section-title">How Are You Feeling Today?</h2>
       <p className="section-subtitle">Your feedback helps us improve your learning experience.</p>
-      <div className="card" style={{ maxWidth: 500, margin: '0 auto', padding: 'var(--space-8)', textAlign: 'center' }}>
+      <div className="card card-amber" style={{ maxWidth: 500, margin: '0 auto', padding: 'var(--space-8)', textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
           {MOODS.map((m) => (
             <button
