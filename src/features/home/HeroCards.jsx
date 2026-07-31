@@ -5,19 +5,17 @@ import { useCardCycle } from './useCardCycle';
 import { useHeroCards } from './useHeroCards';
 
 const ACCENT_VARS = {
-  cyan: 'var(--clr-cyan)',
-  magenta: 'var(--clr-magenta)',
-  blue: 'var(--clr-blue)',
-  green: 'var(--clr-green)',
-  purple: 'var(--clr-purple)',
-  orange: 'var(--clr-orange)'
+  blue: 'var(--primary)',
+  green: 'var(--success)',
+  purple: 'var(--accent)',
+  orange: 'var(--warm)',
 };
 
 function HeroCard({ card, index, total }) {
   const navigate = useNavigate();
   const frames = useMemo(() => flattenCardFrames(card), [card]);
   const frame = useCardCycle(frames, index);
-  const accentColor = ACCENT_VARS[frame.accent] || 'var(--clr-cyan)';
+  const accentColor = ACCENT_VARS[frame.accent] || 'var(--primary)';
 
   function handleActivate() { navigate(frame.link); }
   function handleKeyDown(e) {
