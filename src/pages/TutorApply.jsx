@@ -1,333 +1,281 @@
- import React, { useState, useEffect } from 'react';
+ /* pages/TutorApply.jsx */
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { getAllSiteSections, getClassroomLevels, getClassroomTopics, applyAsTutor } from '../api/client';
+import { useLayout } from '../contexts/LayoutContext';
+import { useLevelFilter } from '../hooks/useLevelFilter';
+import { getClassroomLevels, getClassroomTopics, applyAsTutor } from '../api/client';
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
+import Button from '../components/Button/Button';
+import Card from '../components/Card/Card';
+import Textarea from '../components/Textarea/Textarea';
+import ProgressBar from '../components/ProgressBar/ProgressBar';
+import { useToast } from '../components/Toast/Toast';
 
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -20 }
-};
-
-const pageTransition = {
-  type: 'tween',
-  ease: 'easeInOut',
-  duration: 0.3
-};
+const CARD_COLORS = ['var(--primary)', 'var(--secondary)', 'var(--accent)'];
 
 export default function TutorApply() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [sections, setSections] = useState(null);
+  const { displayName } = useLevelFilter();
+  const addToast = useToast();
+
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({
-    level: '',
-    group_id: '',
-    class_name: '',
-    subjects: [],
-    qualifications: '',
-    experience: '',
-  });
-  const [existingApplication, setExistingApplication] = useState(null);
+  const [levels, setLevels] = useState([]);
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [topics, setTopics] = useState([]);
+  const [selectedTopics, setSelectedTopics] = useState([]);
+  const [qualifications, setQualifications] = useState('');
+  const [experience, setExperience] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState(null);
-  const [levels, setLevels] = useState([]);
-  const [topics, setTopics] = useState([]);
-  const [loadingTopics, setLoadingTopics] = useState(false);
+  const [existingApplication, setExistingApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllSiteSections().then(setSections).catch(() => {});
-    checkExistingApplication();
-    fetchLevels();
+    async function load() {
+      try {
+        const [levelsData, statusRes] = await Promise.all([
+          getClassroomLevels(),
+          fetch('/api/server?module=classroom&path=tutor_status', { credentials: 'include' }).then(r => r.json()).catch(() => ({})),
+        ]);
+        setLevels(levelsData || []);
+        if (statusRes?.application) {
+          setExistingApplication(statusRes.application);
+        }
+      } catch {}
+      setLoading(false);
+    }
+    load();
   }, []);
 
-  const checkExistingApplication = async () => {
-    try {
-      const res = await fetch('/api/server?module=classroom&path=tutor_status', { credentials: 'include' });
-      const data = await res.json();
-      if (data && data.application) {
-        setExistingApplication(data.application);
-      }
-    } catch {}
-  };
-
-  const fetchLevels = async () => {
-    try {
-      const data = await getClassroomLevels();
-      setLevels(data || []);
-    } catch {}
-  };
-
-  const fetchTopics = async (groupId) => {
-    setLoadingTopics(true);
-    try {
-      const data = await getClassroomTopics(groupId);
-      setTopics(data || []);
-    } catch {
-      setTopics([]);
-    } finally {
-      setLoadingTopics(false);
-    }
-  };
-
-  const handleLevelSelect = (level) => {
-    setForm(prev => ({ ...prev, level: level.key, group_id: '', class_name: '', subjects: [] }));
+  const handleLevelSelect = (lvl) => {
+    setSelectedLevel(lvl);
+    setSelectedClass(null);
+    setSelectedTopics([]);
     setStep(2);
   };
 
-  const handleClassSelect = (cls) => {
-    const groupId = typeof cls === 'string' ? cls : cls.id;
-    const className = typeof cls === 'string' ? cls : cls.name;
-    setForm(prev => ({ ...prev, group_id: groupId, class_name: className, subjects: [] }));
-    fetchTopics(groupId);
+  const handleClassSelect = async (cls) => {
+    const classObj = typeof cls === 'string' ? { id: cls, name: cls } : cls;
+    setSelectedClass(classObj);
+    setSelectedTopics([]);
+    try {
+      const data = await getClassroomTopics(classObj.id, selectedLevel.key);
+      setTopics(data || []);
+    } catch {
+      setTopics([]);
+    }
     setStep(3);
   };
 
-  const handleSubjectToggle = (topic) => {
-    setForm(prev => ({
-      ...prev,
-      subjects: prev.subjects.includes(topic.topic_name)
-        ? prev.subjects.filter(s => s !== topic.topic_name)
-        : [...prev.subjects, topic.topic_name],
-    }));
+  const toggleTopic = (topicName) => {
+    setSelectedTopics(prev =>
+      prev.includes(topicName) ? prev.filter(t => t !== topicName) : [...prev, topicName]
+    );
   };
 
   const handleSubmit = async () => {
-    if (!form.level || !form.class_name || form.subjects.length === 0) {
-      setError('Please complete all required fields');
+    if (!selectedLevel || !selectedClass || selectedTopics.length === 0) {
+      addToast('Please complete all required fields', 'error');
       return;
     }
     setSubmitting(true);
-    setError(null);
     try {
-      await applyAsTutor(form.level, form.class_name, form.subjects, form.qualifications, form.experience);
+      await applyAsTutor(
+        selectedLevel.key,
+        selectedClass.name,
+        selectedTopics,
+        qualifications,
+        experience
+      );
       setSubmitted(true);
     } catch (err) {
-      setError(err.message || 'Failed to submit application. Please try again.');
+      addToast(err.message || 'Failed to submit application', 'error');
     }
     setSubmitting(false);
   };
 
-  const statusLabels = {
-    pending: { label: 'Pending Review', color: '#f59e0b', icon: 'fa-clock' },
-    scheduled: { label: 'Interview Scheduled', color: '#3b82f6', icon: 'fa-calendar-check' },
-    interviewed: { label: 'Interview Completed', color: '#8b5cf6', icon: 'fa-check-double' },
-    approved: { label: 'Approved', color: '#10b981', icon: 'fa-circle-check' },
-    rejected: { label: 'Rejected', color: '#ef4444', icon: 'fa-circle-xmark' },
-  };
-
-  const CARD_COLOR_CLASS = ['level-card-cyan', 'level-card-magenta', 'level-card-blue'];
+  if (loading) {
+    return (
+      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   if (existingApplication) {
+    const statusLabels = {
+      pending: { label: 'Pending Review', color: 'var(--warning)' },
+      scheduled: { label: 'Interview Scheduled', color: 'var(--primary)' },
+      interviewed: { label: 'Interview Completed', color: 'var(--accent)' },
+      approved: { label: 'Approved', color: 'var(--success)' },
+      rejected: { label: 'Rejected', color: 'var(--error)' },
+    };
     const status = statusLabels[existingApplication.status] || statusLabels.pending;
+
     return (
-      <motion.div
-        className="tutor-apply-page"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-      >
-        <div className="application-status-card">
-          <div className="status-icon" style={{ color: status.color }}>
-            <i className={`fa-solid ${status.icon}`}></i>
-          </div>
-          <h2>Application Status: {status.label}</h2>
-          <div className="status-details">
+      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+        <span className="sec-label">Teaching</span>
+        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-4)' }}>
+          Tutor Application Status
+        </h1>
+        <Card style={{ padding: 'var(--space-8)', textAlign: 'center', maxWidth: 500, margin: '0 auto' }}>
+          <Icon name="circle-check" style={{ fontSize: '3rem', color: status.color, marginBottom: 'var(--space-4)' }} />
+          <h2 style={{ color: status.color, marginBottom: 'var(--space-4)' }}>{status.label}</h2>
+          <div style={{ marginBottom: 'var(--space-6)' }}>
             <p><strong>Level:</strong> {existingApplication.level}</p>
             <p><strong>Class:</strong> {existingApplication.class_name}</p>
             <p><strong>Subjects:</strong> {(existingApplication.subjects || []).join(', ')}</p>
             {existingApplication.rejection_reason && (
-              <div className="rejection-reason">
-                <strong>Reason:</strong> {existingApplication.rejection_reason}
-              </div>
+              <p style={{ color: 'var(--error)' }}><strong>Reason:</strong> {existingApplication.rejection_reason}</p>
             )}
             {existingApplication.interview_scheduled_at && (
-              <div className="interview-info">
-                <strong>Interview:</strong> {new Date(existingApplication.interview_scheduled_at).toLocaleString()}
-              </div>
+              <p><strong>Interview:</strong> {new Date(existingApplication.interview_scheduled_at).toLocaleString()}</p>
             )}
           </div>
-          <div className="status-actions">
-            <button className="btn-primary" onClick={() => navigate('/tutor/dashboard')}>
-              <i className="fa-solid fa-gauge"></i> Tutor Dashboard
-            </button>
+          <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center' }}>
+            <Button onClick={() => navigate('/tutor/dashboard')} icon="gauge-high">Tutor Dashboard</Button>
             {existingApplication.status === 'rejected' && (
-              <button className="btn-secondary" onClick={() => navigate('/classroom/complaint')}>
-                <i className="fa-solid fa-flag"></i> File Appeal
-              </button>
+              <Button variant="secondary" onClick={() => navigate('/classroom/complaint')} icon="flag">File Appeal</Button>
             )}
           </div>
-        </div>
-      </motion.div>
+        </Card>
+      </div>
     );
   }
 
   if (submitted) {
     return (
-      <motion.div
-        className="tutor-apply-page"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-      >
-        <div className="application-success">
-          <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '3rem' }}></i>
-          <h2>Application Submitted</h2>
-          <p>Your tutor application has been received. An admin will review it and schedule an interview if approved.</p>
-          <div className="tutor-success-actions">
-            <button className="btn-primary" onClick={() => navigate('/tutor/dashboard')}>
-              <i className="fa-solid fa-gauge"></i> Go to Tutor Dashboard
-            </button>
-            <button className="btn-secondary" onClick={() => navigate('/classroom')}>
-              <i className="fa-solid fa-users"></i> Back to Classrooms
-            </button>
-          </div>
+      <div className="section" style={{ paddingTop: 'var(--space-6)', textAlign: 'center' }}>
+        <Icon name="circle-check" style={{ fontSize: '3rem', color: 'var(--success)', marginBottom: 'var(--space-4)' }} />
+        <h1 className="section-title">Application Submitted</h1>
+        <p className="section-subtitle">
+          Your tutor application has been received. An admin will review it and schedule an interview if approved.
+        </p>
+        <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center', marginTop: 'var(--space-6)' }}>
+          <Button onClick={() => navigate('/tutor/dashboard')} icon="gauge-high">Go to Tutor Dashboard</Button>
+          <Button variant="secondary" onClick={() => navigate('/classroom')} icon="users">Back to Classrooms</Button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      className="tutor-apply-page"
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
-      <div className="tutor-apply-header">
+    <div className="tutor-apply-page">
+      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
         <span className="sec-label">Teaching</span>
-        <h1 className="section-title">Become a Tutor</h1>
-        <p className="section-subtitle">
-          Share your knowledge with fellow students. Verified tutors can lead classroom discussions and help learners succeed.
+        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-4)' }}>
+          Become a Tutor
+        </h1>
+        <p className="section-subtitle" style={{ textAlign: 'left', marginBottom: 'var(--space-6)' }}>
+          Share your knowledge with students. Verified tutors can lead classroom discussions.
         </p>
-      </div>
 
-      <div className="apply-steps">
-        <div className={`apply-step ${step >= 1 ? 'active' : ''}`}>
-          <span className="step-num">1</span> Level & Class
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-8)', marginBottom: 'var(--space-8)' }}>
+          {[1, 2, 3].map((n) => (
+            <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <span className={`badge ${step >= n ? 'badge-primary' : 'badge-ghost'}`} style={{ borderRadius: '50%', width: 32, height: 32, justifyContent: 'center' }}>
+                {n}
+              </span>
+              <span style={{ fontSize: 'var(--text-sm)', color: step >= n ? 'var(--text-main)' : 'var(--text-muted)' }}>
+                {n === 1 ? 'Level' : n === 2 ? 'Class' : 'Subjects'}
+              </span>
+            </div>
+          ))}
         </div>
-        <div className={`apply-step ${step >= 2 ? 'active' : ''}`}>
-          <span className="step-num">2</span> Subjects
-        </div>
-        <div className={`apply-step ${step >= 3 ? 'active' : ''}`}>
-          <span className="step-num">3</span> Details
-        </div>
-      </div>
 
-      {step === 1 && (
-        <div className="apply-form-section">
-          <h3>What level do you want to teach?</h3>
-          <div className="apply-grid">
-            {levels.map((lvl, i) => (
-              <button
-                key={lvl.key}
-                className={`apply-card ${CARD_COLOR_CLASS[i % 3]} ${form.level === lvl.key ? 'selected' : ''}`}
-                onClick={() => handleLevelSelect(lvl)}
-              >
-                <i className={`fa-solid ${lvl.icon}`} style={{ fontSize: '2rem' }}></i>
-                <span>{lvl.key}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="apply-form-section">
-          <button className="apply-back" onClick={() => setStep(1)}>
-            <i className="fa-solid fa-arrow-left"></i> Back
-          </button>
-          <h3>Select your class</h3>
-          <div className="apply-grid">
-            {(levels.find(l => l.key === form.level)?.classes || []).map((cls, i) => {
-              const isObj = typeof cls !== 'string';
-              const key = isObj ? cls.id : cls;
-              const label = isObj ? cls.name : cls;
-              const icon = isObj ? cls.icon || 'fa-mortar-pestle' : levels.find(l => l.key === form.level)?.icon;
-              return (
-                <button
-                  key={key}
-                  className={`apply-card ${CARD_COLOR_CLASS[i % 3]} ${form.group_id === key ? 'selected' : ''}`}
-                  onClick={() => handleClassSelect(cls)}
-                >
-                  <i className={`fa-solid ${icon}`}></i>
-                  <span>{label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div className="apply-form-section">
-          <button className="apply-back" onClick={() => setStep(2)}>
-            <i className="fa-solid fa-arrow-left"></i> Back
-          </button>
-          <h3>Select topics you can teach</h3>
-          {loadingTopics ? (
-            <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>
-          ) : topics.length === 0 ? (
-            <div className="onboarding-empty">No topics available for this class.</div>
-          ) : (
-            <div className="apply-topics-grid">
-              {topics.map(topic => (
-                <button
-                  key={topic.id}
-                  className={`apply-topic-card ${form.subjects.includes(topic.topic_name) ? 'selected' : ''}`}
-                  onClick={() => handleSubjectToggle(topic)}
-                >
-                  <i className={`fa-solid ${form.subjects.includes(topic.topic_name) ? 'fa-check-square' : 'fa-square'}`}></i>
-                  {topic.topic_name}
-                  {topic.is_hard_topic && <span className="topic-badge hard">Hard</span>}
-                </button>
+        {step === 1 && (
+          <div>
+            <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your level to teach</h3>
+            <div className="grid grid-cols-3">
+              {levels.map((lvl, i) => (
+                <Card key={lvl.key} onClick={() => handleLevelSelect(lvl)} style={{ cursor: 'pointer' }}>
+                  <div className="card-image-placeholder" style={{ background: `${CARD_COLORS[i % 3]}15` }}>
+                    <Icon name={lvl.icon || 'graduation-cap'} style={{ fontSize: '2rem', color: CARD_COLORS[i % 3] }} />
+                  </div>
+                  <div className="card-body" style={{ textAlign: 'center' }}>
+                    <h3 className="card-title">{lvl.key}</h3>
+                  </div>
+                </Card>
               ))}
             </div>
-          )}
-
-          <div className="apply-details">
-            <h3>Tell us about your qualifications</h3>
-            <textarea
-              className="apply-textarea"
-              placeholder="Describe your qualifications, teaching experience, and why you want to be a tutor..."
-              value={form.qualifications}
-              onChange={e => setForm(prev => ({ ...prev, qualifications: e.target.value }))}
-              rows={5}
-            />
           </div>
+        )}
 
-          <div className="apply-details">
-            <h3>Teaching Experience</h3>
-            <textarea
-              className="apply-textarea"
-              placeholder="Describe your teaching or tutoring experience..."
-              value={form.experience}
-              onChange={e => setForm(prev => ({ ...prev, experience: e.target.value }))}
+        {step === 2 && selectedLevel && (
+          <div>
+            <Button variant="ghost" onClick={() => setStep(1)} icon="arrow-left" style={{ marginBottom: 'var(--space-6)' }}>Back</Button>
+            <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your class in {selectedLevel.key}</h3>
+            <div className="grid grid-cols-3">
+              {(selectedLevel.classes || []).map((cls, i) => {
+                const name = typeof cls === 'string' ? cls : cls.name;
+                const icon = typeof cls === 'object' ? cls.icon : null;
+                return (
+                  <Card key={name} onClick={() => handleClassSelect(cls)} style={{ cursor: 'pointer' }}>
+                    <div className="card-image-placeholder" style={{ background: `${CARD_COLORS[i % 3]}15` }}>
+                      <Icon name={icon || 'book-open'} style={{ fontSize: '2rem', color: CARD_COLORS[i % 3] }} />
+                    </div>
+                    <div className="card-body" style={{ textAlign: 'center' }}>
+                      <h3 className="card-title">{name}</h3>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div>
+            <Button variant="ghost" onClick={() => setStep(2)} icon="arrow-left" style={{ marginBottom: 'var(--space-6)' }}>Back</Button>
+            <h3 style={{ marginBottom: 'var(--space-6)' }}>
+              Select topics you can teach in {selectedClass?.name}
+            </h3>
+            {topics.length === 0 ? (
+              <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>No topics available for this class.</p>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-3)', marginBottom: 'var(--space-8)' }}>
+                {topics.map((topic) => (
+                  <button
+                    key={topic.id}
+                    className={`btn ${selectedTopics.includes(topic.topic_name) ? 'btn-primary' : 'btn-ghost'}`}
+                    onClick={() => toggleTopic(topic.topic_name)}
+                    style={{ flexDirection: 'row', gap: 'var(--space-2)' }}
+                  >
+                    <Icon name={selectedTopics.includes(topic.topic_name) ? 'check-square' : 'square'} />
+                    {topic.topic_name}
+                    {topic.is_hard_topic && <span className="badge badge-error" style={{ marginLeft: 'var(--space-2)' }}>Hard</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <Textarea
+              label="Qualifications"
+              placeholder="Describe your qualifications..."
+              value={qualifications}
+              onChange={(e) => setQualifications(e.target.value)}
               rows={4}
             />
-          </div>
+            <Textarea
+              label="Teaching Experience"
+              placeholder="Describe your teaching experience..."
+              value={experience}
+              onChange={(e) => setExperience(e.target.value)}
+              rows={4}
+            />
 
-          {error && <div className="apply-error">{error}</div>}
-
-          <div className="apply-actions">
-            <button className="btn-primary" onClick={handleSubmit} disabled={submitting}>
-              {submitting ? (
-                <><i className="fa-solid fa-spinner fa-spin"></i> Submitting...</>
-              ) : (
-                <><i className="fa-solid fa-paper-plane"></i> Submit Application</>
-              )}
-            </button>
+            <div style={{ marginTop: 'var(--space-8)', textAlign: 'right' }}>
+              <Button onClick={handleSubmit} loading={submitting} disabled={selectedTopics.length === 0} icon="paper-plane">
+                Submit Application
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
-    </motion.div>
+        )}
+      </div>
+    </div>
   );
 }
