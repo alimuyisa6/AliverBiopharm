@@ -17,10 +17,12 @@ export default function Layout({ children, showFooter = true }) {
   const [scrolled, setScrolled] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(null);
+  const [navNotes, setNavNotes] = useState({});
+  const [loadingNavNotes, setLoadingNavNotes] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { logo, siteName, navigation, footer, groups, level, theme, toggleTheme, isAuthenticated, refreshUser } = useLayout();
+  const { logo, siteName, navigation, footer, groups, level, theme, toggleTheme, isAuthenticated, refreshUser, activeGroupId } = useLayout();
   const { user } = useAuth();
   const isAuthPage = EXCLUDED_PATHS.includes(location.pathname);
 
@@ -55,6 +57,20 @@ export default function Layout({ children, showFooter = true }) {
     }
     return acc;
   }, []);
+
+  const fetchNavNotes = async (groupId) => {
+    setLoadingNavNotes(true);
+    try {
+      const res = await fetch(`/api/server?module=notes&path=nav_list&group_id=${groupId}`, { credentials: 'include' });
+      const data = await res.json();
+      if (data && !data.error) {
+        setNavNotes(prev => ({ ...prev, [groupId]: data }));
+      }
+    } catch (e) {
+    } finally {
+      setLoadingNavNotes(false);
+    }
+  };
 
   return (
     <div className="app-layout">
@@ -137,21 +153,45 @@ export default function Layout({ children, showFooter = true }) {
                   <div key={group.level_id} className="mobile-nav-accordion">
                     <button
                       className="mobile-nav-accordion-trigger"
-                      onClick={() => setAccordionOpen(accordionOpen === group.level_id ? null : group.level_id)}
+                      onClick={() => {
+                        const nextOpen = accordionOpen === group.level_id ? null : group.level_id;
+                        setAccordionOpen(nextOpen);
+                        if (nextOpen) {
+                          group.classes.forEach(cls => {
+                            if (!navNotes[cls.id]) fetchNavNotes(cls.id);
+                          });
+                        }
+                      }}
                     >
                       <span>{group.level_name}</span>
                       <Icon name={accordionOpen === group.level_id ? 'chevron-down' : 'chevron-right'} />
                     </button>
                     <div className={`mobile-nav-accordion-content ${accordionOpen === group.level_id ? 'open' : ''}`}>
                       {group.classes.map((cls) => (
-                        <Link
-                          key={cls.id}
-                          to={`/class/${cls.id}`}
-                          className="mobile-nav-sub-link"
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          {cls.name}
-                        </Link>
+                        <div key={cls.id} style={{ marginBottom: 'var(--space-2)' }}>
+                          <Link to={`/class/${cls.id}`} className="mobile-nav-sub-link" onClick={() => setMobileOpen(false)} style={{ fontWeight: 600 }}>
+                            {cls.name}
+                          </Link>
+                          {navNotes[cls.id] ? (
+                            navNotes[cls.id].map(unit => (
+                              <div key={unit.unit_id} style={{ paddingLeft: 'var(--space-4)' }}>
+                                {unit.notes.map(note => (
+                                  <Link
+                                    key={note.id}
+                                    to={`/notes/read?id=${note.id}`}
+                                    className="mobile-nav-sub-link"
+                                    onClick={() => setMobileOpen(false)}
+                                    style={{ fontSize: 'var(--text-xs)' }}
+                                  >
+                                    {note.title}
+                                  </Link>
+                                ))}
+                              </div>
+                            ))
+                          ) : loadingNavNotes ? (
+                            <span style={{ paddingLeft: 'var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>Loading...</span>
+                          ) : null}
+                        </div>
                       ))}
                     </div>
                   </div>
