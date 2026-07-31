@@ -26,10 +26,8 @@ import ProgressBar from '../components/ProgressBar/ProgressBar';
 import Button from '../components/Button/Button';
 import Modal from '../components/Modal/Modal';
 import Input from '../components/Input/Input';
-import DOMPurify from 'dompurify';
 
 const MAX_TAB_SWITCHES = 3;
-const REDIRECT_SECONDS = 10;
 
 export default function Quiz() {
   const { user } = useAuth();
@@ -53,57 +51,45 @@ export default function Quiz() {
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [pendingBlock, setPendingBlock] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [glossaryMap, setGlossaryMap] = useState({});
-  const [earnedBadges, setEarnedBadges] = useState([]);
   const [streak, setStreak] = useState(0);
   const [topicSearch, setTopicSearch] = useState('');
   const [timeLeft, setTimeLeft] = useState(null);
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeData, setResumeData] = useState(null);
-  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('quiz_sound') !== 'off');
+  const [soundEnabled] = useState(() => localStorage.getItem('quiz_sound') !== 'off');
   const [confidence, setConfidence] = useState([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [answerSubmitting, setAnswerSubmitting] = useState(false);
-  const [sessionActive, setSessionActive] = useState(true);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
-  const [blockTabSwitch, setBlockTabSwitch] = useState(false);
   const [integrityOverlay, setIntegrityOverlay] = useState(false);
-  const [integrityCountdown, setIntegrityCountdown] = useState(REDIRECT_SECONDS);
-  const touchStartX = useRef(null);
   const integrityIntervalRef = useRef(null);
 
   const SPINNER_WORDS = ['Reviewing...', 'Checking...', 'Analyzing...', 'Verifying...', 'Processing...'];
 
   useEffect(() => {
     if (!isReady || !access.canAccess || access.isPending) return;
-    const load = async () => {
+    (async () => {
       try {
         setLoading(true);
         if (user) {
           await recordDailyVisit();
-          const [streakData, badges, savedState] = await Promise.all([
+          const [streakData, savedState] = await Promise.all([
             getUserStreak(),
-            getUserAchievements(),
             getQuizState(),
           ]);
           setStreak(streakData?.count || 0);
-          setEarnedBadges(Array.isArray(badges) ? badges.map(b => b.badge) : []);
           if (savedState?.state) {
             setResumeData(savedState.state);
             setShowResumeModal(true);
-            setLoading(false);
-            return;
           }
         }
-        setLoading(false);
       } catch {
         addToast('Failed to load data', 'error');
+      } finally {
         setLoading(false);
       }
-    };
-    load();
+    })();
   }, [isReady, access.canAccess, access.isPending, user]);
 
   useEffect(() => {
@@ -117,13 +103,15 @@ export default function Quiz() {
 
   useEffect(() => {
     if (!activeUnitId) return;
-    getQuizTopics(activeUnitId).then(topics => setAllTopics(Array.isArray(topics) ? topics : [])).catch(() => {});
+    getQuizTopics(activeUnitId)
+      .then(topics => setAllTopics(Array.isArray(topics) ? topics : []))
+      .catch(() => {});
   }, [activeUnitId]);
 
   const filteredTopics = useMemo(() => {
     if (!Array.isArray(allTopics)) return [];
-    return allTopics.filter(topic =>
-      !topicSearch || topic.topic_name?.toLowerCase().includes(topicSearch.toLowerCase())
+    return allTopics.filter(t =>
+      !topicSearch || t.topic_name?.toLowerCase().includes(topicSearch.toLowerCase())
     );
   }, [allTopics, topicSearch]);
 
@@ -136,7 +124,7 @@ export default function Quiz() {
   const navigateTo = (idx) => setCurrentIndex(idx);
 
   const selectAnswer = async (optionLetter) => {
-    if (userAnswers[currentIndex] !== null || answerSubmitting || integrityOverlay) return;
+    if (userAnswers[currentIndex] !== null || answerSubmitting) return;
     setAnswerSubmitting(true);
     const q = quizQuestions[currentIndex];
     try {
@@ -149,10 +137,6 @@ export default function Quiz() {
         correct_answer_text: result.correct_answer_text,
       };
       setUserAnswers(newAnswers);
-      if (soundEnabled) {
-        if (result.correct) playCorrectSound();
-        else playIncorrectSound();
-      }
       goToNextUnanswered(newAnswers, currentIndex);
     } catch {
       addToast('Failed to verify answer', 'error');
@@ -161,13 +145,12 @@ export default function Quiz() {
     }
   };
 
-  const setConfidenceForCurrent = (lvl) => {
-    const next = [...confidence];
-    next[currentIndex] = lvl;
-    setConfidence(next);
+  const goToNextUnanswered = (answers, currentIdx) => {
+    const first = answers.findIndex(a => a === null);
+    if (first !== -1 && first !== currentIdx) navigateTo(first);
   };
 
-  const submitBlockWithSession = async () => {
+  const submitBlock = async () => {
     if (!quizQuestions.length) return;
     const answersPayload = quizQuestions.map((q, idx) => ({
       id: q.id,
@@ -181,30 +164,12 @@ export default function Quiz() {
       clearQuizState().catch(() => {});
       if (result.auto_submitted) return;
       setResultData(result);
-      trackEvent('quiz_complete', {
-        unitId: activeUnitId,
-        topic: currentTopic,
-        block: currentBlock,
-        score: result.percentage,
-        passed: result.passed,
-      });
-      if (result.passed && result.percentage >= 90) showConfetti();
       const topics = await getQuizTopics(activeUnitId);
       setAllTopics(Array.isArray(topics) ? topics : []);
     } catch (err) {
       addToast('Submission failed', 'error');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const showConfetti = () => {
-    const colors = ['var(--primary)', 'var(--secondary)', 'var(--accent)', 'var(--warm)', 'var(--success)'];
-    for (let i = 0; i < 50; i++) {
-      const p = document.createElement('div');
-      p.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${Math.random()*100}%;top:-10px;border-radius:50%;z-index:9999;pointer-events:none;animation:confettiFall ${2+Math.random()*3}s linear forwards`;
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 4000);
     }
   };
 
@@ -217,11 +182,10 @@ export default function Quiz() {
 
   const startBlock = async (blockNum) => {
     if (!user) { addToast('Please sign in.', 'error'); return; }
-    try {
-      const retry = await checkDailyRetry(activeUnitId, blockNum);
-      if (!retry.can_retry) { addToast(retry.reason || 'Block locked.', 'error'); return; }
-    } catch {
-      addToast('Failed to check retry status', 'error');
+    const retry = await checkDailyRetry(activeUnitId, blockNum).catch(() => null);
+    if (retry && !retry.can_retry) {
+      addToast(retry.reason || 'Block locked.', 'error');
+      return;
     }
     setPendingBlock(blockNum);
     setShowRulesModal(true);
@@ -233,25 +197,11 @@ export default function Quiz() {
     setCurrentBlock(blockNum);
     setLoading(true);
     try {
-      const sessionResult = await startQuizSession(activeUnitId, blockNum);
-      if (!sessionResult.success) {
-        if (sessionResult.auto_submitted) {
-          addToast(sessionResult.message || 'Quiz auto-submitted.', 'warning');
-          setCurrentTopic('');
-          setQuizQuestions([]);
-          setLoading(false);
-          return;
-        }
-        addToast('Failed to start session', 'error');
-        setLoading(false);
-        return;
-      }
-      setTabSwitchCount(sessionResult.tab_switches || 0);
-      setSessionActive(true);
+      await startQuizSession(activeUnitId, blockNum);
+      setTabSwitchCount(0);
       const data = await getQuizBlock(activeUnitId, blockNum);
-      if (!data || !data.questions?.length) {
+      if (!data?.questions?.length) {
         addToast('No questions available.', 'error');
-        setLoading(false);
         return;
       }
       setQuizQuestions(data.questions);
@@ -261,23 +211,16 @@ export default function Quiz() {
       setQuizStartTime(new Date());
       setResultData(null);
       setTimeLeft(600);
-      trackEvent('quiz_start', { unitId: activeUnitId, topic: currentTopic, block: blockNum });
     } catch (err) {
-      addToast('Failed to load quiz: ' + err.message, 'error');
+      addToast('Failed to load block', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const loadLeaderboard = async () => {
-    setLeaderboardLoading(true);
-    try {
-      const data = await getLeaderboard(level || 'O-Level', 10);
-      setLeaderboard(Array.isArray(data) ? data : []);
-    } catch {
-      setLeaderboard([]);
-    }
-    setLeaderboardLoading(false);
+    const data = await getLeaderboard(level || 'O-Level', 10).catch(() => []);
+    setLeaderboard(Array.isArray(data) ? data : []);
   };
 
   if (!isReady || access.isPending) return <PendingApprovalScreen />;
@@ -305,7 +248,7 @@ export default function Quiz() {
         </h1>
         {class_name && (
           <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
-            Currently viewing: {class_name}
+            Current group: {class_name}
           </p>
         )}
 
@@ -327,25 +270,23 @@ export default function Quiz() {
 
         {!currentTopic && (
           <>
-            <QuizHero level={level} className={class_name} />
-            {user && <QuizDashboard user={user} level={level} />}
+            <QuizHero level={level} class_name={class_name} />
+            {user && <QuizDashboard user={user} level={level} class_name={class_name} />}
             {user && <QuizChallenges user={user} />}
-            <QuizLearningPath level={level} />
-            <QuizWeakAreas user={user} onRecommend={(topic, block) => { setCurrentTopic(topic); startBlock(block); }} />
+            <QuizLearningPath level={level} class_name={class_name} />
+            <QuizWeakAreas user={user} onRecommend={(topic, block) => { setCurrentTopic(topic); startBlock(block); }} level={level} class_name={class_name} />
           </>
         )}
 
         {!currentTopic ? (
           <>
             <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
-              <div style={{ flex: 1 }}>
-                <Input
-                  placeholder="Search topics..."
-                  value={topicSearch}
-                  onChange={e => setTopicSearch(e.target.value)}
-                  icon="magnifying-glass"
-                />
-              </div>
+              <Input
+                placeholder="Search topics..."
+                value={topicSearch}
+                onChange={e => setTopicSearch(e.target.value)}
+                icon="magnifying-glass"
+              />
               <Button variant="secondary" onClick={() => { setShowLeaderboard(true); loadLeaderboard(); }}>
                 <Icon name="trophy" /> Leaderboard
               </Button>
@@ -353,7 +294,7 @@ export default function Quiz() {
 
             <div className="grid grid-cols-3">
               {filteredTopics.length === 0 && (
-                <div style={{ textAlign: 'center', padding: 'var(--space-10)', color: 'var(--text-muted)' }}>
+                <div style={{ textAlign: 'center', padding: 'var(--space-10)', color: 'var(--text-muted)', gridColumn: '1 / -1' }}>
                   <Icon name="magnifying-glass" style={{ fontSize: '2rem', marginBottom: 'var(--space-4)', opacity: 0.4 }} />
                   <p>No topics match your search.</p>
                 </div>
@@ -443,7 +384,10 @@ export default function Quiz() {
                   <button
                     key={idx}
                     className={cls + (idx === currentIndex ? ' btn-accent' : '')}
-                    onClick={() => { if (!canNavigateTo(idx, userAnswers)) addToast('Answer previous questions first', 'warning'); else navigateTo(idx); }}
+                    onClick={() => {
+                      if (!canNavigateTo(idx, userAnswers)) addToast('Answer previous questions first', 'warning');
+                      else navigateTo(idx);
+                    }}
                     disabled={!canNavigateTo(idx, userAnswers)}
                     style={{ minWidth: 40 }}
                   >
@@ -530,13 +474,10 @@ export default function Quiz() {
                 ) : currentIndex < quizQuestions.length - 1 ? (
                   <Button onClick={() => navigateTo(currentIndex + 1)}>Next <Icon name="arrow-right" /></Button>
                 ) : allAnswered ? (
-                  <Button onClick={submitBlockWithSession}>Submit Block</Button>
+                  <Button onClick={submitBlock}>Submit Block</Button>
                 ) : null
               )}
             </div>
-            <p style={{ textAlign: 'center', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-              <Icon name="keyboard" /> Press A B C D keys • ← → to navigate
-            </p>
           </div>
         ) : (
           <div style={{ textAlign: 'center' }}>
