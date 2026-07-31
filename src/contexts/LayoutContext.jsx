@@ -50,7 +50,7 @@ export function LayoutProvider({ children }) {
     const isReady = !loading && !authLoading;
     if (!isReady || !bootstrap) {
       return {
-        loading: true, logo: null, siteName: 'AliverBiopharm', navigation: [],
+        loading: true, bootstrap: null,logo: null, siteName: 'AliverBiopharm', navigation: [],
         footer: { quick_links: [], resource_links: [], community_links: [], social_links: {} },
         groups: [], level: null, user, isAuthenticated: !!user,
         colorTheme: {}, theme, toggleTheme, authLoading,
@@ -60,6 +60,7 @@ export function LayoutProvider({ children }) {
 
     return {
       loading: false,
+      bootstrap,
       logo: bootstrap.universal?.logo_url || null,
       siteName: bootstrap.universal?.site_name || 'AliverBiopharm',
       navigation: bootstrap.header?.nav_items || [],
