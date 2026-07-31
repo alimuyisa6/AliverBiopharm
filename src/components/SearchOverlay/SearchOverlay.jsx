@@ -1,4 +1,4 @@
-/* components/SearchOverlay/SearchOverlay.jsx */
+ /* components/SearchOverlay/SearchOverlay.jsx */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,11 +7,11 @@ import { globalSearch } from '../../api/client';
 import { useLayout } from '../../contexts/LayoutContext';
 
 const CATEGORIES = [
-  { key: 'notes', label: 'Notes', icon: 'book-open', path: (item) => `/notes/read?id=${item.id}` },
-  { key: 'glossary', label: 'Glossary', icon: 'book-open', path: (item) => `/glossary/${item.slug}` },
-  { key: 'past_papers', label: 'Past Papers', icon: 'file-lines', path: () => '/past-papers' },
-  { key: 'flashcards', label: 'Flashcards', icon: 'layer-group', path: () => '/flashcards' },
-  { key: 'quizzes', label: 'Quizzes', icon: 'clipboard-check', path: () => '/quiz' },
+  { key: 'note', label: 'Notes', icon: 'book-open', path: (item) => `/notes/read?id=${item.id}` },
+  { key: 'glossary_term', label: 'Glossary', icon: 'book-open', path: (item) => `/glossary/${item.slug}` },
+  { key: 'past_paper', label: 'Past Papers', icon: 'file-lines', path: () => '/past-papers' },
+  { key: 'flashcard_deck', label: 'Flashcards', icon: 'layer-group', path: () => '/flashcards' },
+  { key: 'curriculum_unit', label: 'Quizzes', icon: 'clipboard-check', path: () => '/quiz' },
 ];
 
 export default function SearchOverlay({ open, onClose }) {
@@ -21,7 +21,7 @@ export default function SearchOverlay({ open, onClose }) {
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
   const navigate = useNavigate();
-  const { level } = useLayout();
+  const { level, activeGroupId } = useLayout();
 
   useEffect(() => {
     if (open) {
@@ -48,7 +48,7 @@ export default function SearchOverlay({ open, onClose }) {
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const data = await globalSearch(value.trim());
+        const data = await globalSearch(value.trim(), activeGroupId ? { group_id: activeGroupId } : {});
         setResults(data);
       } catch {
         setResults(null);
@@ -56,7 +56,7 @@ export default function SearchOverlay({ open, onClose }) {
         setLoading(false);
       }
     }, 350);
-  }, []);
+  }, [activeGroupId]);
 
   const handleChange = (e) => {
     setQuery(e.target.value);
