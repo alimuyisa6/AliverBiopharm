@@ -13,7 +13,7 @@ import {
 } from '../api/cachedClient';
 import { useContentAccess } from '../hooks/useContentAccess';
 import PageHeader from '../components/PageHeader/PageHeader';
-import StatCard from '../components/StatsCard/StatsCard';
+import StatCard from '../components/StatCard/StatCard';
 import ProgressBar from '../components/ProgressBar/ProgressBar';
 import Spinner from '../components/Spinner/Spinner';
 import EmptyState from '../components/EmptyState/EmptyState';
