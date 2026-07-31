@@ -1,6 +1,8 @@
- import React, { useContext, useState } from 'react';
+ /* components/AdminLauncher.jsx */
+import { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { requestHandoff } from '../api/client';
+import Icon from './Icon/Icon';
 
 export default function AdminLauncher() {
   const { user } = useContext(AuthContext);
@@ -22,9 +24,10 @@ export default function AdminLauncher() {
     <button
       onClick={openAdminDashboard}
       disabled={loading}
-      className="btn btn-cyan admin-launcher-btn"
+      className="btn btn-primary btn-sm"
+      style={{ position: 'fixed', bottom: 'var(--space-6)', right: 'var(--space-6)', zIndex: 50 }}
     >
-      <i className="fa-solid fa-user-shield" />
+      <Icon name="shield-halved" />
       {loading ? 'Opening…' : 'Admin'}
     </button>
   );
