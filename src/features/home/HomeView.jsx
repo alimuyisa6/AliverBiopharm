@@ -21,7 +21,24 @@ const CONTENT_TYPES = [
   { key: 'recall', label: 'Recall', description: 'Spaced-repetition for long-term memory', icon: 'brain', route: '/recall' },
 ];
 
-function ContentTypeCards({ navigate, user, sections }) {
+ function ContentTypeCards({ navigate, user, sections }) {
+  const { bootstrap } = useLayout();
+  const uiComponents = bootstrap?.ui_components || [];
+
+  const CONTENT_TYPES = [
+    { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes' },
+    { key: 'flashcards', label: 'Flashcards', description: 'Active recall with flip, typed, and MCQ modes', icon: 'layer-group', route: '/flashcards' },
+    { key: 'pdfs', label: 'PDF Library', description: 'Downloadable guides and reference sheets', icon: 'file-pdf', route: '/pdfs' },
+    { key: 'quizzes', label: 'Quizzes', description: 'Block-by-block testing across every unit', icon: 'clipboard-check', route: '/quiz' },
+    { key: 'past_papers', label: 'Past Papers', description: 'Real exam papers by year and board', icon: 'file-lines', route: '/past-papers' },
+    { key: 'recall', label: 'Recall', description: 'Spaced-repetition for long-term memory', icon: 'brain', route: '/recall' },
+  ];
+
+  function getImageForKey(key) {
+    const comp = uiComponents.find(c => c.component_key === `content_type_${key}`);
+    return comp?.properties?.image_url || null;
+  }
+
   return (
     <section className="section reveal">
       <span className="sec-label">Explore</span>
@@ -32,28 +49,35 @@ function ContentTypeCards({ navigate, user, sections }) {
         {sections?.section_headings?.content_types_subtitle || 'Pick where you want to start — every resource is tailored to your level.'}
       </p>
       <div className="grid grid-cols-3">
-        {CONTENT_TYPES.map((type) => (
-          <button
-            key={type.key}
-            className="card card-clickable"
-            onClick={() => navigate(user ? type.route : '/login')}
-          >
-            <div className="card-image-placeholder">
-              <Icon name={type.icon} />
-            </div>
-            <div className="card-body">
-              <h3 className="card-title">{type.label}</h3>
-              <p className="card-text">{type.description}</p>
-            </div>
-            <div className="card-footer">
-              <span className="btn btn-secondary btn-sm">Browse {type.label}</span>
-            </div>
-          </button>
-        ))}
+        {CONTENT_TYPES.map((type) => {
+          const imageUrl = getImageForKey(type.key);
+          return (
+            <button
+              key={type.key}
+              className="card card-clickable"
+              onClick={() => navigate(user ? type.route : '/login')}
+            >
+              {imageUrl ? (
+                <img src={imageUrl} alt={type.label} className="card-image" loading="lazy" />
+              ) : (
+                <div className="card-image-placeholder">
+                  <Icon name={type.icon} />
+                </div>
+              )}
+              <div className="card-body">
+                <h3 className="card-title">{type.label}</h3>
+                <p className="card-text">{type.description}</p>
+              </div>
+              <div className="card-footer">
+                <span className="btn btn-secondary btn-sm">Browse {type.label}</span>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
-}
+             }
 
 export default function HomeView(props) {
   const {
