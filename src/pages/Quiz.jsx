@@ -15,11 +15,12 @@ import {
 } from '../api/cachedClient';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import { AccessDenied } from '../components/access/AccessDenied';
-import QuizHero from '../features/quiz/QuizHero';
-import QuizDashboard from '../features/quiz/QuizDashboard';
-import QuizChallenges from '../features/quiz/QuizChallenges';
-import QuizLearningPath from '../features/quiz/QuizLearningPath';
-import QuizWeakAreas from '../features/quiz/QuizWeakAreas';
+ 
+import QuizHero from "../components/quiz/QuizHero";
+import QuizDashboard from "../components/quiz/QuizDashboard";
+import QuizChallenges from "../components/quiz/QuizChallenges";
+import QuizLearningPath from "../components/quiz/QuizLearningPath";
+import QuizWeakAreas from "../components/quiz/QuizWeakAreas";
 import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
 import ProgressBar from '../components/ProgressBar/ProgressBar';
