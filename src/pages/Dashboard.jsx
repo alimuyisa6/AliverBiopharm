@@ -3,7 +3,14 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
-import { getUserDashboard, getUserAchievements, getContinueReading, getPersonalRecords, getDailyChallenge, getWeakAreas } from '../api/cachedClient';
+import {
+  getUserDashboard,
+  getUserAchievements,
+  getContinueReading,
+  getPersonalRecords,
+  getDailyChallenge,
+  getWeakAreas,
+} from '../api/cachedClient';
 import { useContentAccess } from '../hooks/useContentAccess';
 import PageHeader from '../components/PageHeader/PageHeader';
 import StatCard from '../components/StatCard/StatCard';
@@ -70,9 +77,7 @@ export default function Dashboard() {
       <PageHeader
         title={`Welcome back${user?.full_name ? `, ${user.full_name}` : ''}`}
         subtitle={`${dashboard?.rank_title || 'Beginner'} · ${level?.display_name || ''}`}
-        badges={[
-          { label: level?.display_name || 'No Level', variant: levelColor },
-        ]}
+        badges={[{ label: level?.display_name || 'No Level', variant: levelColor }]}
       />
 
       <div className="grid grid-cols-4" style={{ marginBottom: 'var(--space-10)' }}>
@@ -90,10 +95,25 @@ export default function Dashboard() {
       </div>
 
       {dashboard?.next_goal?.topic && (
-        <Link to="/quiz" className="card" style={{ marginBottom: 'var(--space-10)', padding: 'var(--space-6)', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none' }}>
+        <Link
+          to="/quiz"
+          className="card"
+          style={{
+            marginBottom: 'var(--space-10)',
+            padding: 'var(--space-6)',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            textDecoration: 'none',
+          }}
+        >
           <div>
-            <span className="sec-label" style={{ textAlign: 'left', marginBottom: 'var(--space-2)' }}>Continue Where You Left Off</span>
-            <span style={{ fontWeight: 700, fontSize: 'var(--text-lg)' }}>{dashboard.next_goal.topic} · Block {dashboard.next_goal.block}</span>
+            <span className="sec-label" style={{ textAlign: 'left', marginBottom: 'var(--space-2)' }}>
+              Continue Where You Left Off
+            </span>
+            <span style={{ fontWeight: 700, fontSize: 'var(--text-lg)' }}>
+              {dashboard.next_goal.topic} · Block {dashboard.next_goal.block}
+            </span>
           </div>
           <Icon name="arrow-right" style={{ fontSize: '1.5rem', color: 'var(--primary)' }} />
         </Link>
@@ -101,13 +121,23 @@ export default function Dashboard() {
 
       {continueReading.length > 0 && (
         <div style={{ marginBottom: 'var(--space-10)' }}>
-          <h3 style={{ marginBottom: 'var(--space-6)' }}><Icon name="book-open" style={{ marginRight: 'var(--space-3)', color: `var(--${levelColor})` }} />Continue Reading</h3>
+          <h3 style={{ marginBottom: 'var(--space-6)' }}>
+            <Icon name="book-open" style={{ marginRight: 'var(--space-3)', color: `var(--${levelColor})` }} />
+            Continue Reading
+          </h3>
           <div className="grid grid-cols-3">
             {continueReading.slice(0, 3).map((item) => (
-              <Link key={item.note_id} to={`/notes/read?id=${item.note_id}`} className="card" style={{ textDecoration: 'none' }}>
+              <Link
+                key={item.note_id}
+                to={`/notes/read?id=${item.note_id}`}
+                className="card"
+                style={{ textDecoration: 'none' }}
+              >
                 <div className="card-body">
                   <h4 className="card-title">{item.title}</h4>
-                  <p className="card-text">{item.topic} · {Math.round(item.progress_percentage)}%</p>
+                  <p className="card-text">
+                    {item.topic} · {Math.round(item.progress_percentage)}%
+                  </p>
                 </div>
               </Link>
             ))}
@@ -117,4 +147,46 @@ export default function Dashboard() {
 
       {weakAreas.weak_topics.length > 0 && (
         <div style={{ marginBottom: 'var(--space-10)' }}>
-          <h3 style={{ marginBottom: 'var(--space-6)' }}><Icon name="chart-line" style={{ marginRight: 'var(--space-3)',
+          <h3 style={{ marginBottom: 'var(--space-6)' }}>
+            <Icon name="chart-line" style={{ marginRight: 'var(--space-3)', color: 'var(--error)' }} />
+            Areas to Review
+          </h3>
+          <div
+            style={{
+              display: 'flex',
+              gap: 'var(--space-3)',
+              flexWrap: 'wrap',
+              marginBottom: 'var(--space-4)',
+            }}
+          >
+            {weakAreas.weak_topics.map((t) => (
+              <span key={t} className="badge badge-error">
+                {t}
+              </span>
+            ))}
+          </div>
+          {weakAreas.recommended_block && (
+            <Link to="/quiz" className="btn btn-secondary btn-sm">
+              Practice {weakAreas.recommended_block.topic} Block {weakAreas.recommended_block.block}{' '}
+              <Icon name="arrow-right" />
+            </Link>
+          )}
+        </div>
+      )}
+
+      {records && (records.highest_score > 0 || records.fastest_completion > 0 || records.perfect_blocks > 0) && (
+        <div style={{ marginBottom: 'var(--space-10)' }}>
+          <h3 style={{ marginBottom: 'var(--space-6)' }}>
+            <Icon name="star" style={{ marginRight: 'var(--space-3)', color: 'var(--warm)' }} />
+            Personal Records
+          </h3>
+          <div className="grid grid-cols-3">
+            <StatCard icon="star" value={`${records.highest_score}%`} label="Highest Score" color="warm" />
+            <StatCard icon="stopwatch" value={`${records.fastest_completion}s`} label="Fastest Block" color="secondary" />
+            <StatCard icon="medal" value={records.perfect_blocks} label="Perfect Blocks" color="accent" />
+          </div>
+        </div>
+      )}
+    </Container>
+  );
+}
