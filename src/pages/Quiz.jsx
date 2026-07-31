@@ -25,6 +25,7 @@ import Spinner from '../components/Spinner/Spinner';
 import ProgressBar from '../components/ProgressBar/ProgressBar';
 import Button from '../components/Button/Button';
 import Modal from '../components/Modal/Modal';
+import Input from '../components/Input/Input';
 import DOMPurify from 'dompurify';
 
 const MAX_TAB_SWITCHES = 3;
@@ -35,7 +36,7 @@ export default function Quiz() {
   const navigate = useNavigate();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
-  const { level, class_name, showAll } = useLevelFilter();
+  const { level, class_name, showAll, displayName } = useLevelFilter();
   const { groups } = useLayout();
   const addToast = useToast();
 
@@ -56,7 +57,6 @@ export default function Quiz() {
   const [earnedBadges, setEarnedBadges] = useState([]);
   const [streak, setStreak] = useState(0);
   const [topicSearch, setTopicSearch] = useState('');
-  const [toast, setToast] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeData, setResumeData] = useState(null);
@@ -71,20 +71,16 @@ export default function Quiz() {
   const [blockTabSwitch, setBlockTabSwitch] = useState(false);
   const [integrityOverlay, setIntegrityOverlay] = useState(false);
   const [integrityCountdown, setIntegrityCountdown] = useState(REDIRECT_SECONDS);
-
   const touchStartX = useRef(null);
   const integrityIntervalRef = useRef(null);
 
   const SPINNER_WORDS = ['Reviewing...', 'Checking...', 'Analyzing...', 'Verifying...', 'Processing...'];
 
   useEffect(() => {
-    if (!isReady || !access.canAccess || access.isPending || !activeUnitId) return;
+    if (!isReady || !access.canAccess || access.isPending) return;
     const load = async () => {
       try {
         setLoading(true);
-        const topics = await getQuizTopics(activeUnitId);
-        setAllTopics(Array.isArray(topics) ? topics : []);
-
         if (user) {
           await recordDailyVisit();
           const [streakData, badges, savedState] = await Promise.all([
@@ -108,7 +104,7 @@ export default function Quiz() {
       }
     };
     load();
-  }, [isReady, access.canAccess, access.isPending, activeUnitId, user]);
+  }, [isReady, access.canAccess, access.isPending, user]);
 
   useEffect(() => {
     if (!groups?.length || !user) return;
@@ -120,36 +116,24 @@ export default function Quiz() {
   }, [groups, user]);
 
   useEffect(() => {
-    if (quizStartTime && quizQuestions.length && !integrityOverlay) {
-      const interval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - new Date(quizStartTime).getTime()) / 1000);
-        const remaining = Math.max(0, 600 - elapsed);
-        setTimeLeft(remaining);
-        if (remaining === 0) {
-          clearInterval(interval);
-          addToast('Time is up! Submitting...', 'warning');
-          submitBlockWithSession();
-        }
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [quizStartTime, quizQuestions.length, integrityOverlay]);
+    if (!activeUnitId) return;
+    getQuizTopics(activeUnitId).then(topics => setAllTopics(Array.isArray(topics) ? topics : [])).catch(() => {});
+  }, [activeUnitId]);
+
+  const filteredTopics = useMemo(() => {
+    if (!Array.isArray(allTopics)) return [];
+    return allTopics.filter(topic =>
+      !topicSearch || topic.topic_name?.toLowerCase().includes(topicSearch.toLowerCase())
+    );
+  }, [allTopics, topicSearch]);
 
   const getFirstUnansweredIndex = useCallback((answers) => answers.findIndex(a => a === null), []);
-
   const canNavigateTo = useCallback((targetIndex, answers) => {
     if (answers[targetIndex] !== null) return true;
     return targetIndex === answers.findIndex(a => a === null);
   }, []);
 
-  const navigateTo = (idx) => {
-    setCurrentIndex(idx);
-  };
-
-  const goToNextUnanswered = (answers, currentIdx) => {
-    const first = answers.findIndex(a => a === null);
-    if (first !== -1 && first !== currentIdx) navigateTo(first);
-  };
+  const navigateTo = (idx) => setCurrentIndex(idx);
 
   const selectAnswer = async (optionLetter) => {
     if (userAnswers[currentIndex] !== null || answerSubmitting || integrityOverlay) return;
@@ -170,16 +154,16 @@ export default function Quiz() {
         else playIncorrectSound();
       }
       goToNextUnanswered(newAnswers, currentIndex);
-    } catch (err) {
+    } catch {
       addToast('Failed to verify answer', 'error');
     } finally {
       setAnswerSubmitting(false);
     }
   };
 
-  const setConfidenceForCurrent = (level) => {
+  const setConfidenceForCurrent = (lvl) => {
     const next = [...confidence];
-    next[currentIndex] = level;
+    next[currentIndex] = lvl;
     setConfidence(next);
   };
 
@@ -195,12 +179,15 @@ export default function Quiz() {
       const result = await submitQuizWithSession(activeUnitId, currentBlock, answersPayload, timeTaken);
       sessionStorage.removeItem('quiz_resume');
       clearQuizState().catch(() => {});
-      if (result.auto_submitted) {
-        setLoading(false);
-        return;
-      }
+      if (result.auto_submitted) return;
       setResultData(result);
-      trackEvent('quiz_complete', { unitId: activeUnitId, topic: currentTopic, block: currentBlock, score: result.percentage, passed: result.passed });
+      trackEvent('quiz_complete', {
+        unitId: activeUnitId,
+        topic: currentTopic,
+        block: currentBlock,
+        score: result.percentage,
+        passed: result.passed,
+      });
       if (result.passed && result.percentage >= 90) showConfetti();
       const topics = await getQuizTopics(activeUnitId);
       setAllTopics(Array.isArray(topics) ? topics : []);
@@ -221,10 +208,77 @@ export default function Quiz() {
     }
   };
 
-  const filteredTopics = useMemo(() => {
-    if (!Array.isArray(allTopics)) return [];
-    return allTopics.filter(topic => !topicSearch || topic.topic_name?.toLowerCase().includes(topicSearch.toLowerCase()));
-  }, [allTopics, topicSearch]);
+  const openTopicBlocks = (topic, total) => {
+    setCurrentTopic(topic);
+    setTotalBlocks(Number(total) || 0);
+    setQuizQuestions([]);
+    setResultData(null);
+  };
+
+  const startBlock = async (blockNum) => {
+    if (!user) { addToast('Please sign in.', 'error'); return; }
+    try {
+      const retry = await checkDailyRetry(activeUnitId, blockNum);
+      if (!retry.can_retry) { addToast(retry.reason || 'Block locked.', 'error'); return; }
+    } catch {
+      addToast('Failed to check retry status', 'error');
+    }
+    setPendingBlock(blockNum);
+    setShowRulesModal(true);
+  };
+
+  const confirmStartBlock = async () => {
+    setShowRulesModal(false);
+    const blockNum = pendingBlock;
+    setCurrentBlock(blockNum);
+    setLoading(true);
+    try {
+      const sessionResult = await startQuizSession(activeUnitId, blockNum);
+      if (!sessionResult.success) {
+        if (sessionResult.auto_submitted) {
+          addToast(sessionResult.message || 'Quiz auto-submitted.', 'warning');
+          setCurrentTopic('');
+          setQuizQuestions([]);
+          setLoading(false);
+          return;
+        }
+        addToast('Failed to start session', 'error');
+        setLoading(false);
+        return;
+      }
+      setTabSwitchCount(sessionResult.tab_switches || 0);
+      setSessionActive(true);
+      const data = await getQuizBlock(activeUnitId, blockNum);
+      if (!data || !data.questions?.length) {
+        addToast('No questions available.', 'error');
+        setLoading(false);
+        return;
+      }
+      setQuizQuestions(data.questions);
+      setUserAnswers(new Array(data.questions.length).fill(null));
+      setConfidence(new Array(data.questions.length).fill(null));
+      setCurrentIndex(0);
+      setQuizStartTime(new Date());
+      setResultData(null);
+      setTimeLeft(600);
+      trackEvent('quiz_start', { unitId: activeUnitId, topic: currentTopic, block: blockNum });
+    } catch (err) {
+      addToast('Failed to load quiz: ' + err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadLeaderboard = async () => {
+    setLeaderboardLoading(true);
+    try {
+      const data = await getLeaderboard(level || 'O-Level', 10);
+      setLeaderboard(Array.isArray(data) ? data : []);
+    } catch {
+      setLeaderboard([]);
+    }
+    setLeaderboardLoading(false);
+  };
 
   if (!isReady || access.isPending) return <PendingApprovalScreen />;
   if (!access.canAccess) return <AccessDenied />;
@@ -246,12 +300,20 @@ export default function Quiz() {
     <div className="quiz-page">
       <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
         <span className="sec-label">Assessments</span>
-        <h1 className="section-title">Knowledge Quizzes</h1>
+        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+          Knowledge Quizzes {displayName ? `– ${displayName}` : ''}
+        </h1>
+        {class_name && (
+          <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
+            Currently viewing: {class_name}
+          </p>
+        )}
 
         {user && streak > 0 && (
-          <div className="streak-badge" style={{ justifyContent: 'center', marginBottom: 'var(--space-4)' }}>
-            <Icon name="fire" style={{ color: 'var(--warm)' }} />
-            {streak}-day streak
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-4)' }}>
+            <span className="badge badge-warm">
+              <Icon name="fire" /> {streak}-day streak
+            </span>
           </div>
         )}
 
@@ -265,10 +327,10 @@ export default function Quiz() {
 
         {!currentTopic && (
           <>
-            <QuizHero />
-            {user && <QuizDashboard user={user} />}
+            <QuizHero level={level} className={class_name} />
+            {user && <QuizDashboard user={user} level={level} />}
             {user && <QuizChallenges user={user} />}
-            <QuizLearningPath level={level || 'O-Level'} />
+            <QuizLearningPath level={level} />
             <QuizWeakAreas user={user} onRecommend={(topic, block) => { setCurrentTopic(topic); startBlock(block); }} />
           </>
         )}
@@ -330,15 +392,11 @@ export default function Quiz() {
           <div className="quiz-result-container">
             <div className="card" style={{ textAlign: 'center', padding: 'var(--space-10)', marginBottom: 'var(--space-8)' }}>
               <Icon name={resultData.passed ? 'trophy' : 'book-open'} style={{ fontSize: '3rem', color: resultData.passed ? 'var(--warm)' : 'var(--primary)', marginBottom: 'var(--space-6)' }} />
-              <h2 style={{ marginBottom: 'var(--space-4)' }}>
-                {resultData.passed ? `Congratulations, ${user?.full_name || 'Learner'}!` : 'Block Complete'}
-              </h2>
+              <h2>{resultData.passed ? `Congratulations, ${user?.full_name || 'Learner'}!` : 'Block Complete'}</h2>
               <div style={{ fontSize: 'var(--text-5xl)', fontWeight: 'var(--weight-black)', color: resultData.passed ? 'var(--success)' : 'var(--error)', marginBottom: 'var(--space-4)' }}>
                 {resultData.percentage}%
               </div>
-              <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>
-                {resultData.score}/{resultData.total} correct
-              </p>
+              <p>{resultData.score}/{resultData.total} correct</p>
               <span className={`badge ${resultData.passed ? 'badge-success' : 'badge-error'}`}>
                 <Icon name={resultData.passed ? 'circle-check' : 'circle-xmark'} />
                 {resultData.passed ? 'Passed' : 'Not passed'}
@@ -351,24 +409,17 @@ export default function Quiz() {
             </div>
 
             <div style={{ marginBottom: 'var(--space-8)' }}>
-              <h3 style={{ marginBottom: 'var(--space-6)' }}>Block {currentBlock + 1} Review</h3>
+              <h3 style={{ marginBottom: 'var(--space-6)' }}>Block {currentBlock + 1} Review – {currentTopic}</h3>
               {(resultData.answers || []).map((a, idx) => (
                 <div key={idx} className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-4)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
                     <Icon name={a.isCorrect ? 'circle-check' : 'circle-xmark'} style={{ color: a.isCorrect ? 'var(--success)' : 'var(--error)' }} />
                     <span style={{ fontWeight: 600 }}>Q{idx + 1}</span>
-                    {confidence[idx] && (
-                      <span className={`badge ${confidence[idx] === 'sure' ? 'badge-success' : 'badge-warning'}`}>
-                        {confidence[idx] === 'sure' ? 'Sure' : 'Unsure'}
-                      </span>
-                    )}
                   </div>
-                  <p style={{ marginBottom: 'var(--space-3)' }} dangerouslySetInnerHTML={{ __html: a.question }} />
-                  <p style={{ color: a.isCorrect ? 'var(--success)' : 'var(--error)' }}>
-                    Your answer: {a.userAnswerText}
-                  </p>
+                  <p dangerouslySetInnerHTML={{ __html: a.question }} />
+                  <p style={{ color: a.isCorrect ? 'var(--success)' : 'var(--error)' }}>Your answer: {a.userAnswerText}</p>
                   {!a.isCorrect && <p style={{ color: 'var(--success)' }}>Correct: {a.correctAnswerText}</p>}
-                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)', marginTop: 'var(--space-3)' }} dangerouslySetInnerHTML={{ __html: a.explanation }} />
+                  {a.explanation && <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)', marginTop: 'var(--space-3)' }} dangerouslySetInnerHTML={{ __html: a.explanation }} />}
                 </div>
               ))}
             </div>
@@ -386,17 +437,14 @@ export default function Quiz() {
           <div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginBottom: 'var(--space-6)' }}>
               {quizQuestions.map((_, idx) => {
-                let bgClass = '';
-                if (userAnswers[idx]) {
-                  bgClass = userAnswers[idx].correct ? 'btn-primary' : 'btn-danger';
-                }
-                const isDisabled = !canNavigateTo(idx, userAnswers);
+                let cls = 'btn btn-sm btn-ghost';
+                if (userAnswers[idx]) cls = userAnswers[idx].correct ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-danger';
                 return (
                   <button
                     key={idx}
-                    className={`btn btn-sm ${idx === currentIndex ? 'btn-accent' : bgClass || 'btn-ghost'}`}
-                    onClick={() => { if (!isDisabled) navigateTo(idx); }}
-                    disabled={isDisabled}
+                    className={cls + (idx === currentIndex ? ' btn-accent' : '')}
+                    onClick={() => { if (!canNavigateTo(idx, userAnswers)) addToast('Answer previous questions first', 'warning'); else navigateTo(idx); }}
+                    disabled={!canNavigateTo(idx, userAnswers)}
                     style={{ minWidth: 40 }}
                   >
                     {idx + 1}
@@ -417,22 +465,15 @@ export default function Quiz() {
               </div>
             )}
 
-            <div style={{ marginBottom: 'var(--space-4)' }}>
-              <ProgressBar value={currentIndex + 1} max={quizQuestions.length} variant="gradient" />
-            </div>
-            <p style={{ textAlign: 'center', color: 'var(--text-dim)', marginBottom: 'var(--space-2)' }}>
-              Block {currentBlock + 1} • Q {currentIndex + 1}/{quizQuestions.length}
-            </p>
-            <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-6)' }}>
-              {currentTopic}
+            <ProgressBar value={currentIndex + 1} max={quizQuestions.length} variant="gradient" />
+            <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: 'var(--space-2) 0' }}>
+              Block {currentBlock + 1} • Q {currentIndex + 1}/{quizQuestions.length} – {currentTopic}
             </p>
 
             {answerSubmitting && (
-              <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
+              <div style={{ textAlign: 'center', margin: 'var(--space-4) 0' }}>
                 <Spinner size="sm" />
-                <span style={{ marginLeft: 'var(--space-3)', fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
-                  {SPINNER_WORDS[Math.floor(Math.random() * SPINNER_WORDS.length)]}
-                </span>
+                <span style={{ marginLeft: 'var(--space-3)' }}>{SPINNER_WORDS[Math.floor(Math.random() * SPINNER_WORDS.length)]}</span>
               </div>
             )}
 
@@ -499,9 +540,12 @@ export default function Quiz() {
           </div>
         ) : (
           <div style={{ textAlign: 'center' }}>
-            <h2 style={{ marginBottom: 'var(--space-8)' }}>{currentTopic}</h2>
+            <h2 style={{ marginBottom: 'var(--space-4)' }}>{currentTopic}</h2>
+            <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-8)' }}>
+              {class_name ? `${class_name} – ` : ''}Select a block to start
+            </p>
             {totalBlocks === 0 ? (
-              <p style={{ color: 'var(--text-dim)' }}>No blocks available for this topic.</p>
+              <p style={{ color: 'var(--text-dim)' }}>No blocks available.</p>
             ) : (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-4)', justifyContent: 'center' }}>
                 {Array.from({ length: totalBlocks }).map((_, i) => {
@@ -545,4 +589,4 @@ export default function Quiz() {
       </div>
     </div>
   );
-}
+} 
