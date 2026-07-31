@@ -12,7 +12,7 @@ export function ContactSection({ contactForm, contactStatus, contactInfo = [], o
       <p className="section-subtitle">Got a question? Our team will get back to you within 24 hours.</p>
       <div className="grid grid-cols-2" style={{ alignItems: 'start' }}>
         <form onSubmit={onSubmit}>
-          <div className="card" style={{ padding: 'var(--space-8)' }}>
+          <div className="card card-blue" style={{ padding: 'var(--space-8)' }}>
             <Input
               label="Full Name"
               value={contactForm.name}
@@ -52,7 +52,7 @@ export function ContactSection({ contactForm, contactStatus, contactInfo = [], o
             )}
           </div>
         </form>
-        <div className="card" style={{ padding: 'var(--space-8)' }}>
+        <div className="card card-teal" style={{ padding: 'var(--space-8)' }}>
           <h3 style={{ marginBottom: 'var(--space-6)' }}>
             <Icon name="headset" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />
             Contact Info
