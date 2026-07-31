@@ -95,18 +95,33 @@ function initRevealObserver() {
   try {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('in');
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+        }
       });
     }, { threshold: 0.25, rootMargin: '0px 0px -50px 0px' });
 
     const observeElements = () => {
-      document.querySelectorAll('.reveal:not(.in)').forEach(el => observer.observe(el));
+      document.querySelectorAll('.reveal:not(.in)').forEach(el => {
+        observer.observe(el);
+      });
     };
 
-    observeElements();
+    // Initial observation after a short delay (so React has rendered)
+    setTimeout(observeElements, 100);
 
-    const mutationObserver = new MutationObserver(observeElements);
+    // Re‑observe on DOM changes
+    const mutationObserver = new MutationObserver(() => {
+      observeElements();
+    });
     mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Fallback: after 2 seconds, force‑reveal any still‑hidden elements
+    setTimeout(() => {
+      document.querySelectorAll('.reveal:not(.in)').forEach(el => {
+        el.classList.add('in');
+      });
+    }, 2000);
 
     return () => {
       observer.disconnect();
