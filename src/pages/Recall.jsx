@@ -1,4 +1,4 @@
- /* pages/Recall.jsx */
+/* pages/Recall.jsx */
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -65,15 +65,6 @@ async function playTone(type) {
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
         osc.start(now); osc.stop(now + 0.4);
         break;
-      case 'achievement':
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.setValueAtTime(659.25, now + 0.12);
-        osc.frequency.setValueAtTime(783.99, now + 0.24);
-        osc.frequency.setValueAtTime(1046.5, now + 0.36);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-        osc.start(now); osc.stop(now + 0.6);
-        break;
       default:
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
@@ -88,7 +79,7 @@ export default function BioRecall() {
   const navigate = useNavigate();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
-  const { level, class_name, showAll } = useLevelFilter();
+  const { level, class_name, showAll, displayName } = useLevelFilter();
   const { groups } = useLayout();
   const addToast = useToast();
 
@@ -101,10 +92,7 @@ export default function BioRecall() {
   const [xpTotal, setXpTotal] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
   const [masteryTopics, setMasteryTopics] = useState({});
-  const [topicXpMap, setTopicXpMap] = useState({});
-  const [topicStreakMap, setTopicStreakMap] = useState({});
   const [brainEnergy, setBrainEnergy] = useState(100);
-  const [hasMoreQuestions, setHasMoreQuestions] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [sessionReport, setSessionReport] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
@@ -114,28 +102,13 @@ export default function BioRecall() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [loading, setLoading] = useState(true);
   const [feedbackResult, setFeedbackResult] = useState(null);
-  const [message, setMessage] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(null);
-  const [debugLog, setDebugLog] = useState([]);
-  const countdownRef = useRef(null);
-  const answerInputRef = useRef(null);
-  const [countdown, setCountdown] = useState(8);
-  const [spinnerMessage, setSpinnerMessage] = useState('');
-  const [floatingCards, setFloatingCards] = useState(false);
-  const [floatingConcepts, setFloatingConcepts] = useState([]);
-  const { show, hide } = useLoading();
   const [leaderboard, setLeaderboard] = useState([]);
-  const [heatmap, setHeatmap] = useState([]);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const confettiCanvasRef = useRef(null);
-  const [questionStartTime, setQuestionStartTime] = useState(null);
   const [rankTitle, setRankTitle] = useState('Beginner');
   const [xpProgress, setXpProgress] = useState({ level: 1, xpIntoLevel: 0, xpToNext: 100, progressPercent: 0 });
-  const [masteryAverage, setMasteryAverage] = useState(0);
-  const [spinMessages, setSpinMessages] = useState(['Checking...', 'Reviewing...', 'Feedback ready']);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try { return localStorage.getItem('bioRecall_sound') !== 'off'; } catch { return true; }
   });
+  const answerInputRef = useRef(null);
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -194,7 +167,7 @@ export default function BioRecall() {
       } else {
         addToast('No questions available for this topic', 'warning');
       }
-    } catch (err) {
+    } catch {
       addToast('Failed to start session', 'error');
     } finally {
       setLoading(false);
@@ -205,9 +178,14 @@ export default function BioRecall() {
     const answer = answerInputRef.current?.value?.trim();
     if (!answer) return;
     setAnalyzing(true);
-    setSpinnerMessage(spinMessages[Math.floor(Math.random() * spinMessages.length)]);
     try {
-      const result = await submitRecallAnswer(sessionId, sessionQuestions[currentIndex].id, answer, '', questionStartTime?.toISOString());
+      const result = await submitRecallAnswer(
+        sessionId,
+        sessionQuestions[currentIndex].id,
+        answer,
+        '',
+        questionStartTime?.toISOString()
+      );
       const newRecord = {
         question_id: sessionQuestions[currentIndex].id,
         user_answer: answer,
@@ -259,11 +237,11 @@ export default function BioRecall() {
 
   function computeXpProgress(totalXp) {
     const xp = totalXp || 0;
-    const level = Math.floor(xp / 100) + 1;
-    const xpIntoLevel = xp % 100;
-    const xpToNext = 100 - xpIntoLevel;
-    const progressPercent = xpIntoLevel;
-    return { level, xpIntoLevel, xpToNext, progressPercent };
+    const lvl = Math.floor(xp / 100) + 1;
+    const into = xp % 100;
+    const toNext = 100 - into;
+    const pct = into;
+    return { level: lvl, xpIntoLevel: into, xpToNext: toNext, progressPercent: pct };
   }
 
   const toggleSound = () => {
@@ -277,19 +255,18 @@ export default function BioRecall() {
   if (!isReady || access.isPending) return <PendingApprovalScreen />;
   if (!access.canAccess) return <AccessDenied />;
 
-  if (loading) {
+  if (loading && !sessionActive && !showReport) {
     return (
       <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <Spinner size="lg" />
-          <p style={{ marginTop: 'var(--space-4)', color: 'var(--text-dim)' }}>Preparing your recall session...</p>
-        </div>
+        <Spinner size="lg" />
       </div>
     );
   }
 
   const currentQuestion = sessionQuestions[currentIndex];
   const topicEntries = Object.entries(masteryTopics).filter(([t]) => t && t !== 'null').slice(0, 6);
+  const levelName = displayName || level?.id || '';
+  const classLabel = class_name || '';
 
   return (
     <div className="recall-page">
@@ -303,12 +280,15 @@ export default function BioRecall() {
         <div style={{ marginBottom: 'var(--space-8)' }}>
           <span className="sec-label">{level === 'Pharmacy' ? 'RecallRx' : 'BioRecall'}</span>
           <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
-            {level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${level || ''}`}
+            {level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${levelName}`}
           </h1>
-          {level && (
-            <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
-              {level}{class_name ? ` · ${class_name}` : ''}
-            </span>
+          {levelName && (
+            <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
+              <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                {levelName}
+              </span>
+              {classLabel && <span className="chip" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>{classLabel}</span>}
+            </div>
           )}
         </div>
 
@@ -316,7 +296,9 @@ export default function BioRecall() {
           <>
             <div className="card" style={{ padding: 'var(--space-8)', textAlign: 'center', marginBottom: 'var(--space-8)' }}>
               <Icon name="brain" style={{ fontSize: '3rem', color: 'var(--primary)', marginBottom: 'var(--space-4)' }} />
-              <Button onClick={openTopicModal} size="lg">Continue to Topics</Button>
+              <Button onClick={openTopicModal} size="lg">
+                Continue to Topics{levelName ? ` in ${levelName}` : ''}
+              </Button>
               <div style={{ marginTop: 'var(--space-4)', display: 'flex', justifyContent: 'center', gap: 'var(--space-8)' }}>
                 <div>
                   <Icon name="fire" style={{ color: 'var(--warm)' }} />
@@ -366,7 +348,9 @@ export default function BioRecall() {
 
             {topicEntries.length > 0 && (
               <div style={{ marginBottom: 'var(--space-8)' }}>
-                <h3 style={{ marginBottom: 'var(--space-6)' }}>Topic Mastery</h3>
+                <h3 style={{ marginBottom: 'var(--space-6)' }}>
+                  Topic Mastery {levelName ? `in ${levelName}` : ''}{classLabel ? ` – ${classLabel}` : ''}
+                </h3>
                 <div className="grid grid-cols-3">
                   {topicEntries.map(([topic, mastery]) => (
                     <Card key={topic}>
@@ -383,7 +367,9 @@ export default function BioRecall() {
             )}
 
             <div style={{ marginBottom: 'var(--space-8)' }}>
-              <h3 style={{ marginBottom: 'var(--space-6)' }}>Leaderboard</h3>
+              <h3 style={{ marginBottom: 'var(--space-6)' }}>
+                Leaderboard {levelName ? `– ${levelName}` : ''}
+              </h3>
               {leaderboard.length === 0 ? (
                 <p style={{ color: 'var(--text-dim)' }}>No data yet. Be the first!</p>
               ) : (
@@ -411,11 +397,10 @@ export default function BioRecall() {
 
         {sessionActive && currentQuestion && (
           <div>
-            <div style={{ marginBottom: 'var(--space-4)' }}>
-              <ProgressBar value={currentIndex + 1} max={sessionQuestions.length} variant="gradient" />
-            </div>
-            <p style={{ textAlign: 'center', color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>
+            <ProgressBar value={currentIndex + 1} max={sessionQuestions.length} variant="gradient" />
+            <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: 'var(--space-4) 0' }}>
               Question {currentIndex + 1} of {sessionQuestions.length}
+              {selectedTopic?.topic_name && <> – {selectedTopic.topic_name}</>}
             </p>
 
             <Card style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
@@ -428,7 +413,7 @@ export default function BioRecall() {
               {analyzing && (
                 <div style={{ textAlign: 'center', marginTop: 'var(--space-4)' }}>
                   <Spinner size="sm" />
-                  <span style={{ marginLeft: 'var(--space-3)' }}>{spinnerMessage}</span>
+                  <span style={{ marginLeft: 'var(--space-3)' }}>Checking...</span>
                 </div>
               )}
               <div style={{ marginTop: 'var(--space-6)', display: 'flex', gap: 'var(--space-4)' }}>
@@ -451,8 +436,7 @@ export default function BioRecall() {
                     name={feedbackResult.strength === 'excellent' ? 'star' : feedbackResult.strength === 'strong' ? 'circle-check' : 'rotate'}
                     style={{
                       fontSize: '2rem',
-                      color: feedbackResult.strength === 'excellent' ? 'var(--success)' :
-                             feedbackResult.strength === 'strong' ? 'var(--primary)' : 'var(--warm)'
+                      color: feedbackResult.strength === 'excellent' ? 'var(--success)' : feedbackResult.strength === 'strong' ? 'var(--primary)' : 'var(--warm)'
                     }}
                   />
                   <div>
@@ -503,7 +487,7 @@ export default function BioRecall() {
           </Card>
         )}
 
-        <Modal open={topicModalOpen} onClose={closeTopicModal} title="Select a Topic">
+        <Modal open={topicModalOpen} onClose={closeTopicModal} title={`Select a Topic${levelName ? ` in ${levelName}` : ''}${classLabel ? ` – ${classLabel}` : ''}`}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             {topicList.length === 0 && (
               <p style={{ color: 'var(--text-dim)' }}>No topics available for your level.</p>
@@ -516,9 +500,7 @@ export default function BioRecall() {
                 style={{ justifyContent: 'space-between' }}
               >
                 <span>{topic.topic_name}</span>
-                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-                  {topic.question_count} questions
-                </span>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{topic.question_count} questions</span>
               </button>
             ))}
           </div>
@@ -526,4 +508,4 @@ export default function BioRecall() {
       </div>
     </div>
   );
-}
+} 
