@@ -240,9 +240,12 @@ export default function Auth() {
   return (
     <div className="auth-page" style={{ display: 'flex', minHeight: 'calc(100vh - var(--header-height))' }}>
       <div className="auth-brand-panel" style={{
-        flex: 1, background: 'linear-gradient(135deg, var(--primary-light), var(--accent-light))',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-10)',
-        display: window.innerWidth < 768 ? 'none' : 'flex'
+        flex: 1,
+        background: 'linear-gradient(135deg, var(--primary-light), var(--accent-light))',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 'var(--space-10)',
+        display: window.innerWidth < 768 ? 'none' : 'flex',
       }}>
         <div style={{ maxWidth: 400, textAlign: 'center' }}>
           <Icon name="graduation-cap" style={{ fontSize: '3rem', color: 'var(--primary)', marginBottom: 'var(--space-6)' }} />
