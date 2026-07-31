@@ -1,4 +1,4 @@
-  import {
+ import {
   setCorsHeaders,
   generateCsrfToken,
   getClientIp
@@ -13,34 +13,62 @@ import {
   SecurityError
 } from '../lib/security-middleware.js';
 
+import * as authModule from '../lib/auth.js';
+import * as adminModule from '../lib/admin.js';
+import * as chatModule from '../lib/chat.js';
+import * as classroomModule from '../lib/classroom.js';
+import * as communityModule from '../lib/community.js';
+import * as contactModule from '../lib/contact.js';
+import * as contentModule from '../lib/content.js';
+import * as contentguideModule from '../lib/content-guide.js';
+import * as curriculumModule from '../lib/curriculum.js';
+import * as flashcardsModule from '../lib/flashcards.js';
+import * as glossaryModule from '../lib/glossary.js';
+import * as interactionsModule from '../lib/interactions.js';
+import * as labModule from '../lib/lab.js';
+import * as levelModule from '../lib/level.js';
+import * as notesModule from '../lib/notes.js';
+import * as pastPapersModule from '../lib/past-papers.js';
+import * as platformModule from '../lib/platform.js';
+import * as premiumModule from '../lib/premium.js';
+import * as profileModule from '../lib/profile.js';
+import * as profilePictureModule from '../lib/profile-picture.js';
+import * as quizModule from '../lib/quiz.js';
+import * as recallModule from '../lib/recall.js';
+import * as resourcesModule from '../lib/resources.js';
+import * as searchModule from '../lib/search.js';
+import * as siteModule from '../lib/site.js';
+import * as uploadModule from '../lib/upload.js';
+import * as weeklyChallengeModule from '../lib/weekly-challenge.js';
+
 const MODULE_MAP = {
-  auth:              new URL('../lib/auth.js', import.meta.url).href,
-  admin:             new URL('../lib/admin.js', import.meta.url).href,
-  chat:              new URL('../lib/chat.js', import.meta.url).href,
-  classroom:         new URL('../lib/classroom.js', import.meta.url).href,
-  community:         new URL('../lib/community.js', import.meta.url).href,
-  contact:           new URL('../lib/contact.js', import.meta.url).href,
-  content:           new URL('../lib/content.js', import.meta.url).href,
-  contentguide:      new URL('../lib/content-guide.js', import.meta.url).href,
-  curriculum:        new URL('../lib/curriculum.js', import.meta.url).href,
-  flashcards:        new URL('../lib/flashcards.js', import.meta.url).href,
-  glossary:          new URL('../lib/glossary.js', import.meta.url).href,
-  interactions:      new URL('../lib/interactions.js', import.meta.url).href,
-  lab:               new URL('../lib/lab.js', import.meta.url).href,
-  level:             new URL('../lib/level.js', import.meta.url).href,
-  notes:             new URL('../lib/notes.js', import.meta.url).href,
-  'past-papers':     new URL('../lib/past-papers.js', import.meta.url).href,
-  platform:          new URL('../lib/platform.js', import.meta.url).href,
-  premium:           new URL('../lib/premium.js', import.meta.url).href,
-  profile:           new URL('../lib/profile.js', import.meta.url).href,
-  'profile-picture': new URL('../lib/profile-picture.js', import.meta.url).href,
-  quiz:              new URL('../lib/quiz.js', import.meta.url).href,
-  recall:            new URL('../lib/recall.js', import.meta.url).href,
-  resources:         new URL('../lib/resources.js', import.meta.url).href,
-  search:            new URL('../lib/search.js', import.meta.url).href,
-  site:              new URL('../lib/site.js', import.meta.url).href,
-  upload:            new URL('../lib/upload.js', import.meta.url).href,
-  'weekly-challenge':new URL('../lib/weekly-challenge.js', import.meta.url).href,
+  auth: authModule,
+  admin: adminModule,
+  chat: chatModule,
+  classroom: classroomModule,
+  community: communityModule,
+  contact: contactModule,
+  content: contentModule,
+  contentguide: contentguideModule,
+  curriculum: curriculumModule,
+  flashcards: flashcardsModule,
+  glossary: glossaryModule,
+  interactions: interactionsModule,
+  lab: labModule,
+  level: levelModule,
+  notes: notesModule,
+  'past-papers': pastPapersModule,
+  platform: platformModule,
+  premium: premiumModule,
+  profile: profileModule,
+  'profile-picture': profilePictureModule,
+  quiz: quizModule,
+  recall: recallModule,
+  resources: resourcesModule,
+  search: searchModule,
+  site: siteModule,
+  upload: uploadModule,
+  'weekly-challenge': weeklyChallengeModule,
 };
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -55,16 +83,8 @@ export default async function handler(req, res) {
   const { module: moduleName, path } = req.query;
   if (!moduleName || !path) return res.status(400).json({ error: 'module and path required' });
 
-  const modulePath = MODULE_MAP[moduleName];
-  if (!modulePath) return res.status(404).json({ error: 'Module not found' });
-
-  let mod;
-  try {
-    mod = await import(modulePath);
-  } catch (importErr) {
-    console.error(`[IMPORT ERROR] ${moduleName}`, importErr.message);
-    return res.status(500).json({ error: 'Module load failed', module: moduleName, detail: importErr.message });
-  }
+  const mod = MODULE_MAP[moduleName];
+  if (!mod) return res.status(404).json({ error: 'Module not found' });
 
   try {
     const ctx = await createAuthenticatedContext(req, res);
