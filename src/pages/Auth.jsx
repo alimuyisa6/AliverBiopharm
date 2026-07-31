@@ -1,54 +1,28 @@
- import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { createPortal } from 'react-dom';
+ /* pages/Auth.jsx */
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { signup, getClassSequence, getPharmacyPrograms } from '../api/client';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import useLoading from '../loading/useLoading';
-import InlineSpinner from '../loading/components/InlineSpinner';
-import {
-  FaEnvelope,
-  FaLock,
-  FaUser,
-  FaArrowRight,
-  FaArrowLeft,
-  FaUserPlus,
-  FaRightToBracket,
-  FaCircleCheck,
-  FaGraduationCap,
-  FaShield,
-  FaRocket,
-  FaBook,
-  FaChartLine,
-  FaUsers,
-  FaEye,
-  FaEyeSlash,
-  FaUserGraduate,
-  FaChalkboardUser,
-  FaSeedling,
-  FaFlask,
-  FaCapsules,
-  FaCheck
-} from 'react-icons/fa6';
+import { useToast } from '../components/Toast/Toast';
+import Input from '../components/Input/Input';
+import Button from '../components/Button/Button';
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
 const TRACKS = [
-  { value: 'O-Level', icon: FaSeedling, label: 'O-Level', description: 'Senior 1 – 4' },
-  { value: 'A-Level', icon: FaFlask, label: 'A-Level', description: 'Senior 5 – 6' },
-  { value: 'Pharmacy', icon: FaCapsules, label: 'Pharmacy', description: 'Certificate, Diploma, Degree' },
+  { value: 'O-Level', icon: 'seedling', label: 'O-Level', description: 'Senior 1 – 4' },
+  { value: 'A-Level', icon: 'flask', label: 'A-Level', description: 'Senior 5 – 6' },
+  { value: 'Pharmacy', icon: 'capsules', label: 'Pharmacy', description: 'Certificate, Diploma, Degree' },
 ];
-
-const pageVariants = {
-  initial: { opacity: 0, x: 80 },
-  in: { opacity: 1, x: 0 },
-  out: { opacity: 0, x: -80 }
-};
 
 export default function Auth() {
   const location = useLocation();
   const navigate = useNavigate();
   const mode = location.pathname === '/register' ? 'register' : 'login';
+  const addToast = useToast();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -57,8 +31,6 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [focused, setFocused] = useState(null);
-  const [showPassword, setShowPassword] = useState({ password: false, confirm: false });
 
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [role, setRole] = useState(null);
@@ -74,9 +46,7 @@ export default function Auth() {
   const turnstileRef = useRef(null);
   const widgetIdRef = useRef(null);
   const widgetReadyRef = useRef(false);
-  const [captchaHome, setCaptchaHome] = useState(null);
   const [captchaSlot, setCaptchaSlot] = useState(null);
-  const { show, hide } = useLoading();
 
   const redirectTo = location.state?.from
     ? `${location.state.from.pathname}${location.state.from.search || ''}`
@@ -101,23 +71,17 @@ export default function Auth() {
     try {
       widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
-        callback: () => {
-          widgetReadyRef.current = true;
-        },
+        callback: () => { widgetReadyRef.current = true; },
         'expired-callback': () => {
           widgetReadyRef.current = false;
           if (window.turnstile && widgetIdRef.current) {
-            try {
-              window.turnstile.reset(widgetIdRef.current);
-            } catch {}
+            try { window.turnstile.reset(widgetIdRef.current); } catch {}
           }
         },
         'error-callback': () => {
           widgetReadyRef.current = false;
           if (window.turnstile && widgetIdRef.current) {
-            try {
-              window.turnstile.reset(widgetIdRef.current);
-            } catch {}
+            try { window.turnstile.reset(widgetIdRef.current); } catch {}
           }
           return false;
         }
@@ -153,36 +117,21 @@ export default function Auth() {
       cancelled = true;
       clearInterval(interval);
       if (window.turnstile && widgetIdRef.current) {
-        try {
-          window.turnstile.remove(widgetIdRef.current);
-        } catch {}
+        try { window.turnstile.remove(widgetIdRef.current); } catch {}
       }
       widgetIdRef.current = null;
       widgetReadyRef.current = false;
     };
   }, [renderWidget]);
 
-  const switchMode = useCallback((nextMode) => {
-    navigate(nextMode === 'register' ? '/register' : '/login', { state: location.state, replace: true });
-  }, [navigate, location.state]);
-
   const getTurnstileToken = () => {
     if (!window.turnstile || !widgetIdRef.current || !widgetReadyRef.current) return '';
-    try {
-      return window.turnstile.getResponse(widgetIdRef.current) || '';
-    } catch {
-      widgetIdRef.current = null;
-      widgetReadyRef.current = false;
-      renderWidget();
-      return '';
-    }
+    try { return window.turnstile.getResponse(widgetIdRef.current) || ''; } catch { return ''; }
   };
 
   const resetTurnstile = () => {
     if (!window.turnstile || !widgetIdRef.current) return;
-    try {
-      window.turnstile.reset(widgetIdRef.current);
-    } catch {
+    try { window.turnstile.reset(widgetIdRef.current); } catch {
       widgetIdRef.current = null;
       widgetReadyRef.current = false;
       renderWidget();
@@ -193,26 +142,19 @@ export default function Auth() {
     e.preventDefault();
     setError('');
     const token = getTurnstileToken();
-    if (!token) {
-      setError('Please complete the verification');
-      return;
-    }
+    if (!token) { setError('Please complete the verification'); return; }
     setSubmitting(true);
-    show('auth', 'Signing you in...');
     try {
       const result = await login(email, password, token);
       if (result?.mfa_required) {
-        hide();
         setSubmitting(false);
         setMfaStep(true);
         resetTurnstile();
         return;
       }
-      hide();
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed.');
-      hide();
       resetTurnstile();
     } finally {
       setSubmitting(false);
@@ -227,25 +169,18 @@ export default function Auth() {
       return;
     }
     const token = getTurnstileToken();
-    if (!token) {
-      setMfaError('Please complete the verification again');
-      return;
-    }
+    if (!token) { setMfaError('Please complete the verification again'); return; }
     setSubmitting(true);
-    show('auth', 'Verifying...');
     try {
       const result = await login(email, password, token, mfaCode.trim());
       if (result?.mfa_required) {
         setMfaError('Incorrect code. Please try again.');
-        hide();
         resetTurnstile();
         return;
       }
-      hide();
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setMfaError(err.message || 'Verification failed.');
-      hide();
       resetTurnstile();
     } finally {
       setSubmitting(false);
@@ -262,36 +197,18 @@ export default function Auth() {
   async function handleRegister(e) {
     e.preventDefault();
     setError('');
-    if (!fullName.trim()) {
-      setError('Full name is required');
-      return;
-    }
-    if (password !== confirm) {
-      setError('Passwords do not match');
-      return;
-    }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-    if (mode === 'register') {
-      setOnboardingStep(1);
-    }
+    if (!fullName.trim()) { setError('Full name is required'); return; }
+    if (password !== confirm) { setError('Passwords do not match'); return; }
+    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (mode === 'register') setOnboardingStep(1);
   }
 
   async function handleOnboardingFinish() {
     setError('');
-    if (!role || !track || !className) {
-      setError('Please complete all onboarding steps');
-      return;
-    }
+    if (!role || !track || !className) { setError('Please complete all onboarding steps'); return; }
     const token = getTurnstileToken();
-    if (!token) {
-      setError('Verification expired.');
-      return;
-    }
+    if (!token) { setError('Verification expired.'); return; }
     setSubmitting(true);
-    show('form', 'Creating your account...');
     try {
       await signup(email, password, token, {
         full_name: fullName.trim(),
@@ -300,13 +217,9 @@ export default function Auth() {
         class_name: className
       });
       setSuccess(true);
-      hide();
-      setTimeout(() => {
-        navigate(redirectTo, { replace: true });
-      }, 1500);
+      setTimeout(() => navigate(redirectTo, { replace: true }), 1500);
     } catch (err) {
       setError(err.message || 'Registration failed.');
-      hide();
       resetTurnstile();
     } finally {
       setSubmitting(false);
@@ -320,454 +233,255 @@ export default function Auth() {
     return 0;
   };
 
-  const captchaPortalTarget = captchaSlot || captchaHome;
-  const captchaPortal = captchaPortalTarget
-    ? createPortal(<div ref={turnstileRef} className="auth-captcha" />, captchaPortalTarget)
-    : null;
+  const switchMode = (nextMode) => {
+    navigate(nextMode === 'register' ? '/register' : '/login', { state: location.state, replace: true });
+  };
 
-  let content;
-
-  if (success) {
-    content = (
-      <motion.div
-        className="auth-page"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <div className="auth-form-panel">
-          <div className="auth-card success-card">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-            >
-              <FaCircleCheck className="success-icon" />
-            </motion.div>
-            <h2 className="success-title">Account Created!</h2>
-            <p className="success-subtitle">Welcome to Aliver Biopharm. Redirecting you...</p>
-            <div className="success-loader">
-              <div className="loader-bar" />
+  return (
+    <div className="auth-page" style={{ display: 'flex', minHeight: 'calc(100vh - var(--header-height))' }}>
+      <div className="auth-brand-panel" style={{
+        flex: 1, background: 'linear-gradient(135deg, var(--primary-light), var(--accent-light))',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-10)',
+        display: window.innerWidth < 768 ? 'none' : 'flex'
+      }}>
+        <div style={{ maxWidth: 400, textAlign: 'center' }}>
+          <Icon name="graduation-cap" style={{ fontSize: '3rem', color: 'var(--primary)', marginBottom: 'var(--space-6)' }} />
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--text-4xl)', fontWeight: 'var(--weight-black)', marginBottom: 'var(--space-4)' }}>
+            {mode === 'login' ? 'Welcome Back' : 'Start Your Journey'}
+          </h1>
+          <p style={{ color: 'var(--text-dim)', lineHeight: 'var(--leading-relaxed)' }}>
+            {mode === 'login'
+              ? 'Sign in to continue your learning journey across O-Level, A-Level, and Pharmacy.'
+              : 'Create an account and access thousands of resources tailored to your level.'}
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', marginTop: 'var(--space-10)', textAlign: 'left' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <Icon name="rocket" style={{ color: 'var(--primary)' }} />
+              <span style={{ fontSize: 'var(--text-sm)' }}>Personalized learning</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <Icon name="book-open" style={{ color: 'var(--accent)' }} />
+              <span style={{ fontSize: 'var(--text-sm)' }}>Expert resources</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <Icon name="shield-halved" style={{ color: 'var(--secondary)' }} />
+              <span style={{ fontSize: 'var(--text-sm)' }}>Secure & private</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <Icon name="users" style={{ color: 'var(--warm)' }} />
+              <span style={{ fontSize: 'var(--text-sm)' }}>Community learning</span>
             </div>
           </div>
         </div>
-      </motion.div>
-    );
-  } else if (mfaStep) {
-    content = (
-      <motion.div
-        className="auth-page"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      >
-        <div className="auth-form-panel">
-          <motion.div
-            className="auth-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div className="auth-header">
-              <h2 className="auth-title">Two-Factor Verification</h2>
-              <p className="auth-subtitle">Enter the 6-digit code from your authenticator app</p>
-            </div>
-            <AnimatePresence>
+      </div>
+
+      <div className="auth-form-panel" style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 'var(--space-10)', background: 'var(--bg-card)'
+      }}>
+        <div style={{ maxWidth: 420, width: '100%' }}>
+          {success ? (
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center' }}>
+              <Icon name="circle-check" style={{ fontSize: '4rem', color: 'var(--success)', marginBottom: 'var(--space-6)' }} />
+              <h2 style={{ marginBottom: 'var(--space-4)' }}>Account Created!</h2>
+              <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>Welcome to AliverBiopharm. Redirecting you...</p>
+              <div className="progress-track">
+                <div className="progress-fill progress-gradient" style={{ width: '100%', animation: 'borderProgress 1.5s var(--ease-slow) forwards' }} />
+              </div>
+            </motion.div>
+          ) : mfaStep ? (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <div style={{ marginBottom: 'var(--space-8)' }}>
+                <h2 style={{ marginBottom: 'var(--space-3)' }}>Two-Factor Verification</h2>
+                <p style={{ color: 'var(--text-dim)' }}>Enter the 6-digit code from your authenticator app</p>
+              </div>
               {mfaError && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="auth-error"
-                >
-                  <span className="error-icon">⚠</span>{mfaError}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <form onSubmit={handleMfaSubmit} className="auth-form">
-              <div className="form-group">
-                <label className="form-label">Authentication Code</label>
-                <div className="input-wrapper">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    maxLength={6}
-                    placeholder="000000"
-                    value={mfaCode}
-                    onChange={e => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    onFocus={() => setFocused('mfa')}
-                    onBlur={() => setFocused(null)}
-                    className="form-input auth-mfa-input"
-                    required
-                    disabled={submitting}
-                    autoFocus
-                  />
-                  <div className="input-highlight" />
+                <div className="alert alert-error" style={{ marginBottom: 'var(--space-6)' }}>
+                  <Icon name="exclamation-triangle" /> {mfaError}
                 </div>
-              </div>
-              <div ref={setCaptchaSlot} className="auth-captcha" />
-              <motion.button
-                type="submit"
-                className={`btn-primary auth-submit${submitting ? ' loading' : ''}`}
-                disabled={submitting}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {submitting ? <><InlineSpinner /> Verifying...</> : 'Verify and Sign In'}
-              </motion.button>
-            </form>
-            <div className="auth-footer">
-              <p className="auth-footer-text">
-                <button type="button" className="auth-link" onClick={handleMfaBack}>
-                  <FaArrowLeft /> Back to sign in
+              )}
+              <form onSubmit={handleMfaSubmit}>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={mfaCode}
+                  onChange={e => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  disabled={submitting}
+                  autoFocus
+                />
+                <div ref={setCaptchaSlot} style={{ marginBottom: 'var(--space-6)' }} />
+                <Button type="submit" loading={submitting} style={{ width: '100%' }}>
+                  Verify and Sign In
+                </Button>
+              </form>
+              <div style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
+                <button className="btn btn-ghost" onClick={handleMfaBack}>
+                  <Icon name="arrow-left" /> Back to sign in
                 </button>
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </motion.div>
-    );
-  } else if (onboardingStep > 0) {
-    content = (
-      <motion.div
-        className="auth-page"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      >
-        <div className="auth-form-panel">
-          <div className="auth-card">
-            <div className="auth-header">
-              <h2 className="auth-title">Complete Your Profile</h2>
-              <p className="auth-subtitle">Help us personalise your learning experience</p>
-            </div>
-            <div style={{ marginBottom: '1.5rem', width: '100%', height: '4px', background: 'var(--clr-navy-light)', borderRadius: '4px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${progressPct()}%`, background: 'linear-gradient(90deg, var(--clr-cyan), var(--clr-magenta))', borderRadius: '4px', transition: 'width 0.3s' }} />
-            </div>
-            <AnimatePresence>
+              </div>
+            </motion.div>
+          ) : onboardingStep > 0 ? (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <div style={{ marginBottom: 'var(--space-8)' }}>
+                <h2 style={{ marginBottom: 'var(--space-3)' }}>Complete Your Profile</h2>
+                <p style={{ color: 'var(--text-dim)' }}>Help us personalise your learning experience</p>
+              </div>
+              <div className="progress-track" style={{ marginBottom: 'var(--space-6)' }}>
+                <div className="progress-fill progress-gradient" style={{ width: `${progressPct()}%` }} />
+              </div>
               {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="auth-error"
-                >
-                  <span className="error-icon">⚠</span>{error}
-                </motion.div>
+                <div className="alert alert-error" style={{ marginBottom: 'var(--space-6)' }}>
+                  <Icon name="exclamation-triangle" /> {error}
+                </div>
               )}
-            </AnimatePresence>
-            {onboardingStep === 1 && (
-              <div className="auth-form">
-                <div className="form-group">
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', fontWeight: 600, letterSpacing: 'var(--ls-wider)', color: 'var(--clr-cyan)', textTransform: 'uppercase' }}>Step 1 of 3</span>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-h3)', fontWeight: 700, color: 'var(--clr-white)', margin: '0.5rem 0' }}>I am a...</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <button
-                      className={`auth-submit`}
-                      style={{ background: role === 'student' ? 'linear-gradient(135deg, var(--clr-cyan), var(--clr-blue))' : 'var(--clr-deep-space)', border: '2px solid var(--clr-border-glow)', justifyContent: 'flex-start', padding: '1rem', fontSize: '1rem' }}
-                      onClick={() => { setRole('student'); setOnboardingStep(2); }}
-                    >
-                      <FaUserGraduate style={{ marginRight: '0.5rem' }} /> Student
+              {onboardingStep === 1 && (
+                <div>
+                  <span className="sec-label" style={{ textAlign: 'left' }}>Step 1 of 3</span>
+                  <h3 style={{ marginBottom: 'var(--space-6)' }}>I am a...</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                    <button className={`card card-clickable ${role === 'student' ? 'card-selected' : ''}`}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-5)' }}
+                      onClick={() => { setRole('student'); setOnboardingStep(2); }}>
+                      <Icon name="user-graduate" style={{ fontSize: '1.5rem' }} /> Student
                     </button>
-                    <button
-                      className={`auth-submit`}
-                      style={{ background: role === 'teacher' ? 'linear-gradient(135deg, var(--clr-cyan), var(--clr-blue))' : 'var(--clr-deep-space)', border: '2px solid var(--clr-border-glow)', justifyContent: 'flex-start', padding: '1rem', fontSize: '1rem' }}
-                      onClick={() => { setRole('teacher'); setOnboardingStep(2); }}
-                    >
-                      <FaChalkboardUser style={{ marginRight: '0.5rem' }} /> Teacher
+                    <button className={`card card-clickable ${role === 'teacher' ? 'card-selected' : ''}`}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-5)' }}
+                      onClick={() => { setRole('teacher'); setOnboardingStep(2); }}>
+                      <Icon name="user-pen" style={{ fontSize: '1.5rem' }} /> Teacher
                     </button>
                   </div>
                 </div>
-              </div>
-            )}
-            {onboardingStep === 2 && (
-              <div className="auth-form">
-                <div className="form-group">
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', fontWeight: 600, letterSpacing: 'var(--ls-wider)', color: 'var(--clr-cyan)', textTransform: 'uppercase' }}>Step 2 of 3</span>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-h3)', fontWeight: 700, color: 'var(--clr-white)', margin: '0.5rem 0' }}>Select your track</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {TRACKS.map(t => {
-                      const Icon = t.icon;
-                      return (
-                        <button
-                          key={t.value}
-                          className={`auth-submit`}
-                          style={{ background: track === t.value ? 'linear-gradient(135deg, var(--clr-cyan), var(--clr-blue))' : 'var(--clr-deep-space)', border: '2px solid var(--clr-border-glow)', justifyContent: 'flex-start', padding: '1rem', fontSize: '1rem' }}
-                          onClick={() => { setTrack(t.value); setClassName(null); setOnboardingStep(3); }}
-                        >
-                          <Icon style={{ marginRight: '0.5rem' }} /> {t.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div style={{ marginTop: '1rem' }}>
-                    <button className="auth-link" onClick={() => { setOnboardingStep(1); setTrack(null); }}>
-                      <FaArrowLeft /> Back
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-            {onboardingStep === 3 && (
-              <div className="auth-form">
-                <div className="form-group">
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', fontWeight: 600, letterSpacing: 'var(--ls-wider)', color: 'var(--clr-cyan)', textTransform: 'uppercase' }}>Step 3 of 3</span>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-h3)', fontWeight: 700, color: 'var(--clr-white)', margin: '0.5rem 0' }}>{track === 'Pharmacy' ? 'Select your programme' : 'Select your class'}</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {classes.map(c => (
-                      <button
-                        key={c.value}
-                        className={`auth-submit`}
-                        style={{ background: className === c.value ? 'linear-gradient(135deg, var(--clr-cyan), var(--clr-blue))' : 'var(--clr-deep-space)', border: '2px solid var(--clr-border-glow)', justifyContent: 'flex-start', padding: '1rem', fontSize: '1rem' }}
-                        onClick={() => setClassName(c.value)}
-                      >
-                        {c.label}
+              )}
+              {onboardingStep === 2 && (
+                <div>
+                  <span className="sec-label" style={{ textAlign: 'left' }}>Step 2 of 3</span>
+                  <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your track</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                    {TRACKS.map(t => (
+                      <button key={t.value}
+                        className={`card card-clickable ${track === t.value ? 'card-selected' : ''}`}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-5)' }}
+                        onClick={() => { setTrack(t.value); setClassName(null); setOnboardingStep(3); }}>
+                        <Icon name={t.icon} style={{ fontSize: '1.5rem' }} />
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{t.label}</div>
+                          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>{t.description}</div>
+                        </div>
                       </button>
                     ))}
                   </div>
-                  <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                    <button className="auth-link" onClick={() => setOnboardingStep(2)}>
-                      <FaArrowLeft /> Back
-                    </button>
-                    <button
-                      className={`btn-primary auth-submit${submitting ? ' loading' : ''}`}
-                      onClick={handleOnboardingFinish}
-                      disabled={!className || submitting}
-                      style={{ minWidth: 'auto' }}
-                    >
-                      {submitting ? <><InlineSpinner /> Creating...</> : <><FaCheck /> Complete</>}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    );
-  } else {
-    content = (
-      <motion.div
-        className="auth-page"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      >
-        <div className="auth-brand-panel">
-          <div className="auth-brand-content">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="auth-brand-badge"
-            >
-              <FaGraduationCap />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="auth-label"
-            >
-              ALIVER BIOPHARM
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="auth-brand-title"
-            >
-              {mode === 'login' ? 'Welcome Back' : 'Start Your Journey'}
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="auth-brand-description"
-            >
-              {mode === 'login' ? 'Sign in to continue your learning journey' : 'Create an account and start learning today'}
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="auth-features"
-            >
-              <div className="auth-feature">
-                <FaRocket className="feature-icon feature-icon-cyan" />
-                <span>Personalized learning</span>
-              </div>
-              <div className="auth-feature">
-                <FaBook className="feature-icon feature-icon-magenta" />
-                <span>Expert resources</span>
-              </div>
-              <div className="auth-feature">
-                <FaShield className="feature-icon feature-icon-blue" />
-                <span>Secure & private</span>
-              </div>
-              <div className="auth-feature">
-                <FaUsers className="feature-icon feature-icon-orange" />
-                <span>Community learning</span>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-        <div className="auth-form-panel">
-          <motion.div
-            className="auth-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="auth-header">
-              <h2 className="auth-title">{mode === 'login' ? 'Sign In' : 'Create Account'}</h2>
-              <p className="auth-subtitle">{mode === 'login' ? 'Access your account securely' : 'Join thousands of learners worldwide'}</p>
-            </div>
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="auth-error"
-                >
-                  <span className="error-icon">⚠</span>{error}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="auth-form">
-              {mode === 'register' && (
-                <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <div className="input-wrapper">
-                    <input
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={fullName}
-                      onChange={e => setFullName(e.target.value)}
-                      onFocus={() => setFocused('name')}
-                      onBlur={() => setFocused(null)}
-                      className={`form-input${focused === 'name' ? ' input-focused' : ''}`}
-                      required
-                      disabled={submitting}
-                    />
-                    <div className="input-highlight" />
-                  </div>
-                </div>
-              )}
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
-                <div className="input-wrapper">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    onFocus={() => setFocused('email')}
-                    onBlur={() => setFocused(null)}
-                    className={`form-input${focused === 'email' ? ' input-focused' : ''}`}
-                    required
-                    disabled={submitting}
-                  />
-                  <div className="input-highlight" />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <div className="input-wrapper password-wrapper">
-                  <input
-                    type={showPassword.password ? 'text' : 'password'}
-                    placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    onFocus={() => setFocused('password')}
-                    onBlur={() => setFocused(null)}
-                    className={`form-input${focused === 'password' ? ' input-focused' : ''}`}
-                    required
-                    disabled={submitting}
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle"
-                    onClick={() => setShowPassword(prev => ({ ...prev, password: !prev.password }))}
-                    disabled={submitting}
-                  >
-                    {showPassword.password ? <FaEyeSlash /> : <FaEye />}
+                  <button className="btn btn-ghost" style={{ marginTop: 'var(--space-6)' }}
+                    onClick={() => { setOnboardingStep(1); setTrack(null); }}>
+                    <Icon name="arrow-left" /> Back
                   </button>
-                  <div className="input-highlight" />
                 </div>
-                {mode === 'register' && <span className="input-hint">Minimum 8 characters</span>}
-              </div>
-              {mode === 'register' && (
-                <div className="form-group">
-                  <label className="form-label">Confirm Password</label>
-                  <div className="input-wrapper password-wrapper">
-                    <input
-                      type={showPassword.confirm ? 'text' : 'password'}
-                      placeholder="Confirm your password"
-                      value={confirm}
-                      onChange={e => setConfirm(e.target.value)}
-                      onFocus={() => setFocused('confirm')}
-                      onBlur={() => setFocused(null)}
-                      className={`form-input${focused === 'confirm' ? ' input-focused' : ''}`}
-                      required
-                      disabled={submitting}
-                    />
-                    <button
-                      type="button"
-                      className="password-toggle"
-                      onClick={() => setShowPassword(prev => ({ ...prev, confirm: !prev.confirm }))}
-                      disabled={submitting}
-                    >
-                      {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}
+              )}
+              {onboardingStep === 3 && (
+                <div>
+                  <span className="sec-label" style={{ textAlign: 'left' }}>Step 3 of 3</span>
+                  <h3 style={{ marginBottom: 'var(--space-6)' }}>
+                    {track === 'Pharmacy' ? 'Select your programme' : 'Select your class'}
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+                    {classes.map(c => (
+                      <button key={c.value}
+                        className={`card card-clickable ${className === c.value ? 'card-selected' : ''}`}
+                        style={{ padding: 'var(--space-5)' }}
+                        onClick={() => setClassName(c.value)}>
+                        <span style={{ fontWeight: 600 }}>{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--space-8)' }}>
+                    <button className="btn btn-ghost" onClick={() => setOnboardingStep(2)}>
+                      <Icon name="arrow-left" /> Back
                     </button>
-                    <div className="input-highlight" />
+                    <Button onClick={handleOnboardingFinish} loading={submitting} disabled={!className}>
+                      <Icon name="check" /> Complete
+                    </Button>
                   </div>
                 </div>
               )}
-              <div ref={setCaptchaSlot} className="auth-captcha" />
-              <motion.button
-                type="submit"
-                className={`btn-primary auth-submit${submitting ? ' loading' : ''}`}
-                disabled={submitting}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {submitting ? (
-                  <><InlineSpinner />{mode === 'login' ? 'Signing in...' : 'Creating account...'}</>
-                ) : (
-                  <>{mode === 'login' ? <><FaRightToBracket /> Sign In</> : <><FaUserPlus /> Create Account</>}</>
+            </motion.div>
+          ) : (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <div style={{ marginBottom: 'var(--space-8)' }}>
+                <h2 style={{ marginBottom: 'var(--space-3)' }}>
+                  {mode === 'login' ? 'Sign In' : 'Create Account'}
+                </h2>
+                <p style={{ color: 'var(--text-dim)' }}>
+                  {mode === 'login' ? 'Access your account securely' : 'Join thousands of learners worldwide'}
+                </p>
+              </div>
+              {error && (
+                <div className="alert alert-error" style={{ marginBottom: 'var(--space-6)' }}>
+                  <Icon name="exclamation-triangle" /> {error}
+                </div>
+              )}
+              <form onSubmit={mode === 'login' ? handleLogin : handleRegister}>
+                {mode === 'register' && (
+                  <Input
+                    label="Full Name"
+                    placeholder="Enter your full name"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    required
+                    disabled={submitting}
+                    icon="user"
+                  />
                 )}
-              </motion.button>
-            </form>
-            <div className="auth-footer">
-              <p className="auth-footer-text">
-                {mode === 'login' ? (
-                  <>Don't have an account? <button type="button" className="auth-link" onClick={() => switchMode('register')}>Sign Up <FaArrowRight /></button></>
-                ) : (
-                  <>Already have an account? <button type="button" className="auth-link" onClick={() => switchMode('login')}><FaArrowLeft /> Sign In</button></>
+                <Input
+                  label="Email Address"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  disabled={submitting}
+                  icon="envelope"
+                />
+                <Input
+                  label="Password"
+                  type="password"
+                  placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  disabled={submitting}
+                  hint={mode === 'register' ? 'Minimum 8 characters' : undefined}
+                />
+                {mode === 'register' && (
+                  <Input
+                    label="Confirm Password"
+                    type="password"
+                    placeholder="Confirm your password"
+                    value={confirm}
+                    onChange={e => setConfirm(e.target.value)}
+                    required
+                    disabled={submitting}
+                  />
                 )}
-              </p>
-            </div>
-          </motion.div>
+                <div ref={setCaptchaSlot} style={{ marginBottom: 'var(--space-6)' }} />
+                <Button type="submit" loading={submitting} style={{ width: '100%' }}>
+                  {mode === 'login' ? <><Icon name="right-to-bracket" /> Sign In</> : <><Icon name="user-plus" /> Create Account</>}
+                </Button>
+              </form>
+              <div style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
+                  {mode === 'login' ? (
+                    <>Don't have an account? <button className="btn btn-ghost btn-sm" onClick={() => switchMode('register')}>Sign Up <Icon name="arrow-right" /></button></>
+                  ) : (
+                    <>Already have an account? <button className="btn btn-ghost btn-sm" onClick={() => switchMode('login')}><Icon name="arrow-left" /> Sign In</button></>
+                  )}
+                </p>
+              </div>
+            </motion.div>
+          )}
         </div>
-      </motion.div>
-    );
-  }
-
-  return (
-    <>
-      <div ref={setCaptchaHome} style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: 0, height: 0, overflow: 'hidden', pointerEvents: 'none' }} />
-      {captchaPortal}
-      {content}
-    </>
+      </div>
+    </div>
   );
 }
