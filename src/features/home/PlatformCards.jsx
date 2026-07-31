@@ -9,7 +9,7 @@ export function PlatformCards() {
 
   const uiComponents = bootstrap?.ui_components || [];
 
-  function getImageForGroup(groupId) {
+  function getImage(groupId) {
     const comp = uiComponents.find(
       c => c.component_key === `platform_card_${groupId}`
     );
@@ -23,7 +23,7 @@ export function PlatformCards() {
       <p className="section-subtitle">Choose your path and start learning today.</p>
       <div className="grid grid-cols-3">
         {groups.map((group) => {
-          const imageUrl = getImageForGroup(group.id);
+          const imageUrl = getImage(group.id);
           return (
             <button
               key={group.id}
