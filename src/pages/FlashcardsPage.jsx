@@ -1,36 +1,38 @@
- import React, { useState, useEffect } from 'react';
+ /* pages/FlashcardsPage.jsx */
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
- 
+import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
+import { AccessDenied } from '../components/access/AccessDenied';
 import FlashcardDeckView from '../components/FlashcardDeckView';
 import FlashcardProgress from '../components/Flashcardprogress';
-import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
-import { completeFlashcardSession, getKnownFlashcards } from '../api/cachedClient';
-import { FaSpinner, FaTriangleExclamation } from 'react-icons/fa6';
+import { completeFlashcardSession, getKnownFlashcards, getFlashcardDecks } from '../api/cachedClient';
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
+import Button from '../components/Button/Button';
+import Card from '../components/Card/Card';
+import EmptyState from '../components/EmptyState/EmptyState';
 
-const STAGE = {
-  LOADING: 'loading',
-  SUBJECT: 'subject',
-  STUDY: 'study',
-  COMPLETE: 'complete'
-};
+const STAGE = { LOADING: 'loading', SUBJECT: 'subject', STUDY: 'study', COMPLETE: 'complete' };
 
 export default function FlashcardsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
-  const { level, class_name, showAll } = useLevelFilter();
-
+  const { level, class_name, displayName } = useLevelFilter();
   const [stage, setStage] = useState(STAGE.LOADING);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [sessionResult, setSessionResult] = useState(null);
   const [knownIds, setKnownIds] = useState([]);
   const [error, setError] = useState(null);
-  const [studyMeta, setStudyMeta] = useState({ confidence_level: null, last_topic: null });
+  const [decks, setDecks] = useState([]);
+
+  const levelName = displayName || level || '';
+  const classLabel = class_name || '';
 
   useEffect(() => {
     if (!user) {
@@ -38,21 +40,23 @@ export default function FlashcardsPage() {
       return;
     }
     init();
-  }, [user, isReady, access.canAccess, level]);
+  }, [user, isReady, access.canAccess, level, class_name]);
 
   async function init() {
     try {
-      const knownData = await getKnownFlashcards();
+      const [knownData, decksData] = await Promise.all([
+        getKnownFlashcards(),
+        getFlashcardDecks({}),
+      ]);
       setKnownIds(knownData || []);
+      setDecks(decksData || []);
       setStage(STAGE.SUBJECT);
     } catch (err) {
-      setError('Failed to load. Please refresh.');
-      console.error(err);
+      setError('Failed to load flashcards. Please refresh.');
     }
   }
 
-  function handleSubjectStart({ confidence, topic, deck }) {
-    setStudyMeta({ confidence_level: confidence, last_topic: topic || null });
+  function handleDeckSelect(deck) {
     setSelectedDeck(deck);
     setStage(STAGE.STUDY);
   }
@@ -66,7 +70,7 @@ export default function FlashcardsPage() {
           total: data.card_count ?? total,
           correct: data.correct ?? 0,
           incorrect: data.incorrect ?? 0,
-          score: data.score ?? 0
+          score: data.score ?? 0,
         };
       } catch {}
     }
@@ -80,53 +84,79 @@ export default function FlashcardsPage() {
     setStage(STAGE.SUBJECT);
   }
 
-  if (!isReady || access.isPending) {
-    return <PendingApprovalScreen />;
-  }
+  if (!isReady || access.isPending) return <PendingApprovalScreen />;
+  if (!access.canAccess) return <AccessDenied />;
 
-  if (!access.canAccess) {
-    return <div className="fc-access-denied">Access restricted. Please contact support.</div>;
-  }
-
-  if (error) {
+  if (stage === STAGE.LOADING) {
     return (
-      <div className="fc-page">
-        <div className="fc-page-inner">
-          <div className="fc-empty">
-            <FaTriangleExclamation className="fc-empty-icon" />
-            <p className="fc-empty-text">{error}</p>
-            <button className="fc-btn-primary" onClick={init}>Try Again</button>
-          </div>
-        </div>
+      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Spinner size="lg" />
       </div>
     );
   }
 
-  if (stage === STAGE.LOADING) {
+  if (error) {
     return (
-      <div className="fc-page">
-        <div className="fc-page-inner">
-          <div className="fc-loading">
-            <FaSpinner className="icon-spin" />
-            <p className="fc-loading-text">Loading your flashcards…</p>
-          </div>
-        </div>
+      <div className="section" style={{ textAlign: 'center', paddingTop: 'var(--space-16)' }}>
+        <EmptyState
+          icon="exclamation-triangle"
+          title="Error"
+          description={error}
+          action={<Button onClick={init}>Try Again</Button>}
+        />
       </div>
     );
   }
 
   if (stage === STAGE.SUBJECT) {
     return (
-      <FlashcardSubjectSelect
-        state={{
-          selected_level: level || null,
-          selected_discipline: level === 'Pharmacy' ? 'Pharmacy' : 'Biology',
-          selected_class: class_name || '',
-          show_all: showAll
-        }}
-        onStart={handleSubjectStart}
-        onBack={() => navigate('/')}
-      />
+      <div className="flashcards-page">
+        <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+          <span className="sec-label">Study Tools</span>
+          <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+            Flashcards{levelName ? ` – ${levelName}` : ''}
+          </h1>
+          {classLabel && <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>{classLabel}</p>}
+
+          <p className="section-subtitle" style={{ textAlign: 'left', marginBottom: 'var(--space-6)' }}>
+            Select a deck to start studying. Flip, typed, multiple choice, and structure identification modes available.
+          </p>
+
+          {decks.length === 0 ? (
+            <EmptyState
+              icon="layer-group"
+              title="No Decks Available"
+              description={`No flashcard decks found for ${classLabel || levelName || 'your level'}.`}
+            />
+          ) : (
+            <div className="grid grid-cols-3">
+              {decks.map((deck) => (
+                <Card key={deck.id}>
+                  <div className="card-image-placeholder">
+                    <Icon name="layer-group" style={{ fontSize: '2rem', color: 'var(--primary)' }} />
+                  </div>
+                  <div className="card-body">
+                    <h3 className="card-title">{deck.title}</h3>
+                    <p className="card-text">{deck.description || 'No description'}</p>
+                    {deck.card_types && (
+                      <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-3)', flexWrap: 'wrap' }}>
+                        {deck.card_types.map((type) => (
+                          <span key={type} className="chip">{type.replace('_', ' ')}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="card-footer">
+                    <Button size="sm" icon="play" onClick={() => handleDeckSelect(deck)}>
+                      Start
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 
