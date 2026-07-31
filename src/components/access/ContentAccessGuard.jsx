@@ -1,4 +1,4 @@
-import React from 'react';
+ /* components/access/ContentAccessGuard.jsx */
 import { useContentAccess } from '../../hooks/useContentAccess';
 import { PendingApprovalScreen } from './PendingApprovalScreen';
 import { AccessDenied } from './AccessDenied';
