@@ -1,13 +1,22 @@
  /* pages/Home.jsx */
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import {
-  getPublicStats, getCommunityActivity, getContinueReading,
-  getUserStreak, submitMood, submitContact, subscribeNewsletter,
-  submitWeeklyChallenge, requestChat, getChatMessages, sendChatMessage,
-  deleteChatMessage, checkAdminOnline,
+  getPublicStats,
+  getCommunityActivity,
+  getContinueReading,
+  getUserStreak,
+  submitMood,
+  submitContact,
+  subscribeNewsletter,
+  submitWeeklyChallenge,
+  requestChat,
+  getChatMessages,
+  sendChatMessage,
+  deleteChatMessage,
+  checkAdminOnline,
 } from '../api/cachedClient';
 import { getSections } from '../api/sections';
 import HomeView from '../features/home/HomeView';
@@ -17,7 +26,6 @@ export default function Home() {
   const { level, groups } = useLayout();
   const navigate = useNavigate();
   const chatBodyRef = useRef(null);
-  const currentYear = new Date().getFullYear();
 
   const [sections, setSections] = useState({});
   const [publicStats, setPublicStats] = useState(null);
@@ -37,6 +45,7 @@ export default function Home() {
   const [contactStatus, setContactStatus] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState(null);
+  const currentYear = new Date().getFullYear();
 
   const activeGroupName = useMemo(() => {
     if (!user?.profile?.active_group_id || !groups?.length) return null;
@@ -50,9 +59,14 @@ export default function Home() {
     getPublicStats().then(setPublicStats).catch(() => {});
     getCommunityActivity().then(setCommunityActivity).catch(() => {});
     checkAdminOnline().then(res => setAdminOnline(res?.online)).catch(() => {});
+
     if (user) {
-      getContinueReading().then(data => setContinueLearning(Array.isArray(data) ? data : [])).catch(() => {});
-      getUserStreak().then(res => setStreak(res?.count || 0)).catch(() => {});
+      getContinueReading()
+        .then(data => setContinueLearning(Array.isArray(data) ? data : []))
+        .catch(() => {});
+      getUserStreak()
+        .then(res => setStreak(res?.count || 0))
+        .catch(() => {});
     }
   }, [user, level]);
 
