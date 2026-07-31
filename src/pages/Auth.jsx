@@ -1,5 +1,4 @@
- /* pages/Auth.jsx */
-import { useState, useEffect, useRef, useCallback } from 'react';
+ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { signup, getClassSequence, getPharmacyPrograms } from '../api/client';
@@ -43,7 +42,6 @@ export default function Auth() {
   const [mfaError, setMfaError] = useState('');
 
   const { login } = useAuth();
-  const turnstileRef = useRef(null);
   const widgetIdRef = useRef(null);
   const widgetReadyRef = useRef(false);
   const [captchaSlot, setCaptchaSlot] = useState(null);
@@ -66,10 +64,10 @@ export default function Auth() {
     }
   }, [track]);
 
-  const renderWidget = useCallback(() => {
-    if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) return;
+  const renderWidget = useCallback((container) => {
+    if (!window.turnstile || !container || widgetIdRef.current) return;
     try {
-      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+      widgetIdRef.current = window.turnstile.render(container, {
         sitekey: TURNSTILE_SITE_KEY,
         callback: () => { widgetReadyRef.current = true; },
         'expired-callback': () => {
@@ -94,7 +92,6 @@ export default function Auth() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
     if (!document.querySelector('script[src*="turnstile"]')) {
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
@@ -103,16 +100,21 @@ export default function Auth() {
       script.crossOrigin = 'anonymous';
       document.head.appendChild(script);
     }
+
+    if (!captchaSlot) return;
+
+    let cancelled = false;
     let attempts = 0;
     const interval = setInterval(() => {
       attempts++;
       if (cancelled) return;
-      if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
-        renderWidget();
+      if (window.turnstile && captchaSlot && !widgetIdRef.current) {
+        renderWidget(captchaSlot);
         clearInterval(interval);
       }
       if (attempts > 50) clearInterval(interval);
     }, 100);
+
     return () => {
       cancelled = true;
       clearInterval(interval);
@@ -122,7 +124,7 @@ export default function Auth() {
       widgetIdRef.current = null;
       widgetReadyRef.current = false;
     };
-  }, [renderWidget]);
+  }, [captchaSlot, renderWidget]);
 
   const getTurnstileToken = () => {
     if (!window.turnstile || !widgetIdRef.current || !widgetReadyRef.current) return '';
@@ -134,7 +136,7 @@ export default function Auth() {
     try { window.turnstile.reset(widgetIdRef.current); } catch {
       widgetIdRef.current = null;
       widgetReadyRef.current = false;
-      renderWidget();
+      if (captchaSlot) renderWidget(captchaSlot);
     }
   };
 
