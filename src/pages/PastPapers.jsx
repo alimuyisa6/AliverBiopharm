@@ -1,66 +1,46 @@
- import React, { useState, useEffect } from 'react';
+ /* pages/PastPapers.jsx */
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import {
-  getPastPapers,
-  getPastPaperFilterOptions,
-  getPastPaperDownloadUrl
+  getPastPapers, getPastPaperFilterOptions, getPastPaperDownloadUrl,
 } from '../api/client';
-import {
-  FaLock,
-  FaFilter,
-  FaChevronDown,
-  FaFilePdf,
-  FaDownload,
-  FaSpinner,
-  FaChevronLeft,
-  FaChevronRight,
-  FaXmark,
-  FaHouse
-} from 'react-icons/fa6';
-
-const LEVEL_ACCENTS = {
-  'O-Level': 'var(--clr-cyan)',
-  'A-Level': 'var(--clr-magenta)',
-  'Pharmacy': 'var(--clr-green)'
-};
-
-function getLevelAccent(level) {
-  return LEVEL_ACCENTS[level] || 'var(--clr-cyan)';
-}
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
+import Button from '../components/Button/Button';
+import Select from '../components/Select/Select';
+import EmptyState from '../components/EmptyState/EmptyState';
+import { useToast } from '../components/Toast/Toast';
 
 export default function PastPapers() {
   const { user } = useAuth();
-  const { level, class_name, showAll, classLabel } = useLevelFilter();
+  const { level, class_name, showAll, displayName } = useLevelFilter();
+  const addToast = useToast();
 
   const [initializing, setInitializing] = useState(true);
   const [papers, setPapers] = useState([]);
-  const [filterOptions, setFilterOptions] = useState({ levels: [], subjects: [], years: [], exam_boards: [], paper_types: [], topics: [] });
-  const [filters, setFilters] = useState({ subject: '', year: '', exam_board: '', paper_type: '', topic: '' });
+  const [filterOptions, setFilterOptions] = useState({
+    subjects: [], years: [], exam_boards: [], paper_types: [],
+  });
+  const [filters, setFilters] = useState({
+    subject: '', year: '', exam_board: '', paper_type: '',
+  });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [papersLoading, setPapersLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
-  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
-  const [filterAccordions, setFilterAccordions] = useState({ subject: false, year: false, exam_board: false, paper_type: false });
-  const [authPrompt, setAuthPrompt] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const effectiveLevel = showAll ? null : level;
   const effectiveClass = showAll ? null : class_name;
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const opts = await getPastPaperFilterOptions();
-        setFilterOptions(opts);
-      } catch (err) {
-        console.error(err);
-      }
-      setInitializing(false);
-    };
-    init();
+    getPastPaperFilterOptions()
+      .then(setFilterOptions)
+      .catch(() => {})
+      .finally(() => setInitializing(false));
   }, []);
 
   useEffect(() => {
@@ -71,7 +51,7 @@ export default function PastPapers() {
     loadPapers();
   }, [filters, page, effectiveLevel, effectiveClass]);
 
-  async function loadPapers() {
+  const loadPapers = async () => {
     setPapersLoading(true);
     try {
       const params = { page, limit: 12 };
@@ -81,265 +61,211 @@ export default function PastPapers() {
       if (filters.year) params.year = filters.year;
       if (filters.exam_board) params.exam_board = filters.exam_board;
       if (filters.paper_type) params.paper_type = filters.paper_type;
-      if (filters.topic) params.topic = filters.topic;
       const result = await getPastPapers(params);
       setPapers(result.papers || []);
       setTotalPages(result.total_pages || 1);
       setTotal(result.total || 0);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      addToast('Failed to load papers', 'error');
     }
     setPapersLoading(false);
-  }
+  };
 
-  function setFilter(key, value) {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    setPage(1);
-  }
-
-  function clearFilters() {
-    setFilters({ subject: '', year: '', exam_board: '', paper_type: '', topic: '' });
-    setPage(1);
-  }
-
-  async function handleDownload(paper) {
-    if (!user) { setAuthPrompt(true); return; }
+  const handleDownload = async (paper) => {
+    if (!user) {
+      addToast('Please sign in to download', 'warning');
+      return;
+    }
     setDownloadingId(paper.id);
     try {
       const result = await getPastPaperDownloadUrl(paper.id);
       const a = document.createElement('a');
       a.href = result.url;
       a.download = paper.title + '.pdf';
-      a.target = '_blank';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
     } catch (err) {
-      alert('Download failed: ' + err.message);
+      addToast('Download failed', 'error');
     }
     setDownloadingId(null);
-  }
+  };
 
-  const activeFilterCount = [filters.subject, filters.year, filters.exam_board, filters.paper_type, filters.topic].filter(Boolean).length;
+  const clearFilters = () => {
+    setFilters({ subject: '', year: '', exam_board: '', paper_type: '' });
+    setPage(1);
+  };
+
+  const activeFilterCount = [filters.subject, filters.year, filters.exam_board, filters.paper_type].filter(Boolean).length;
 
   if (initializing) {
     return (
-      <div className="past-papers-page">
-        <div className="pp-loading">
-          <div className="pdf-loading-spinner">
-            <div className="spinner-dot dot-magenta"></div>
-            <div className="spinner-dot dot-cyan"></div>
-            <div className="spinner-dot dot-orange"></div>
-          </div>
-        </div>
+      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Spinner size="lg" />
       </div>
     );
   }
 
+  const levelName = displayName || level || '';
+  const classLabel = class_name || '';
+
   return (
     <div className="past-papers-page">
-      <span className="sec-label">EXAM PREPARATION</span>
-      <h1 className="section-title">Past Papers</h1>
-      <p className="section-subtitle">Download past examination papers for O-Level, A-Level and Pharmacy. Practice with real exam questions.</p>
+      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+        <span className="sec-label">Exam Preparation</span>
+        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+          Past Papers{levelName ? ` – ${levelName}` : ''}
+        </h1>
+        {classLabel && (
+          <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
+            {classLabel}
+          </p>
+        )}
 
-      <div className="breadcrumb">
-        <Link to="/"><FaHouse className="breadcrumb-icon" /> Home</Link><span>›</span><span>Past Papers</span>
-        {effectiveLevel && (<><span>›</span><span>{effectiveLevel}</span></>)}
-        {effectiveClass && (<><span>›</span><span>{classLabel || 'Class'}: {effectiveClass}</span></>)}
-      </div>
+        <nav className="breadcrumb">
+          <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
+          <Icon name="chevron-right" className="breadcrumb-sep" />
+          <span>Past Papers</span>
+          {levelName && <><Icon name="chevron-right" className="breadcrumb-sep" /><span>{levelName}</span></>}
+          {classLabel && <><Icon name="chevron-right" className="breadcrumb-sep" /><span>{classLabel}</span></>}
+        </nav>
 
-      {!user && (
-        <div className="pp-auth-banner">
-          <FaLock className="pp-auth-banner-icon" />
-          <div className="pp-auth-banner-text">
-            <p className="pp-auth-banner-title">Sign in to download papers</p>
-            <p className="pp-auth-banner-sub">You can browse all papers freely. Create a free account to download.</p>
-          </div>
-          <div className="pp-auth-banner-actions">
-            <Link to="/login" className="btn-secondary">Sign In</Link>
-            <Link to="/register" className="btn-primary">Register Free</Link>
-          </div>
-        </div>
-      )}
-
-      <div className="pp-controls">
-        <div className="pp-filter-wrap">
-          <button
-            className={`pp-filter-toggle${filterDropdownOpen ? ' open' : ''}`}
-            onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
-          >
-            <FaFilter className="pp-icon-filter" />
-            Filters
-            {activeFilterCount > 0 && <span className="pp-filter-badge">{activeFilterCount}</span>}
-            <FaChevronDown className="pp-chevron" />
-          </button>
-
-          {filterDropdownOpen && (
-            <div className="pp-filter-panel">
-              {[
-                { key: 'subject', label: 'Subject', options: filterOptions.subjects },
-                { key: 'year', label: 'Year', options: filterOptions.years.map(String) },
-                { key: 'exam_board', label: 'Exam Board', options: filterOptions.exam_boards },
-                { key: 'paper_type', label: 'Paper Type', options: filterOptions.paper_types }
-              ].map(({ key, label, options }) => (
-                <div key={key} className="filter-accordion">
-                  <button
-                    className={`filter-accordion-btn${filterAccordions[key] ? ' open' : ''}`}
-                    onClick={() => setFilterAccordions(prev => ({ ...prev, [key]: !prev[key] }))}
-                  >
-                    <span>{label}</span>
-                    <span className="filter-selected">{filters[key] || 'All'}</span>
-                    <FaChevronDown className="pp-chevron" />
-                  </button>
-                  {filterAccordions[key] && (
-                    <div className="filter-options open">
-                      <label className="filter-option">
-                        <input type="radio" name={key} checked={!filters[key]} onChange={() => setFilter(key, '')} /> All
-                      </label>
-                      {options.map(opt => (
-                        <label key={opt} className="filter-option">
-                          <input type="radio" name={key} checked={filters[key] === opt} onChange={() => setFilter(key, opt)} /> {opt}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-              {activeFilterCount > 0 && (
-                <button className="pp-filter-clear" onClick={() => { clearFilters(); setFilterDropdownOpen(false); }}>
-                  <FaXmark /> Clear all filters
-                </button>
-              )}
+        {!user && (
+          <div className="alert alert-info" style={{ marginBottom: 'var(--space-6)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <Icon name="lock" style={{ marginRight: 'var(--space-3)' }} />
+              Sign in to download papers. You can browse freely.
             </div>
-          )}
-        </div>
-      </div>
+            <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+              <Link to="/login" className="btn btn-secondary btn-sm">Sign In</Link>
+              <Link to="/register" className="btn btn-primary btn-sm">Register Free</Link>
+            </div>
+          </div>
+        )}
 
-      <div className="pp-results-bar">
-        <p className="pp-results-count">
-          {papersLoading ? 'Loading...' : `${total} paper${total !== 1 ? 's' : ''} found`}
-        </p>
-        {activeFilterCount > 0 && (
-          <button className="pp-clear-btn" onClick={clearFilters}>
-            <FaXmark /> Clear filters
-          </button>
+        <div style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-6)', flexWrap: 'wrap', alignItems: 'center' }}>
+          <Button
+            variant={showFilters ? 'primary' : 'secondary'}
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Icon name="filter" /> Filters
+            {activeFilterCount > 0 && <span className="badge badge-primary" style={{ marginLeft: 'var(--space-2)' }}>{activeFilterCount}</span>}
+          </Button>
+          {activeFilterCount > 0 && (
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              <Icon name="xmark" /> Clear filters
+            </Button>
+          )}
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
+            {papersLoading ? 'Loading...' : `${total} paper${total !== 1 ? 's' : ''} found`}
+          </p>
+        </div>
+
+        {showFilters && (
+          <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)', display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+            <Select
+              label="Subject"
+              options={filterOptions.subjects.map(s => ({ value: s, label: s }))}
+              value={filters.subject}
+              onChange={e => setFilters(prev => ({ ...prev, subject: e.target.value }))}
+            />
+            <Select
+              label="Year"
+              options={filterOptions.years.map(y => ({ value: String(y), label: String(y) }))}
+              value={filters.year}
+              onChange={e => setFilters(prev => ({ ...prev, year: e.target.value }))}
+            />
+            <Select
+              label="Exam Board"
+              options={filterOptions.exam_boards.map(b => ({ value: b, label: b }))}
+              value={filters.exam_board}
+              onChange={e => setFilters(prev => ({ ...prev, exam_board: e.target.value }))}
+            />
+            <Select
+              label="Paper Type"
+              options={filterOptions.paper_types.map(t => ({ value: t, label: t }))}
+              value={filters.paper_type}
+              onChange={e => setFilters(prev => ({ ...prev, paper_type: e.target.value }))}
+            />
+          </div>
+        )}
+
+        {papersLoading ? (
+          <div style={{ textAlign: 'center', padding: 'var(--space-10)' }}>
+            <Spinner size="lg" />
+          </div>
+        ) : papers.length === 0 ? (
+          <EmptyState
+            icon="file-lines"
+            title="No Papers Found"
+            description={`No past papers match your filters for ${classLabel || levelName || 'your level'}.`}
+            action={<Button variant="secondary" onClick={clearFilters}>Clear Filters</Button>}
+          />
+        ) : (
+          <div className="grid grid-cols-3">
+            {papers.map(paper => (
+              <div key={paper.id} className="card">
+                <div className="card-image-placeholder" style={{ background: 'var(--primary-light)' }}>
+                  <Icon name="file-pdf" style={{ fontSize: '2rem', color: 'var(--error)' }} />
+                </div>
+                <div className="card-body">
+                  <h3 className="card-title">{paper.title}</h3>
+                  <p className="card-text">{paper.subject}</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-3)' }}>
+                    {paper.level && <span className="chip">{paper.level}</span>}
+                    {paper.year && <span className="chip">{paper.year}</span>}
+                    {paper.paper_type && <span className="chip">{paper.paper_type}</span>}
+                    {paper.class_name && <span className="chip">{paper.class_name}</span>}
+                  </div>
+                </div>
+                <div className="card-footer">
+                  <Button
+                    size="sm"
+                    loading={downloadingId === paper.id}
+                    onClick={() => handleDownload(paper)}
+                  >
+                    <Icon name="download" />
+                    {user ? 'Download' : 'Sign in to Download'}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-2)', marginTop: 'var(--space-8)' }}>
+            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+              <Icon name="chevron-left" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+              .reduce((acc, p, idx, arr) => {
+                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, idx) =>
+                p === '...' ? (
+                  <span key={`ellipsis-${idx}`} style={{ padding: 'var(--space-2)' }}>...</span>
+                ) : (
+                  <Button
+                    key={p}
+                    variant={p === page ? 'primary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </Button>
+                )
+              )}
+            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+              <Icon name="chevron-right" />
+            </Button>
+          </div>
         )}
       </div>
-
-      {papersLoading ? (
-        <div className="pp-loading">
-          <div className="pdf-loading-spinner">
-            <div className="spinner-dot dot-magenta"></div>
-            <div className="spinner-dot dot-cyan"></div>
-            <div className="spinner-dot dot-orange"></div>
-          </div>
-        </div>
-      ) : papers.length === 0 ? (
-        <div className="pp-empty">
-          <FaFilePdf className="pp-empty-icon" />
-          <p className="pp-empty-title">No papers found</p>
-          <p className="pp-empty-sub">Try adjusting your filters.</p>
-          <button onClick={clearFilters} className="btn-secondary">Clear filters</button>
-        </div>
-      ) : (
-        <div className="pp-grid">
-          {papers.map(paper => (
-            <div key={paper.id} className="pp-card" style={{ '--level-accent': getLevelAccent(paper.level) }}>
-              <div className="pp-card-header">
-                <div className="pp-card-icon">
-                  <FaFilePdf />
-                </div>
-                <div className="pp-card-header-text">
-                  <h3 className="pp-card-title">{paper.title}</h3>
-                  <p className="pp-card-subject">{paper.subject}</p>
-                </div>
-              </div>
-
-              <div className="pp-tags">
-                <span className="pp-tag pp-tag-level">{paper.level}</span>
-                {paper.year && <span className="pp-tag pp-tag-year">{paper.year}</span>}
-                {paper.paper_type && <span className="pp-tag pp-tag-type">{paper.paper_type}</span>}
-                {paper.exam_board && <span className="pp-tag pp-tag-board">{paper.exam_board}</span>}
-                {paper.topic && <span className="pp-tag pp-tag-topic">{paper.topic}</span>}
-                {paper.class_name && <span className="pp-tag pp-tag-class">{paper.class_name}</span>}
-              </div>
-
-              {paper.download_count > 0 && (
-                <p className="pp-downloads">
-                  <FaDownload /> {paper.download_count} downloads
-                </p>
-              )}
-
-              <div className="pp-card-footer">
-                <button
-                  onClick={() => handleDownload(paper)}
-                  disabled={downloadingId === paper.id}
-                  className={`pp-download-btn${user ? ' authed' : ''}`}
-                >
-                  {downloadingId === paper.id ? (
-                    <><FaSpinner className="icon-spin" /> Downloading...</>
-                  ) : user ? (
-                    <><FaDownload /> Download</>
-                  ) : (
-                    <><FaLock /> Sign in to Download</>
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {totalPages > 1 && (
-        <div className="pp-pagination">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="btn-secondary pp-page-nav"
-          >
-            <FaChevronLeft />
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1)
-            .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
-            .reduce((acc, p, idx, arr) => {
-              if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
-              acc.push(p);
-              return acc;
-            }, [])
-            .map((p, idx) => p === '...' ? (
-              <span key={`ellipsis-${idx}`} className="pp-page-ellipsis">...</span>
-            ) : (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`pp-page-btn${p === page ? ' active' : ''}`}
-              >
-                {p}
-              </button>
-            ))}
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="btn-secondary pp-page-nav"
-          >
-            <FaChevronRight />
-          </button>
-        </div>
-      )}
-
-      {authPrompt && (
-        <div className="pp-auth-modal-overlay" onClick={() => setAuthPrompt(false)}>
-          <div className="pp-auth-modal" onClick={e => e.stopPropagation()}>
-            <FaLock className="pp-auth-modal-icon" />
-            <h3 className="pp-auth-modal-title">Sign in to Download</h3>
-            <p className="pp-auth-modal-text">Create a free account to download past papers and track your progress.</p>
-            <div className="pp-auth-modal-actions">
-              <Link to="/login" className="btn-secondary">Sign In</Link>
-              <Link to="/register" className="btn-primary">Register Free</Link>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
