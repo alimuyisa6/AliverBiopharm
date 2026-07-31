@@ -1,20 +1,23 @@
-/* components/Hero/Hero.jsx */
-import { Link } from 'react-router-dom';
-import Icon from '../Icon/Icon';
+ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLayout } from '../../contexts/LayoutContext';
 
 export default function Hero() {
   const { isAuthenticated } = useAuth();
-  const { level, groups } = useLayout();
+  const { level, groups, bootstrap } = useLayout();
 
+  const heroImage = bootstrap?.landing?.hero_image_url;
   const levelName = level?.display_name || '';
   const groupName = groups?.length > 0 ? groups[0].name : '';
 
   return (
     <section className="hero">
-      <div className="hero-image-placeholder">
-        <Icon name="graduation-cap" />
+      <div className="hero-image">
+        {heroImage ? (
+          <img src={heroImage} alt="" />
+        ) : (
+          <div className="hero-image-placeholder" />
+        )}
       </div>
       <div className="hero-content">
         <h1 className="hero-title">
