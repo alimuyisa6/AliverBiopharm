@@ -1,4 +1,6 @@
- import React from 'react';
+ /* features/home/HomeView.jsx */
+import { Link } from 'react-router-dom';
+import Icon from '../../components/Icon/Icon';
 import { PlatformCards } from './PlatformCards';
 import { StatsGrid } from './StatsGrid';
 import { TestimonialSlider } from './TestimonialSlider';
@@ -8,52 +10,46 @@ import { CommunitySection } from '../community/CommunitySection';
 import { ContactSection } from '../contact/ContactSection';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
+import Hero from '../../components/Hero/Hero';
 
 const CONTENT_TYPES = [
-  { key: 'notes', label: 'Notes', description: 'Read structured topic notes with diagrams and summaries', icon: 'fa-book-open', route: '/notes' },
-  { key: 'flashcards', label: 'Flashcards', description: 'Drill key terms and structures until they stick', icon: 'fa-layer-group', route: '/flashcards' },
-  { key: 'pdfs', label: 'PDF Library', description: 'Download printable guides and reference sheets', icon: 'fa-file-pdf', route: '/pdfs' },
-  { key: 'quizzes', label: 'Quizzes', description: 'Test yourself block by block across every unit', icon: 'fa-circle-question', route: '/quiz' },
-  { key: 'past_papers', label: 'Past Papers', description: 'Practice with real exam papers by year and board', icon: 'fa-file-lines', route: '/past-papers' },
-  { key: 'recall', label: 'Recall', description: 'Daily spaced-repetition sessions to build long-term memory', icon: 'fa-brain', route: '/recall' },
+  { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes' },
+  { key: 'flashcards', label: 'Flashcards', description: 'Active recall with flip, typed, and MCQ modes', icon: 'layer-group', route: '/flashcards' },
+  { key: 'pdfs', label: 'PDF Library', description: 'Downloadable guides and reference sheets', icon: 'file-pdf', route: '/pdfs' },
+  { key: 'quizzes', label: 'Quizzes', description: 'Block-by-block testing across every unit', icon: 'clipboard-check', route: '/quiz' },
+  { key: 'past_papers', label: 'Past Papers', description: 'Real exam papers by year and board', icon: 'file-lines', route: '/past-papers' },
+  { key: 'recall', label: 'Recall', description: 'Spaced-repetition for long-term memory', icon: 'brain', route: '/recall' },
 ];
 
 function ContentTypeCards({ navigate, user, sections }) {
   return (
-    <section className="section content-types-section">
-      <div className="section-header">
-        <h2 className="section-title">{sections?.section_headings?.content_types_title || 'Explore by Content Type'}</h2>
-        <p className="section-subtitle">{sections?.section_headings?.content_types_subtitle || 'Pick where you want to start'}</p>
-      </div>
-      <div className="content-type-grid">
-        {CONTENT_TYPES.map((type) => {
-          const imageUrl = sections?.content_type_images?.[type.key];
-          return (
-            <div
-              key={type.key}
-              className="content-type-card"
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate(user ? type.route : '/login')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(user ? type.route : '/login'); } }}
-              style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined}
-            >
-              <span className="content-type-overlay" />
-              <span className="content-type-icon"><i className={`fa-solid ${type.icon}`} /></span>
-              <span className="content-type-body">
-                <span className="content-type-label">{type.label}</span>
-                <span className="content-type-description">{type.description}</span>
-              </span>
-              <button
-                type="button"
-                className="btn-primary content-type-btn"
-                onClick={(e) => { e.stopPropagation(); navigate(user ? type.route : '/login'); }}
-              >
-                Browse {type.label}
-              </button>
+    <section className="section reveal">
+      <span className="sec-label">Explore</span>
+      <h2 className="section-title">
+        {sections?.section_headings?.content_types_title || 'Everything You Need to Succeed'}
+      </h2>
+      <p className="section-subtitle">
+        {sections?.section_headings?.content_types_subtitle || 'Pick where you want to start — every resource is tailored to your level.'}
+      </p>
+      <div className="grid grid-cols-3">
+        {CONTENT_TYPES.map((type) => (
+          <button
+            key={type.key}
+            className="card card-clickable"
+            onClick={() => navigate(user ? type.route : '/login')}
+          >
+            <div className="card-image-placeholder">
+              <Icon name={type.icon} />
             </div>
-          );
-        })}
+            <div className="card-body">
+              <h3 className="card-title">{type.label}</h3>
+              <p className="card-text">{type.description}</p>
+            </div>
+            <div className="card-footer">
+              <span className="btn btn-secondary btn-sm">Browse {type.label}</span>
+            </div>
+          </button>
+        ))}
       </div>
     </section>
   );
@@ -61,65 +57,32 @@ function ContentTypeCards({ navigate, user, sections }) {
 
 export default function HomeView(props) {
   const {
-    sections,
-    user,
-    navigate,
-    activeLevelName,
-    activeGroupName,
-    publicStats,
-    communityActivity,
-    weeklyChallengeAnswer,
-    moodSelected,
-    setMoodSelected,
-    moodMessage,
-    setMoodMessage,
-    moodSubmitted,
-    continueLearning,
-    streak,
-    chatOpen,
-    chatMessages,
-    chatInput,
-    adminOnline,
-    contactForm,
-    contactStatus,
-    newsletterEmail,
-    newsletterStatus,
-    currentYear,
-    handleWeeklyChallengeSubmit,
-    handleContactSubmit,
-    handleNewsletterSubmit,
-    handleMoodSubmit,
-    sendChat,
-    deleteChatMsg,
-    setChatOpen,
-    setChatInput,
-    setContactForm,
-    setNewsletterEmail,
-    chatBodyRef,
+    sections, user, navigate, activeLevelName, activeGroupName,
+    publicStats, communityActivity, weeklyChallengeAnswer,
+    moodSelected, setMoodSelected, moodMessage, setMoodMessage, moodSubmitted,
+    continueLearning, streak, chatOpen, chatMessages, chatInput, adminOnline,
+    contactForm, contactStatus, newsletterEmail, newsletterStatus, currentYear,
+    handleWeeklyChallengeSubmit, handleContactSubmit, handleNewsletterSubmit,
+    handleMoodSubmit, sendChat, deleteChatMsg, setChatOpen, setChatInput,
+    setContactForm, setNewsletterEmail, chatBodyRef, requestChatRoom,
   } = props;
 
   return (
     <div className="home-page">
-      {user ? (
-        <section className="section welcome-section">
-          <div className="welcome-banner">
-            <h1 className="welcome-title">
-              Welcome to{activeLevelName && <><br />{activeLevelName}</>}
-            </h1>
+      <Hero />
+
+      {user && activeLevelName && (
+        <section className="section" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-4)' }}>
+          <div style={{ textAlign: 'center' }}>
+            <span className="sec-label">Your Level</span>
+            <h2 className="section-title" style={{ fontSize: 'var(--text-3xl)' }}>
+              {activeLevelName}
+            </h2>
             {activeGroupName && (
-              <p className="welcome-subtitle">
-                You are currently studying <strong>{activeGroupName}</strong>
+              <p className="section-subtitle" style={{ marginBottom: 0 }}>
+                Currently studying <strong>{activeGroupName}</strong>
               </p>
             )}
-          </div>
-        </section>
-      ) : (
-        <section className="section welcome-section">
-          <div className="welcome-banner">
-            <h1 className="welcome-title">Welcome to<br />AliverBiopharm</h1>
-            <p className="welcome-subtitle">
-              Explore our comprehensive learning resources across O-Level, A-Level, and Pharmacy.
-            </p>
           </div>
         </section>
       )}
@@ -133,17 +96,13 @@ export default function HomeView(props) {
         quiz_attempts: publicStats?.quiz_attempts || 0,
       }} />
 
-      <ContinueLearningSection
-        continueLearning={continueLearning}
-        user={user}
-        streak={streak}
-      />
+      <ContinueLearningSection continueLearning={continueLearning} user={user} streak={streak} />
 
       <ContentTypeCards navigate={navigate} user={user} sections={sections} />
 
       <CommunitySection
         activity={communityActivity}
-        weeklyChallenge={sections.weekly_challenge}
+        weeklyChallenge={sections?.weekly_challenge}
         weeklyChallengeAnswer={weeklyChallengeAnswer}
         onWeeklySubmit={handleWeeklyChallengeSubmit}
       />
