@@ -96,7 +96,11 @@ export default function Layout({ children, showFooter = true }) {
             </nav>
 
             <div className="nav-actions">
-              {isAuthenticated && <ClassSwitcher />}
+              {isAuthenticated && (
+                <span className="class-switcher-wrap">
+                  <ClassSwitcher />
+                </span>
+              )}
 
               <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setSearchOpen(true)} aria-label="Search">
                 <Icon name="magnifying-glass" />
@@ -289,7 +293,7 @@ export default function Layout({ children, showFooter = true }) {
           </div>
           <div className="footer-bottom">
             <p>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</p>
-            <nav style={{ display: 'flex', gap: 'var(--space-4)' }}>
+            <nav className="footer-bottom-nav">
               <Link to="/privacy" className="footer-link">Privacy</Link>
               <Link to="/terms" className="footer-link">Terms</Link>
               <Link to="/about" className="footer-link">About</Link>
