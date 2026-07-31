@@ -1,47 +1,29 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  FaBrain, FaCheck, FaTrophy, FaFire, FaStar, FaChartLine,
-  FaPencil, FaCircleInfo, FaMicroscope, FaDna, FaCapsules,
-  FaBookOpen, FaBullseye, FaLeaf, FaFlask, FaTree, FaSeedling,
-  FaStarOfLife, FaChartSimple, FaCalendarDay, FaCircleCheck,
-  FaLink, FaTriangleExclamation, FaExclamation, FaDownload,
-  FaClock, FaVolumeHigh, FaVolumeXmark, FaRotate, FaHouse,
-  FaArrowLeft, FaArrowRight, FaSpinner
-} from 'react-icons/fa6';
+ /* pages/Recall.jsx */
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
+import { useLayout } from '../contexts/LayoutContext';
+import { useToast } from '../components/Toast/Toast';
 import {
-  getRecallSession,
-  checkRecallSession,
-  getRecallStats,
-  getRecallAchievements,
-  getRecallDashboard,
-  getRecallTopics,
-  continueRecallSession,
-  submitRecallAnswer,
-  completeRecallSession,
-  getLeaderboard
+  getRecallSession, checkRecallSession, getRecallStats,
+  getRecallAchievements, getRecallDashboard, getRecallTopics,
+  continueRecallSession, submitRecallAnswer, completeRecallSession,
+  getLeaderboard,
 } from '../api/cachedClient';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
-import useLoading from '../loading/useLoading';
-import InlineSpinner from '../loading/components/InlineSpinner';
-
-const strengthIcons = {
-  excellent: FaStar,
-  strong: FaCircleCheck,
-  developing: FaRotate
-};
-
-function escapeHtml(unsafe) {
-  if (!unsafe) return '';
-  return unsafe.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
-}
+import { AccessDenied } from '../components/access/AccessDenied';
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
+import ProgressBar from '../components/ProgressBar/ProgressBar';
+import Button from '../components/Button/Button';
+import Card from '../components/Card/Card';
+import Modal from '../components/Modal/Modal';
+import Input from '../components/Input/Input';
 
 let audioCtx = null;
-
 async function getAudioContext() {
   if (!audioCtx) {
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; }
@@ -67,24 +49,21 @@ async function playTone(type) {
         osc.frequency.setValueAtTime(659.25, now + 0.1);
         osc.frequency.setValueAtTime(783.99, now + 0.2);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-        osc.start(now);
-        osc.stop(now + 0.5);
+        osc.start(now); osc.stop(now + 0.5);
         break;
       case 'strong':
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.setValueAtTime(554.37, now + 0.08);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
         break;
       case 'developing':
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(330, now);
         osc.frequency.setValueAtTime(294, now + 0.15);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-        osc.start(now);
-        osc.stop(now + 0.4);
+        osc.start(now); osc.stop(now + 0.4);
         break;
       case 'achievement':
         osc.type = 'sine';
@@ -93,26 +72,26 @@ async function playTone(type) {
         osc.frequency.setValueAtTime(783.99, now + 0.24);
         osc.frequency.setValueAtTime(1046.5, now + 0.36);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-        osc.start(now);
-        osc.stop(now + 0.6);
+        osc.start(now); osc.stop(now + 0.6);
         break;
       default:
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-        osc.start(now);
-        osc.stop(now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
     }
   } catch {}
 }
 
 export default function BioRecall() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
   const { level, class_name, showAll } = useLevelFilter();
+  const { groups } = useLayout();
+  const addToast = useToast();
 
-  // ... (state declarations unchanged)
   const [sessionQuestions, setSessionQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sessionActive, setSessionActive] = useState(false);
@@ -159,312 +138,392 @@ export default function BioRecall() {
   });
   const isMounted = useRef(true);
 
-  // … all useEffect, callbacks, handlers remain identical as before (no style changes inside them)
+  useEffect(() => {
+    if (!isReady || !access.canAccess || access.isPending) return;
+    loadUserProgress();
+  }, [isReady, access.canAccess, access.isPending]);
 
-  // Rendering helper functions now use global CSS classes
-
-  const renderHeatmap = () => {
-    const today = new Date();
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - 365);
-    const days = [];
-    for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
-      days.push(d.toISOString().split('T')[0]);
+  async function loadUserProgress() {
+    setLoading(true);
+    try {
+      const [dash, stats, achievements, topics, lb] = await Promise.all([
+        getRecallDashboard().catch(() => null),
+        getRecallStats().catch(() => null),
+        getRecallAchievements().catch(() => []),
+        getRecallTopics(groups?.[0]?.id).catch(() => []),
+        getLeaderboard(level || 'O-Level', 10).catch(() => []),
+      ]);
+      if (!isMounted.current) return;
+      if (dash) {
+        setDashboardData(dash);
+        setXpTotal(dash.total_xp || 0);
+        setStreakDays(dash.current_streak || 0);
+        setRankTitle(dash.rank_title || 'Beginner');
+        const prog = computeXpProgress(dash.total_xp || 0);
+        setXpProgress(prog);
+      }
+      if (stats) {
+        setMasteryTopics(stats.mastery_topics || {});
+        setBrainEnergy(stats.brain_energy || 100);
+      }
+      setAchievementsList(Array.isArray(achievements) ? achievements : []);
+      setTopicList(Array.isArray(topics) ? topics : []);
+      setLeaderboard(Array.isArray(lb) ? lb : []);
+    } catch {
+      addToast('Failed to load data', 'error');
+    } finally {
+      setLoading(false);
     }
-    const heatmapMap = {};
-    heatmap.forEach(h => { heatmapMap[h.date] = h; });
-    return (
-      <div className="heatmap-container">
-        <div className="heatmap-grid">
-          {days.map(date => {
-            const entry = heatmapMap[date];
-            const intensity = entry?.intensity || 0;
-            const count = entry?.count || 0;
-            return (
-              <div
-                key={date}
-                className={`heatmap-cell heatmap-level-${intensity}`}
-                title={`${date}: ${count} questions`}
-              />
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
+  }
 
-  const renderLeaderboard = () => {
-    if (!leaderboard.length) return null;
-    return (
-      <div className="leaderboard-panel">
-        <h3 className="leaderboard-title"><FaTrophy className="leaderboard-icon" /> Leaderboard</h3>
-        <table className="leaderboard-table">
-          <thead>
-            <tr><th>Rank</th><th>User</th><th>XP</th><th>Level</th></tr>
-          </thead>
-          <tbody>
-            {leaderboard.map((entry, idx) => (
-              <tr key={idx}>
-                <td>{idx + 1}</td>
-                <td>{escapeHtml(entry.username || entry.email || 'Anonymous')}</td>
-                <td>{entry.total_xp}</td>
-                <td>{entry.recall_level}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
+  const openTopicModal = () => setTopicModalOpen(true);
+  const closeTopicModal = () => setTopicModalOpen(false);
 
-  const renderDashboard = () => {
-    if (!dashboardData) return null;
-    const topicEntries = Object.entries(masteryTopics).filter(([t]) => t && t !== 'null').slice(0, 6);
-    const daily = dashboardData.dailyChallenge || {};
-    const isQuestComplete = daily.isCompleted || (daily.completed >= daily.target);
-    return (
-      <div className="dashboard-grid">
-        <div className="dashboard-card">
-          <div className="card-title">
-            <FaBullseye className={`dashboard-icon ${isQuestComplete ? 'quest-complete' : ''}`} />
-            Daily Challenge
-            {isQuestComplete && <FaCheck className="quest-check" />}
-          </div>
-          <div>{isQuestComplete ? 'Quest Complete!' : `Complete ${daily.target || 10} Recall Questions`}</div>
-          <div>Progress: {daily.completed || 0} / {daily.target || 10}</div>
-          <div className="progress-bar-bg">
-            <div className="progress-bar-fill" style={{ '--progress-width': `${Math.min(daily.progressPercent || 0, 100)}%` }} />
-          </div>
-          <div>Reward: +50 XP</div>
-        </div>
-        <div className="dashboard-card">
-          <div className="card-title"><FaChartSimple className="dashboard-icon" /> XP Progress</div>
-          <div>Level {xpProgress.level} · <span className="rank-label">{rankTitle}</span></div>
-          <div className="xp-progress">{xpProgress.xpIntoLevel} / 100 XP to next level</div>
-          <div className="progress-bar-bg">
-            <div className="progress-bar-fill" style={{ '--progress-width': `${xpProgress.progressPercent}%` }} />
-          </div>
-        </div>
-        <div className="dashboard-card">
-          <div className="card-title"><FaTrophy className="dashboard-icon trophy-icon" /> Achievements</div>
-          <div className="achievement-grid">
-            {achievementsList.map((ach) => (
-              <div key={ach.key} className={`achievement-item ${ach.unlocked ? 'unlocked' : 'locked'}`}>
-                <i className={`fa-solid ${ach.icon} achievement-icon`}></i>
-                <div className="achievement-title">{ach.title}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        {dashboardData.dueForReview > 0 && (
-          <div className="dashboard-card">
-            <div className="card-title"><FaClock className="dashboard-icon review-icon" /> Spaced Repetition</div>
-            <div>{dashboardData.dueForReview} items due for review today</div>
-          </div>
-        )}
-        <div className="dashboard-card">
-          <div className="card-title"><FaBrain className="dashboard-icon brain-icon" /> Brain Energy</div>
-          <div className="progress-bar-bg">
-            <div className="progress-bar-fill" style={{ '--progress-width': `${brainEnergy}%` }} />
-          </div>
-          <div>{brainEnergy}% energy remaining</div>
-        </div>
-        <div className="dashboard-card">
-          <div className="card-title"><FaLeaf className="dashboard-icon leaf-icon" /> Memory Garden</div>
-          <div className="memory-garden">
-            {dashboardData.gardenStage === 'tree' ? <FaTree className="garden-tree" /> : <FaSeedling className="garden-seedling" />}
-          </div>
-          <div>{dashboardData.streak} day streak</div>
-        </div>
-        <div className="dashboard-card dashboard-card-clickable" onClick={toggleSound}>
-          <div className="card-title">
-            {soundEnabled ? <FaVolumeHigh className="dashboard-icon sound-on" /> : <FaVolumeXmark className="dashboard-icon sound-off" />}
-            Sound Effects
-          </div>
-          <div>{soundEnabled ? 'On' : 'Off'} (click to toggle)</div>
-        </div>
-        <div className="dashboard-card">
-          <div className="card-title"><FaFlask className="dashboard-icon flask-icon" /> Subject</div>
-          <div className="subject-illustration"><i className={`fa-solid ${dashboardData.subjectIllustration}`}></i></div>
-          <div>{level}{effectiveClassName ? ` · ${effectiveClassName}` : ''}</div>
-        </div>
-        <div className="dashboard-card">
-          <div className="card-title"><FaStarOfLife className="dashboard-icon star-icon" /> Topic Mastery</div>
-          <div className="topic-icon-grid">
-            {topicEntries.map(([topic, mastery]) => (
-              <div key={topic} className="topic-icon-card">
-                <div className="topic-big-icon"><FaBookOpen /></div>
-                <div className="topic-name">{escapeHtml(topic)}</div>
-                <div className="topic-mastery">{Math.round(mastery)}%</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="dashboard-card">
-          <div className="card-title"><FaBookOpen className="dashboard-icon book-icon" /> Quote</div>
-          <div className="quote-text">{dashboardData.quote}</div>
-        </div>
-        <div className="dashboard-card">
-          <div className="card-title"><FaCalendarDay className="dashboard-icon calendar-icon" /> Activity Heatmap</div>
-          {renderHeatmap()}
-        </div>
-      </div>
-    );
-  };
+  async function handleStartSession(topic) {
+    setSelectedTopic(topic);
+    setTopicModalOpen(false);
+    setLoading(true);
+    try {
+      const session = await getRecallSession(topic.unit_id);
+      if (session?.questions?.length) {
+        setSessionQuestions(session.questions);
+        setSessionId(session.session_id);
+        setCurrentIndex(0);
+        setSessionActive(true);
+        setUserAnswersRecord([]);
+      } else {
+        addToast('No questions available for this topic', 'warning');
+      }
+    } catch (err) {
+      addToast('Failed to start session', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const renderFeedback = () => {
-    if (!feedbackResult) return null;
-    const { strength, xp, matched, feedback, common_mistake_explanation, study_note, diff, strength_meaning } = feedbackResult;
-    const strengthClass = strength === 'excellent' ? 'strength-excellent' : strength === 'strong' ? 'strength-strong' : 'strength-developing';
-    const Icon = strengthIcons[strength] || FaCircleInfo;
-    const label = strength_meaning?.label || strength;
-    const description = strength_meaning?.description || '';
-    const colorClass = `feedback-${strength}`;
-    return (
-      <div className="feedback-area">
-        <div className={`recall-strength ${strengthClass}`}>
-          <Icon className={`strength-icon ${colorClass}`} />
-          <div>
-            <div className={`strength-label ${colorClass}`}>{label}</div>
-            <div className="strength-description">{description}</div>
-          </div>
-        </div>
-        <div className="feedback-matched">Matched: <strong>{escapeHtml(matched)}</strong></div>
-        <div className="feedback-xp"><FaTrophy className="xp-icon" /> +{xp} XP</div>
-        {diff && diff.your_answer && (
-          <div className="feedback-comparison">
-            <h4><FaExclamation className="comparison-warning" /> Answer Comparison</h4>
-            <div className="comparison-row">
-              <div>Your answer: <span className="comparison-wrong">{escapeHtml(diff.your_answer)}</span></div>
-              <div>Correct answer: <span className="comparison-correct">{escapeHtml(diff.correct_answer)}</span></div>
-              {diff.was_common_mistake && <div className="common-mistake-tag">This is a common mistake. See explanation below.</div>}
-            </div>
-          </div>
-        )}
-        {feedback?.answer_explanation && (
-          <div className="feedback-section">
-            <h4><FaBookOpen className="feedback-explanation-icon" /> Explanation</h4>
-            <div>{feedback.answer_explanation}</div>
-          </div>
-        )}
-        {feedback?.related_concepts?.length > 0 && (
-          <div className="feedback-section">
-            <h4><FaLink className="feedback-link-icon" /> Related Concepts</h4>
-            <ul className="concept-list">
-              {feedback.related_concepts.map((c, i) => <li key={i}><strong>{escapeHtml(c)}</strong></li>)}
-            </ul>
-          </div>
-        )}
-        {common_mistake_explanation && (
-          <div className="feedback-section">
-            <h4><FaTriangleExclamation className="feedback-mistake-icon" /> Common Confusion</h4>
-            <div>{escapeHtml(common_mistake_explanation)}</div>
-          </div>
-        )}
-        {study_note && <div className="study-note"><FaCircleInfo className="study-note-icon" /> Study Note: {escapeHtml(study_note)}</div>}
-      </div>
-    );
-  };
+  async function handleSubmitAnswer() {
+    const answer = answerInputRef.current?.value?.trim();
+    if (!answer) return;
+    setAnalyzing(true);
+    setSpinnerMessage(spinMessages[Math.floor(Math.random() * spinMessages.length)]);
+    try {
+      const result = await submitRecallAnswer(sessionId, sessionQuestions[currentIndex].id, answer, '', questionStartTime?.toISOString());
+      const newRecord = {
+        question_id: sessionQuestions[currentIndex].id,
+        user_answer: answer,
+        strength: result.strength,
+        correct_answer: result.correct_answer,
+        explanation: result.explanation,
+        xp_earned: result.xp_earned,
+      };
+      setUserAnswersRecord(prev => [...prev, newRecord]);
+      setFeedbackResult(result);
+      if (soundEnabled) {
+        if (result.strength === 'excellent') playTone('excellent');
+        else if (result.strength === 'strong') playTone('strong');
+        else playTone('developing');
+      }
+      if (result.xp_earned) {
+        setXpTotal(prev => prev + result.xp_earned);
+        const newXp = (xpTotal || 0) + result.xp_earned;
+        const prog = computeXpProgress(newXp);
+        setXpProgress(prog);
+      }
+    } catch {
+      addToast('Failed to submit answer', 'error');
+    } finally {
+      setAnalyzing(false);
+      if (answerInputRef.current) answerInputRef.current.value = '';
+    }
+  }
 
-  const renderFloatingCards = () => {
-    if (!floatingCards) return null;
-    const items = floatingConcepts.length ? floatingConcepts : ['Cell', 'DNA', 'Enzyme'];
-    const icon = level === 'O-Level' ? <FaMicroscope /> : level === 'A-Level' ? <FaDna /> : <FaCapsules />;
-    const cards = Array.from({ length: 12 }, (_, i) => {
-      const text = items[Math.floor(Math.random() * items.length)];
-      return (
-        <div key={i} className="float-card" style={{ top: `${Math.random() * 70 + 10}%`, left: '-100px' }}>
-          {icon} <span>{text}</span>
-        </div>
-      );
+  function handleNextQuestion() {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < sessionQuestions.length) {
+      setCurrentIndex(nextIndex);
+      setFeedbackResult(null);
+      setQuestionStartTime(new Date());
+    } else {
+      setSessionActive(false);
+      setShowReport(true);
+      handleCompleteSession();
+    }
+  }
+
+  async function handleCompleteSession() {
+    try {
+      const result = await completeRecallSession(sessionId);
+      setSessionReport(result?.report || null);
+    } catch {}
+  }
+
+  function computeXpProgress(totalXp) {
+    const xp = totalXp || 0;
+    const level = Math.floor(xp / 100) + 1;
+    const xpIntoLevel = xp % 100;
+    const xpToNext = 100 - xpIntoLevel;
+    const progressPercent = xpIntoLevel;
+    return { level, xpIntoLevel, xpToNext, progressPercent };
+  }
+
+  const toggleSound = () => {
+    setSoundEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('bioRecall_sound', next ? 'on' : 'off');
+      return next;
     });
-    return <div className="floating-cards-area">{cards}</div>;
   };
 
-  // … the rest of the file stays the same (session logic, loadUserProgress, etc.)
-
-  if (!isReady || access.isPending) {
-    return <PendingApprovalScreen />;
-  }
-
-  if (!access.canAccess) {
-    return <div className="recall-access-denied">Access restricted. Please contact support.</div>;
-  }
+  if (!isReady || access.isPending) return <PendingApprovalScreen />;
+  if (!access.canAccess) return <AccessDenied />;
 
   if (loading) {
     return (
-      <div className="recall-loading">
-        <div className="spinner-colors">
-          <div className="spinner-dot-color"></div>
-          <div className="spinner-dot-color"></div>
-          <div className="spinner-dot-color"></div>
-          <div className="spinner-dot-color"></div>
+      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <Spinner size="lg" />
+          <p style={{ marginTop: 'var(--space-4)', color: 'var(--text-dim)' }}>Preparing your recall session...</p>
         </div>
-        <div className="recall-loading-text">Preparing your session...</div>
       </div>
     );
   }
 
+  const currentQuestion = sessionQuestions[currentIndex];
+  const topicEntries = Object.entries(masteryTopics).filter(([t]) => t && t !== 'null').slice(0, 6);
+
   return (
-    <>
-      {renderConfettiCanvas()}
-      <div className="recall-container">
-        <div className="breadcrumb">
-          <Link to="/"><FaHouse className="breadcrumb-icon" /> Home</Link>
-          <span>›</span>
+    <div className="recall-page">
+      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+        <nav className="breadcrumb">
+          <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
+          <Icon name="chevron-right" className="breadcrumb-sep" />
           <span>Recall Practice</span>
+        </nav>
+
+        <div style={{ marginBottom: 'var(--space-8)' }}>
+          <span className="sec-label">{level === 'Pharmacy' ? 'RecallRx' : 'BioRecall'}</span>
+          <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+            {level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${level || ''}`}
+          </h1>
+          {level && (
+            <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+              {level}{class_name ? ` · ${class_name}` : ''}
+            </span>
+          )}
         </div>
 
-        <div className="recall-header">
-          <h1>{level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${level || ''}`}</h1>
-          {level && <span className="level-badge">{level}{effectiveClassName ? ` · ${effectiveClassName}` : ''}</span>}
-        </div>
-
-        <div className="main-layout">
-          <div className="main-content">
-            {!sessionActive && !showReport && (
-              <div className="entrance-screen">
-                <div className="recall-card">
-                  <FaBrain className="brain-icon" />
-                  <button className="continue-btn" onClick={openTopicModal}>Continue to Topics</button>
-                  <p className="recall-streak-info"><FaFire className="streak-fire" /> {streakDays} Day Recall Streak</p>
-                  <p className="recall-xp-info"><FaStar className="xp-star" /> Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</p>
-                  {message && <div className={`user-message ${message.type}`}>{message.text}</div>}
+        {!sessionActive && !showReport && (
+          <>
+            <div className="card" style={{ padding: 'var(--space-8)', textAlign: 'center', marginBottom: 'var(--space-8)' }}>
+              <Icon name="brain" style={{ fontSize: '3rem', color: 'var(--primary)', marginBottom: 'var(--space-4)' }} />
+              <Button onClick={openTopicModal} size="lg">Continue to Topics</Button>
+              <div style={{ marginTop: 'var(--space-4)', display: 'flex', justifyContent: 'center', gap: 'var(--space-8)' }}>
+                <div>
+                  <Icon name="fire" style={{ color: 'var(--warm)' }} />
+                  <span style={{ marginLeft: 'var(--space-2)' }}>{streakDays} Day Streak</span>
                 </div>
-                {renderWeakTopicAlert()}
-                {renderDashboard()}
-              </div>
-            )}
-            {sessionActive && (
-              <div className="session-screen">
-                <div className="recall-card">{renderQuestion()}</div>
-                <div className="analytics-row">
-                  <div className="stat-card">
-                    <FaChartLine className="stat-icon" />
-                    <span>E:{userAnswersRecord.filter(r => r.strength === 'excellent').length} S:{userAnswersRecord.filter(r => r.strength === 'strong').length} D:{userAnswersRecord.filter(r => r.strength === 'developing').length}</span>
-                  </div>
-                  <div className="stat-card">
-                    <FaTrophy className="stat-icon trophy" />
-                    Mastery: <span>{masteryAverage}%</span>
-                  </div>
-                  <div className="stat-card">
-                    <FaFire className="stat-icon fire" />
-                    Streak: <span>{streakDays} days</span>
-                  </div>
+                <div>
+                  <Icon name="star" style={{ color: 'var(--accent)' }} />
+                  <span style={{ marginLeft: 'var(--space-2)' }}>Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</span>
                 </div>
               </div>
-            )}
-            {showReport && renderReport()}
-          </div>
-          <div className="sidebar">
-            {!sessionActive && !showReport && <>{renderLeaderboard()}</>}
-          </div>
-        </div>
+            </div>
 
-        {topicModalOpen && renderTopicModal()}
-        {renderFloatingCards()}
-        {showConfirm && renderConfirm()}
+            <div className="grid grid-cols-3" style={{ marginBottom: 'var(--space-8)' }}>
+              <Card>
+                <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
+                  <Icon name="trophy" style={{ fontSize: '2rem', color: 'var(--warm)' }} />
+                  <h3 style={{ margin: 'var(--space-4) 0' }}>XP Progress</h3>
+                  <p style={{ marginBottom: 'var(--space-4)' }}>Level {xpProgress.level} · {rankTitle}</p>
+                  <ProgressBar value={xpProgress.xpIntoLevel} max={100} variant="gradient" />
+                  <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>{xpProgress.xpIntoLevel} / 100 XP to next level</p>
+                </div>
+              </Card>
+
+              <Card>
+                <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
+                  <Icon name="brain" style={{ fontSize: '2rem', color: 'var(--primary)' }} />
+                  <h3 style={{ margin: 'var(--space-4) 0' }}>Brain Energy</h3>
+                  <ProgressBar value={brainEnergy} max={100} variant="primary" />
+                  <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>{brainEnergy}% remaining</p>
+                </div>
+              </Card>
+
+              <Card>
+                <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
+                  <Icon name="trophy" style={{ fontSize: '2rem', color: 'var(--accent)' }} />
+                  <h3 style={{ margin: 'var(--space-4) 0' }}>Achievements</h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', justifyContent: 'center' }}>
+                    {achievementsList.slice(0, 6).map((ach) => (
+                      <span key={ach.key} className="badge badge-accent" title={ach.title}>
+                        <Icon name={ach.icon || 'medal'} />
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {topicEntries.length > 0 && (
+              <div style={{ marginBottom: 'var(--space-8)' }}>
+                <h3 style={{ marginBottom: 'var(--space-6)' }}>Topic Mastery</h3>
+                <div className="grid grid-cols-3">
+                  {topicEntries.map(([topic, mastery]) => (
+                    <Card key={topic}>
+                      <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
+                        <Icon name="book-open" style={{ fontSize: '2rem', color: 'var(--primary)' }} />
+                        <h4 style={{ margin: 'var(--space-3) 0' }}>{topic}</h4>
+                        <ProgressBar value={mastery} max={100} variant="success" />
+                        <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>{Math.round(mastery)}%</p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: 'var(--space-8)' }}>
+              <h3 style={{ marginBottom: 'var(--space-6)' }}>Leaderboard</h3>
+              {leaderboard.length === 0 ? (
+                <p style={{ color: 'var(--text-dim)' }}>No data yet. Be the first!</p>
+              ) : (
+                leaderboard.map((entry, idx) => (
+                  <div key={idx} className="card" style={{ padding: 'var(--space-4)', flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-2)' }}>
+                    <span style={{ fontWeight: 700, color: idx === 0 ? 'var(--warm)' : idx === 1 ? 'var(--primary)' : idx === 2 ? 'var(--accent)' : 'var(--text-dim)' }}>
+                      #{idx + 1}
+                    </span>
+                    <span style={{ flex: 1 }}>{entry.user_name || entry.email || 'Anonymous'}</span>
+                    <span>{entry.total_xp} XP</span>
+                    <span className="badge badge-primary">Level {entry.recall_level}</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <Button variant="ghost" onClick={toggleSound}>
+                <Icon name={soundEnabled ? 'volume-high' : 'volume-xmark'} />
+                Sound: {soundEnabled ? 'On' : 'Off'}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {sessionActive && currentQuestion && (
+          <div>
+            <div style={{ marginBottom: 'var(--space-4)' }}>
+              <ProgressBar value={currentIndex + 1} max={sessionQuestions.length} variant="gradient" />
+            </div>
+            <p style={{ textAlign: 'center', color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>
+              Question {currentIndex + 1} of {sessionQuestions.length}
+            </p>
+
+            <Card style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
+              <h3 style={{ marginBottom: 'var(--space-6)' }}>{currentQuestion.question_text}</h3>
+              <Input
+                ref={answerInputRef}
+                placeholder="Type your answer..."
+                disabled={analyzing}
+              />
+              {analyzing && (
+                <div style={{ textAlign: 'center', marginTop: 'var(--space-4)' }}>
+                  <Spinner size="sm" />
+                  <span style={{ marginLeft: 'var(--space-3)' }}>{spinnerMessage}</span>
+                </div>
+              )}
+              <div style={{ marginTop: 'var(--space-6)', display: 'flex', gap: 'var(--space-4)' }}>
+                {!feedbackResult ? (
+                  <Button onClick={handleSubmitAnswer} disabled={analyzing} loading={analyzing}>
+                    <Icon name="paper-plane" /> Submit
+                  </Button>
+                ) : (
+                  <Button onClick={handleNextQuestion}>
+                    {currentIndex + 1 < sessionQuestions.length ? 'Next Question' : 'Finish Session'} <Icon name="arrow-right" />
+                  </Button>
+                )}
+              </div>
+            </Card>
+
+            {feedbackResult && (
+              <Card style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+                  <Icon
+                    name={feedbackResult.strength === 'excellent' ? 'star' : feedbackResult.strength === 'strong' ? 'circle-check' : 'rotate'}
+                    style={{
+                      fontSize: '2rem',
+                      color: feedbackResult.strength === 'excellent' ? 'var(--success)' :
+                             feedbackResult.strength === 'strong' ? 'var(--primary)' : 'var(--warm)'
+                    }}
+                  />
+                  <div>
+                    <h4>{feedbackResult.strength === 'excellent' ? 'Perfect!' : feedbackResult.strength === 'strong' ? 'Close!' : 'Needs Review'}</h4>
+                    <p style={{ color: 'var(--text-dim)' }}>+{feedbackResult.xp_earned} XP</p>
+                  </div>
+                </div>
+                <p><strong>Correct answer:</strong> {feedbackResult.correct_answer}</p>
+                {feedbackResult.explanation && <p style={{ color: 'var(--text-dim)' }}>{feedbackResult.explanation}</p>}
+              </Card>
+            )}
+          </div>
+        )}
+
+        {showReport && sessionReport && (
+          <Card style={{ padding: 'var(--space-8)', textAlign: 'center' }}>
+            <Icon name="trophy" style={{ fontSize: '3rem', color: 'var(--warm)', marginBottom: 'var(--space-4)' }} />
+            <h2>Session Complete</h2>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-8)', margin: 'var(--space-8) 0' }}>
+              <div>
+                <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-black)', color: 'var(--success)' }}>
+                  {sessionReport.excellent || 0}
+                </div>
+                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Excellent</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-black)', color: 'var(--primary)' }}>
+                  {sessionReport.strong || 0}
+                </div>
+                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Strong</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-black)', color: 'var(--warm)' }}>
+                  {sessionReport.developing || 0}
+                </div>
+                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Needs Review</div>
+              </div>
+            </div>
+            <p>Mastery Score: {sessionReport.mastery_score || 0}%</p>
+            <div style={{ marginTop: 'var(--space-8)', display: 'flex', gap: 'var(--space-4)', justifyContent: 'center' }}>
+              <Button onClick={() => { setShowReport(false); setSessionActive(false); setTopicModalOpen(true); }}>
+                <Icon name="rotate" /> Study Another Topic
+              </Button>
+              <Button variant="secondary" onClick={() => navigate('/')}>
+                <Icon name="home" /> Home
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        <Modal open={topicModalOpen} onClose={closeTopicModal} title="Select a Topic">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+            {topicList.length === 0 && (
+              <p style={{ color: 'var(--text-dim)' }}>No topics available for your level.</p>
+            )}
+            {topicList.map((topic) => (
+              <button
+                key={topic.unit_id}
+                className="btn btn-secondary"
+                onClick={() => handleStartSession(topic)}
+                style={{ justifyContent: 'space-between' }}
+              >
+                <span>{topic.topic_name}</span>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                  {topic.question_count} questions
+                </span>
+              </button>
+            ))}
+          </div>
+        </Modal>
       </div>
-    </>
+    </div>
   );
 }
