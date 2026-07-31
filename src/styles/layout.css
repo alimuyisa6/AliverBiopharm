@@ -44,7 +44,7 @@ body.dark-mode .site-header {
 }
 
 .header-logo img {
-  height: 36px;
+  height: 44px;
   width: auto;
 }
 
@@ -52,6 +52,8 @@ body.dark-mode .site-header {
   display: flex;
   align-items: center;
   gap: var(--space-6);
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .main-nav-link {
@@ -75,6 +77,7 @@ body.dark-mode .site-header {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .hamburger-btn {
@@ -88,6 +91,7 @@ body.dark-mode .site-header {
   background: var(--bg-card);
   color: var(--text-main);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .mobile-nav-overlay {
@@ -267,6 +271,7 @@ body.dark-mode .site-header {
 @media (max-width: 768px) {
   .main-nav { display: none; }
   .hamburger-btn { display: flex; }
+  .nav-actions > *:not(.hamburger-btn) { display: none; }
   .footer-inner { grid-template-columns: 1fr; gap: var(--space-8); }
   .footer-bottom { flex-direction: column; gap: var(--space-4); text-align: center; }
 }
