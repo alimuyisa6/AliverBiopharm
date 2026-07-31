@@ -1,19 +1,41 @@
- import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+/* pages/Classroom.jsx */
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
 import { useLayout } from '../contexts/LayoutContext';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
+import { AccessDenied } from '../components/access/AccessDenied';
 import { listClassrooms, getUnits } from '../api/client';
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
+import Button from '../components/Button/Button';
+import EmptyState from '../components/EmptyState/EmptyState';
 
-const STATUS_CLASSES = {
-  live: 'room-status-live',
-  upcoming: 'room-status-upcoming',
-  open_floor: 'room-status-open',
-  ended: 'room-status-ended',
-  offline: 'room-status-offline',
+const STATUS_ICONS = {
+  live: 'circle',
+  upcoming: 'clock',
+  open_floor: 'users',
+  ended: 'circle-check',
+  offline: 'circle',
+};
+
+const STATUS_LABELS = {
+  live: 'Live',
+  upcoming: 'Upcoming',
+  open_floor: 'Open Floor',
+  ended: 'Ended',
+  offline: 'Offline',
+};
+
+const STATUS_COLORS = {
+  live: 'var(--success)',
+  upcoming: 'var(--warm)',
+  open_floor: 'var(--primary)',
+  ended: 'var(--text-muted)',
+  offline: 'var(--text-muted)',
 };
 
 export default function Classroom() {
@@ -21,7 +43,7 @@ export default function Classroom() {
   const navigate = useNavigate();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
-  const { level, class_name, showAll } = useLevelFilter();
+  const { level, class_name, showAll, displayName } = useLevelFilter();
   const { groups } = useLayout();
 
   const [rooms, setRooms] = useState([]);
@@ -29,15 +51,12 @@ export default function Classroom() {
   const [error, setError] = useState(null);
   const [activeUnitId, setActiveUnitId] = useState(null);
 
-  // Determine the active unit id from the user's active group, or fallback to the first group's first unit
   useEffect(() => {
-    if (!groups || !Array.isArray(groups) || groups.length === 0) return;
+    if (!groups?.length || !user) return;
     const groupId = user?.profile?.active_group_id || groups[0]?.id;
     if (!groupId) return;
     getUnits({ group_id: groupId }).then(units => {
-      if (units && units.length > 0) {
-        setActiveUnitId(units[0].id);
-      }
+      if (units?.length) setActiveUnitId(units[0].id);
     }).catch(() => {});
   }, [groups, user]);
 
@@ -50,185 +69,127 @@ export default function Classroom() {
     setLoading(true);
     setError(null);
     try {
-      // Use unit_id for classroom listing (new endpoint)
       const data = await listClassrooms(activeUnitId, null);
       setRooms(data || []);
-    } catch (err) {
+    } catch {
       setError('Failed to load classrooms');
-      console.error(err);
     }
     setLoading(false);
   };
 
-  if (!isReady || access.isPending) {
-    return <PendingApprovalScreen />;
-  }
-
-  if (!access.canAccess) {
-    return <div className="classroom-access-denied">Access restricted. Please contact support.</div>;
-  }
+  if (!isReady || access.isPending) return <PendingApprovalScreen />;
+  if (!access.canAccess) return <AccessDenied />;
 
   if (loading) {
     return (
-      <div className="classroom-loading">
-        <i className="fa-solid fa-spinner fa-spin"></i>
-        <p>Loading classrooms...</p>
+      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Spinner size="lg" />
       </div>
     );
   }
 
+  const levelName = displayName || level?.id || '';
+  const classLabel = class_name || '';
+
   return (
     <div className="classroom-page">
-      <div className="classroom-header">
+      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
         <span className="sec-label">Live Learning</span>
-        <h1 className="section-title">Classrooms</h1>
-        {level && !showAll && (
-          <div className="classroom-active-filters">
-            <span className="filter-tag">{level}</span>
-            {class_name && <span className="filter-tag">{class_name}</span>}
+        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+          Classrooms{levelName ? ` – ${levelName}` : ''}
+        </h1>
+        {classLabel && (
+          <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
+            {classLabel}
+          </p>
+        )}
+
+        {levelName && !showAll && (
+          <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-6)' }}>
+            <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>{levelName}</span>
+            {classLabel && <span className="chip" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>{classLabel}</span>}
           </div>
         )}
         {showAll && (
-          <div className="classroom-active-filters">
-            <span className="filter-tag teacher-all">All Levels (Teacher Access)</span>
+          <div style={{ marginBottom: 'var(--space-6)' }}>
+            <span className="badge badge-primary">All Levels (Teacher Access)</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: 'var(--space-6)' }}>
+            <Icon name="exclamation-triangle" /> {error}
+            <Button variant="secondary" size="sm" onClick={fetchRooms} style={{ marginLeft: 'auto' }}>Retry</Button>
+          </div>
+        )}
+
+        {!loading && !error && rooms.length === 0 && (
+          <EmptyState
+            icon="door-closed"
+            title="No Classrooms Available"
+            description={`No active rooms for ${classLabel || levelName || 'your level'}. Check back later or start a discussion.`}
+            action={
+              <Button onClick={() => navigate('/tutor/apply')}>
+                <Icon name="user-pen" /> Become a Tutor
+              </Button>
+            }
+          />
+        )}
+
+        {!loading && !error && rooms.length > 0 && (
+          <div className="grid grid-cols-3">
+            {rooms.map(room => {
+              const statusColor = STATUS_COLORS[room.status] || STATUS_COLORS.offline;
+              return (
+                <div key={room.id} className="card" style={{ borderTop: `4px solid ${statusColor}` }}>
+                  <div className="card-image-placeholder">
+                    {room.cover_image_url ? (
+                      <img src={room.cover_image_url} alt={room.title} className="card-image" />
+                    ) : (
+                      <Icon name="users" style={{ fontSize: '3rem', color: statusColor }} />
+                    )}
+                  </div>
+                  <div style={{ padding: 'var(--space-3) var(--space-4)', background: statusColor, color: '#fff', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                    <Icon name={STATUS_ICONS[room.status] || 'circle'} />
+                    <span style={{ fontSize: 'var(--text-xs)', fontWeight: 600 }}>{STATUS_LABELS[room.status] || room.status}</span>
+                  </div>
+                  <div className="card-body">
+                    <h3 className="card-title">{room.title}</h3>
+                    <p className="card-text">{room.topic_name} · {room.class_name}</p>
+                    {room.tutor_name && (
+                      <p className="card-text" style={{ fontSize: 'var(--text-xs)' }}>
+                        <Icon name="user" style={{ marginRight: 'var(--space-1)' }} />
+                        {room.tutor_name}
+                      </p>
+                    )}
+                    {room.participant_count > 0 && (
+                      <p className="card-text" style={{ fontSize: 'var(--text-xs)' }}>
+                        <Icon name="users" style={{ marginRight: 'var(--space-1)' }} />
+                        {room.participant_count} participants
+                      </p>
+                    )}
+                  </div>
+                  <div className="card-footer">
+                    {room.status === 'live' || room.status === 'open_floor' ? (
+                      <Button size="sm" onClick={() => navigate(`/classroom/${room.id}`)}>
+                        <Icon name="door-open" /> Join
+                      </Button>
+                    ) : room.status === 'upcoming' ? (
+                      <Button size="sm" variant="secondary" disabled>
+                        <Icon name="clock" /> {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Button>
+                    ) : (
+                      <Button size="sm" variant="ghost" disabled>
+                        <Icon name="circle" /> {STATUS_LABELS[room.status] || 'Offline'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
-
-      {error && (
-        <div className="classroom-error">
-          <p>{error}</p>
-          <button className="btn-secondary" onClick={fetchRooms}>Retry</button>
-        </div>
-      )}
-
-      {!loading && !error && rooms.length === 0 && (
-        <div className="classroom-empty">
-          <i className="fa-solid fa-door-closed"></i>
-          <h3>No Classrooms Available</h3>
-          <p>No active rooms for your level. Check back later or start a discussion.</p>
-          <button className="btn-primary" onClick={() => navigate('/tutor/apply')}>
-            <i className="fa-solid fa-chalkboard-user"></i> Become a Tutor
-          </button>
-        </div>
-      )}
-
-      {!loading && !error && rooms.length > 0 && (
-        <div className="classroom-grid">
-          {rooms.map(room => {
-            const statusClass = STATUS_CLASSES[room.status] || 'room-status-offline';
-            const isPremium = room.room_type === 'premium';
-            const isHard = room.room_type === 'hard_topic';
-            return (
-              <div key={room.id} className={`classroom-card ${room.status}`}>
-                <div className="classroom-card-media">
-                  {room.cover_image_url ? (
-                    <img src={room.cover_image_url} alt={room.title} loading="lazy" />
-                  ) : (
-                    <div className="card-media-fallback">
-                      <i className="fa-solid fa-chalkboard-user"></i>
-                    </div>
-                  )}
-                  {isHard && (
-                    <span className="card-media-ribbon ribbon-hard">
-                      <i className="fa-solid fa-triangle-exclamation"></i> Hard Topic
-                    </span>
-                  )}
-                  {isPremium && !isHard && (
-                    <span className="card-media-ribbon ribbon-premium">
-                      <i className="fa-solid fa-crown"></i> Premium
-                    </span>
-                  )}
-                </div>
-                <div className={`room-status-bar ${statusClass}`}>
-                  <i className={`fa-solid ${STATUS_META_ICONS[room.status] || 'fa-circle'}`}></i>
-                  <span>{STATUS_META_LABELS[room.status] || 'Offline'}</span>
-                </div>
-                <div className="room-body">
-                  <h3 className="room-title">{room.title}</h3>
-                  <div className="room-meta">
-                    <span>
-                      <i className="fa-solid fa-book room-meta-icon-cyan"></i>
-                      {room.topic_name}
-                    </span>
-                    <span>
-                      <i className="fa-solid fa-user-graduate room-meta-icon-blue"></i>
-                      {room.class_name}
-                    </span>
-                  </div>
-                  <div className="room-stats">
-                    <span>
-                      <i className="fa-solid fa-users room-stats-icon-purple"></i>
-                      {room.participant_count || 0} participants
-                    </span>
-                    {room.room_type !== 'free' && (
-                      <span className={`room-type-badge ${room.room_type}`}>
-                        <i className={`fa-solid ${room.room_type === 'hard_topic' ? 'fa-triangle-exclamation' : 'fa-crown'}`}></i>
-                        {room.room_type === 'hard_topic' ? 'Hard Topic' : 'Premium'}
-                      </span>
-                    )}
-                  </div>
-                  {room.tutor_name && (
-                    <div className="room-tutor">
-                      {room.tutor_avatar_url ? (
-                        <img src={room.tutor_avatar_url} alt={room.tutor_name} className="room-tutor-avatar" />
-                      ) : (
-                        <i className="fa-solid fa-chalkboard-user"></i>
-                      )}
-                      <span>{room.tutor_name}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="room-footer">
-                  {room.status === 'live' && (
-                    <button className="btn-primary" onClick={() => navigate(`/classroom/${room.id}`)}>
-                      <i className="fa-solid fa-door-open"></i> Join Now
-                    </button>
-                  )}
-                  {room.status === 'upcoming' && room.scheduled_at && (
-                    <button className="btn-secondary" disabled>
-                      <i className="fa-solid fa-clock room-status-icon-orange"></i>
-                      {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </button>
-                  )}
-                  {room.status === 'open_floor' && (
-                    <button className="btn-primary" onClick={() => navigate(`/classroom/${room.id}`)}>
-                      <i className="fa-solid fa-users"></i> Join Discussion
-                    </button>
-                  )}
-                  {room.status === 'ended' && (
-                    <button className="btn-secondary" disabled>
-                      <i className="fa-solid fa-circle-check"></i> Session Ended
-                    </button>
-                  )}
-                  {room.status === 'offline' && (
-                    <button className="btn-secondary" disabled>
-                      <i className="fa-solid fa-circle"></i> Offline
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
-}
-
-// Icon and label maps for status
-const STATUS_META_ICONS = {
-  live: 'fa-circle',
-  upcoming: 'fa-clock',
-  open_floor: 'fa-users',
-  ended: 'fa-circle-check',
-  offline: 'fa-circle',
-};
-
-const STATUS_META_LABELS = {
-  live: 'Live',
-  upcoming: 'Upcoming',
-  open_floor: 'Open Floor',
-  ended: 'Ended',
-  offline: 'Offline',
-};
+} 
