@@ -1,5 +1,4 @@
-/* contexts/AuthContext.jsx */
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+ import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getUser, signin, signout, getProfile } from '../api/client';
 import Spinner from '../components/Spinner/Spinner';
@@ -113,6 +112,22 @@ export function ProtectedRoute({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (loading) return;
+
+    if (!user) {
+      navigate('/login', { replace: true, state: { from: location } });
+      return;
+    }
+    if (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') {
+      navigate('/onboarding', { replace: true });
+      return;
+    }
+    if (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding') {
+      navigate('/onboarding', { replace: true });
+    }
+  }, [user, loading, location.pathname, navigate]);
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
@@ -121,20 +136,12 @@ export function ProtectedRoute({ children }) {
     );
   }
 
-  if (!user) {
-    navigate('/login', { replace: true, state: { from: location } });
-    return null;
-  }
+  const needsRedirect =
+    !user ||
+    (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') ||
+    (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding');
 
-  if (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') {
-    navigate('/onboarding', { replace: true });
-    return null;
-  }
-
-  if (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding') {
-    navigate('/onboarding', { replace: true });
-    return null;
-  }
+  if (needsRedirect) return null;
 
   return children;
-} 
+}
