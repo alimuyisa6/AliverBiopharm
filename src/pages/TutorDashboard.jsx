@@ -1,31 +1,38 @@
- import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+ /* pages/TutorDashboard.jsx */
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getClassroomLevels, getClassroomTopics, getTutorStatus, getTutorRooms, createClassroom, endClassroom } from '../api/client';
-
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -20 }
-};
-
-const pageTransition = {
-  type: 'tween',
-  ease: 'easeInOut',
-  duration: 0.3
-};
+import { useLayout } from '../contexts/LayoutContext';
+import { useLevelFilter } from '../hooks/useLevelFilter';
+import {
+  getClassroomLevels,
+  getClassroomTopics,
+  getTutorStatus,
+  getTutorRooms,
+  createClassroom,
+  endClassroom,
+} from '../api/client';
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
+import Button from '../components/Button/Button';
+import Input from '../components/Input/Input';
+import Select from '../components/Select/Select';
+import Card from '../components/Card/Card';
+import Modal from '../components/Modal/Modal';
+import EmptyState from '../components/EmptyState/EmptyState';
+import { useToast } from '../components/Toast/Toast';
 
 export default function TutorDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { displayName } = useLevelFilter();
+  const addToast = useToast();
+
   const [tutorStatus, setTutorStatus] = useState(null);
   const [levels, setLevels] = useState([]);
   const [activeRooms, setActiveRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [statusError, setStatusError] = useState(null);
-  const [roomsError, setRoomsError] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [form, setForm] = useState({
     title: '',
@@ -41,11 +48,10 @@ export default function TutorDashboard() {
   const [loadingTopics, setLoadingTopics] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [createError, setCreateError] = useState(null);
-  const [createSuccess, setCreateSuccess] = useState(null);
 
   useEffect(() => {
     if (!user) {
-      setError('You must be logged in to access the tutor dashboard.');
+      setError('You must be logged in.');
       setLoading(false);
       return;
     }
@@ -55,56 +61,29 @@ export default function TutorDashboard() {
   const fetchDashboard = async () => {
     setLoading(true);
     setError(null);
-    setStatusError(null);
-
     try {
-      let statusData;
-      try {
-        statusData = await getTutorStatus();
-      } catch (err) {
-        if (err.status === 401) {
-          setStatusError('Your session has expired. Please log in again.');
-        } else if (err.status === 403) {
-          setStatusError('Access denied. Please log in again.');
-        } else if (err.status === 404) {
-          setStatusError('Tutor service not available. Please try again later.');
-        } else {
-          setStatusError(err.message || 'Server error. Please try again.');
-        }
-        setLoading(false);
-        return;
-      }
-
+      const [statusData, levelsData] = await Promise.all([
+        getTutorStatus(),
+        getClassroomLevels(),
+      ]);
       setTutorStatus(statusData?.application || null);
-
-      try {
-        const levelsData = await getClassroomLevels();
-        setLevels(levelsData || []);
-      } catch {
-        setLevels([]);
-      }
-
+      setLevels(levelsData || []);
       if (statusData?.application?.status === 'approved') {
         fetchActiveRooms();
       }
     } catch (err) {
-      if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
-        setError('Network error. Please check your internet connection and try again.');
-      } else {
-        setError('Failed to load dashboard. Please try again.');
-      }
+      setError('Failed to load dashboard. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const fetchActiveRooms = async () => {
-    setRoomsError(null);
     try {
       const data = await getTutorRooms();
       setActiveRooms(data?.rooms || data || []);
-    } catch (err) {
-      setRoomsError(err.message || 'Failed to load your rooms.');
+    } catch {
+      addToast('Failed to load your rooms.', 'error');
     }
   };
 
@@ -125,13 +104,8 @@ export default function TutorDashboard() {
       setCreateError('Please fill all required fields.');
       return;
     }
-    if ((form.room_type === 'hard_topic' || form.room_type === 'premium') && !form.scheduled_at) {
-      setCreateError('Scheduled date and time is required for this room type.');
-      return;
-    }
     setSubmitting(true);
     setCreateError(null);
-    setCreateSuccess(null);
     try {
       await createClassroom({
         title: form.title,
@@ -139,8 +113,7 @@ export default function TutorDashboard() {
         room_type: form.room_type,
         scheduled_at: form.scheduled_at || null,
       });
-
-      setCreateSuccess('Classroom created successfully!');
+      addToast('Classroom created successfully!', 'success');
       setShowCreateForm(false);
       setForm({
         title: '',
@@ -152,17 +125,9 @@ export default function TutorDashboard() {
         room_type: 'free',
         scheduled_at: '',
       });
-      setTopics([]);
       fetchActiveRooms();
-      setTimeout(() => setCreateSuccess(null), 5000);
     } catch (err) {
-      if (err.status === 403) {
-        setCreateError(err.message || 'You are not authorized to create rooms.');
-      } else if (err.status === 401) {
-        setCreateError('Your session has expired. Please log in again.');
-      } else {
-        setCreateError(err.message || 'Failed to create room.');
-      }
+      setCreateError(err.message || 'Failed to create room.');
     } finally {
       setSubmitting(false);
     }
@@ -171,508 +136,269 @@ export default function TutorDashboard() {
   const handleEndRoom = async (roomId) => {
     try {
       await endClassroom(roomId);
+      addToast('Room ended.', 'success');
       fetchActiveRooms();
     } catch (err) {
-      setRoomsError(err.message || 'Failed to end room.');
+      addToast(err.message || 'Failed to end room.', 'error');
     }
-  };
-
-  const statusLabels = {
-    pending: { label: 'Pending Review', className: 'status-pending', icon: 'fa-clock' },
-    scheduled: { label: 'Interview Scheduled', className: 'status-scheduled', icon: 'fa-calendar-check' },
-    interviewed: { label: 'Interview Completed', className: 'status-interviewed', icon: 'fa-check-double' },
-    approved: { label: 'Approved Tutor', className: 'status-approved', icon: 'fa-circle-check' },
-    rejected: { label: 'Application Rejected', className: 'status-rejected', icon: 'fa-circle-xmark' },
-  };
-
-  const roomStatusIcons = {
-    live: { icon: 'fa-tower-broadcast', className: 'status-live-bar', label: 'Live' },
-    open_floor: { icon: 'fa-users', className: 'status-open-floor-bar', label: 'Open Floor' },
-    upcoming: { icon: 'fa-clock', className: 'status-upcoming-bar', label: 'Upcoming' },
   };
 
   if (loading) {
     return (
-      <motion.div
-        className="tutor-dashboard-page"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        <div className="tutor-dashboard-loading">
-          <div className="tutor-loading-spinner">
-            <i className="fa-solid fa-spinner fa-spin"></i>
-          </div>
-          <p className="tutor-loading-text">Loading your dashboard...</p>
-        </div>
-      </motion.div>
+      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Spinner size="lg" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <motion.div
-        className="tutor-dashboard-page"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-      >
-        <div className="tutor-dashboard-error">
-          <div className="tutor-error-icon">
-            <i className="fa-solid fa-triangle-exclamation"></i>
-          </div>
-          <h2>Something went wrong</h2>
-          <p className="tutor-error-text">{error}</p>
-          <div className="tutor-error-actions">
-            <button className="tutor-btn tutor-btn-primary" onClick={fetchDashboard}>
-              <i className="fa-solid fa-rotate"></i> Try Again
-            </button>
-            <button className="tutor-btn tutor-btn-secondary" onClick={() => navigate('/classroom')}>
-              <i className="fa-solid fa-users"></i> Back to Classrooms
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  if (statusError) {
-    return (
-      <motion.div
-        className="tutor-dashboard-page"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-      >
-        <div className="tutor-dashboard-error">
-          <div className="tutor-error-icon">
-            <i className="fa-solid fa-lock"></i>
-          </div>
-          <h2>Unable to Load Tutor Status</h2>
-          <p className="tutor-error-text">{statusError}</p>
-          <div className="tutor-error-actions">
-            <button className="tutor-btn tutor-btn-primary" onClick={() => navigate('/login')}>
-              <i className="fa-solid fa-right-to-bracket"></i> Log In
-            </button>
-            <button className="tutor-btn tutor-btn-secondary" onClick={fetchDashboard}>
-              <i className="fa-solid fa-rotate"></i> Retry
-            </button>
-          </div>
-        </div>
-      </motion.div>
+      <div className="section" style={{ textAlign: 'center', paddingTop: 'var(--space-16)' }}>
+        <EmptyState
+          icon="exclamation-triangle"
+          title="Error"
+          description={error}
+          action={<Button onClick={() => navigate('/login')}>Log In</Button>}
+        />
+      </div>
     );
   }
 
   const application = tutorStatus;
   const isApproved = application?.status === 'approved';
-  const status = application ? statusLabels[application.status] : null;
+  const statusLabels = {
+    pending: { label: 'Pending Review', color: 'var(--warning)', icon: 'clock' },
+    scheduled: { label: 'Interview Scheduled', color: 'var(--primary)', icon: 'calendar' },
+    interviewed: { label: 'Interview Completed', color: 'var(--accent)', icon: 'check-double' },
+    approved: { label: 'Approved Tutor', color: 'var(--success)', icon: 'circle-check' },
+    rejected: { label: 'Application Rejected', color: 'var(--error)', icon: 'circle-xmark' },
+  };
+
+  const levelName = displayName || '';
 
   return (
-    <motion.div
-      className="tutor-dashboard-page"
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
-      <div className="tutor-dashboard-container">
-        <div className="tutor-dashboard-hero">
-          <div className="tutor-hero-content">
-            <span className="tutor-hero-label">Teaching Portal</span>
-            <h1 className="tutor-hero-title">Tutor Dashboard</h1>
-            <p className="tutor-hero-subtitle">
-              Manage your classrooms, track sessions, and engage with students.
-            </p>
-          </div>
-          <div className="tutor-hero-icon">
-            <i className="fa-solid fa-chalkboard-user"></i>
-          </div>
-        </div>
+    <div className="tutor-dashboard-page">
+      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+        <span className="sec-label">Teaching Portal</span>
+        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-4)' }}>
+          Tutor Dashboard{levelName ? ` – ${levelName}` : ''}
+        </h1>
+        <p className="section-subtitle" style={{ textAlign: 'left', marginBottom: 'var(--space-6)' }}>
+          Manage your classrooms, track sessions, and engage with students.
+        </p>
 
         {!application && (
-          <div className="tutor-empty-state">
-            <div className="tutor-empty-icon">
-              <i className="fa-solid fa-graduation-cap"></i>
-            </div>
-            <h2 className="tutor-empty-title">No Application Found</h2>
-            <p className="tutor-empty-text">
-              You haven't applied to become a tutor yet. Apply now to start leading classroom discussions and make an impact.
-            </p>
-            <div className="tutor-empty-actions">
-              <button className="tutor-btn tutor-btn-primary" onClick={() => navigate('/tutor/apply')}>
-                <i className="fa-solid fa-paper-plane"></i> Start Application
-              </button>
-            </div>
-          </div>
+          <EmptyState
+            icon="graduation-cap"
+            title="No Application Found"
+            description="You haven't applied to become a tutor yet."
+            action={
+              <Button onClick={() => navigate('/tutor/apply')} icon="paper-plane">
+                Start Application
+              </Button>
+            }
+          />
         )}
 
-        {application && !isApproved && status && (
-          <div className="tutor-application-card">
-            <div className={`tutor-app-status tutor-app-status--${application.status}`}>
-              <div className={`tutor-app-status-icon ${status.className}`}>
-                <i className={`fa-solid ${status.icon}`}></i>
-              </div>
-              <div className="tutor-app-status-info">
-                <span className={`tutor-app-status-label ${status.className}`}>{status.label}</span>
-                <span className="tutor-app-status-date">
-                  Applied {new Date(application.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                  })}
+        {application && !isApproved && statusLabels[application.status] && (
+          <Card style={{ padding: 'var(--space-8)', maxWidth: 600, margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+              <Icon name={statusLabels[application.status].icon} style={{ fontSize: '2rem', color: statusLabels[application.status].color }} />
+              <div>
+                <span className="badge" style={{ background: `${statusLabels[application.status].color}20`, color: statusLabels[application.status].color }}>
+                  {statusLabels[application.status].label}
                 </span>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)', marginTop: 'var(--space-2)' }}>
+                  Applied {new Date(application.created_at).toLocaleDateString()}
+                </p>
               </div>
             </div>
-
-            <div className="tutor-app-details">
-              <div className="tutor-app-detail">
-                <i className="fa-solid fa-layer-group tutor-detail-icon-muted"></i>
-                <div>
-                  <span className="tutor-detail-label">Level</span>
-                  <span className="tutor-detail-value">{application.level}</span>
-                </div>
-              </div>
-              <div className="tutor-app-detail">
-                <i className="fa-solid fa-users tutor-detail-icon-muted"></i>
-                <div>
-                  <span className="tutor-detail-label">Class</span>
-                  <span className="tutor-detail-value">{application.class_name}</span>
-                </div>
-              </div>
-              <div className="tutor-app-detail">
-                <i className="fa-solid fa-book-open tutor-detail-icon-muted"></i>
-                <div>
-                  <span className="tutor-detail-label">Subjects</span>
-                  <span className="tutor-detail-value">
-                    {(application.subjects || []).join(', ')}
-                  </span>
-                </div>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+              <p><strong>Level:</strong> {application.level}</p>
+              <p><strong>Class:</strong> {application.class_name}</p>
+              <p><strong>Subjects:</strong> {(application.subjects || []).join(', ')}</p>
             </div>
-
-            {application.status === 'scheduled' && application.interview_scheduled_at && (
-              <div className="tutor-interview-card">
-                <i className={`fa-solid fa-calendar-check ${status.className}`}></i>
-                <div>
-                  <span className="tutor-interview-label">Interview Scheduled</span>
-                  <span className="tutor-interview-date">
-                    {new Date(application.interview_scheduled_at).toLocaleString('en-US', {
-                      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                      hour: '2-digit', minute: '2-digit',
-                    })}
-                  </span>
-                </div>
-              </div>
-            )}
-
             {application.status === 'rejected' && application.rejection_reason && (
-              <div className="tutor-rejection-card">
-                <div className="tutor-rejection-header">
-                  <i className={`fa-solid fa-circle-info ${status.className}`}></i>
-                  <span>Reason for Rejection</span>
-                </div>
-                <p className="tutor-rejection-text">{application.rejection_reason}</p>
+              <div className="alert alert-error" style={{ marginTop: 'var(--space-4)' }}>
+                <Icon name="circle-info" /> {application.rejection_reason}
               </div>
             )}
-          </div>
+          </Card>
         )}
 
         {isApproved && (
-          <div className="tutor-approved-panel">
-            <div className="tutor-approved-banner">
-              <div className="tutor-approved-badge">
-                <i className="fa-solid fa-circle-check status-approved"></i>
-                <span>Approved Tutor</span>
+          <div>
+            <div className="alert alert-success" style={{ marginBottom: 'var(--space-6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <Icon name="circle-check" style={{ marginRight: 'var(--space-3)' }} />
+                Approved Tutor — {application.display_name || 'Tutor'}
               </div>
-              <div className="tutor-approved-info">
-                <span className="tutor-approved-name">{application.display_name || 'Tutor'}</span>
-                <span className="tutor-approved-meta">
-                  {application.level} · {application.class_name}
-                </span>
-              </div>
-              <div className="tutor-approved-subjects">
-                {(application.subjects || []).map(subject => (
-                  <span key={subject} className="tutor-subject-tag">{subject}</span>
-                ))}
+              <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+                <Button
+                  variant={showCreateForm ? 'secondary' : 'primary'}
+                  size="sm"
+                  onClick={() => {
+                    setShowCreateForm(!showCreateForm);
+                    setCreateError(null);
+                  }}
+                  icon={showCreateForm ? 'xmark' : 'plus'}
+                >
+                  {showCreateForm ? 'Cancel' : 'Create Classroom'}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={fetchActiveRooms} icon="rotate">
+                  Refresh
+                </Button>
               </div>
             </div>
-
-            <div className="tutor-dashboard-actions">
-              <button
-                className={`tutor-btn ${showCreateForm ? 'tutor-btn-outline' : 'tutor-btn-primary'}`}
-                onClick={() => {
-                  setShowCreateForm(!showCreateForm);
-                  setCreateError(null);
-                  setCreateSuccess(null);
-                }}
-              >
-                <i className={`fa-solid ${showCreateForm ? 'fa-xmark' : 'fa-plus-circle'}`}></i>
-                {showCreateForm ? 'Cancel' : 'Create Classroom'}
-              </button>
-              <button className="tutor-btn tutor-btn-ghost" onClick={fetchActiveRooms}>
-                <i className="fa-solid fa-arrows-rotate"></i> Refresh
-              </button>
-            </div>
-
-            {createSuccess && (
-              <div className="tutor-alert tutor-alert--success">
-                <i className="fa-solid fa-circle-check"></i>
-                <span>{createSuccess}</span>
-              </div>
-            )}
 
             {showCreateForm && (
-              <div className="tutor-create-form">
-                <h3 className="tutor-form-title">
-                  <i className="fa-solid fa-plus-circle"></i> New Classroom
+              <Card style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-8)' }}>
+                <h3 style={{ marginBottom: 'var(--space-6)' }}>
+                  <Icon name="plus" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />
+                  New Classroom
                 </h3>
-                <p className="tutor-form-subtitle">
-                  Fill in the details below to create a new classroom session.
-                </p>
-
-                <div className="tutor-form-group">
-                  <label className="tutor-form-label">
-                    Room Title <span className="tutor-required">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="tutor-form-input"
-                    placeholder="e.g., Introduction to Cell Biology"
-                    value={form.title}
-                    onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
-                    maxLength={200}
+                <Input
+                  label="Room Title"
+                  placeholder="e.g., Introduction to Cell Biology"
+                  value={form.title}
+                  onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                  required
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                  <Select
+                    label="Level"
+                    value={form.level}
+                    onChange={(e) => {
+                      setForm((prev) => ({ ...prev, level: e.target.value, group_id: '', class_name: '', topic_id: '', topic_name: '' }));
+                      setTopics([]);
+                    }}
+                    options={levels.map((l) => ({ value: l.key, label: l.key }))}
+                    placeholder="Choose level..."
+                  />
+                  <Select
+                    label="Class"
+                    value={form.group_id}
+                    onChange={(e) => {
+                      const groupId = e.target.value;
+                      const found = (levels.find((l) => l.key === form.level)?.classes || []).find((c) => (typeof c === 'string' ? c : c.id) === groupId);
+                      const name = found ? (typeof found === 'string' ? found : found.name) : '';
+                      setForm((prev) => ({ ...prev, group_id: groupId, class_name: name, topic_id: '', topic_name: '' }));
+                      if (groupId) fetchTopics(groupId);
+                    }}
+                    options={(levels.find((l) => l.key === form.level)?.classes || []).map((c) => ({
+                      value: typeof c === 'string' ? c : c.id,
+                      label: typeof c === 'string' ? c : c.name,
+                    }))}
+                    placeholder="Choose class..."
+                    disabled={!form.level}
                   />
                 </div>
-
-                <div className="tutor-form-row">
-                  <div className="tutor-form-group">
-                    <label className="tutor-form-label">
-                      Level <span className="tutor-required">*</span>
-                    </label>
-                    <select
-                      className="tutor-form-select"
-                      value={form.level}
-                      onChange={e => {
-                        setForm(prev => ({ ...prev, level: e.target.value, group_id: '', class_name: '', topic_id: '', topic_name: '' }));
-                        setTopics([]);
-                      }}
-                    >
-                      <option value="">Choose level...</option>
-                      {levels.map(lvl => (
-                        <option key={lvl.key} value={lvl.key}>{lvl.key}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="tutor-form-group">
-                    <label className="tutor-form-label">
-                      Class <span className="tutor-required">*</span>
-                    </label>
-                    <select
-                      className="tutor-form-select"
-                      value={form.group_id}
-                      onChange={e => {
-                        const groupId = e.target.value;
-                        const classesForLevel = levels.find(l => l.key === form.level)?.classes || [];
-                        const matched = classesForLevel.find(c => (typeof c === 'string' ? c : c.id) === groupId);
-                        const className = matched ? (typeof matched === 'string' ? matched : matched.name) : '';
-                        setForm(prev => ({ ...prev, group_id: groupId, class_name: className, topic_id: '', topic_name: '' }));
-                        if (groupId) fetchTopics(groupId);
-                      }}
-                      disabled={!form.level}
-                    >
-                      <option value="">Choose class...</option>
-                      {(levels.find(l => l.key === form.level)?.classes || []).map(cls => {
-                        const val = typeof cls === 'string' ? cls : cls.id;
-                        const label = typeof cls === 'string' ? cls : cls.name;
-                        return <option key={val} value={val}>{label}</option>;
-                      })}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="tutor-form-group">
-                  <label className="tutor-form-label">
-                    Topic <span className="tutor-required">*</span>
-                  </label>
-                  <select
-                    className="tutor-form-select"
-                    value={form.topic_id}
-                    onChange={e => {
-                      const selected = topics.find(t => t.id === e.target.value);
-                      setForm(prev => ({
-                        ...prev,
-                        topic_id: e.target.value,
-                        topic_name: selected?.topic_name || '',
-                      }));
-                    }}
-                    disabled={!form.group_id || loadingTopics}
-                  >
-                    <option value="">
-                      {loadingTopics ? 'Loading topics...' : 'Choose topic...'}
-                    </option>
-                    {topics.map(t => (
-                      <option key={t.id} value={t.id}>
-                        {t.topic_name}{t.is_hard_topic ? ' (Hard Topic)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="tutor-form-row">
-                  <div className="tutor-form-group">
-                    <label className="tutor-form-label">
-                      Room Type <span className="tutor-required">*</span>
-                    </label>
-                    <select
-                      className="tutor-form-select"
-                      value={form.room_type}
-                      onChange={e => setForm(prev => ({ ...prev, room_type: e.target.value }))}
-                    >
-                      <option value="free">Free Discussion (Open Floor)</option>
-                      <option value="hard_topic">Hard Topic (Scheduled)</option>
-                      <option value="premium">Premium (Scheduled)</option>
-                    </select>
-                  </div>
-
+                <Select
+                  label="Topic"
+                  value={form.topic_id}
+                  onChange={(e) => {
+                    const selected = topics.find((t) => t.id === e.target.value);
+                    setForm((prev) => ({
+                      ...prev,
+                      topic_id: e.target.value,
+                      topic_name: selected?.topic_name || '',
+                    }));
+                  }}
+                  options={topics.map((t) => ({ value: t.id, label: t.topic_name }))}
+                  placeholder={loadingTopics ? 'Loading topics...' : 'Choose topic...'}
+                  disabled={!form.group_id || loadingTopics}
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                  <Select
+                    label="Room Type"
+                    value={form.room_type}
+                    onChange={(e) => setForm((prev) => ({ ...prev, room_type: e.target.value }))}
+                    options={[
+                      { value: 'free', label: 'Free Discussion' },
+                      { value: 'hard_topic', label: 'Hard Topic (Scheduled)' },
+                      { value: 'premium', label: 'Premium (Scheduled)' },
+                    ]}
+                  />
                   {(form.room_type === 'hard_topic' || form.room_type === 'premium') && (
-                    <div className="tutor-form-group">
-                      <label className="tutor-form-label">
-                        Schedule <span className="tutor-required">*</span>
-                      </label>
-                      <input
-                        type="datetime-local"
-                        className="tutor-form-input"
-                        value={form.scheduled_at}
-                        onChange={e => setForm(prev => ({ ...prev, scheduled_at: e.target.value }))}
-                      />
-                    </div>
+                    <Input
+                      label="Schedule"
+                      type="datetime-local"
+                      value={form.scheduled_at}
+                      onChange={(e) => setForm((prev) => ({ ...prev, scheduled_at: e.target.value }))}
+                    />
                   )}
                 </div>
-
                 {createError && (
-                  <div className="tutor-alert tutor-alert--error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
-                    <span>{createError}</span>
+                  <div className="alert alert-error" style={{ marginTop: 'var(--space-4)' }}>
+                    <Icon name="exclamation-triangle" /> {createError}
                   </div>
                 )}
-
-                <button
-                  className="tutor-btn tutor-btn-primary tutor-btn-full"
-                  onClick={handleCreateRoom}
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <>
-                      <i className="fa-solid fa-spinner fa-spin"></i> Creating Classroom...
-                    </>
-                  ) : (
-                    <>
-                      <i className="fa-solid fa-plus-circle"></i> Create Classroom
-                    </>
-                  )}
-                </button>
-              </div>
+                <div style={{ marginTop: 'var(--space-6)' }}>
+                  <Button onClick={handleCreateRoom} loading={submitting} icon="plus">
+                    Create Classroom
+                  </Button>
+                </div>
+              </Card>
             )}
 
-            <div className="tutor-rooms-section">
-              <div className="tutor-rooms-header">
-                <h3 className="tutor-rooms-title">
-                  <i className="fa-solid fa-broadcast-tower tutor-rooms-title-icon"></i>
-                  Your Active Classrooms
-                  {activeRooms.length > 0 && (
-                    <span className="tutor-rooms-count">{activeRooms.length}</span>
-                  )}
-                </h3>
-              </div>
+            <h3 style={{ marginBottom: 'var(--space-6)' }}>
+              <Icon name="users" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />
+              Your Active Classrooms ({activeRooms.length})
+            </h3>
 
-              {roomsError && (
-                <div className="tutor-alert tutor-alert--error">
-                  <i className="fa-solid fa-circle-exclamation"></i>
-                  <span>{roomsError}</span>
-                  <button className="tutor-btn tutor-btn-sm tutor-btn-secondary" onClick={fetchActiveRooms}>
-                    Retry
-                  </button>
-                </div>
-              )}
-
-              {!roomsError && activeRooms.length === 0 && (
-                <div className="tutor-rooms-empty">
-                  <div className="tutor-rooms-empty-icon">
-                    <i className="fa-solid fa-door-closed"></i>
-                  </div>
-                  <h4 className="tutor-rooms-empty-title">No Active Classrooms</h4>
-                  <p className="tutor-rooms-empty-text">
-                    You haven't created any classrooms yet. Click "Create Classroom" to get started.
-                  </p>
-                </div>
-              )}
-
-              {!roomsError && activeRooms.length > 0 && (
-                <div className="tutor-rooms-grid">
-                  {activeRooms.map(room => {
-                    const roomStatus = roomStatusIcons[room.status] || roomStatusIcons.upcoming;
-                    return (
-                      <div key={room.id} className={`tutor-room-card tutor-room-card--${room.status}`}>
-                        <div className="tutor-room-card-header">
-                          <div className={`tutor-room-status tutor-room-status--${room.status} ${roomStatus.className}`}>
-                            <i className={`fa-solid ${roomStatus.icon}`}></i>
-                            <span>{roomStatus.label}</span>
-                          </div>
-                          <span className="tutor-room-participants">
-                            <i className="fa-solid fa-user"></i> {room.participant_count || 0}
-                          </span>
-                        </div>
-
-                        <div className="tutor-room-card-body">
-                          <h4 className="tutor-room-title">{room.title}</h4>
-                          <div className="tutor-room-meta">
-                            <span>
-                              <i className="fa-solid fa-book tutor-room-meta-icon"></i> {room.topic_name}
-                            </span>
-                            <span>
-                              <i className="fa-solid fa-user-graduate tutor-room-meta-icon"></i> {room.class_name}
-                            </span>
-                          </div>
-                          {room.scheduled_at && (
-                            <div className="tutor-room-schedule">
-                              <i className="fa-solid fa-calendar tutor-room-schedule-icon"></i>
-                              <span>
-                                {new Date(room.scheduled_at).toLocaleString('en-US', {
-                                  weekday: 'short', month: 'short', day: 'numeric',
-                                  hour: '2-digit', minute: '2-digit',
-                                })}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="tutor-room-card-footer">
-                          <button
-                            className="tutor-btn tutor-btn-primary tutor-btn-sm"
-                            onClick={() => navigate(`/classroom/${room.id}`)}
-                          >
-                            <i className="fa-solid fa-door-open"></i> Enter Room
-                          </button>
-                          <button
-                            className="tutor-btn tutor-btn-danger tutor-btn-sm"
-                            onClick={() => handleEndRoom(room.id)}
-                          >
-                            <i className="fa-solid fa-stop-circle"></i> End
-                          </button>
-                        </div>
+            {activeRooms.length === 0 ? (
+              <EmptyState
+                icon="door-closed"
+                title="No Active Classrooms"
+                description="You haven't created any classrooms yet."
+              />
+            ) : (
+              <div className="grid grid-cols-3">
+                {activeRooms.map((room) => {
+                  const statusIconMap = {
+                    live: 'circle',
+                    open_floor: 'users',
+                    upcoming: 'clock',
+                  };
+                  const statusLabelMap = {
+                    live: 'Live',
+                    open_floor: 'Open Floor',
+                    upcoming: 'Upcoming',
+                  };
+                  return (
+                    <Card key={room.id}>
+                      <div style={{ padding: 'var(--space-3) var(--space-4)', background: room.status === 'live' ? 'var(--success)' : room.status === 'open_floor' ? 'var(--primary)' : 'var(--warning)', color: '#fff', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                        <Icon name={statusIconMap[room.status] || 'circle'} />
+                        <span style={{ fontSize: 'var(--text-xs)', fontWeight: 600 }}>
+                          {statusLabelMap[room.status] || room.status}
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                      <div className="card-body">
+                        <h4 className="card-title">{room.title}</h4>
+                        <p className="card-text">{room.topic_name} · {room.class_name}</p>
+                        {room.participant_count > 0 && (
+                          <p className="card-text">
+                            <Icon name="users" style={{ marginRight: 'var(--space-1)' }} />
+                            {room.participant_count} participants
+                          </p>
+                        )}
+                      </div>
+                      <div className="card-footer" style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                        <Button size="sm" onClick={() => navigate(`/classroom/${room.id}`)} icon="door-open">
+                          Enter
+                        </Button>
+                        <Button size="sm" variant="danger" onClick={() => handleEndRoom(room.id)} icon="stop">
+                          End
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
