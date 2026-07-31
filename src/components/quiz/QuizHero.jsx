@@ -1,10 +1,10 @@
-/* features/quiz/QuizHero.jsx */
+ /* features/quiz/QuizHero.jsx */
 import { useEffect, useState } from 'react';
 import { getPlatformStats } from '../../api/client';
 import Icon from '../../components/Icon/Icon';
 import Skeleton from '../../components/Skeleton/Skeleton';
 
-export default function QuizHero({ level, className }) {
+export default function QuizHero({ level, class_name }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +24,7 @@ export default function QuizHero({ level, className }) {
   }
 
   const levelName = level?.display_name || level?.id || '';
-  const classLabel = className || '';
+  const classLabel = class_name || '';
 
   return (
     <section className="section reveal" style={{ paddingTop: 0 }}>
@@ -37,12 +37,16 @@ export default function QuizHero({ level, className }) {
         }}
       >
         <h1 style={{ marginBottom: 'var(--space-4)' }}>
-          {levelName ? `Master ${levelName}` : 'Master Biology and Pharmacy'}
-          {classLabel && <span style={{ display: 'block', fontSize: 'var(--text-xl)', fontWeight: 400, marginTop: 'var(--space-2)' }}>{classLabel}</span>}
+          {levelName ? `Master ${levelName}` : 'Master Your Studies'}
+          {classLabel && (
+            <span style={{ display: 'block', fontSize: 'var(--text-xl)', fontWeight: 400, marginTop: 'var(--space-2)' }}>
+              {classLabel}
+            </span>
+          )}
         </h1>
         <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-8)' }}>
           {levelName
-            ? `Build your knowledge in ${levelName}, track progress, and master every topic.`
+            ? `Build your knowledge in ${levelName}${classLabel ? ` (${classLabel})` : ''}, track progress, and master every topic.`
             : 'Build scientific knowledge, track progress, earn achievements, and master every topic.'}
         </p>
         <div className="grid grid-cols-4" style={{ gap: 'var(--space-4)' }}>
@@ -70,4 +74,4 @@ export default function QuizHero({ level, className }) {
       </div>
     </section>
   );
-} 
+}
