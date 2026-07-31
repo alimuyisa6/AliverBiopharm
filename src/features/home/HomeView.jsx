@@ -11,6 +11,7 @@ import { ContactSection } from '../contact/ContactSection';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
 import Hero from '../../components/Hero/Hero';
+import { useLayout } from '../../contexts/LayoutContext';
 
 const CONTENT_TYPES = [
   { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes' },
