@@ -1,39 +1,38 @@
- import React from 'react';
+ /* features/home/ContinueLearningSection.jsx */
 import { Link } from 'react-router-dom';
+import Icon from '../../components/Icon/Icon';
 
 export function ContinueLearningSection({ continueLearning, user, streak }) {
   if (!user) return null;
-
-  const views = Array.isArray(continueLearning) ? continueLearning : [];
-  const hasContent = views.length > 0 || streak > 0;
-  if (!hasContent) return null;
+  const items = Array.isArray(continueLearning) ? continueLearning : [];
+  if (!items.length && !streak) return null;
 
   return (
-    <section id="continue-learning" className="section reveal">
+    <section className="section reveal">
       <span className="sec-label">Your Journey</span>
       <h2 className="section-title">Pick Up Where You Left Off</h2>
-      <p className="section-subtitle">Your recent activity and saved resources, ready when you are.</p>
-      <div className="continue-learning-grid">
+      <p className="section-subtitle">Your recent activity, ready when you are.</p>
+      <div className="grid grid-cols-3">
         {streak > 0 && (
-          <div className="continue-card">
-            <i className="fa-solid fa-fire continue-streak-icon" />
-            <strong>{streak}-Day Streak</strong>
-            <p>Keep it up!</p>
+          <div className="stat-card">
+            <Icon name="fire" className="stat-icon" style={{ color: 'var(--warm)' }} />
+            <div className="stat-value">{streak}</div>
+            <div className="stat-label">Day Streak</div>
           </div>
         )}
-        {views.length > 0 && (
-          <div className="continue-card">
-            <strong>Recent Views</strong>
-            <ul className="continue-list">
-              {views.filter(Boolean).map(v => (
-                <li key={v.note_id}>
-                  <Link to={`/notes/read?id=${v.note_id}`} className="continue-link">{v.title}</Link>
-                  {v.topic && <span className="continue-topic"> · {v.topic}</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {items.slice(0, 2).map((item) => (
+          <Link key={item.note_id} to={`/notes/read?id=${item.note_id}`} className="card" style={{ textDecoration: 'none' }}>
+            <div className="card-body">
+              <h4 className="card-title">{item.title}</h4>
+              <p className="card-text">{item.topic}</p>
+            </div>
+            <div style={{ padding: '0 var(--space-6) var(--space-6)' }}>
+              <div className="progress-track">
+                <div className="progress-fill progress-primary" style={{ width: `${item.progress_percentage}%` }} />
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   );
