@@ -1,5 +1,4 @@
- /* features/home/HomeView.jsx */
-import { Link } from 'react-router-dom';
+ import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import { PlatformCards } from './PlatformCards';
 import { StatsGrid } from './StatsGrid';
@@ -22,20 +21,11 @@ const CONTENT_TYPES = [
   { key: 'recall', label: 'Recall', description: 'Spaced-repetition for long-term memory', icon: 'brain', route: '/recall' },
 ];
 
- function ContentTypeCards({ navigate, user, sections }) {
+function ContentTypeCards({ navigate, user, sections }) {
   const { bootstrap } = useLayout();
   const uiComponents = bootstrap?.ui_components || [];
 
-  const CONTENT_TYPES = [
-    { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes' },
-    { key: 'flashcards', label: 'Flashcards', description: 'Active recall with flip, typed, and MCQ modes', icon: 'layer-group', route: '/flashcards' },
-    { key: 'pdfs', label: 'PDF Library', description: 'Downloadable guides and reference sheets', icon: 'file-pdf', route: '/pdfs' },
-    { key: 'quizzes', label: 'Quizzes', description: 'Block-by-block testing across every unit', icon: 'clipboard-check', route: '/quiz' },
-    { key: 'past_papers', label: 'Past Papers', description: 'Real exam papers by year and board', icon: 'file-lines', route: '/past-papers' },
-    { key: 'recall', label: 'Recall', description: 'Spaced-repetition for long-term memory', icon: 'brain', route: '/recall' },
-  ];
-
-  function getImageForKey(key) {
+  function getImage(key) {
     const comp = uiComponents.find(c => c.component_key === `content_type_${key}`);
     return comp?.properties?.image_url || null;
   }
@@ -51,7 +41,7 @@ const CONTENT_TYPES = [
       </p>
       <div className="grid grid-cols-3">
         {CONTENT_TYPES.map((type) => {
-          const imageUrl = getImageForKey(type.key);
+          const imageUrl = getImage(type.key);
           return (
             <button
               key={type.key}
@@ -78,7 +68,7 @@ const CONTENT_TYPES = [
       </div>
     </section>
   );
-             }
+}
 
 export default function HomeView(props) {
   const {
