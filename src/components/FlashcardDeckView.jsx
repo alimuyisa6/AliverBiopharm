@@ -1,4 +1,5 @@
- import React, { useState, useEffect } from 'react';
+ /* components/FlashcardDeckView.jsx */
+import { useState, useEffect } from 'react';
 import {
   getFlashcardDeck,
   toggleFlashcardKnown,
@@ -8,12 +9,17 @@ import {
   startFlashcardSession,
   updateFlashcardSession,
 } from '../api/cachedClient';
+import Icon from './Icon/Icon';
+import Button from './Button/Button';
+import ProgressBar from './ProgressBar/ProgressBar';
+import Spinner from './Spinner/Spinner';
+import { useToast } from './Toast/Toast';
 
 const MODES = [
-  { value: 'flip', icon: 'fa-rotate', label: 'Flip' },
-  { value: 'typed', icon: 'fa-keyboard', label: 'Typed' },
-  { value: 'multiple_choice', icon: 'fa-list-check', label: 'MCQ' },
-  { value: 'structure_identification', icon: 'fa-microscope', label: 'Structure' },
+  { value: 'flip', icon: 'rotate', label: 'Flip' },
+  { value: 'typed', icon: 'keyboard', label: 'Typed' },
+  { value: 'multiple_choice', icon: 'list-check', label: 'MCQ' },
+  { value: 'structure_identification', icon: 'microscope', label: 'Structure' },
 ];
 
 export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode: initialMode = 'flip', onComplete }) {
@@ -30,18 +36,17 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
   const [mcAnswered, setMcAnswered] = useState(null);
   const [structureTab, setStructureTab] = useState('name');
   const [loading, setLoading] = useState(true);
+  const addToast = useToast();
 
   const card = cards[index] || null;
 
-  useEffect(() => {
-    loadDeck();
-  }, [deckMeta.id]);
+  useEffect(() => { loadDeck(); }, [deckMeta.id]);
 
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'ArrowRight') handleNext();
       if (e.key === 'ArrowLeft') handlePrev();
-      if (e.key === ' ') { e.preventDefault(); setFlipped(f => !f); }
+      if (e.key === ' ') { e.preventDefault(); setFlipped((f) => !f); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -55,7 +60,9 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
       setCards(data.cards || []);
       const sid = await startFlashcardSession(deckMeta.id, mode);
       setSessionId(sid?.session_id || null);
-    } catch {}
+    } catch {
+      addToast('Failed to load deck', 'error');
+    }
     setLoading(false);
   }
 
@@ -69,13 +76,13 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
 
   function handleNext() {
     if (index >= cards.length - 1) return;
-    setIndex(i => i + 1);
+    setIndex((i) => i + 1);
     resetCard();
   }
 
   function handlePrev() {
     if (index <= 0) return;
-    setIndex(i => i - 1);
+    setIndex((i) => i - 1);
     resetCard();
   }
 
@@ -83,7 +90,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
     if (!card) return;
     try {
       await toggleFlashcardKnown(card.id);
-      setKnown(prev => {
+      setKnown((prev) => {
         const next = new Set(prev);
         next.has(card.id) ? next.delete(card.id) : next.add(card.id);
         return next;
@@ -95,7 +102,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
     if (!card) return;
     try {
       await toggleFlashcardBookmark(card.id);
-      setBookmarked(prev => {
+      setBookmarked((prev) => {
         const next = new Set(prev);
         next.has(card.id) ? next.delete(card.id) : next.add(card.id);
         return next;
@@ -105,7 +112,9 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
 
   async function handleRate(difficulty) {
     if (!card) return;
-    try { await rateFlashcard(card.id, difficulty); } catch {}
+    try {
+      await rateFlashcard(card.id, difficulty);
+    } catch {}
   }
 
   async function handleCheckTyped(checkType = 'answer') {
@@ -123,7 +132,11 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
     if (!card || mcAnswered !== null) return;
     const correct = optionIndex === card.mc_correct_index;
     setMcAnswered(optionIndex);
-    setFeedback({ correct, strength: correct ? 'excellent' : 'incorrect', correct_answer: card.mc_options?.[card.mc_correct_index] });
+    setFeedback({
+      correct,
+      strength: correct ? 'excellent' : 'incorrect',
+      correct_answer: card.mc_options?.[card.mc_correct_index],
+    });
     if (sessionId) {
       await updateFlashcardSession(sessionId, card.id, correct, index).catch(() => {});
     }
@@ -140,45 +153,22 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
     window.speechSynthesis.speak(utt);
   }
 
-  function feedbackClass(strength) {
-    if (strength === 'excellent') return 'fc-feedback-excellent';
-    if (strength === 'strong') return 'fc-feedback-strong';
-    if (strength === 'partial') return 'fc-feedback-partial';
-    return 'fc-feedback-incorrect';
-  }
-
-  function feedbackIcon(strength) {
-    if (strength === 'excellent') return 'fa-circle-check';
-    if (strength === 'strong') return 'fa-check';
-    if (strength === 'partial') return 'fa-circle-exclamation';
-    return 'fa-circle-xmark';
-  }
-
   if (loading) {
     return (
-      <div className="fc-page">
-        <div className="fc-page-inner">
-          <div className="fc-loading">
-            <div className="fc-spinner"></div>
-            Loading deck…
-          </div>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Spinner size="lg" />
       </div>
     );
   }
 
   if (!card) {
     return (
-      <div className="fc-page">
-        <div className="fc-page-inner">
-          <div className="fc-empty">
-            <i className="fa-solid fa-layer-group"></i>
-            No cards in this deck yet.
-          </div>
-          <button className="fc-btn-ghost" onClick={() => onComplete({ sessionId, total: 0 })}>
-            <i className="fa-solid fa-arrow-left"></i> Back
-          </button>
-        </div>
+      <div className="section" style={{ textAlign: 'center' }}>
+        <Icon name="layer-group" style={{ fontSize: '3rem', color: 'var(--text-muted)', marginBottom: 'var(--space-4)' }} />
+        <p>No cards in this deck yet.</p>
+        <Button variant="ghost" onClick={() => onComplete({ sessionId, total: 0 })} icon="arrow-left">
+          Back
+        </Button>
       </div>
     );
   }
@@ -188,253 +178,212 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
   const isLast = index === cards.length - 1;
 
   return (
-    <div className="fc-page">
-      <div className="fc-page-inner">
-        <div className="fc-progress-track">
-          <div className="fc-progress-fill" style={{ width: `${((index + 1) / cards.length) * 100}%` }} />
+    <div className="flashcard-deck-view">
+      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+        <div style={{ marginBottom: 'var(--space-6)' }}>
+          <ProgressBar value={index + 1} max={cards.length} variant="gradient" />
         </div>
 
-        <div className="fc-mode-bar">
-          {MODES.map(m => (
-            <button
+        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-6)', flexWrap: 'wrap' }}>
+          {MODES.map((m) => (
+            <Button
               key={m.value}
-              className={`fc-mode-btn ${mode === m.value ? 'fc-active' : ''}`}
+              variant={mode === m.value ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => { setMode(m.value); resetCard(); }}
+              icon={m.icon}
             >
-              <i className={`fa-solid ${m.icon}`}></i>
-              <span>{m.label}</span>
-            </button>
+              {m.label}
+            </Button>
           ))}
         </div>
 
-        <div className="fc-study-wrap">
-          <div className="fc-card-counter">
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
             {index + 1} / {cards.length}
-            {deck?.title && <span className="fc-deck-title">{deck.title}</span>}
-          </div>
-
-          {mode === 'flip' && (
-            <div className="fc-flip-scene" onClick={() => setFlipped(f => !f)}>
-              <div className={`fc-flip-card ${flipped ? 'fc-flipped' : ''}`}>
-                <div className="fc-card-face fc-card-front">
-                  <span className="fc-card-tag">Question</span>
-                  <button className="fc-speak-btn" onClick={e => { e.stopPropagation(); speakText(card.front_text); }}>
-                    <i className="fa-solid fa-volume-high"></i>
-                  </button>
-                  {card.image_url && <img src={card.image_url} alt="" className="fc-card-image" />}
-                  <p className="fc-card-question">{card.front_text}</p>
-                  <span className="fc-card-hint"><i className="fa-regular fa-hand-pointer"></i> Tap to flip</span>
-                </div>
-                <div className="fc-card-face fc-card-back">
-                  <span className="fc-card-tag">Answer</span>
-                  <button className="fc-speak-btn" onClick={e => { e.stopPropagation(); speakText(card.back_text); }}>
-                    <i className="fa-solid fa-volume-high"></i>
-                  </button>
-                  <p className="fc-card-answer">{card.back_text}</p>
-                </div>
-              </div>
-            </div>
+          </span>
+          {deck?.title && (
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>{deck.title}</span>
           )}
+        </div>
 
-          {mode === 'typed' && (
-            <>
-              <div className="fc-flip-scene">
-                <div className="fc-card-face fc-card-front">
-                  <span className="fc-card-tag">Question</span>
-                  <button className="fc-speak-btn" onClick={() => speakText(card.front_text)}>
-                    <i className="fa-solid fa-volume-high"></i>
-                  </button>
-                  {card.image_url && <img src={card.image_url} alt="" className="fc-card-image" />}
-                  <p className="fc-card-question">{card.front_text}</p>
-                </div>
+        {mode === 'flip' && (
+          <div className="card" style={{ padding: 'var(--space-8)', textAlign: 'center', cursor: 'pointer' }} onClick={() => setFlipped((f) => !f)}>
+            {!flipped ? (
+              <div>
+                <span className="chip" style={{ marginBottom: 'var(--space-4)' }}>Question</span>
+                <h3 style={{ marginBottom: 'var(--space-4)' }}>{card.front_text}</h3>
+                {card.image_url && <img src={card.image_url} alt="" style={{ maxWidth: 200, margin: '0 auto' }} />}
+                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
+                  <Icon name="hand" /> Tap to flip
+                </p>
               </div>
-              <div className="fc-typed-wrap">
-                <input
-                  className="fc-typed-input"
-                  placeholder="Type your answer…"
-                  value={typedAnswer}
-                  onChange={e => setTypedAnswer(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleCheckTyped(); }}
-                  disabled={!!feedback}
-                />
-                {!feedback && (
-                  <button
-                    className="fc-btn-primary"
-                    onClick={() => handleCheckTyped()}
-                    disabled={!typedAnswer.trim()}
-                  >
-                    <i className="fa-solid fa-check"></i> Check
-                  </button>
-                )}
-                {feedback && (
-                  <div className={`fc-feedback ${feedbackClass(feedback.strength)}`}>
-                    <i className={`fa-solid ${feedbackIcon(feedback.strength)}`}></i>
-                    <span>
-                      {feedback.strength === 'excellent' && 'Perfect! '}
-                      {feedback.strength === 'strong' && 'Close! '}
-                      {feedback.strength === 'partial' && 'Partially correct. '}
-                      {feedback.strength === 'incorrect' && 'Not quite. '}
-                      Correct answer: <strong>{feedback.correct_answer}</strong>
-                      {feedback.explanation && <span> — {feedback.explanation}</span>}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          {mode === 'multiple_choice' && (
-            <>
-              <div className="fc-flip-scene">
-                <div className="fc-card-face fc-card-front">
-                  <span className="fc-card-tag">Question</span>
-                  <p className="fc-card-question">{card.front_text}</p>
-                </div>
-              </div>
-              {(card.mc_options?.length > 0) ? (
-                <div className="fc-mc-grid">
-                  {card.mc_options.map((opt, i) => {
-                    let cls = 'fc-mc-btn';
-                    if (mcAnswered !== null) {
-                      if (i === card.mc_correct_index) cls += ' fc-mc-correct';
-                      else if (i === mcAnswered) cls += ' fc-mc-wrong';
-                    }
-                    return (
-                      <button key={i} className={cls} onClick={() => handleMCSelect(i)} disabled={mcAnswered !== null}>
-                        <span className="fc-mc-letter">{String.fromCharCode(65 + i)}</span>
-                        {opt}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="fc-empty">
-                  <i className="fa-solid fa-list-check"></i>
-                  No MCQ options for this card.
-                </div>
-              )}
-              {feedback && (
-                <div className={`fc-feedback ${feedbackClass(feedback.strength)}`}>
-                  <i className={`fa-solid ${feedbackIcon(feedback.strength)}`}></i>
-                  <span>
-                    {feedback.correct ? 'Correct! ' : `Incorrect. Answer: `}
-                    <strong>{feedback.correct_answer}</strong>
-                  </span>
-                </div>
-              )}
-            </>
-          )}
-
-          {mode === 'structure_identification' && (
-            <>
-              <div className="fc-flip-scene">
-                <div className="fc-card-face fc-card-front">
-                  <span className="fc-card-tag">Structure</span>
-                  {card.image_url ? (
-                    <img src={card.image_url} alt={card.structure_name || 'Structure'} className="fc-card-image" />
-                  ) : (
-                    <div className="fc-card-placeholder">
-                      <i className="fa-solid fa-image"></i>
-                      <span>{card.structure_name || 'Image coming soon'}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="fc-structure-tabs">
-                <button
-                  className={`fc-structure-tab ${structureTab === 'name' ? 'fc-active' : ''}`}
-                  onClick={() => setStructureTab('name')}
-                >
-                  <i className="fa-solid fa-tag"></i> Name
-                </button>
-                <button
-                  className={`fc-structure-tab ${structureTab === 'function' ? 'fc-active' : ''}`}
-                  onClick={() => setStructureTab('function')}
-                >
-                  <i className="fa-solid fa-gear"></i> Function
-                </button>
-              </div>
-
-              <div className="fc-typed-wrap">
-                <input
-                  className="fc-typed-input"
-                  placeholder={structureTab === 'name' ? 'What is this structure called?' : 'What is its function?'}
-                  value={typedAnswer}
-                  onChange={e => setTypedAnswer(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleCheckTyped(structureTab); }}
-                  disabled={!!feedback}
-                />
-                {!feedback && (
-                  <button
-                    className="fc-btn-primary"
-                    onClick={() => handleCheckTyped(structureTab)}
-                    disabled={!typedAnswer.trim()}
-                  >
-                    <i className="fa-solid fa-check"></i> Check
-                  </button>
-                )}
-                {feedback && (
-                  <div className={`fc-feedback ${feedbackClass(feedback.strength)}`}>
-                    <i className={`fa-solid ${feedbackIcon(feedback.strength)}`}></i>
-                    <span>
-                      {feedback.strength === 'excellent' && 'Excellent! '}
-                      {feedback.strength === 'strong' && 'Close! '}
-                      {feedback.strength === 'partial' && 'Partially correct. '}
-                      {feedback.strength === 'incorrect' && 'Not quite. '}
-                      {structureTab === 'name'
-                        ? <>Structure: <strong>{feedback.correct_answer || card.structure_name}</strong></>
-                        : <>Function: <strong>{feedback.correct_answer}</strong></>}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          <div className="fc-difficulty-row">
-            <button className="fc-diff-btn fc-diff-easy" onClick={() => handleRate('easy')}>Easy</button>
-            <button className="fc-diff-btn fc-diff-medium" onClick={() => handleRate('medium')}>Medium</button>
-            <button className="fc-diff-btn fc-diff-hard" onClick={() => handleRate('hard')}>Hard</button>
-          </div>
-
-          <div className="fc-card-actions">
-            <button
-              className={`fc-action-btn ${isKnown ? 'fc-known' : ''}`}
-              onClick={handleToggleKnown}
-            >
-              <i className={`fa-${isKnown ? 'solid' : 'regular'} fa-circle-check`}></i>
-              {isKnown ? 'Known' : 'Mark Known'}
-            </button>
-            <button
-              className={`fc-action-btn ${isBookmarked ? 'fc-bookmarked' : ''}`}
-              onClick={handleToggleBookmark}
-            >
-              <i className={`fa-${isBookmarked ? 'solid' : 'regular'} fa-bookmark`}></i>
-              {isBookmarked ? 'Saved' : 'Save'}
-            </button>
-          </div>
-
-          <div className="fc-nav-row">
-            <button className="fc-nav-btn" onClick={handlePrev} disabled={index === 0}>
-              <i className="fa-solid fa-arrow-left"></i>
-            </button>
-
-            {isLast ? (
-              <button className="fc-btn-primary" onClick={handleFinish}>
-                Finish <i className="fa-solid fa-flag-checkered"></i>
-              </button>
             ) : (
-              <button className="fc-nav-btn" onClick={handleNext}>
-                <i className="fa-solid fa-arrow-right"></i>
-              </button>
+              <div>
+                <span className="chip" style={{ marginBottom: 'var(--space-4)', background: 'var(--success-light)', color: 'var(--success)' }}>Answer</span>
+                <h3 style={{ marginBottom: 'var(--space-4)' }}>{card.back_text}</h3>
+                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); speakText(card.back_text); }} icon="volume-high" />
+              </div>
             )}
           </div>
+        )}
 
-          <p className="fc-keyboard-hint">
-            <i className="fa-regular fa-keyboard"></i> ← → navigate · Space flip
-          </p>
+        {mode === 'typed' && (
+          <div>
+            <div className="card" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
+              <span className="chip" style={{ marginBottom: 'var(--space-4)' }}>Question</span>
+              <h3>{card.front_text}</h3>
+              {card.image_url && <img src={card.image_url} alt="" style={{ maxWidth: 200, marginTop: 'var(--space-4)' }} />}
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+              <input
+                className="form-input"
+                placeholder="Type your answer..."
+                value={typedAnswer}
+                onChange={(e) => setTypedAnswer(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleCheckTyped(); }}
+                disabled={!!feedback}
+                style={{ flex: 1 }}
+              />
+              {!feedback && (
+                <Button onClick={() => handleCheckTyped()} disabled={!typedAnswer.trim()} icon="check">
+                  Check
+                </Button>
+              )}
+            </div>
+            {feedback && (
+              <div className={`alert ${feedback.correct ? 'alert-success' : 'alert-error'}`}>
+                <Icon name={feedback.correct ? 'circle-check' : 'circle-xmark'} />
+                <span>
+                  {feedback.correct ? 'Correct! ' : 'Incorrect. '}
+                  Correct answer: <strong>{feedback.correct_answer}</strong>
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {mode === 'multiple_choice' && (
+          <div>
+            <div className="card" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
+              <span className="chip" style={{ marginBottom: 'var(--space-4)' }}>Question</span>
+              <h3>{card.front_text}</h3>
+            </div>
+            {card.mc_options?.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+                {card.mc_options.map((opt, i) => {
+                  let variant = 'secondary';
+                  if (mcAnswered !== null) {
+                    if (i === card.mc_correct_index) variant = 'primary';
+                    else if (i === mcAnswered) variant = 'danger';
+                  }
+                  return (
+                    <Button
+                      key={i}
+                      variant={variant}
+                      onClick={() => handleMCSelect(i)}
+                      disabled={mcAnswered !== null}
+                      style={{ justifyContent: 'flex-start' }}
+                    >
+                      <span style={{ fontWeight: 700, marginRight: 'var(--space-3)' }}>{String.fromCharCode(65 + i)}</span>
+                      {opt}
+                    </Button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-muted)' }}>No MCQ options for this card.</p>
+            )}
+            {feedback && (
+              <div className={`alert ${feedback.correct ? 'alert-success' : 'alert-error'}`}>
+                <Icon name={feedback.correct ? 'circle-check' : 'circle-xmark'} />
+                <span>
+                  {feedback.correct ? 'Correct! ' : `Incorrect. Answer: `}
+                  <strong>{feedback.correct_answer}</strong>
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {mode === 'structure_identification' && (
+          <div>
+            <div className="card" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
+              <span className="chip" style={{ marginBottom: 'var(--space-4)' }}>Structure</span>
+              {card.image_url ? (
+                <img src={card.image_url} alt={card.structure_name || 'Structure'} style={{ maxWidth: 300, margin: '0 auto' }} />
+              ) : (
+                <div style={{ padding: 'var(--space-10)', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <Icon name="image" style={{ fontSize: '3rem', marginBottom: 'var(--space-4)' }} />
+                  <p>{card.structure_name || 'Image coming soon'}</p>
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+              <Button variant={structureTab === 'name' ? 'primary' : 'ghost'} size="sm" onClick={() => setStructureTab('name')} icon="tag">
+                Name
+              </Button>
+              <Button variant={structureTab === 'function' ? 'primary' : 'ghost'} size="sm" onClick={() => setStructureTab('function')} icon="gear">
+                Function
+              </Button>
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+              <input
+                className="form-input"
+                placeholder={structureTab === 'name' ? 'What is this structure called?' : 'What is its function?'}
+                value={typedAnswer}
+                onChange={(e) => setTypedAnswer(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleCheckTyped(structureTab); }}
+                disabled={!!feedback}
+                style={{ flex: 1 }}
+              />
+              {!feedback && (
+                <Button onClick={() => handleCheckTyped(structureTab)} disabled={!typedAnswer.trim()} icon="check">
+                  Check
+                </Button>
+              )}
+            </div>
+            {feedback && (
+              <div className={`alert ${feedback.correct ? 'alert-success' : 'alert-error'}`}>
+                <Icon name={feedback.correct ? 'circle-check' : 'circle-xmark'} />
+                <span>
+                  {feedback.correct ? 'Correct! ' : 'Not quite. '}
+                  {structureTab === 'name'
+                    ? <>Structure: <strong>{feedback.correct_answer || card.structure_name}</strong></>
+                    : <>Function: <strong>{feedback.correct_answer}</strong></>}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 'var(--space-2)', justifyContent: 'center', marginTop: 'var(--space-6)' }}>
+          <Button variant="ghost" size="sm" onClick={() => handleRate('easy')}>Easy</Button>
+          <Button variant="ghost" size="sm" onClick={() => handleRate('medium')}>Medium</Button>
+          <Button variant="ghost" size="sm" onClick={() => handleRate('hard')}>Hard</Button>
         </div>
+
+        <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center', marginTop: 'var(--space-6)' }}>
+          <Button variant={isKnown ? 'primary' : 'ghost'} size="sm" onClick={handleToggleKnown} icon={isKnown ? 'circle-check' : 'circle'}>
+            {isKnown ? 'Known' : 'Mark Known'}
+          </Button>
+          <Button variant={isBookmarked ? 'warm' : 'ghost'} size="sm" onClick={handleToggleBookmark} icon={isBookmarked ? 'bookmark' : 'bookmark'}>
+            {isBookmarked ? 'Saved' : 'Save'}
+          </Button>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--space-8)' }}>
+          <Button variant="secondary" onClick={handlePrev} disabled={index === 0} icon="arrow-left" />
+          {isLast ? (
+            <Button onClick={handleFinish} icon="flag-checkered">Finish</Button>
+          ) : (
+            <Button onClick={handleNext} icon="arrow-right" />
+          )}
+        </div>
+
+        <p style={{ textAlign: 'center', marginTop: 'var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+          <Icon name="keyboard" /> Arrow keys navigate · Space flips
+        </p>
       </div>
     </div>
   );
