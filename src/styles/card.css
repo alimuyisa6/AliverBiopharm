@@ -220,3 +220,62 @@ body.dark-mode .card-emerald {
     flex-direction: column;
   }
 }
+
+.newsletter-input {
+  flex: 1;
+}
+
+.newsletter-status {
+  margin-top: var(--space-3);
+}
+
+/* Mood check */
+.mood-card {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.mood-emoji-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.mood-emoji-btn {
+  font-size: 1.5rem;
+}
+
+.mood-textarea {
+  margin-bottom: var(--space-4);
+}
+
+.mood-success {
+  color: var(--success);
+  font-weight: var(--weight-semibold);
+}
+
+/* Contact section grid */
+.contact-grid {
+  align-items: start;
+}
+
+/* Home level banner */
+.home-level-banner {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-4);
+}
+
+.home-level-banner-inner {
+  text-align: center;
+}
+
+.home-level-title {
+  font-size: var(--text-3xl);
+}
+
+.home-level-subtitle {
+  margin-bottom: 0;
+}
