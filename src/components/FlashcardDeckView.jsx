@@ -22,6 +22,13 @@ const MODES = [
   { value: 'structure_identification', icon: 'microscope', label: 'Structure' },
 ];
 
+const MODE_CARD_COLOR = {
+  flip: 'card-blue',
+  typed: 'card-teal',
+  multiple_choice: 'card-violet',
+  structure_identification: 'card-amber',
+};
+
 export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode: initialMode = 'flip', onComplete }) {
   const [deck, setDeck] = useState(null);
   const [cards, setCards] = useState([]);
@@ -155,7 +162,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div className="fcd-loading-wrap">
         <Spinner size="lg" />
       </div>
     );
@@ -163,8 +170,8 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
 
   if (!card) {
     return (
-      <div className="section" style={{ textAlign: 'center' }}>
-        <Icon name="layer-group" style={{ fontSize: '3rem', color: 'var(--text-muted)', marginBottom: 'var(--space-4)' }} />
+      <div className="section fcd-empty">
+        <Icon name="layer-group" className="fcd-empty-icon" />
         <p>No cards in this deck yet.</p>
         <Button variant="ghost" onClick={() => onComplete({ sessionId, total: 0 })} icon="arrow-left">
           Back
@@ -176,15 +183,16 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
   const isKnown = known.has(card.id);
   const isBookmarked = bookmarked.has(card.id);
   const isLast = index === cards.length - 1;
+  const cardColor = MODE_CARD_COLOR[mode] || 'card-blue';
 
   return (
     <div className="flashcard-deck-view">
-      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
-        <div style={{ marginBottom: 'var(--space-6)' }}>
+      <div className="section fcd-section">
+        <div className="fcd-progress-row">
           <ProgressBar value={index + 1} max={cards.length} variant="gradient" />
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-6)', flexWrap: 'wrap' }}>
+        <div className="fcd-mode-row">
           {MODES.map((m) => (
             <Button
               key={m.value}
@@ -198,30 +206,24 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
           ))}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
-          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
-            {index + 1} / {cards.length}
-          </span>
-          {deck?.title && (
-            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>{deck.title}</span>
-          )}
+        <div className="fcd-meta-row">
+          <span className="fcd-meta-index">{index + 1} / {cards.length}</span>
+          {deck?.title && <span className="fcd-meta-title">{deck.title}</span>}
         </div>
 
         {mode === 'flip' && (
-          <div className="card" style={{ padding: 'var(--space-8)', textAlign: 'center', cursor: 'pointer' }} onClick={() => setFlipped((f) => !f)}>
+          <div className={`card ${cardColor} fcd-question-card is-flip`} onClick={() => setFlipped((f) => !f)}>
             {!flipped ? (
               <div>
-                <span className="chip" style={{ marginBottom: 'var(--space-4)' }}>Question</span>
-                <h3 style={{ marginBottom: 'var(--space-4)' }}>{card.front_text}</h3>
-                {card.image_url && <img src={card.image_url} alt="" style={{ maxWidth: 200, margin: '0 auto' }} />}
-                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
-                  <Icon name="hand" /> Tap to flip
-                </p>
+                <span className="chip fcd-answer-chip">Question</span>
+                <h3 className="fcd-card-heading">{card.front_text}</h3>
+                {card.image_url && <img src={card.image_url} alt="" className="fcd-card-image" />}
+                <p className="fcd-tap-hint"><Icon name="hand" /> Tap to flip</p>
               </div>
             ) : (
               <div>
-                <span className="chip" style={{ marginBottom: 'var(--space-4)', background: 'var(--success-light)', color: 'var(--success)' }}>Answer</span>
-                <h3 style={{ marginBottom: 'var(--space-4)' }}>{card.back_text}</h3>
+                <span className="chip fcd-answer-chip is-correct">Answer</span>
+                <h3 className="fcd-card-heading">{card.back_text}</h3>
                 <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); speakText(card.back_text); }} icon="volume-high" />
               </div>
             )}
@@ -230,12 +232,12 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
 
         {mode === 'typed' && (
           <div>
-            <div className="card" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
-              <span className="chip" style={{ marginBottom: 'var(--space-4)' }}>Question</span>
+            <div className={`card ${cardColor} fcd-question-card-static`}>
+              <span className="chip fcd-answer-chip">Question</span>
               <h3>{card.front_text}</h3>
-              {card.image_url && <img src={card.image_url} alt="" style={{ maxWidth: 200, marginTop: 'var(--space-4)' }} />}
+              {card.image_url && <img src={card.image_url} alt="" className="fcd-card-image" />}
             </div>
-            <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+            <div className="fcd-input-row">
               <input
                 className="form-input"
                 placeholder="Type your answer..."
@@ -243,7 +245,6 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                 onChange={(e) => setTypedAnswer(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleCheckTyped(); }}
                 disabled={!!feedback}
-                style={{ flex: 1 }}
               />
               {!feedback && (
                 <Button onClick={() => handleCheckTyped()} disabled={!typedAnswer.trim()} icon="check">
@@ -265,12 +266,12 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
 
         {mode === 'multiple_choice' && (
           <div>
-            <div className="card" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
-              <span className="chip" style={{ marginBottom: 'var(--space-4)' }}>Question</span>
+            <div className={`card ${cardColor} fcd-question-card-static`}>
+              <span className="chip fcd-answer-chip">Question</span>
               <h3>{card.front_text}</h3>
             </div>
             {card.mc_options?.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+              <div className="fcd-mc-list">
                 {card.mc_options.map((opt, i) => {
                   let variant = 'secondary';
                   if (mcAnswered !== null) {
@@ -283,16 +284,15 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                       variant={variant}
                       onClick={() => handleMCSelect(i)}
                       disabled={mcAnswered !== null}
-                      style={{ justifyContent: 'flex-start' }}
                     >
-                      <span style={{ fontWeight: 700, marginRight: 'var(--space-3)' }}>{String.fromCharCode(65 + i)}</span>
+                      <span className="fcd-mc-option-letter">{String.fromCharCode(65 + i)}</span>
                       {opt}
                     </Button>
                   );
                 })}
               </div>
             ) : (
-              <p style={{ color: 'var(--text-muted)' }}>No MCQ options for this card.</p>
+              <p className="fcd-mc-empty">No MCQ options for this card.</p>
             )}
             {feedback && (
               <div className={`alert ${feedback.correct ? 'alert-success' : 'alert-error'}`}>
@@ -308,18 +308,18 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
 
         {mode === 'structure_identification' && (
           <div>
-            <div className="card" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
-              <span className="chip" style={{ marginBottom: 'var(--space-4)' }}>Structure</span>
+            <div className={`card ${cardColor} fcd-question-card-static`}>
+              <span className="chip fcd-answer-chip">Structure</span>
               {card.image_url ? (
-                <img src={card.image_url} alt={card.structure_name || 'Structure'} style={{ maxWidth: 300, margin: '0 auto' }} />
+                <img src={card.image_url} alt={card.structure_name || 'Structure'} className="fcd-structure-image" />
               ) : (
-                <div style={{ padding: 'var(--space-10)', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  <Icon name="image" style={{ fontSize: '3rem', marginBottom: 'var(--space-4)' }} />
+                <div className="fcd-structure-placeholder">
+                  <Icon name="image" className="fcd-structure-placeholder-icon" />
                   <p>{card.structure_name || 'Image coming soon'}</p>
                 </div>
               )}
             </div>
-            <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+            <div className="fcd-structure-tabs">
               <Button variant={structureTab === 'name' ? 'primary' : 'ghost'} size="sm" onClick={() => setStructureTab('name')} icon="tag">
                 Name
               </Button>
@@ -327,7 +327,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                 Function
               </Button>
             </div>
-            <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+            <div className="fcd-input-row">
               <input
                 className="form-input"
                 placeholder={structureTab === 'name' ? 'What is this structure called?' : 'What is its function?'}
@@ -335,7 +335,6 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
                 onChange={(e) => setTypedAnswer(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleCheckTyped(structureTab); }}
                 disabled={!!feedback}
-                style={{ flex: 1 }}
               />
               {!feedback && (
                 <Button onClick={() => handleCheckTyped(structureTab)} disabled={!typedAnswer.trim()} icon="check">
@@ -357,22 +356,22 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 'var(--space-2)', justifyContent: 'center', marginTop: 'var(--space-6)' }}>
+        <div className="fcd-rate-row">
           <Button variant="ghost" size="sm" onClick={() => handleRate('easy')}>Easy</Button>
           <Button variant="ghost" size="sm" onClick={() => handleRate('medium')}>Medium</Button>
           <Button variant="ghost" size="sm" onClick={() => handleRate('hard')}>Hard</Button>
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center', marginTop: 'var(--space-6)' }}>
+        <div className="fcd-actions-row">
           <Button variant={isKnown ? 'primary' : 'ghost'} size="sm" onClick={handleToggleKnown} icon={isKnown ? 'circle-check' : 'circle'}>
             {isKnown ? 'Known' : 'Mark Known'}
           </Button>
-          <Button variant={isBookmarked ? 'warm' : 'ghost'} size="sm" onClick={handleToggleBookmark} icon={isBookmarked ? 'bookmark' : 'bookmark'}>
+          <Button variant={isBookmarked ? 'warm' : 'ghost'} size="sm" onClick={handleToggleBookmark} icon="bookmark">
             {isBookmarked ? 'Saved' : 'Save'}
           </Button>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--space-8)' }}>
+        <div className="fcd-nav-row">
           <Button variant="secondary" onClick={handlePrev} disabled={index === 0} icon="arrow-left" />
           {isLast ? (
             <Button onClick={handleFinish} icon="flag-checkered">Finish</Button>
@@ -381,7 +380,7 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
           )}
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: 'var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+        <p className="fcd-keyboard-hint">
           <Icon name="keyboard" /> Arrow keys navigate · Space flips
         </p>
       </div>
