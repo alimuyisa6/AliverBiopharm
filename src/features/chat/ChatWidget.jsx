@@ -17,35 +17,53 @@ export function ChatWidget({ chatOpen, chatMessages = [], chatInput, adminOnline
   };
 
   return (
-    <div style={{ position: 'fixed', bottom: 'var(--space-6)', right: 'var(--space-6)', zIndex: 'var(--z-dropdown)' }}>
-      <button className="btn btn-primary btn-icon btn-lg" onClick={onToggle} aria-label="Chat" style={{ borderRadius: '50%', width: 52, height: 52 }}>
+    <div className="chat-widget">
+      <button
+        className="btn btn-primary btn-icon btn-lg chat-toggle-btn"
+        onClick={onToggle}
+        aria-label={chatOpen ? 'Close support chat' : 'Open support chat'}
+        aria-expanded={chatOpen}
+      >
         <Icon name={chatOpen ? 'xmark' : 'message'} />
       </button>
+
       {chatOpen && (
-        <div style={{ position: 'absolute', bottom: 64, right: 0, width: 340, background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-xl)', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', borderBottom: '1px solid var(--border-default)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-              <Icon name="headset" style={{ color: 'var(--primary)' }} />
+        <div className="chat-panel" role="dialog" aria-label="Support chat">
+          <div className="chat-panel-header">
+            <div className="chat-panel-header-info">
+              <span className="chat-panel-header-avatar">
+                <Icon name="headset" />
+              </span>
               <div>
-                <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>Support</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-xs)' }}>
+                <div className="chat-panel-title">Support</div>
+                <div className="chat-panel-status">
                   <span className={`status-dot ${adminOnline ? 'status-dot-success' : 'status-dot-error'}`} />
-                  {adminOnline ? 'Online' : 'Offline'}
+                  {adminOnline ? 'We usually reply within minutes' : 'Currently offline — leave a message'}
                 </div>
               </div>
             </div>
-            <button className="btn btn-ghost btn-sm btn-icon" onClick={onToggle}><Icon name="xmark" /></button>
+            <button className="btn btn-ghost btn-sm btn-icon" onClick={onToggle} aria-label="Close chat">
+              <Icon name="xmark" />
+            </button>
           </div>
-          <div ref={chatBodyRef} style={{ height: 300, overflowY: 'auto', padding: 'var(--space-4)' }}>
+
+          <div ref={chatBodyRef} className="chat-body">
             {chatMessages.map((msg) => (
-              <div key={msg.id} style={{ marginBottom: 'var(--space-3)', display: 'flex', justifyContent: msg.sender_type === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div style={{ maxWidth: '80%', padding: 'var(--space-3) var(--space-4)', borderRadius: 'var(--radius-lg)', background: msg.sender_type === 'user' ? 'var(--primary-light)' : 'var(--bg-card-hover)', fontSize: 'var(--text-sm)' }}>
-                  <div style={{ fontWeight: 600, fontSize: 'var(--text-xs)', marginBottom: 'var(--space-1)' }}>
-                    {msg.sender_type === 'user' ? 'You' : 'Admin'}
+              <div
+                key={msg.id}
+                className={`chat-message-row${msg.sender_type === 'user' ? ' is-own' : ''}`}
+              >
+                <div className="chat-message-bubble">
+                  <div className="chat-message-sender">
+                    {msg.sender_type === 'user' ? 'You' : 'Support Team'}
                   </div>
-                  <div>{msg.content}</div>
+                  <div className="chat-message-content">{msg.content}</div>
                   {msg.sender_type === 'user' && (
-                    <button className="btn btn-ghost btn-sm" onClick={() => onDeleteMsg(msg.id)} style={{ marginTop: 'var(--space-1)', padding: 0 }}>
+                    <button
+                      className="btn btn-ghost btn-sm chat-message-delete"
+                      onClick={() => onDeleteMsg(msg.id)}
+                      aria-label="Delete message"
+                    >
                       <Icon name="trash" />
                     </button>
                   )}
@@ -53,18 +71,24 @@ export function ChatWidget({ chatOpen, chatMessages = [], chatInput, adminOnline
               </div>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 'var(--space-2)', padding: 'var(--space-3)', borderTop: '1px solid var(--border-default)' }}>
+
+          <div className="chat-input-row">
             <textarea
-              className="form-textarea"
-              placeholder="Type a message..."
+              className="form-textarea chat-textarea"
+              placeholder="Type your message..."
               value={chatInput}
               onChange={handleInput}
               onKeyDown={handleKeyPress}
               rows={1}
               maxLength={500}
-              style={{ minHeight: 40, flex: 1 }}
+              aria-label="Message"
             />
-            <button className="btn btn-primary btn-icon btn-sm" onClick={onSend} disabled={!chatInput.trim()}>
+            <button
+              className="btn btn-primary chat-send-btn"
+              onClick={onSend}
+              disabled={!chatInput.trim()}
+              aria-label="Send message"
+            >
               <Icon name="paper-plane" />
             </button>
           </div>
