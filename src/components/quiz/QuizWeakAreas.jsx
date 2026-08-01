@@ -1,4 +1,4 @@
- /* features/quiz/QuizWeakAreas.jsx */
+/* features/quiz/QuizWeakAreas.jsx */
 import { useEffect, useState } from 'react';
 import { getRequest } from '../../api/client';
 import Icon from '../../components/Icon/Icon';
@@ -18,14 +18,14 @@ export default function QuizWeakAreas({ user, onRecommend, level, class_name }) 
   const classLabel = class_name || '';
 
   return (
-    <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-8)' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-4)' }}>
-        <Icon name="lightbulb" style={{ fontSize: '1.5rem', color: 'var(--warm)' }} />
+    <div className="card card-violet quiz-weakareas-card">
+      <div className="quiz-weakareas-inner">
+        <Icon name="lightbulb" className="quiz-weakareas-icon" />
         <div>
-          <h4 style={{ marginBottom: 'var(--space-3)' }}>
+          <h4 className="quiz-weakareas-title">
             Focus Areas{levelName ? ` – ${levelName}` : ''}{classLabel ? ` (${classLabel})` : ''}
           </h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+          <div className="quiz-weakareas-tags">
             {weak.weak_topics.map(t => (
               <span key={t} className="badge badge-error">{t}</span>
             ))}
@@ -40,3 +40,4 @@ export default function QuizWeakAreas({ user, onRecommend, level, class_name }) 
     </div>
   );
 }
+ 
