@@ -20,62 +20,31 @@ export default function FlashcardWelcome({ user, level, discipline, cls, onDone 
 
   return (
     <div className="flashcard-welcome">
-      <div className="section" style={{ textAlign: 'center' }}>
+      <div className="section fcd-empty">
         <span className="sec-label">Welcome</span>
         <h2 className="section-title">You're all set</h2>
-        <p className="section-subtitle" style={{ marginBottom: 'var(--space-8)' }}>
+        <p className="section-subtitle fcw-subtitle-gap">
           {level} · {discipline} · {cls}
         </p>
 
-        <div style={{ perspective: '1000px', maxWidth: 400, margin: '0 auto' }}>
-          <div
-            style={{
-              position: 'relative',
-              width: '100%',
-              height: 240,
-              transition: 'transform 0.6s',
-              transformStyle: 'preserve-3d',
-              transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-            }}
-          >
-            <div className="card" style={{
-              position: 'absolute',
-              inset: 0,
-              backfaceVisibility: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 'var(--space-8)',
-              textAlign: 'center',
-            }}>
-              <span style={{ fontSize: '3rem', marginBottom: 'var(--space-4)' }}>👋</span>
-              <h3 style={{ marginBottom: 'var(--space-3)' }}>Welcome, {displayName}</h3>
-              <p style={{ color: 'var(--text-dim)' }}>
+        <div className="fcw-flip-container">
+          <div className={`fcw-flip-inner${flipped ? ' is-flipped' : ''}`}>
+            <div className="card card-blue fcw-flip-face">
+              <span className="fcw-emoji">👋</span>
+              <h3 className="fcd-card-heading">Welcome, {displayName}</h3>
+              <p className="quiz-challenge-reward">
                 Get ready for your {level} {discipline} flashcards.
               </p>
             </div>
 
-            <div className="card" style={{
-              position: 'absolute',
-              inset: 0,
-              backfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 'var(--space-8)',
-              textAlign: 'center',
-            }}>
-              <span style={{ fontSize: '3rem', marginBottom: 'var(--space-4)' }}>😊</span>
-              <h3 style={{ marginBottom: 'var(--space-3)' }}>Please have a seat.</h3>
-              <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
+            <div className="card card-teal fcw-flip-face is-back">
+              <span className="fcw-emoji">😊</span>
+              <h3 className="fcd-card-heading">Please have a seat.</h3>
+              <p className="quiz-challenge-reward">
                 Loading your personalised study session…
               </p>
-              <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
-                <Icon name="layer-group" style={{ marginRight: 'var(--space-2)' }} />
-                {cls}
+              <span className="chip fcd-answer-chip is-correct">
+                <Icon name="layer-group" /> {cls}
               </span>
             </div>
           </div>
