@@ -12,8 +12,10 @@ import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
 import Hero from '../../components/Hero/Hero';
 import { useLayout } from '../../contexts/LayoutContext';
-import { FaqAccordion } from './FaqAccordion';          // added
-import { ClassroomSection } from '../classroom/ClassroomSection';  // added
+import { FaqAccordion } from './FaqAccordion';               // new
+import { BlogGrid } from './BlogGrid';                         // new
+import { TeamScroll } from './TeamScroll';                     // new
+import { ClassroomSection } from '../classroom/ClassroomSection'; // new
 
 const CONTENT_TYPES = [
   { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes', color: 'blue' },
@@ -118,7 +120,7 @@ export default function HomeView(props) {
 
       <ContentTypeCards navigate={navigate} user={user} sections={sections} />
 
-      {/* Live classroom teaser – added */}
+      {/* Live classroom teaser – now directly on homepage */}
       <ClassroomSection user={user} />
 
       <CommunitySection
@@ -139,8 +141,14 @@ export default function HomeView(props) {
 
       <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
 
-      {/* FAQ Accordion – added directly on homepage */}
+      {/* FAQ accordion – displayed directly on homepage */}
       <FaqAccordion items={sections?.faq?.questions || []} />
+
+      {/* Blog section – from sections.blog.posts */}
+      <BlogGrid posts={sections?.blog?.posts || []} />
+
+      {/* Team / Faculty section – from sections.team.members */}
+      <TeamScroll members={sections?.team?.members || []} />
 
       <ContactSection
         contactForm={contactForm}
