@@ -1,4 +1,4 @@
- /* components/Layout/Layout.jsx */
+/* components/Layout/Layout.jsx */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -107,7 +107,7 @@ export default function Layout({ children, showFooter = true }) {
               </button>
 
               {isAuthenticated ? (
-                <div className="dropdown" style={{ position: 'relative' }}>
+                <div className="dropdown">
                   <button className="btn btn-ghost btn-sm" onClick={() => {}}>
                     <Icon name="user" />
                   </button>
@@ -172,20 +172,19 @@ export default function Layout({ children, showFooter = true }) {
                     </button>
                     <div className={`mobile-nav-accordion-content ${accordionOpen === group.level_id ? 'open' : ''}`}>
                       {group.classes.map((cls) => (
-                        <div key={cls.id} style={{ marginBottom: 'var(--space-2)' }}>
-                          <Link to={`/class/${cls.id}`} className="mobile-nav-sub-link" onClick={() => setMobileOpen(false)} style={{ fontWeight: 600 }}>
+                        <div key={cls.id} className="mobile-nav-class-group">
+                          <Link to={`/class/${cls.id}`} className="mobile-nav-sub-link mobile-nav-class-link" onClick={() => setMobileOpen(false)}>
                             {cls.name}
                           </Link>
                           {navNotes[cls.id] ? (
                             navNotes[cls.id].map(unit => (
-                              <div key={unit.unit_id} style={{ paddingLeft: 'var(--space-4)' }}>
+                              <div key={unit.unit_id} className="mobile-nav-unit-group">
                                 {unit.notes.map(note => (
                                   <Link
                                     key={note.id}
                                     to={`/notes/read?id=${note.id}`}
-                                    className="mobile-nav-sub-link"
+                                    className="mobile-nav-sub-link mobile-nav-note-link"
                                     onClick={() => setMobileOpen(false)}
-                                    style={{ fontSize: 'var(--text-xs)' }}
                                   >
                                     {note.title}
                                   </Link>
@@ -193,7 +192,7 @@ export default function Layout({ children, showFooter = true }) {
                               </div>
                             ))
                           ) : loadingNavNotes ? (
-                            <span style={{ paddingLeft: 'var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>Loading...</span>
+                            <span className="mobile-nav-loading">Loading...</span>
                           ) : null}
                         </div>
                       ))}
@@ -304,3 +303,4 @@ export default function Layout({ children, showFooter = true }) {
     </div>
   );
 }
+ 
