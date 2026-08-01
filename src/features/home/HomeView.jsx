@@ -87,14 +87,14 @@ export default function HomeView(props) {
       <Hero />
 
       {user && activeLevelName && (
-        <section className="section" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-4)' }}>
-          <div style={{ textAlign: 'center' }}>
+        <section className="section home-level-banner">
+          <div className="home-level-banner-inner">
             <span className="sec-label">Your Level</span>
-            <h2 className="section-title" style={{ fontSize: 'var(--text-3xl)' }}>
+            <h2 className="section-title home-level-title">
               {activeLevelName}
             </h2>
             {activeGroupName && (
-              <p className="section-subtitle" style={{ marginBottom: 0 }}>
+              <p className="section-subtitle home-level-subtitle">
                 Currently studying <strong>{activeGroupName}</strong>
               </p>
             )}
