@@ -1,4 +1,4 @@
- /* features/contact/ContactSection.jsx */
+/* features/contact/ContactSection.jsx */
 import Icon from '../../components/Icon/Icon';
 import Input from '../../components/Input/Input';
 import Textarea from '../../components/Textarea/Textarea';
@@ -10,7 +10,7 @@ export function ContactSection({ contactForm, contactStatus, contactInfo = [], o
       <span className="sec-label">Support</span>
       <h2 className="section-title">We're Here to Help</h2>
       <p className="section-subtitle">Got a question? Our team will get back to you within 24 hours.</p>
-      <div className="grid grid-cols-2" style={{ alignItems: 'start' }}>
+      <div className="grid grid-cols-2 contact-grid">
         <form onSubmit={onSubmit}>
           <div className="card card-blue form-card">
             <Input
@@ -70,3 +70,4 @@ export function ContactSection({ contactForm, contactStatus, contactInfo = [], o
     </section>
   );
 }
+ 
