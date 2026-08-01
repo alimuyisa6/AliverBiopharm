@@ -1,4 +1,5 @@
- import { Link } from 'react-router-dom';
+ /* src/features/home/HomeView.jsx */
+import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import { PlatformCards } from './PlatformCards';
 import { StatsGrid } from './StatsGrid';
@@ -11,6 +12,8 @@ import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
 import Hero from '../../components/Hero/Hero';
 import { useLayout } from '../../contexts/LayoutContext';
+import { FaqAccordion } from './FaqAccordion';          // added
+import { ClassroomSection } from '../classroom/ClassroomSection';  // added
 
 const CONTENT_TYPES = [
   { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes', color: 'blue' },
@@ -115,6 +118,9 @@ export default function HomeView(props) {
 
       <ContentTypeCards navigate={navigate} user={user} sections={sections} />
 
+      {/* Live classroom teaser – added */}
+      <ClassroomSection user={user} />
+
       <CommunitySection
         activity={communityActivity}
         weeklyChallenge={sections?.weekly_challenge}
@@ -132,6 +138,9 @@ export default function HomeView(props) {
       />
 
       <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
+
+      {/* FAQ Accordion – added directly on homepage */}
+      <FaqAccordion items={sections?.faq?.questions || []} />
 
       <ContactSection
         contactForm={contactForm}
