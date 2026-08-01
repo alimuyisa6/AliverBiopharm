@@ -12,7 +12,7 @@ export function ContactSection({ contactForm, contactStatus, contactInfo = [], o
       <p className="section-subtitle">Got a question? Our team will get back to you within 24 hours.</p>
       <div className="grid grid-cols-2" style={{ alignItems: 'start' }}>
         <form onSubmit={onSubmit}>
-          <div className="card card-blue" style={{ padding: 'var(--space-8)' }}>
+          <div className="card card-blue form-card">
             <Input
               label="Full Name"
               value={contactForm.name}
@@ -43,26 +43,25 @@ export function ContactSection({ contactForm, contactStatus, contactInfo = [], o
             />
             <Button type="submit" icon="paper-plane">Send Message</Button>
             {contactStatus && (
-              <p style={{
-                marginTop: 'var(--space-4)', fontSize: 'var(--text-sm)',
-                color: contactStatus.success ? 'var(--success)' : 'var(--error)',
-              }}>
+              <p className={`form-status ${contactStatus.success ? 'success' : 'error'}`}>
                 {contactStatus.message}
               </p>
             )}
           </div>
         </form>
-        <div className="card card-teal" style={{ padding: 'var(--space-8)' }}>
-          <h3 style={{ marginBottom: 'var(--space-6)' }}>
-            <Icon name="headset" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />
+        <div className="card card-teal form-card">
+          <h3 className="form-card-heading">
+            <Icon name="headset" className="icon" />
             Contact Info
           </h3>
           {contactInfo.map((info) => (
-            <div key={info.label} style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-6)', alignItems: 'center' }}>
-              <Icon name={info.icon || 'circle-info'} style={{ color: 'var(--primary)', fontSize: '1.25rem' }} />
+            <div key={info.label} className="contact-info-row">
+              <span className="contact-info-icon">
+                <Icon name={info.icon || 'circle-info'} />
+              </span>
               <div>
-                <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>{info.label}</div>
-                <a href={info.href} style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>{info.value}</a>
+                <div className="contact-info-label">{info.label}</div>
+                <a href={info.href} className="contact-info-value">{info.value}</a>
               </div>
             </div>
           ))}
