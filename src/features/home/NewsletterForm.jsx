@@ -1,4 +1,4 @@
- /* features/home/NewsletterForm.jsx */
+/* features/home/NewsletterForm.jsx */
 import Button from '../../components/Button/Button';
 import Input from '../../components/Input/Input';
 
@@ -16,12 +16,12 @@ export function NewsletterForm({ email, status, onChange, onSubmit }) {
             value={email}
             onChange={onChange}
             required
-            style={{ flex: 1 }}
+            className="newsletter-input"
           />
           <Button type="submit" icon="paper-plane">Subscribe</Button>
         </form>
         {status && (
-          <p className={`form-status ${status.success ? 'success' : 'error'}`} style={{ marginTop: 'var(--space-3)' }}>
+          <p className={`form-status newsletter-status ${status.success ? 'success' : 'error'}`}>
             {status.message}
           </p>
         )}
@@ -29,3 +29,4 @@ export function NewsletterForm({ email, status, onChange, onSubmit }) {
     </section>
   );
 }
+ 
