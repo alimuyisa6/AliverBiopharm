@@ -16,6 +16,10 @@
 @import './toast.css';
 @import './notification.css';
  @import './chat.css';
+@import './quiz.css';
+@import './flashcard.css';
+@import './classroom.css';
+@import './recall.css';
 
 .profile-picture-upload {
   display: flex;
