@@ -2,15 +2,12 @@
 import { getClassroomLevels, getClassroomTopics } from '../../api/cachedClient';
 
 const CARD_COLOR_CLASS = [
-  'level-card-cyan',
-  'level-card-magenta',
   'level-card-blue',
-  'level-card-green',
-  'level-card-purple',
-  'level-card-orange',
+  'level-card-teal',
+  'level-card-violet',
+  'level-card-amber',
+  'level-card-emerald',
 ];
-
-const STEP_COLORS = ['var(--clr-cyan)', 'var(--clr-magenta)', 'var(--clr-blue)'];
 
 export function ClassroomOnboarding({ onComplete }) {
   const [step, setStep] = useState(1);
@@ -63,24 +60,16 @@ export function ClassroomOnboarding({ onComplete }) {
   };
 
   if (loadingLevels) {
-    return <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--clr-cyan)' }}></i></div>;
+    return <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>;
   }
 
   return (
     <div className="classroom-onboarding">
       <div className="onboarding-steps">
-        {[1, 2, 3].map((n, idx) => (
+        {[1, 2, 3].map((n) => (
           <React.Fragment key={n}>
-            <div
-              className={`onboarding-step ${step >= n ? 'active' : ''}`}
-              style={step >= n ? { color: STEP_COLORS[idx] } : undefined}
-            >
-              <span
-                className="step-number"
-                style={step >= n ? { borderColor: STEP_COLORS[idx], background: STEP_COLORS[idx], color: '#fff' } : undefined}
-              >
-                {n}
-              </span>
+            <div className={`onboarding-step ${step >= n ? 'active' : ''}`}>
+              <span className="step-number">{n}</span>
               <span className="step-label">{n === 1 ? 'Level' : n === 2 ? 'Class' : 'Topic'}</span>
             </div>
             {n < 3 && <div className="step-line"></div>}
@@ -116,7 +105,7 @@ export function ClassroomOnboarding({ onComplete }) {
       {step === 2 && selectedLevel && (
         <div className="onboarding-body">
           <button className="onboarding-back" onClick={handleBack}>
-            <i className="fa-solid fa-arrow-left" style={{ color: 'var(--clr-blue)' }}></i> Back
+            <i className="fa-solid fa-arrow-left"></i> Back
           </button>
           <h3>Select Your Class</h3>
           <div className="onboarding-grid">
@@ -150,11 +139,11 @@ export function ClassroomOnboarding({ onComplete }) {
       {step === 3 && (
         <div className="onboarding-body">
           <button className="onboarding-back" onClick={handleBack}>
-            <i className="fa-solid fa-arrow-left" style={{ color: 'var(--clr-blue)' }}></i> Back
+            <i className="fa-solid fa-arrow-left"></i> Back
           </button>
           <h3>Select a Topic</h3>
           {loadingTopics ? (
-            <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--clr-cyan)' }}></i></div>
+            <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>
           ) : topics.length === 0 ? (
             <div className="onboarding-empty">No topics available for this class.</div>
           ) : (
@@ -167,9 +156,9 @@ export function ClassroomOnboarding({ onComplete }) {
                 >
                   <div className="topic-card-content">
                     {topic.is_hard_topic ? (
-                      <i className="fa-solid fa-triangle-exclamation" style={{ color: 'var(--clr-red)' }}></i>
+                      <i className="fa-solid fa-triangle-exclamation topic-icon-hard"></i>
                     ) : (
-                      <i className="fa-solid fa-book-open" style={{ color: 'var(--clr-cyan)' }}></i>
+                      <i className="fa-solid fa-book-open topic-icon-normal"></i>
                     )}
                     <span className="topic-name">{topic.topic_name}</span>
                     {topic.is_hard_topic && <span className="topic-badge hard">Hard Topic</span>}
