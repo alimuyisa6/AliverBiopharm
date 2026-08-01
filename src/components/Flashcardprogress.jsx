@@ -5,10 +5,10 @@ import Button from './Button/Button';
 export default function FlashcardProgress({ result, onRestart, onHome }) {
   const { total = 0, correct = 0, incorrect = 0, score = 0 } = result || {};
 
-  function scoreColor() {
-    if (score >= 80) return 'var(--success)';
-    if (score >= 50) return 'var(--primary)';
-    return 'var(--error)';
+  function scoreClass() {
+    if (score >= 80) return 'is-high';
+    if (score >= 50) return '';
+    return 'is-low';
   }
 
   function message() {
@@ -20,34 +20,28 @@ export default function FlashcardProgress({ result, onRestart, onHome }) {
 
   return (
     <div className="flashcard-progress">
-      <div className="section" style={{ textAlign: 'center' }}>
-        <div className="card" style={{ padding: 'var(--space-10)', maxWidth: 500, margin: '0 auto' }}>
-          <Icon name="trophy" style={{ fontSize: '3rem', color: 'var(--warm)', marginBottom: 'var(--space-4)' }} />
+      <div className="section fcd-empty">
+        <div className="card card-amber fcp-card">
+          <Icon name="trophy" className="fcp-trophy" />
           <h2>Session Complete</h2>
-          <p style={{ color: 'var(--text-dim)', marginTop: 'var(--space-3)' }}>{message()}</p>
+          <p className="fcp-message">{message()}</p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-8)', margin: 'var(--space-8) 0' }}>
+          <div className="fcp-stats-row">
             <div>
-              <div style={{ fontSize: 'var(--text-4xl)', fontWeight: 'var(--weight-black)', color: scoreColor() }}>
-                {score}%
-              </div>
-              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Score</div>
+              <div className={`fcp-stat-value is-score ${scoreClass()}`}>{score}%</div>
+              <div className="fcp-stat-label">Score</div>
             </div>
             <div>
-              <div style={{ fontSize: 'var(--text-4xl)', fontWeight: 'var(--weight-black)', color: 'var(--success)' }}>
-                {correct}
-              </div>
-              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Correct</div>
+              <div className="fcp-stat-value is-correct">{correct}</div>
+              <div className="fcp-stat-label">Correct</div>
             </div>
             <div>
-              <div style={{ fontSize: 'var(--text-4xl)', fontWeight: 'var(--weight-black)', color: 'var(--error)' }}>
-                {incorrect}
-              </div>
-              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Missed</div>
+              <div className="fcp-stat-value is-missed">{incorrect}</div>
+              <div className="fcp-stat-label">Missed</div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center' }}>
+          <div className="fcp-actions-row">
             <Button onClick={onRestart} icon="rotate-right">Study Again</Button>
             <Button variant="secondary" onClick={onHome} icon="home">Home</Button>
           </div>
