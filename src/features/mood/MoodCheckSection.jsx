@@ -16,14 +16,13 @@ export function MoodCheckSection({ moodSelected, moodMessage, moodSubmitted, onM
       <span className="sec-label">Mood Check</span>
       <h2 className="section-title">How Are You Feeling Today?</h2>
       <p className="section-subtitle">Your feedback helps us improve your learning experience.</p>
-      <div className="card card-amber" style={{ maxWidth: 500, margin: '0 auto', padding: 'var(--space-8)', textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+      <div className="card card-amber mood-card">
+        <div className="mood-emoji-row">
           {MOODS.map((m) => (
             <button
               key={m.key}
-              className={`btn btn-ghost btn-icon ${moodSelected === m.key ? 'btn-primary' : ''}`}
+              className={`btn btn-ghost btn-icon mood-emoji-btn ${moodSelected === m.key ? 'btn-primary' : ''}`}
               onClick={() => onMoodSelect(m.key)}
-              style={{ fontSize: '1.5rem' }}
               aria-label={m.key}
             >
               {m.emoji}
@@ -33,18 +32,17 @@ export function MoodCheckSection({ moodSelected, moodMessage, moodSubmitted, onM
         {moodSelected && !moodSubmitted && (
           <div>
             <textarea
-              className="form-textarea"
+              className="form-textarea mood-textarea"
               placeholder="Tell us more (optional)..."
               value={moodMessage}
               onChange={(e) => onMessageChange(e.target.value)}
               rows={3}
-              style={{ marginBottom: 'var(--space-4)' }}
             />
             <Button onClick={onSubmit} icon="paper-plane">Submit</Button>
           </div>
         )}
         {moodSubmitted && (
-          <p style={{ color: 'var(--success)', fontWeight: 600 }}>
+          <p className="mood-success">
             <Icon name="circle-check" /> Thanks for sharing!
           </p>
         )}
