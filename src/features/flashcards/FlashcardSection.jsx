@@ -1,4 +1,4 @@
-// features/flashcards/FlashcardSection.jsx
+ // features/flashcards/FlashcardSection.jsx
 import React from 'react';
 
 export function FlashcardSection({ headingTitle, headingSubtitle, onStartStudy, onBrowseDecks, user }) {
@@ -21,7 +21,7 @@ export function FlashcardSection({ headingTitle, headingSubtitle, onStartStudy, 
         {previewCards.map((item, i) => (
           <div key={i} className="fc-preview-card">
             <p className="fc-preview-q">{item.q}</p>
-            <span className="fc-chip" style={{ margin: '0 auto' }}>{item.label}</span>
+            <span className="fc-chip fc-preview-chip">{item.label}</span>
             <div className="fc-preview-dots">
               {[0, 1, 2].map(d => (
                 <span key={d} className={`fc-preview-dot ${d === i ? 'fc-active' : ''}`}></span>
@@ -30,17 +30,17 @@ export function FlashcardSection({ headingTitle, headingSubtitle, onStartStudy, 
           </div>
         ))}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+      <div className="fc-actions-row">
         <button className="btn-primary" onClick={onStartStudy}>
           <i className="fa-solid fa-layer-group"></i>
           {user ? 'Start Studying' : 'Login to Study'}
         </button>
         {user && (
-          <button className="btn-download" onClick={onBrowseDecks} style={{ padding: '10px 20px' }}>
+          <button className="btn-download fc-browse-btn" onClick={onBrowseDecks}>
             <i className="fa-solid fa-arrow-right"></i> Browse Decks
           </button>
         )}
       </div>
     </section>
   );
-} 
+}
