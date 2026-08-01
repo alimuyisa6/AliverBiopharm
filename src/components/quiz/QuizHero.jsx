@@ -17,7 +17,7 @@ export default function QuizHero({ level, class_name }) {
 
   if (loading) {
     return (
-      <div style={{ padding: 'var(--space-10)' }}>
+      <div className="quiz-hero-loading">
         <Skeleton height={120} />
       </div>
     );
@@ -27,46 +27,35 @@ export default function QuizHero({ level, class_name }) {
   const classLabel = class_name || '';
 
   return (
-    <section className="section reveal" style={{ paddingTop: 0 }}>
-      <div
-        className="card"
-        style={{
-          padding: 'var(--space-10)',
-          textAlign: 'center',
-          background: 'linear-gradient(135deg, var(--primary-light), var(--accent-light))',
-        }}
-      >
-        <h1 style={{ marginBottom: 'var(--space-4)' }}>
+    <section className="section reveal quiz-hero-section">
+      <div className="card quiz-hero-card">
+        <h1 className="quiz-hero-title">
           {levelName ? `Master ${levelName}` : 'Master Your Studies'}
-          {classLabel && (
-            <span style={{ display: 'block', fontSize: 'var(--text-xl)', fontWeight: 400, marginTop: 'var(--space-2)' }}>
-              {classLabel}
-            </span>
-          )}
+          {classLabel && <span className="quiz-hero-classlabel">{classLabel}</span>}
         </h1>
-        <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-8)' }}>
+        <p className="quiz-hero-subtitle">
           {levelName
             ? `Build your knowledge in ${levelName}${classLabel ? ` (${classLabel})` : ''}, track progress, and master every topic.`
             : 'Build scientific knowledge, track progress, earn achievements, and master every topic.'}
         </p>
-        <div className="grid grid-cols-4" style={{ gap: 'var(--space-4)' }}>
+        <div className="grid grid-cols-4 quiz-hero-stats">
           <div className="stat-card">
-            <Icon name="book-open" className="stat-icon" style={{ color: 'var(--primary)' }} />
+            <Icon name="book-open" className="stat-icon stat-icon-primary" />
             <div className="stat-value">{stats?.total_questions ?? 0}</div>
             <div className="stat-label">Questions</div>
           </div>
           <div className="stat-card">
-            <Icon name="dna" className="stat-icon" style={{ color: 'var(--secondary)' }} />
+            <Icon name="dna" className="stat-icon stat-icon-secondary" />
             <div className="stat-value">{stats?.total_topics ?? 0}</div>
             <div className="stat-label">Topics</div>
           </div>
           <div className="stat-card">
-            <Icon name="user-graduate" className="stat-icon" style={{ color: 'var(--accent)' }} />
+            <Icon name="user-graduate" className="stat-icon stat-icon-accent" />
             <div className="stat-value">{stats?.total_learners ?? 0}</div>
             <div className="stat-label">Learners</div>
           </div>
           <div className="stat-card">
-            <Icon name="chart-line" className="stat-icon" style={{ color: 'var(--warm)' }} />
+            <Icon name="chart-line" className="stat-icon stat-icon-warm" />
             <div className="stat-value">{stats?.average_pass_rate ?? 0}%</div>
             <div className="stat-label">Pass Rate</div>
           </div>
