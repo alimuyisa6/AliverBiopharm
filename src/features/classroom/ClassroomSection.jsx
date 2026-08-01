@@ -16,6 +16,12 @@ const STATUS_CLASS = {
   upcoming: 'classroom-status-upcoming',
 };
 
+const STATUS_BAR_CLASS = {
+  live: 'status-bar-success',
+  open_floor: 'status-bar-primary',
+  upcoming: 'status-bar-warm',
+};
+
 export function ClassroomSection({ user }) {
   const navigate = useNavigate();
   const [feed, setFeed] = useState([]);
@@ -38,21 +44,19 @@ export function ClassroomSection({ user }) {
       </p>
 
       {loading ? (
-        <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin" style={{ color: 'var(--clr-cyan)' }}></i></div>
+        <div className="classroom-loading"><i className="fa-solid fa-spinner fa-spin"></i></div>
       ) : feed.length === 0 ? (
         <div className="classroom-empty">
-          <i className="fa-solid fa-door-closed" style={{ color: 'var(--clr-text-muted)' }}></i>
+          <i className="fa-solid fa-door-closed"></i>
           <p>No sessions running right now. Check back soon.</p>
         </div>
       ) : (
         <div className="classroom-level-grid">
           {feed.map(room => {
             const statusClass = STATUS_CLASS[room.status] || '';
+            const statusBarClass = STATUS_BAR_CLASS[room.status] || 'status-bar-warm';
             const isPremium = room.room_type === 'premium';
             const isHard = room.room_type === 'hard_topic';
-            const statusColor = room.status === 'live' ? 'var(--clr-green)' : 
-                               room.status === 'open_floor' ? 'var(--clr-blue)' : 
-                               'var(--clr-orange)';
             return (
               <div key={room.id} className={`classroom-level-card ${statusClass}`}>
                 <div className="card-media">
@@ -60,13 +64,13 @@ export function ClassroomSection({ user }) {
                     <img src={room.image_url} alt={room.topic_name} loading="lazy" />
                   ) : (
                     <div className="card-media-fallback">
-                      <i className="fa-solid fa-dna" style={{ color: 'var(--clr-cyan)' }}></i>
+                      <i className="fa-solid fa-dna"></i>
                     </div>
                   )}
                   {isHard && <span className="card-media-ribbon ribbon-hard">Hard Topic</span>}
                   {isPremium && !isHard && <span className="card-media-ribbon ribbon-premium">Premium</span>}
                 </div>
-                <div className="room-status-bar" style={{ backgroundColor: statusColor }}>
+                <div className={`room-status-bar ${statusBarClass}`}>
                   <i className={`fa-solid ${room.status === 'live' || room.status === 'open_floor' ? 'fa-tower-broadcast' : 'fa-clock'}`}></i>
                   <span>{room.status === 'open_floor' ? 'Open Floor' : room.status === 'live' ? 'Live' : 'Upcoming'}</span>
                 </div>
@@ -78,20 +82,20 @@ export function ClassroomSection({ user }) {
                       {room.tutor_avatar_url ? (
                         <img src={room.tutor_avatar_url} alt={room.tutor_name} className="room-tutor-avatar" />
                       ) : (
-                        <i className="fa-solid fa-user-tie" style={{ color: 'var(--clr-magenta)' }}></i>
+                        <i className="fa-solid fa-user-tie"></i>
                       )}
                       {room.tutor_name}
                     </p>
                   )}
                   {room.live_duration_seconds !== undefined && (
                     <p className="room-duration-line">
-                      <i className="fa-solid fa-hourglass-half" style={{ color: 'var(--clr-blue)' }}></i>
+                      <i className="fa-solid fa-hourglass-half"></i>
                       Running {formatDuration(room.live_duration_seconds)}
                     </p>
                   )}
                   {room.starts_in_seconds !== undefined && (
                     <p className="room-duration-line">
-                      <i className="fa-solid fa-clock" style={{ color: 'var(--clr-orange)' }}></i>
+                      <i className="fa-solid fa-clock"></i>
                       Starts in {formatDuration(room.starts_in_seconds)}
                     </p>
                   )}
