@@ -1,0 +1,268 @@
+/* styles/flashcard.css */
+
+.fcd-section {
+  padding-top: var(--space-6);
+}
+
+.fcd-loading-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.fcd-empty {
+  text-align: center;
+}
+
+.fcd-empty-icon {
+  font-size: 3rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.fcd-progress-row {
+  margin-bottom: var(--space-6);
+}
+
+.fcd-mode-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.fcd-meta-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.fcd-meta-index {
+  font-size: var(--text-sm);
+  color: var(--text-dim);
+}
+
+.fcd-meta-title {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.fcd-question-card {
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.fcd-question-card.is-flip {
+  cursor: pointer;
+}
+
+.fcd-question-card-static {
+  padding: var(--space-8);
+  margin-bottom: var(--space-6);
+}
+
+.fcd-answer-chip {
+  margin-bottom: var(--space-4);
+}
+
+.fcd-answer-chip.is-correct {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.fcd-card-heading {
+  margin-bottom: var(--space-4);
+}
+
+.fcd-card-image {
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.fcd-structure-image {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.fcd-tap-hint {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.fcd-input-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.fcd-input-row .form-input {
+  flex: 1;
+}
+
+.fcd-mc-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.fcd-mc-option-letter {
+  font-weight: var(--weight-bold);
+  margin-right: var(--space-3);
+}
+
+.fcd-mc-empty {
+  color: var(--text-muted);
+}
+
+.fcd-structure-placeholder {
+  padding: var(--space-10);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.fcd-structure-placeholder-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+}
+
+.fcd-structure-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.fcd-rate-row {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+.fcd-actions-row {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+.fcd-nav-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-8);
+}
+
+.fcd-keyboard-hint {
+  text-align: center;
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* Welcome flip card */
+.fcw-flip-container {
+  perspective: 1000px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.fcw-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.fcw-flip-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.fcw-flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.fcw-flip-face.is-back {
+  transform: rotateY(180deg);
+}
+
+.fcw-emoji {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+}
+
+.fcw-subtitle-gap {
+  margin-bottom: var(--space-8);
+}
+
+/* Progress / results */
+.fcp-card {
+  padding: var(--space-10);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.fcp-trophy {
+  font-size: 3rem;
+  color: var(--warm);
+  margin-bottom: var(--space-4);
+}
+
+.fcp-message {
+  color: var(--text-dim);
+  margin-top: var(--space-3);
+}
+
+.fcp-stats-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-8);
+  margin: var(--space-8) 0;
+}
+
+.fcp-stat-value {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-black);
+}
+
+.fcp-stat-value.is-score { color: var(--primary); }
+.fcp-stat-value.is-score.is-high { color: var(--success); }
+.fcp-stat-value.is-score.is-low { color: var(--error); }
+.fcp-stat-value.is-correct { color: var(--success); }
+.fcp-stat-value.is-missed { color: var(--error); }
+
+.fcp-stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-dim);
+}
+
+.fcp-actions-row {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
+/* Flashcard preview section (homepage) */
+.fc-actions-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.fc-preview-chip {
+  margin: 0 auto;
+}
+
+.fc-browse-btn {
+  padding: 10px 20px;
+}
