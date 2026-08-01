@@ -15,7 +15,7 @@
 @import './grid.css';
 @import './toast.css';
 @import './notification.css';
- 
+ @import './chat.css';
 
 .profile-picture-upload {
   display: flex;
