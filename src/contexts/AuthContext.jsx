@@ -1,4 +1,4 @@
- import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+ import { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getUser, signin, signout, getProfile } from '../api/client';
 import Spinner from '../components/Spinner/Spinner';
@@ -112,7 +112,13 @@ export function ProtectedRoute({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const needsRedirect =
+    !user ||
+    (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') ||
+    (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding');
+
+ 
+  useLayoutEffect(() => {
     if (loading) return;
 
     if (!user) {
@@ -130,16 +136,11 @@ export function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+      <div className="fcd-loading-wrap">
         <Spinner size="lg" />
       </div>
     );
   }
-
-  const needsRedirect =
-    !user ||
-    (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') ||
-    (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding');
 
   if (needsRedirect) return null;
 
