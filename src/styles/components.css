@@ -20,6 +20,8 @@
 @import './flashcard.css';
 @import './classroom.css';
 @import './recall.css';
+@import './about.css';
+@import './legal.css';
 
 .profile-picture-upload {
   display: flex;
