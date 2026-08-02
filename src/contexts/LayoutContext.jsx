@@ -1,7 +1,8 @@
-/* contexts/LayoutContext.jsx */
+ /* contexts/LayoutContext.jsx */
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { bootstrapPlatform, switchClass } from '../api/cachedClient';
+import { getAllSiteSections } from '../api/client';
 
 export const LayoutContext = createContext(null);
 
@@ -11,6 +12,7 @@ export function LayoutProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [sections, setSections] = useState({});
 
   const effectiveLevel = user?.profile?.active_level_id || user?.profile?.track || 'O-Level';
   const activeGroupId = user?.profile?.active_group_id || null;
@@ -26,8 +28,14 @@ export function LayoutProvider({ children }) {
 
   useEffect(() => {
     setLoading(true);
-    bootstrapPlatform(effectiveLevel)
-      .then(setBootstrap)
+    Promise.all([
+      bootstrapPlatform(effectiveLevel),
+      getAllSiteSections()
+    ])
+      .then(([bootstrapData, sectionData]) => {
+        setBootstrap(bootstrapData);
+        setSections(sectionData || {});
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [effectiveLevel, activeGroupId]);
@@ -50,11 +58,12 @@ export function LayoutProvider({ children }) {
     const isReady = !loading && !authLoading;
     if (!isReady || !bootstrap) {
       return {
-        loading: true, bootstrap: null,logo: null, siteName: 'AliverBiopharm', navigation: [],
+        loading: true, bootstrap: null, logo: null, siteName: 'AliverBiopharm', navigation: [],
         footer: { quick_links: [], resource_links: [], community_links: [], social_links: {} },
         groups: [], level: null, user, isAuthenticated: !!user,
         colorTheme: {}, theme, toggleTheme, authLoading,
         refreshUser: refresh, switchClass: handleSwitchClass, switching, activeGroupId,
+        sections: {},
       };
     }
 
@@ -77,8 +86,9 @@ export function LayoutProvider({ children }) {
       switchClass: handleSwitchClass,
       switching,
       activeGroupId,
+      sections,
     };
-  }, [bootstrap, loading, authLoading, user, theme, toggleTheme, refresh, handleSwitchClass, switching, activeGroupId]);
+  }, [bootstrap, loading, authLoading, user, theme, toggleTheme, refresh, handleSwitchClass, switching, activeGroupId, sections]);
 
   return (
     <LayoutContext.Provider value={value}>
@@ -91,4 +101,4 @@ export function useLayout() {
   const ctx = useContext(LayoutContext);
   if (!ctx) throw new Error('useLayout must be used within LayoutProvider');
   return ctx;
-} 
+}
