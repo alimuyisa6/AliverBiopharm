@@ -22,6 +22,7 @@
 @import './recall.css';
 @import './about.css';
 @import './legal.css';
+@import './glossary.css';
 
 .profile-picture-upload {
   display: flex;
