@@ -15,7 +15,7 @@ import {
 } from '../api/cachedClient';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
 import { AccessDenied } from '../components/access/AccessDenied';
- 
+
 import QuizHero from "../components/quiz/QuizHero";
 import QuizDashboard from "../components/quiz/QuizDashboard";
 import QuizChallenges from "../components/quiz/QuizChallenges";
@@ -230,12 +230,17 @@ export default function Quiz() {
     setLeaderboard(Array.isArray(data) ? data : []);
   };
 
-  if (!isReady || access.isPending) return <PendingApprovalScreen />;
+  if (!isReady || access.loading) return (
+    <div className="fcd-loading-wrap">
+      <Spinner size="lg" />
+    </div>
+  );
+  if (access.isPending) return <PendingApprovalScreen />;
   if (!access.canAccess) return <AccessDenied />;
 
   if (loading && !quizQuestions.length && !resultData && !currentTopic) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div className="fcd-loading-wrap">
         <Spinner size="lg" />
       </div>
     );
@@ -244,23 +249,23 @@ export default function Quiz() {
   const firstUnanswered = getFirstUnansweredIndex(userAnswers);
   const allAnswered = userAnswers.length > 0 && userAnswers.every(a => a !== null);
   const timerPercent = timeLeft !== null ? (timeLeft / 600) * 100 : 100;
-  const timerColor = timerPercent > 50 ? 'var(--success)' : timerPercent > 20 ? 'var(--warning)' : 'var(--error)';
+  const timerClass = timerPercent > 50 ? 'is-good' : timerPercent > 20 ? 'is-warn' : 'is-danger';
 
   return (
     <div className="quiz-page">
-      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+      <div className="section quiz-page-section">
         <span className="sec-label">Assessments</span>
-        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+        <h1 className="section-title quiz-page-title">
           Knowledge Quizzes {displayName ? `– ${displayName}` : ''}
         </h1>
         {class_name && (
-          <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
+          <p className="quiz-group-label">
             Current group: {class_name}
           </p>
         )}
 
         {user && streak > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-4)' }}>
+          <div className="quiz-streak-row">
             <span className="badge badge-warm">
               <Icon name="fire" /> {streak}-day streak
             </span>
@@ -287,7 +292,7 @@ export default function Quiz() {
 
         {!currentTopic ? (
           <>
-            <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
+            <div className="quiz-topic-controls">
               <Input
                 placeholder="Search topics..."
                 value={topicSearch}
@@ -301,8 +306,8 @@ export default function Quiz() {
 
             <div className="grid grid-cols-3">
               {filteredTopics.length === 0 && (
-                <div style={{ textAlign: 'center', padding: 'var(--space-10)', color: 'var(--text-muted)', gridColumn: '1 / -1' }}>
-                  <Icon name="magnifying-glass" style={{ fontSize: '2rem', marginBottom: 'var(--space-4)', opacity: 0.4 }} />
+                <div className="quiz-empty-topics">
+                  <Icon name="magnifying-glass" className="quiz-empty-icon" />
                   <p>No topics match your search.</p>
                 </div>
               )}
@@ -327,7 +332,7 @@ export default function Quiz() {
                     <div className="card-body">
                       <h3 className="card-title">{topic.topic_name}</h3>
                       <p className="card-text">{topic.question_count} questions</p>
-                      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                      <p className="quiz-topic-status">
                         {allDone ? 'All blocks done!' : 'Questions being added'}
                       </p>
                     </div>
@@ -338,10 +343,10 @@ export default function Quiz() {
           </>
         ) : resultData ? (
           <div className="quiz-result-container">
-            <div className="card" style={{ textAlign: 'center', padding: 'var(--space-10)', marginBottom: 'var(--space-8)' }}>
-              <Icon name={resultData.passed ? 'trophy' : 'book-open'} style={{ fontSize: '3rem', color: resultData.passed ? 'var(--warm)' : 'var(--primary)', marginBottom: 'var(--space-6)' }} />
+            <div className="card quiz-result-card">
+              <Icon name={resultData.passed ? 'trophy' : 'book-open'} className={`quiz-result-icon ${resultData.passed ? 'is-pass' : 'is-fail'}`} />
               <h2>{resultData.passed ? `Congratulations, ${user?.full_name || 'Learner'}!` : 'Block Complete'}</h2>
-              <div style={{ fontSize: 'var(--text-5xl)', fontWeight: 'var(--weight-black)', color: resultData.passed ? 'var(--success)' : 'var(--error)', marginBottom: 'var(--space-4)' }}>
+              <div className={`quiz-result-score ${resultData.passed ? 'is-pass' : 'is-fail'}`}>
                 {resultData.percentage}%
               </div>
               <p>{resultData.score}/{resultData.total} correct</p>
@@ -350,29 +355,29 @@ export default function Quiz() {
                 {resultData.passed ? 'Passed' : 'Not passed'}
               </span>
               {tabSwitchCount > 0 && (
-                <p style={{ marginTop: 'var(--space-4)', color: 'var(--warning)', fontSize: 'var(--text-sm)' }}>
+                <p className="quiz-tabswitch-warning">
                   <Icon name="exclamation-triangle" /> {tabSwitchCount} tab switch{tabSwitchCount > 1 ? 'es' : ''} recorded
                 </p>
               )}
             </div>
 
-            <div style={{ marginBottom: 'var(--space-8)' }}>
-              <h3 style={{ marginBottom: 'var(--space-6)' }}>Block {currentBlock + 1} Review – {currentTopic}</h3>
+            <div className="quiz-review-section">
+              <h3 className="quiz-review-heading">Block {currentBlock + 1} Review – {currentTopic}</h3>
               {(resultData.answers || []).map((a, idx) => (
-                <div key={idx} className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-4)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
-                    <Icon name={a.isCorrect ? 'circle-check' : 'circle-xmark'} style={{ color: a.isCorrect ? 'var(--success)' : 'var(--error)' }} />
-                    <span style={{ fontWeight: 600 }}>Q{idx + 1}</span>
+                <div key={idx} className="card quiz-review-card">
+                  <div className="quiz-review-header">
+                    <Icon name={a.isCorrect ? 'circle-check' : 'circle-xmark'} className={`icon ${a.isCorrect ? 'is-correct' : 'is-incorrect'}`} />
+                    <span className="quiz-review-qnum">Q{idx + 1}</span>
                   </div>
                   <p dangerouslySetInnerHTML={{ __html: a.question }} />
-                  <p style={{ color: a.isCorrect ? 'var(--success)' : 'var(--error)' }}>Your answer: {a.userAnswerText}</p>
-                  {!a.isCorrect && <p style={{ color: 'var(--success)' }}>Correct: {a.correctAnswerText}</p>}
-                  {a.explanation && <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)', marginTop: 'var(--space-3)' }} dangerouslySetInnerHTML={{ __html: a.explanation }} />}
+                  <p className={`quiz-review-answer ${a.isCorrect ? 'is-correct' : 'is-incorrect'}`}>Your answer: {a.userAnswerText}</p>
+                  {!a.isCorrect && <p className="quiz-review-correct-answer">Correct: {a.correctAnswerText}</p>}
+                  {a.explanation && <p className="quiz-review-explanation" dangerouslySetInnerHTML={{ __html: a.explanation }} />}
                 </div>
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center' }}>
+            <div className="quiz-result-actions">
               {currentBlock + 1 < totalBlocks && (
                 <Button onClick={() => startBlock(currentBlock + 1)}>Next Block <Icon name="arrow-right" /></Button>
               )}
@@ -383,20 +388,19 @@ export default function Quiz() {
           </div>
         ) : quizQuestions.length > 0 ? (
           <div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginBottom: 'var(--space-6)' }}>
+            <div className="quiz-nav-pills">
               {quizQuestions.map((_, idx) => {
                 let cls = 'btn btn-sm btn-ghost';
                 if (userAnswers[idx]) cls = userAnswers[idx].correct ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-danger';
                 return (
                   <button
                     key={idx}
-                    className={cls + (idx === currentIndex ? ' btn-accent' : '')}
+                    className={cls + (idx === currentIndex ? ' btn-accent' : '') + ' quiz-nav-pill'}
                     onClick={() => {
                       if (!canNavigateTo(idx, userAnswers)) addToast('Answer previous questions first', 'warning');
                       else navigateTo(idx);
                     }}
                     disabled={!canNavigateTo(idx, userAnswers)}
-                    style={{ minWidth: 40 }}
                   >
                     {idx + 1}
                   </button>
@@ -405,10 +409,10 @@ export default function Quiz() {
             </div>
 
             {timeLeft !== null && (
-              <div style={{ marginBottom: 'var(--space-6)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
-                  <span style={{ fontSize: 'var(--text-sm)' }}>Time remaining</span>
-                  <span style={{ fontSize: 'var(--text-sm)', color: timerColor }}>
+              <div className="quiz-timer-row">
+                <div className="quiz-timer-header">
+                  <span className="quiz-timer-label">Time remaining</span>
+                  <span className={`quiz-timer-value ${timerClass}`}>
                     {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
                   </span>
                 </div>
@@ -417,21 +421,21 @@ export default function Quiz() {
             )}
 
             <ProgressBar value={currentIndex + 1} max={quizQuestions.length} variant="gradient" />
-            <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: 'var(--space-2) 0' }}>
+            <p className="quiz-progress-label">
               Block {currentBlock + 1} • Q {currentIndex + 1}/{quizQuestions.length} – {currentTopic}
             </p>
 
             {answerSubmitting && (
-              <div style={{ textAlign: 'center', margin: 'var(--space-4) 0' }}>
+              <div className="quiz-answering-indicator">
                 <Spinner size="sm" />
-                <span style={{ marginLeft: 'var(--space-3)' }}>{SPINNER_WORDS[Math.floor(Math.random() * SPINNER_WORDS.length)]}</span>
+                <span className="quiz-spinner-label">{SPINNER_WORDS[Math.floor(Math.random() * SPINNER_WORDS.length)]}</span>
               </div>
             )}
 
-            <div className="card" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
-              <h3 style={{ marginBottom: 'var(--space-6)' }} dangerouslySetInnerHTML={{ __html: quizQuestions[currentIndex].question_text }} />
+            <div className="card quiz-question-card">
+              <h3 className="quiz-question-heading" dangerouslySetInnerHTML={{ __html: quizQuestions[currentIndex].question_text }} />
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+              <div className="quiz-options-list">
                 {['A','B','C','D'].map(opt => {
                   const answered = userAnswers[currentIndex] !== null;
                   const selected = userAnswers[currentIndex]?.selected;
@@ -444,23 +448,22 @@ export default function Quiz() {
                   return (
                     <button
                       key={opt}
-                      className={cls}
+                      className={cls + ' quiz-option-btn'}
                       onClick={() => selectAnswer(opt)}
                       disabled={answered || answerSubmitting}
-                      style={{ textAlign: 'left', justifyContent: 'flex-start' }}
                     >
-                      <span style={{ fontWeight: 700, marginRight: 'var(--space-3)' }}>{opt}.</span>
+                      <span className="quiz-option-letter">{opt}.</span>
                       <span dangerouslySetInnerHTML={{ __html: quizQuestions[currentIndex][`option_${opt.toLowerCase()}`] }} />
-                      {answered && opt === correctOpt && <Icon name="circle-check" style={{ marginLeft: 'auto', color: 'var(--text-inverse)' }} />}
-                      {answered && opt === selected && opt !== correctOpt && <Icon name="circle-xmark" style={{ marginLeft: 'auto', color: 'var(--text-inverse)' }} />}
+                      {answered && opt === correctOpt && <Icon name="circle-check" className="quiz-option-icon" />}
+                      {answered && opt === selected && opt !== correctOpt && <Icon name="circle-xmark" className="quiz-option-icon" />}
                     </button>
                   );
                 })}
               </div>
 
               {userAnswers[currentIndex] === null && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginTop: 'var(--space-6)' }}>
-                  <span style={{ fontSize: 'var(--text-sm)' }}>Confidence:</span>
+                <div className="quiz-confidence-row">
+                  <span className="quiz-confidence-label">Confidence:</span>
                   <Button variant="ghost" size="sm" onClick={() => setConfidenceForCurrent('sure')}>
                     <Icon name={confidence[currentIndex] === 'sure' ? 'circle-check' : 'circle'} /> Sure
                   </Button>
@@ -471,7 +474,7 @@ export default function Quiz() {
               )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+            <div className="quiz-nav-buttons">
               <Button variant="secondary" onClick={() => { if (currentIndex > 0) navigateTo(currentIndex - 1); }} disabled={currentIndex === 0}>
                 <Icon name="arrow-left" /> Prev
               </Button>
@@ -487,15 +490,15 @@ export default function Quiz() {
             </div>
           </div>
         ) : (
-          <div style={{ textAlign: 'center' }}>
-            <h2 style={{ marginBottom: 'var(--space-4)' }}>{currentTopic}</h2>
-            <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-8)' }}>
+          <div className="quiz-blocks-page">
+            <h2 className="quiz-blocks-heading">{currentTopic}</h2>
+            <p className="quiz-blocks-sub">
               {class_name ? `${class_name} – ` : ''}Select a block to start
             </p>
             {totalBlocks === 0 ? (
-              <p style={{ color: 'var(--text-dim)' }}>No blocks available.</p>
+              <p className="quiz-blocks-empty">No blocks available.</p>
             ) : (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-4)', justifyContent: 'center' }}>
+              <div className="quiz-blocks-grid">
                 {Array.from({ length: totalBlocks }).map((_, i) => {
                   const topicData = allTopics.find(t => t.topic_name === currentTopic);
                   const locked = topicData?.locked_blocks?.includes(i);
@@ -514,24 +517,24 @@ export default function Quiz() {
                 })}
               </div>
             )}
-            <Button variant="ghost" style={{ marginTop: 'var(--space-8)' }} onClick={() => setCurrentTopic('')}>
+            <Button variant="ghost" className="quiz-back-btn" onClick={() => setCurrentTopic('')}>
               <Icon name="arrow-left" /> Back
             </Button>
           </div>
         )}
 
         <Modal open={showRulesModal} onClose={() => setShowRulesModal(false)} title="Quiz Rules">
-          <ul style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            <li><Icon name="circle-check" style={{ color: 'var(--success)' }} /> 10 questions per block</li>
-            <li><Icon name="circle-check" style={{ color: 'var(--success)' }} /> 70% to pass</li>
-            <li><Icon name="circle-check" style={{ color: 'var(--success)' }} /> Immediate feedback</li>
-            <li><Icon name="circle-check" style={{ color: 'var(--success)' }} /> Full explanations on review</li>
-            <li><Icon name="circle-check" style={{ color: 'var(--success)' }} /> 10-minute time limit</li>
-            <li><Icon name="exclamation-triangle" style={{ color: 'var(--warning)' }} /> Tab switches are recorded</li>
-            <li><Icon name="exclamation-triangle" style={{ color: 'var(--error)' }} /> {MAX_TAB_SWITCHES} tab switches auto-submits and locks for 48 hours</li>
+          <ul className="quiz-rules-list">
+            <li><Icon name="circle-check" className="quiz-rules-icon is-success" /> 10 questions per block</li>
+            <li><Icon name="circle-check" className="quiz-rules-icon is-success" /> 70% to pass</li>
+            <li><Icon name="circle-check" className="quiz-rules-icon is-success" /> Immediate feedback</li>
+            <li><Icon name="circle-check" className="quiz-rules-icon is-success" /> Full explanations on review</li>
+            <li><Icon name="circle-check" className="quiz-rules-icon is-success" /> 10-minute time limit</li>
+            <li><Icon name="exclamation-triangle" className="quiz-rules-icon is-warning" /> Tab switches are recorded</li>
+            <li><Icon name="exclamation-triangle" className="quiz-rules-icon is-error" /> {MAX_TAB_SWITCHES} tab switches auto-submits and locks for 48 hours</li>
           </ul>
-          <div style={{ marginTop: 'var(--space-6)' }}>
-            <Button onClick={confirmStartBlock} style={{ width: '100%' }}>I understand, let's begin!</Button>
+          <div className="quiz-rules-submit">
+            <Button onClick={confirmStartBlock} className="quiz-rules-submit-btn">I understand, let's begin!</Button>
           </div>
         </Modal>
       </div>
