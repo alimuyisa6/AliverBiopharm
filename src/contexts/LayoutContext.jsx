@@ -28,15 +28,22 @@ export function LayoutProvider({ children }) {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([
+    Promise.allSettled([
       bootstrapPlatform(effectiveLevel),
       getAllSiteSections()
     ])
-      .then(([bootstrapData, sectionData]) => {
-        setBootstrap(bootstrapData);
-        setSections(sectionData || {});
+      .then(([bootstrapResult, sectionsResult]) => {
+        if (bootstrapResult.status === 'fulfilled') {
+          setBootstrap(bootstrapResult.value);
+        } else {
+          console.error('bootstrapPlatform failed', bootstrapResult.reason);
+        }
+        if (sectionsResult.status === 'fulfilled') {
+          setSections(sectionsResult.value || {});
+        } else {
+          console.error('getAllSiteSections failed', sectionsResult.reason);
+        }
       })
-      .catch(() => {})
       .finally(() => setLoading(false));
   }, [effectiveLevel, activeGroupId]);
 
@@ -63,7 +70,7 @@ export function LayoutProvider({ children }) {
         groups: [], level: null, user, isAuthenticated: !!user,
         colorTheme: {}, theme, toggleTheme, authLoading,
         refreshUser: refresh, switchClass: handleSwitchClass, switching, activeGroupId,
-        sections: {},
+        sections,
       };
     }
 
