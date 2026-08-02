@@ -1,4 +1,4 @@
-/* pages/Recall.jsx */
+ /* pages/Recall.jsx */
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -105,6 +105,7 @@ export default function BioRecall() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [rankTitle, setRankTitle] = useState('Beginner');
   const [xpProgress, setXpProgress] = useState({ level: 1, xpIntoLevel: 0, xpToNext: 100, progressPercent: 0 });
+  const [questionStartTime, setQuestionStartTime] = useState(null);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try { return localStorage.getItem('bioRecall_sound') !== 'off'; } catch { return true; }
   });
@@ -164,6 +165,7 @@ export default function BioRecall() {
         setCurrentIndex(0);
         setSessionActive(true);
         setUserAnswersRecord([]);
+        setQuestionStartTime(new Date());
       } else {
         addToast('No questions available for this topic', 'warning');
       }
@@ -252,12 +254,17 @@ export default function BioRecall() {
     });
   };
 
-  if (!isReady || access.isPending) return <PendingApprovalScreen />;
+  if (!isReady || access.loading) return (
+    <div className="fcd-loading-wrap">
+      <Spinner size="lg" />
+    </div>
+  );
+  if (access.isPending) return <PendingApprovalScreen />;
   if (!access.canAccess) return <AccessDenied />;
 
   if (loading && !sessionActive && !showReport) {
     return (
-      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div className="section recall-loading-wrap">
         <Spinner size="lg" />
       </div>
     );
@@ -268,74 +275,79 @@ export default function BioRecall() {
   const levelName = displayName || level?.id || '';
   const classLabel = class_name || '';
 
+  function rankClass(idx) {
+    if (idx === 0) return 'is-gold';
+    if (idx === 1) return 'is-silver';
+    if (idx === 2) return 'is-bronze';
+    return 'is-default';
+  }
+
   return (
     <div className="recall-page">
-      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+      <div className="section recall-page-section">
         <nav className="breadcrumb">
           <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
           <Icon name="chevron-right" className="breadcrumb-sep" />
           <span>Recall Practice</span>
         </nav>
 
-        <div style={{ marginBottom: 'var(--space-8)' }}>
+        <div className="recall-header">
           <span className="sec-label">{level === 'Pharmacy' ? 'RecallRx' : 'BioRecall'}</span>
-          <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+          <h1 className="section-title recall-page-title">
             {level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${levelName}`}
           </h1>
           {levelName && (
-            <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-              <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
-                {levelName}
-              </span>
-              {classLabel && <span className="chip" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>{classLabel}</span>}
+            <div className="recall-chips-row">
+              <span className="chip recall-chip-level">{levelName}</span>
+              {classLabel && <span className="chip recall-chip-class">{classLabel}</span>}
             </div>
           )}
         </div>
 
         {!sessionActive && !showReport && (
           <>
-            <div className="card" style={{ padding: 'var(--space-8)', textAlign: 'center', marginBottom: 'var(--space-8)' }}>
-              <Icon name="brain" style={{ fontSize: '3rem', color: 'var(--primary)', marginBottom: 'var(--space-4)' }} />
+            <div className="card recall-intro-card">
+              <Icon name="brain" className="recall-intro-icon" />
               <Button onClick={openTopicModal} size="lg">
                 Continue to Topics{levelName ? ` in ${levelName}` : ''}
               </Button>
-              <div style={{ marginTop: 'var(--space-4)', display: 'flex', justifyContent: 'center', gap: 'var(--space-8)' }}>
+              <div className="recall-intro-stats">
                 <div>
-                  <Icon name="fire" style={{ color: 'var(--warm)' }} />
-                  <span style={{ marginLeft: 'var(--space-2)' }}>{streakDays} Day Streak</span>
+                  <Icon name="fire" className="recall-intro-stat-icon is-warm" />
+                  <span className="recall-intro-stat-text">{streakDays} Day Streak</span>
                 </div>
                 <div>
-                  <Icon name="star" style={{ color: 'var(--accent)' }} />
-                  <span style={{ marginLeft: 'var(--space-2)' }}>Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</span>
+                  <Icon name="star" className="recall-intro-stat-icon is-accent" />
+                  <span className="recall-intro-stat-text">Level {xpProgress.level} · {xpTotal} XP · {rankTitle}</span>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3" style={{ marginBottom: 'var(--space-8)' }}>
+            <div className="grid grid-cols-3 recall-cards-grid">
               <Card>
-                <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
-                  <Icon name="trophy" style={{ fontSize: '2rem', color: 'var(--warm)' }} />
-                  <h3 style={{ margin: 'var(--space-4) 0' }}>XP Progress</h3>
-                  <p style={{ marginBottom: 'var(--space-4)' }}>Level {xpProgress.level} · {rankTitle}</p>
+                <div className="recall-stat-card-inner">
+                  <Icon name="trophy" className="recall-stat-card-icon is-warm" />
+                  <h3 className="recall-stat-card-heading">XP Progress</h3>
+                  <p className="recall-stat-card-sub">Level {xpProgress.level} · {rankTitle}</p>
                   <ProgressBar value={xpProgress.xpIntoLevel} max={100} variant="gradient" />
-                  <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>{xpProgress.xpIntoLevel} / 100 XP to next level</p>
+                  <p className="recall-stat-card-footer">{xpProgress.xpIntoLevel} / 100 XP to next level</p>
                 </div>
               </Card>
 
               <Card>
-                <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
-                  <Icon name="brain" style={{ fontSize: '2rem', color: 'var(--primary)' }} />
-                  <h3 style={{ margin: 'var(--space-4) 0' }}>Brain Energy</h3>
+                <div className="recall-stat-card-inner">
+                  <Icon name="brain" className="recall-stat-card-icon is-primary" />
+                  <h3 className="recall-stat-card-heading">Brain Energy</h3>
                   <ProgressBar value={brainEnergy} max={100} variant="primary" />
-                  <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>{brainEnergy}% remaining</p>
+                  <p className="recall-stat-card-footer">{brainEnergy}% remaining</p>
                 </div>
               </Card>
 
               <Card>
-                <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
-                  <Icon name="trophy" style={{ fontSize: '2rem', color: 'var(--accent)' }} />
-                  <h3 style={{ margin: 'var(--space-4) 0' }}>Achievements</h3>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', justifyContent: 'center' }}>
+                <div className="recall-stat-card-inner">
+                  <Icon name="trophy" className="recall-stat-card-icon is-accent" />
+                  <h3 className="recall-stat-card-heading">Achievements</h3>
+                  <div className="recall-badge-row">
                     {achievementsList.slice(0, 6).map((ach) => (
                       <span key={ach.key} className="badge badge-accent" title={ach.title}>
                         <Icon name={ach.icon || 'medal'} />
@@ -347,18 +359,18 @@ export default function BioRecall() {
             </div>
 
             {topicEntries.length > 0 && (
-              <div style={{ marginBottom: 'var(--space-8)' }}>
-                <h3 style={{ marginBottom: 'var(--space-6)' }}>
+              <div className="recall-topics-section">
+                <h3 className="recall-section-heading">
                   Topic Mastery {levelName ? `in ${levelName}` : ''}{classLabel ? ` – ${classLabel}` : ''}
                 </h3>
                 <div className="grid grid-cols-3">
                   {topicEntries.map(([topic, mastery]) => (
                     <Card key={topic}>
-                      <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
-                        <Icon name="book-open" style={{ fontSize: '2rem', color: 'var(--primary)' }} />
-                        <h4 style={{ margin: 'var(--space-3) 0' }}>{topic}</h4>
+                      <div className="recall-topic-card-inner">
+                        <Icon name="book-open" className="recall-topic-card-icon" />
+                        <h4 className="recall-topic-card-heading">{topic}</h4>
                         <ProgressBar value={mastery} max={100} variant="success" />
-                        <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>{Math.round(mastery)}%</p>
+                        <p className="recall-topic-card-pct">{Math.round(mastery)}%</p>
                       </div>
                     </Card>
                   ))}
@@ -366,19 +378,19 @@ export default function BioRecall() {
               </div>
             )}
 
-            <div style={{ marginBottom: 'var(--space-8)' }}>
-              <h3 style={{ marginBottom: 'var(--space-6)' }}>
+            <div className="recall-leaderboard-section">
+              <h3 className="recall-section-heading">
                 Leaderboard {levelName ? `– ${levelName}` : ''}
               </h3>
               {leaderboard.length === 0 ? (
-                <p style={{ color: 'var(--text-dim)' }}>No data yet. Be the first!</p>
+                <p className="recall-leaderboard-empty">No data yet. Be the first!</p>
               ) : (
                 leaderboard.map((entry, idx) => (
-                  <div key={idx} className="card" style={{ padding: 'var(--space-4)', flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-2)' }}>
-                    <span style={{ fontWeight: 700, color: idx === 0 ? 'var(--warm)' : idx === 1 ? 'var(--primary)' : idx === 2 ? 'var(--accent)' : 'var(--text-dim)' }}>
+                  <div key={idx} className="card recall-leaderboard-row">
+                    <span className={`recall-rank ${rankClass(idx)}`}>
                       #{idx + 1}
                     </span>
-                    <span style={{ flex: 1 }}>{entry.user_name || entry.email || 'Anonymous'}</span>
+                    <span className="recall-entry-name">{entry.user_name || entry.email || 'Anonymous'}</span>
                     <span>{entry.total_xp} XP</span>
                     <span className="badge badge-primary">Level {entry.recall_level}</span>
                   </div>
@@ -386,7 +398,7 @@ export default function BioRecall() {
               )}
             </div>
 
-            <div style={{ textAlign: 'center' }}>
+            <div className="recall-sound-toggle-wrap">
               <Button variant="ghost" onClick={toggleSound}>
                 <Icon name={soundEnabled ? 'volume-high' : 'volume-xmark'} />
                 Sound: {soundEnabled ? 'On' : 'Off'}
@@ -398,25 +410,25 @@ export default function BioRecall() {
         {sessionActive && currentQuestion && (
           <div>
             <ProgressBar value={currentIndex + 1} max={sessionQuestions.length} variant="gradient" />
-            <p style={{ textAlign: 'center', color: 'var(--text-dim)', margin: 'var(--space-4) 0' }}>
+            <p className="quiz-progress-label">
               Question {currentIndex + 1} of {sessionQuestions.length}
               {selectedTopic?.topic_name && <> – {selectedTopic.topic_name}</>}
             </p>
 
-            <Card style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
-              <h3 style={{ marginBottom: 'var(--space-6)' }}>{currentQuestion.question_text}</h3>
+            <Card className="recall-question-card">
+              <h3 className="recall-question-heading">{currentQuestion.question_text}</h3>
               <Input
                 ref={answerInputRef}
                 placeholder="Type your answer..."
                 disabled={analyzing}
               />
               {analyzing && (
-                <div style={{ textAlign: 'center', marginTop: 'var(--space-4)' }}>
+                <div className="recall-analyzing-row">
                   <Spinner size="sm" />
-                  <span style={{ marginLeft: 'var(--space-3)' }}>Checking...</span>
+                  <span className="recall-analyzing-label">Checking...</span>
                 </div>
               )}
-              <div style={{ marginTop: 'var(--space-6)', display: 'flex', gap: 'var(--space-4)' }}>
+              <div className="recall-answer-actions">
                 {!feedbackResult ? (
                   <Button onClick={handleSubmitAnswer} disabled={analyzing} loading={analyzing}>
                     <Icon name="paper-plane" /> Submit
@@ -430,53 +442,50 @@ export default function BioRecall() {
             </Card>
 
             {feedbackResult && (
-              <Card style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+              <Card className="recall-feedback-card">
+                <div className="recall-feedback-header">
                   <Icon
                     name={feedbackResult.strength === 'excellent' ? 'star' : feedbackResult.strength === 'strong' ? 'circle-check' : 'rotate'}
-                    style={{
-                      fontSize: '2rem',
-                      color: feedbackResult.strength === 'excellent' ? 'var(--success)' : feedbackResult.strength === 'strong' ? 'var(--primary)' : 'var(--warm)'
-                    }}
+                    className={`recall-feedback-icon ${feedbackResult.strength === 'excellent' ? 'is-excellent' : feedbackResult.strength === 'strong' ? 'is-strong' : 'is-developing'}`}
                   />
                   <div>
                     <h4>{feedbackResult.strength === 'excellent' ? 'Perfect!' : feedbackResult.strength === 'strong' ? 'Close!' : 'Needs Review'}</h4>
-                    <p style={{ color: 'var(--text-dim)' }}>+{feedbackResult.xp_earned} XP</p>
+                    <p className="recall-feedback-xp">+{feedbackResult.xp_earned} XP</p>
                   </div>
                 </div>
                 <p><strong>Correct answer:</strong> {feedbackResult.correct_answer}</p>
-                {feedbackResult.explanation && <p style={{ color: 'var(--text-dim)' }}>{feedbackResult.explanation}</p>}
+                {feedbackResult.explanation && <p className="recall-feedback-explanation">{feedbackResult.explanation}</p>}
               </Card>
             )}
           </div>
         )}
 
         {showReport && sessionReport && (
-          <Card style={{ padding: 'var(--space-8)', textAlign: 'center' }}>
-            <Icon name="trophy" style={{ fontSize: '3rem', color: 'var(--warm)', marginBottom: 'var(--space-4)' }} />
+          <Card className="recall-report-card">
+            <Icon name="trophy" className="recall-report-icon" />
             <h2>Session Complete</h2>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-8)', margin: 'var(--space-8) 0' }}>
+            <div className="recall-report-stats">
               <div>
-                <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-black)', color: 'var(--success)' }}>
+                <div className="recall-report-value is-success">
                   {sessionReport.excellent || 0}
                 </div>
-                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Excellent</div>
+                <div className="recall-report-label">Excellent</div>
               </div>
               <div>
-                <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-black)', color: 'var(--primary)' }}>
+                <div className="recall-report-value is-primary">
                   {sessionReport.strong || 0}
                 </div>
-                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Strong</div>
+                <div className="recall-report-label">Strong</div>
               </div>
               <div>
-                <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-black)', color: 'var(--warm)' }}>
+                <div className="recall-report-value is-warm">
                   {sessionReport.developing || 0}
                 </div>
-                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>Needs Review</div>
+                <div className="recall-report-label">Needs Review</div>
               </div>
             </div>
             <p>Mastery Score: {sessionReport.mastery_score || 0}%</p>
-            <div style={{ marginTop: 'var(--space-8)', display: 'flex', gap: 'var(--space-4)', justifyContent: 'center' }}>
+            <div className="recall-report-actions">
               <Button onClick={() => { setShowReport(false); setSessionActive(false); setTopicModalOpen(true); }}>
                 <Icon name="rotate" /> Study Another Topic
               </Button>
@@ -488,19 +497,18 @@ export default function BioRecall() {
         )}
 
         <Modal open={topicModalOpen} onClose={closeTopicModal} title={`Select a Topic${levelName ? ` in ${levelName}` : ''}${classLabel ? ` – ${classLabel}` : ''}`}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div className="recall-topic-modal-list">
             {topicList.length === 0 && (
-              <p style={{ color: 'var(--text-dim)' }}>No topics available for your level.</p>
+              <p className="recall-topic-modal-empty">No topics available for your level.</p>
             )}
             {topicList.map((topic) => (
               <button
                 key={topic.unit_id}
-                className="btn btn-secondary"
+                className="btn btn-secondary recall-topic-modal-btn"
                 onClick={() => handleStartSession(topic)}
-                style={{ justifyContent: 'space-between' }}
               >
                 <span>{topic.topic_name}</span>
-                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{topic.question_count} questions</span>
+                <span className="recall-topic-modal-count">{topic.question_count} questions</span>
               </button>
             ))}
           </div>
@@ -508,4 +516,4 @@ export default function BioRecall() {
       </div>
     </div>
   );
-} 
+}
