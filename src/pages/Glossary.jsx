@@ -58,10 +58,10 @@ export default function Glossary() {
   }, [level, class_name]);
 
   const getLevelColor = (lvl) => {
-    if (lvl === 'O-Level') return '#0ab5b5';
-    if (lvl === 'A-Level') return '#b8873a';
-    if (lvl === 'Pharmacy') return '#10b981';
-    return 'var(--clr-cyan)';
+    if (lvl === 'O-Level') return 'var(--primary)';
+    if (lvl === 'A-Level') return 'var(--warm)';
+    if (lvl === 'Pharmacy') return 'var(--success)';
+    return 'var(--primary)';
   };
 
   const groupedTerms = {};
