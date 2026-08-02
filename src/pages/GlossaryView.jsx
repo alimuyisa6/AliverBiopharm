@@ -23,7 +23,7 @@ export default function GlossaryView({
 }) {
   if (loading && terms.length === 0) {
     return (
-      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="glossary-loading-wrap">
         <div className="pdf-loading-spinner">
           <div className="spinner-dot dot-magenta"></div>
           <div className="spinner-dot dot-cyan"></div>
@@ -36,7 +36,7 @@ export default function GlossaryView({
   const levelColor = getLevelColor(selectedLevel);
 
   return (
-    <div className="glossary-page" style={{ paddingTop: '20px' }}>
+    <div className="glossary-page">
       <div className="glossary-header">
         <div className="glossary-header-inner">
           <h1 className="glossary-main-title">
@@ -47,7 +47,7 @@ export default function GlossaryView({
             Master every term with linked quizzes, notes, flashcards, and past papers — all in one place.
           </p>
           {selectedClass && (
-            <div className="glossary-class-badge" style={{ borderColor: levelColor, color: levelColor }}>
+            <div className="glossary-class-badge" style={{ '--badge-accent': levelColor }}>
               <span className="glossary-class-badge-label">Class:</span>
               <span className="glossary-class-badge-value">{selectedClass}</span>
             </div>
@@ -137,9 +137,7 @@ export default function GlossaryView({
                         key={term.id}
                         className={`glossary-term-btn ${activeTerm?.id === term.id ? 'active' : ''}`}
                         onClick={() => onTermClick(term)}
-                        style={{
-                          borderLeftColor: activeTerm?.id === term.id ? levelColor : 'transparent'
-                        }}
+                        style={{ '--term-accent': activeTerm?.id === term.id ? levelColor : 'transparent' }}
                       >
                         <span className="glossary-term-btn-text">{term.term}</span>
                         <span className="glossary-term-btn-arrow">
