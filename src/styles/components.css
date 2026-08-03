@@ -76,55 +76,55 @@
   height: 2.25rem;
   border-radius: var(--radius-full);
   background: var(--bg-card-hover);
-  color: var(--text-dim);
-  transition: color var(--ease-fast), background var(--ease-fast), transform var(--ease-fast);
+  color: var(--text-inverse);
+  transition: filter var(--ease-fast), transform var(--ease-fast);
 }
 
 .footer-social-link:hover {
   transform: translateY(-2px);
-  color: var(--text-inverse);
+  filter: brightness(1.15);
 }
 
-.footer-social-link[data-platform="x-twitter"]:hover {
+.footer-social-link[data-platform="x-twitter"] {
   background: #000000;
 }
 
-.footer-social-link[data-platform="facebook"]:hover {
+.footer-social-link[data-platform="facebook"] {
   background: #1877F2;
 }
 
-.footer-social-link[data-platform="linkedin"]:hover {
+.footer-social-link[data-platform="linkedin"] {
   background: #0A66C2;
 }
 
-.footer-social-link[data-platform="instagram"]:hover {
+.footer-social-link[data-platform="instagram"] {
   background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4);
 }
 
-.footer-social-link[data-platform="telegram"]:hover {
+.footer-social-link[data-platform="telegram"] {
   background: #26A5E4;
 }
 
-.footer-social-link[data-platform="youtube"]:hover {
+.footer-social-link[data-platform="youtube"] {
   background: #FF0000;
 }
 
-.footer-social-link[data-platform="tiktok"]:hover {
+.footer-social-link[data-platform="tiktok"] {
   background: #000000;
 }
 
-.footer-social-link[data-platform="whatsapp"]:hover {
+.footer-social-link[data-platform="whatsapp"] {
   background: #25D366;
 }
 
-.footer-social-link[data-platform="discord"]:hover {
+.footer-social-link[data-platform="discord"] {
   background: #5865F2;
 }
 
-.footer-social-link[data-platform="pinterest"]:hover {
+.footer-social-link[data-platform="pinterest"] {
   background: #E60023;
 }
 
-.footer-social-link[data-platform="reddit"]:hover {
+.footer-social-link[data-platform="reddit"] {
   background: #FF4500;
 }
