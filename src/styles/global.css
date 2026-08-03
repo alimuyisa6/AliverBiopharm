@@ -1,4 +1,4 @@
-/* styles/global.css */
+ /* styles/global.css */
 @import './colors.css';
 @import './semantic.css';
 @import './typography.css';
@@ -108,7 +108,7 @@ h4 { font-size: var(--text-xl); }
   top: var(--space-3);
 }
 
-  .reveal {
+.reveal {
   opacity: 0;
   transform: translateY(36px);
   transition: opacity 0.8s ease, transform 0.8s ease;
@@ -119,7 +119,6 @@ h4 { font-size: var(--text-xl); }
   transform: translateY(0);
 }
 
-/* Fallback: if not revealed within 1s, show anyway */
 .reveal:not(.in) {
   animation: forceVisible 1s ease 1s forwards;
 }
