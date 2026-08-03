@@ -1,4 +1,4 @@
- /* api/server.js */
+/* api/server.js */
 import {
   setCorsHeaders,
   generateCsrfToken,
@@ -59,7 +59,7 @@ const CSRF_EXEMPT_KEYS = new Set([
   'auth:signin',
   'auth:handoff_exchange',
   'contact:submit_contact',
-  'site:subscribe_newsletter'
+  'contact:subscribe_newsletter'
 ]);
 
 export default async function handler(req, res) {
