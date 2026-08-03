@@ -15,7 +15,7 @@
 @import './grid.css';
 @import './toast.css';
 @import './notification.css';
- @import './chat.css';
+@import './chat.css';
 @import './quiz.css';
 @import './flashcard.css';
 @import './classroom.css';
@@ -66,4 +66,65 @@
 
 .password-input-wrapper {
   position: relative;
+}
+
+.footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-card-hover);
+  color: var(--text-dim);
+  transition: color var(--ease-fast), background var(--ease-fast), transform var(--ease-fast);
+}
+
+.footer-social-link:hover {
+  transform: translateY(-2px);
+  color: var(--text-inverse);
+}
+
+.footer-social-link[data-platform="x-twitter"]:hover {
+  background: #000000;
+}
+
+.footer-social-link[data-platform="facebook"]:hover {
+  background: #1877F2;
+}
+
+.footer-social-link[data-platform="linkedin"]:hover {
+  background: #0A66C2;
+}
+
+.footer-social-link[data-platform="instagram"]:hover {
+  background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4);
+}
+
+.footer-social-link[data-platform="telegram"]:hover {
+  background: #26A5E4;
+}
+
+.footer-social-link[data-platform="youtube"]:hover {
+  background: #FF0000;
+}
+
+.footer-social-link[data-platform="tiktok"]:hover {
+  background: #000000;
+}
+
+.footer-social-link[data-platform="whatsapp"]:hover {
+  background: #25D366;
+}
+
+.footer-social-link[data-platform="discord"]:hover {
+  background: #5865F2;
+}
+
+.footer-social-link[data-platform="pinterest"]:hover {
+  background: #E60023;
+}
+
+.footer-social-link[data-platform="reddit"]:hover {
+  background: #FF4500;
 }
