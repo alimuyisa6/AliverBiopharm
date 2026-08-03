@@ -28,6 +28,8 @@ import {
   FaShare, FaGear, FaFileContract,
   FaScrewdriverWrench, FaRightToBracket, FaRightFromBracket,
   FaPaperPlane, FaPlay, FaThumbsUp, FaShieldHalved,
+  FaFacebookF, FaTelegram, FaYoutube, FaTiktok,
+  FaWhatsapp, FaDiscord, FaPinterestP, FaRedditAlien,
 } from 'react-icons/fa6';
 
 const ICON_MAP = {
@@ -137,6 +139,14 @@ const ICON_MAP = {
   keyboard: FaKeyboard,
   'flag-checkered': FaFlagCheckered,
   share: FaShare,
+  facebook: FaFacebookF,
+  telegram: FaTelegram,
+  youtube: FaYoutube,
+  tiktok: FaTiktok,
+  whatsapp: FaWhatsapp,
+  discord: FaDiscord,
+  pinterest: FaPinterestP,
+  reddit: FaRedditAlien,
 };
 
 const Icon = memo(function Icon({ name, size, className, ...props }) {
