@@ -252,7 +252,15 @@ export default function Layout({ children, showFooter = true }) {
               {footer.social_links && Object.keys(footer.social_links).length > 0 && (
                 <div className="footer-social">
                   {Object.entries(footer.social_links).map(([platform, url]) => (
-                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="footer-social-link"
+                      data-platform={platform}
+                      aria-label={platform}
+                    >
                       <Icon name={platform} />
                     </a>
                   ))}
@@ -303,4 +311,3 @@ export default function Layout({ children, showFooter = true }) {
     </div>
   );
 }
- 
