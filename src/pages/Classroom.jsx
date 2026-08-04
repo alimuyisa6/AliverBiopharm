@@ -1,4 +1,4 @@
-/* pages/Classroom.jsx */
+ /* pages/Classroom.jsx */
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -28,14 +28,6 @@ const STATUS_LABELS = {
   open_floor: 'Open Floor',
   ended: 'Ended',
   offline: 'Offline',
-};
-
-const STATUS_COLORS = {
-  live: 'var(--success)',
-  upcoming: 'var(--warm)',
-  open_floor: 'var(--primary)',
-  ended: 'var(--text-muted)',
-  offline: 'var(--text-muted)',
 };
 
 export default function Classroom() {
@@ -82,7 +74,7 @@ export default function Classroom() {
 
   if (loading) {
     return (
-      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div className="fcd-loading-wrap">
         <Spinner size="lg" />
       </div>
     );
@@ -93,33 +85,31 @@ export default function Classroom() {
 
   return (
     <div className="classroom-page">
-      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+      <div className="section classroom-list-section">
         <span className="sec-label">Live Learning</span>
-        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+        <h1 className="section-title classroom-page-title">
           Classrooms{levelName ? ` – ${levelName}` : ''}
         </h1>
         {classLabel && (
-          <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
-            {classLabel}
-          </p>
+          <p className="classroom-class-label">{classLabel}</p>
         )}
 
         {levelName && !showAll && (
-          <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-6)' }}>
-            <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>{levelName}</span>
-            {classLabel && <span className="chip" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>{classLabel}</span>}
+          <div className="classroom-level-chips">
+            <span className="chip classroom-chip-level">{levelName}</span>
+            {classLabel && <span className="chip classroom-chip-class">{classLabel}</span>}
           </div>
         )}
         {showAll && (
-          <div style={{ marginBottom: 'var(--space-6)' }}>
+          <div className="classroom-teacher-badge-wrap">
             <span className="badge badge-primary">All Levels (Teacher Access)</span>
           </div>
         )}
 
         {error && (
-          <div className="alert alert-error" style={{ marginBottom: 'var(--space-6)' }}>
+          <div className="alert alert-error classroom-error-alert">
             <Icon name="exclamation-triangle" /> {error}
-            <Button variant="secondary" size="sm" onClick={fetchRooms} style={{ marginLeft: 'auto' }}>Retry</Button>
+            <Button variant="secondary" size="sm" onClick={fetchRooms} className="classroom-error-retry">Retry</Button>
           </div>
         )}
 
@@ -139,33 +129,31 @@ export default function Classroom() {
         {!loading && !error && rooms.length > 0 && (
           <div className="grid grid-cols-3">
             {rooms.map(room => {
-              const statusColor = STATUS_COLORS[room.status] || STATUS_COLORS.offline;
+              const statusKey = STATUS_LABELS[room.status] ? room.status : 'offline';
               return (
-                <div key={room.id} className="card" style={{ borderTop: `4px solid ${statusColor}` }}>
+                <div key={room.id} className={`card classroom-room-card status-${statusKey}`}>
                   <div className="card-image-placeholder">
                     {room.cover_image_url ? (
                       <img src={room.cover_image_url} alt={room.title} className="card-image" />
                     ) : (
-                      <Icon name="users" style={{ fontSize: '3rem', color: statusColor }} />
+                      <Icon name="users" className="classroom-room-status-icon" />
                     )}
                   </div>
-                  <div style={{ padding: 'var(--space-3) var(--space-4)', background: statusColor, color: '#fff', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                  <div className="classroom-room-status-bar">
                     <Icon name={STATUS_ICONS[room.status] || 'circle'} />
-                    <span style={{ fontSize: 'var(--text-xs)', fontWeight: 600 }}>{STATUS_LABELS[room.status] || room.status}</span>
+                    <span>{STATUS_LABELS[room.status] || room.status}</span>
                   </div>
                   <div className="card-body">
                     <h3 className="card-title">{room.title}</h3>
                     <p className="card-text">{room.topic_name} · {room.class_name}</p>
                     {room.tutor_name && (
-                      <p className="card-text" style={{ fontSize: 'var(--text-xs)' }}>
-                        <Icon name="user" style={{ marginRight: 'var(--space-1)' }} />
-                        {room.tutor_name}
+                      <p className="card-text classroom-room-meta">
+                        <Icon name="user" /> {room.tutor_name}
                       </p>
                     )}
                     {room.participant_count > 0 && (
-                      <p className="card-text" style={{ fontSize: 'var(--text-xs)' }}>
-                        <Icon name="users" style={{ marginRight: 'var(--space-1)' }} />
-                        {room.participant_count} participants
+                      <p className="card-text classroom-room-meta">
+                        <Icon name="users" /> {room.participant_count} participants
                       </p>
                     )}
                   </div>
@@ -192,4 +180,4 @@ export default function Classroom() {
       </div>
     </div>
   );
-} 
+}
