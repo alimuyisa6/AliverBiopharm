@@ -36,7 +36,7 @@ export default function Classroom() {
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
   const { level, class_name, showAll, displayName } = useLevelFilter();
-  const { groups } = useLayout();
+  const { groups, bootstrap } = useLayout();
 
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +68,12 @@ export default function Classroom() {
     }
     setLoading(false);
   };
+
+  function getEmptyStateImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
+    return comp?.properties?.image_url || null;
+  }
 
   if (!isReady || access.isPending) return <PendingApprovalScreen />;
   if (!access.canAccess) return <AccessDenied />;
@@ -115,7 +121,7 @@ export default function Classroom() {
 
         {!loading && !error && rooms.length === 0 && (
           <EmptyState
-            icon="door-closed"
+            image={getEmptyStateImage('classrooms')}
             title="No Classrooms Available"
             description={`No active rooms for ${classLabel || levelName || 'your level'}. Check back later or start a discussion.`}
             action={
