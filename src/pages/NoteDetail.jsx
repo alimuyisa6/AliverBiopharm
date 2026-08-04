@@ -13,6 +13,13 @@ import {
   getReadingProgress
 } from '../api/client';
 
+function normalizeReactions(data) {
+  return {
+    counts: data?.counts || {},
+    user: Array.isArray(data?.user_reactions) ? data.user_reactions : []
+  };
+}
+
 export default function NoteDetail() {
   const { user } = useAuth();
   const { groups } = useLayout();
@@ -53,7 +60,7 @@ export default function NoteDetail() {
           getReactions('note', data.id),
           getComments('note', data.id)
         ]);
-        setReactions(reactionData);
+        setReactions(normalizeReactions(reactionData));
         setComments(commentData?.comments || []);
 
         if (user) {
@@ -103,7 +110,7 @@ export default function NoteDetail() {
     try {
       await toggleReaction('note', noteId, reactionType);
       const updated = await getReactions('note', noteId);
-      setReactions(updated);
+      setReactions(normalizeReactions(updated));
     } catch (err) {
       console.error(err);
     }
@@ -186,7 +193,7 @@ export default function NoteDetail() {
             ].map(({ type, icon, label }) => (
               <button
                 key={type}
-                className={`note-reaction-btn ${reactions.user.includes(type) ? 'active' : ''}`}
+                className={`note-reaction-btn ${(reactions.user || []).includes(type) ? 'active' : ''}`}
                 onClick={() => handleReaction(type)}
               >
                 <i className={`fa-regular ${icon}`}></i> {label}
