@@ -166,16 +166,18 @@ export default function NoteDetail() {
         </div>
 
         <article ref={contentRef} className="note-article">
-          <div className="note-meta-tags">
-            {note?.unit_title?.group_name && (
-              <span className="note-tag note-tag-group">{note.unit_title.group_name}</span>
-            )}
-            {note?.unit_title?.unit_name && (
-              <span className="note-tag note-tag-unit">{note.unit_title.unit_name}</span>
-            )}
-          </div>
+          <div className="note-hero">
+            <div className="note-meta-tags">
+              {note?.unit_title?.group_name && (
+                <span className="note-tag note-tag-group">{note.unit_title.group_name}</span>
+              )}
+              {note?.unit_title?.unit_name && (
+                <span className="note-tag note-tag-unit">{note.unit_title.unit_name}</span>
+              )}
+            </div>
 
-          <h1 className="note-title">{note?.title || note?.unit_title?.unit_name || 'Note'}</h1>
+            <h1 className="note-title">{note?.title || note?.unit_title?.unit_name || 'Note'}</h1>
+          </div>
 
           <div
             className="notes-content-container"
