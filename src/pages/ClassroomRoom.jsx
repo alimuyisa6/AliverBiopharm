@@ -119,7 +119,7 @@ export default function ClassroomRoom() {
 
   if (loading) {
     return (
-      <div className="section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div className="fcd-loading-wrap">
         <Spinner size="lg" />
       </div>
     );
@@ -127,7 +127,7 @@ export default function ClassroomRoom() {
 
   if (error || !room) {
     return (
-      <div className="section" style={{ textAlign: 'center', paddingTop: 'var(--space-16)' }}>
+      <div className="section quiz-blocks-page">
         <EmptyState
           icon="exclamation-triangle"
           title="Room Not Found"
@@ -147,75 +147,74 @@ export default function ClassroomRoom() {
 
   return (
     <div className="classroom-room-page">
-      <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border-default)', padding: 'var(--space-4) var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+      <div className="classroom-room-header">
         <Button variant="ghost" size="sm" icon onClick={handleLeaveRoom}>
           <Icon name="arrow-left" />
         </Button>
-        <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: 'var(--text-xl)', marginBottom: 'var(--space-1)' }}>{room.title}</h2>
-          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
-            {room.topic_name && <span className="chip" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>{room.topic_name}</span>}
-            {roomClass && <span className="chip" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>{roomClass}</span>}
-            {levelName && <span className="chip" style={{ background: 'var(--secondary-light)', color: 'var(--secondary)' }}>{levelName}</span>}
+        <div className="classroom-room-header-info">
+          <h2 className="classroom-room-header-title">{room.title}</h2>
+          <div className="classroom-room-header-chips">
+            {room.topic_name && <span className="chip classroom-chip-topic">{room.topic_name}</span>}
+            {roomClass && <span className="chip classroom-chip-class">{roomClass}</span>}
+            {levelName && <span className="chip classroom-chip-level-alt">{levelName}</span>}
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+        <div className="classroom-room-live-indicator">
           <span className="status-dot status-dot-success" />
-          <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>Live</span>
+          <span className="classroom-room-live-label">Live</span>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', height: 'calc(100vh - 140px)' }}>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-4)' }} ref={chatBodyRef}>
+      <div className="classroom-room-layout">
+        <div className="classroom-chat-column">
+          <div className="classroom-chat-body" ref={chatBodyRef}>
             {messages.map(msg => (
-              <div key={msg.id} style={{ marginBottom: 'var(--space-3)' }}>
+              <div key={msg.id} className="classroom-message">
                 {msg.message_type === 'system' ? (
-                  <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 'var(--text-sm)', fontStyle: 'italic' }}>
-                    <Icon name="circle-info" style={{ marginRight: 'var(--space-2)' }} />
+                  <div className="classroom-message-system">
+                    <Icon name="circle-info" />
                     {msg.content}
                   </div>
                 ) : msg.message_type === 'resource' ? (
-                  <div className="card" style={{ padding: 'var(--space-4)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
+                  <div className="card classroom-message-resource">
+                    <div className="classroom-message-resource-header">
                       <strong>{msg.sender_name || 'Tutor'}</strong>
-                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                      <span className="classroom-message-resource-time">
                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                      <Icon name="file-pdf" style={{ color: 'var(--error)' }} />
+                    <div className="classroom-message-resource-file">
+                      <Icon name="file-pdf" />
                       <a href={msg.file_url} target="_blank" rel="noreferrer" download={msg.file_name}>
                         {msg.file_name}
                       </a>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.user_id === user?.id ? 'flex-end' : 'flex-start' }}>
-                    <div style={{ maxWidth: '70%', padding: 'var(--space-3) var(--space-4)', borderRadius: 'var(--radius-lg)', background: msg.user_id === user?.id ? 'var(--primary-light)' : 'var(--bg-card-hover)' }}>
-                      <div style={{ fontWeight: 600, fontSize: 'var(--text-xs)', marginBottom: 'var(--space-1)' }}>
+                  <div className={`classroom-message-row${msg.user_id === user?.id ? ' is-own' : ''}`}>
+                    <div className="classroom-message-bubble">
+                      <div className="classroom-message-bubble-header">
                         {msg.sender_name || 'User'}
-                        <span style={{ marginLeft: 'var(--space-3)', fontWeight: 400, color: 'var(--text-muted)' }}>
+                        <span className="classroom-message-bubble-time">
                           {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <p style={{ fontSize: 'var(--text-sm)' }}>{msg.content}</p>
+                      <p className="classroom-message-bubble-text">{msg.content}</p>
                     </div>
                   </div>
                 )}
               </div>
             ))}
           </div>
-          <div style={{ borderTop: '1px solid var(--border-default)', padding: 'var(--space-3)', display: 'flex', gap: 'var(--space-3)' }}>
+          <div className="classroom-chat-input-row">
             <textarea
-              className="form-textarea"
+              className="form-textarea classroom-chat-textarea"
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a message..."
               rows={1}
               maxLength={1000}
-              style={{ minHeight: 40 }}
             />
             <Button onClick={handleSendMessage} disabled={!chatInput.trim()} icon>
               <Icon name="paper-plane" />
@@ -223,30 +222,33 @@ export default function ClassroomRoom() {
           </div>
         </div>
 
-        <div style={{ borderLeft: '1px solid var(--border-default)', padding: 'var(--space-4)', overflowY: 'auto' }}>
-          <h4 style={{ marginBottom: 'var(--space-4)' }}>
-            <Icon name="users" style={{ marginRight: 'var(--space-3)', color: 'var(--accent)' }} />
+        <div className="classroom-sidebar">
+          <h4 className="classroom-participants-heading">
+            <Icon name="users" />
             Participants ({participants.length})
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+          <div className="classroom-participants-list">
             {participants.map(p => (
-              <div key={p.id || p.user_id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                <Icon name={p.role === 'tutor' ? 'user-graduate' : p.role === 'admin' ? 'shield-halved' : 'user'} style={{ color: 'var(--text-muted)' }} />
+              <div key={p.id || p.user_id} className="classroom-participant-row">
+                <Icon
+                  name={p.role === 'tutor' ? 'user-graduate' : p.role === 'admin' ? 'shield-halved' : 'user'}
+                  className="classroom-participant-role-icon"
+                />
                 <div>
-                  <div style={{ fontWeight: 500, fontSize: 'var(--text-sm)' }}>{p.user_name || 'User'}</div>
-                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{p.role}</div>
+                  <div className="classroom-participant-name">{p.user_name || 'User'}</div>
+                  <div className="classroom-participant-role">{p.role}</div>
                 </div>
-                {p.is_muted && <Icon name="microphone-slash" style={{ color: 'var(--error)', marginLeft: 'auto' }} />}
-                {p.hand_raised && <Icon name="hand" style={{ color: 'var(--warm)', marginLeft: 'auto' }} />}
+                {p.is_muted && <Icon name="microphone-slash" className="classroom-participant-status-icon icon-muted" />}
+                {p.hand_raised && <Icon name="hand" className="classroom-participant-status-icon icon-handraised" />}
               </div>
             ))}
           </div>
 
-          <h4 style={{ marginTop: 'var(--space-8)', marginBottom: 'var(--space-4)' }}>
-            <Icon name="circle-info" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />
+          <h4 className="classroom-roominfo-heading">
+            <Icon name="circle-info" />
             Room Info
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', fontSize: 'var(--text-sm)' }}>
+          <div className="classroom-room-info-list">
             {room.level && <p><strong>Level:</strong> {room.level}</p>}
             {roomClass && <p><strong>Class:</strong> {roomClass}</p>}
             {room.topic_name && <p><strong>Topic:</strong> {room.topic_name}</p>}
@@ -256,7 +258,7 @@ export default function ClassroomRoom() {
         </div>
       </div>
 
-      <div style={{ borderTop: '1px solid var(--border-default)', padding: 'var(--space-3) var(--space-6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card)' }}>
+      <div className="classroom-room-footer">
         <Button variant={isMuted ? 'ghost' : 'primary'} size="sm" disabled title="Mute controlled by tutor">
           <Icon name={isMuted ? 'microphone-slash' : 'microphone'} />
           {isMuted ? 'Muted' : 'Unmuted'}
