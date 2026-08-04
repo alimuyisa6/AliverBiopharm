@@ -106,8 +106,7 @@ export function LayoutProvider({ children }) {
   }, [refresh]);
 
   const value = useMemo(() => {
-    const isReady = !authLoading && (!loading || !!bootstrap);
-    if (!isReady || !bootstrap) {
+    if (!bootstrap) {
       return {
         loading: true, bootstrap: null, logo: null, siteName: 'AliverBiopharm', navigation: [],
         footer: { quick_links: [], resource_links: [], community_links: [], social_links: {} },
