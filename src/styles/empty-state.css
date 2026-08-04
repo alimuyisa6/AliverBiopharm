@@ -1,4 +1,4 @@
-/* styles/empty-state.css */
+ /* styles/empty-state.css */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -12,6 +12,14 @@
   font-size: 3rem;
   color: var(--text-muted);
   opacity: 0.5;
+}
+
+.empty-state-image {
+  max-width: 280px;
+  width: 100%;
+  height: auto;
+  margin-bottom: var(--space-6);
+  opacity: 0.9;
 }
 
 .empty-state-title {
