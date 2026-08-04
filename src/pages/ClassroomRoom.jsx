@@ -12,12 +12,14 @@ import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
 import EmptyState from '../components/EmptyState/EmptyState';
+import { useLayout } from '../contexts/LayoutContext';
 
 export default function ClassroomRoom() {
   const { roomId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { displayName, class_name } = useLevelFilter();
+  const { bootstrap } = useLayout();
   const chatBodyRef = useRef(null);
 
   const [room, setRoom] = useState(null);
@@ -117,6 +119,12 @@ export default function ClassroomRoom() {
     }
   };
 
+  function getEmptyStateImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
+    return comp?.properties?.image_url || null;
+  }
+
   if (loading) {
     return (
       <div className="fcd-loading-wrap">
@@ -129,7 +137,7 @@ export default function ClassroomRoom() {
     return (
       <div className="section quiz-blocks-page">
         <EmptyState
-          icon="exclamation-triangle"
+          image={getEmptyStateImage('classrooms')}
           title="Room Not Found"
           description={error || 'The classroom does not exist or has ended.'}
           action={
