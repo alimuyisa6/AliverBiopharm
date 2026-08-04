@@ -12,10 +12,12 @@ import Button from '../components/Button/Button';
 import Select from '../components/Select/Select';
 import EmptyState from '../components/EmptyState/EmptyState';
 import { useToast } from '../components/Toast/Toast';
+import { useLayout } from '../contexts/LayoutContext';
 
 export default function PastPapers() {
   const { user } = useAuth();
   const { level, class_name, showAll, displayName } = useLevelFilter();
+  const { bootstrap } = useLayout();
   const addToast = useToast();
 
   const [initializing, setInitializing] = useState(true);
@@ -35,6 +37,12 @@ export default function PastPapers() {
 
   const effectiveLevel = showAll ? null : level;
   const effectiveClass = showAll ? null : class_name;
+
+  function getEmptyStateImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
+    return comp?.properties?.image_url || null;
+  }
 
   useEffect(() => {
     getPastPaperFilterOptions()
@@ -197,7 +205,7 @@ export default function PastPapers() {
           </div>
         ) : papers.length === 0 ? (
           <EmptyState
-            icon="file-lines"
+            image={getEmptyStateImage('past_papers')}
             title="No Papers Found"
             description={`No past papers match your filters for ${classLabel || levelName || 'your level'}.`}
             action={<Button variant="secondary" onClick={clearFilters}>Clear Filters</Button>}
