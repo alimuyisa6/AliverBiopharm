@@ -1,6 +1,6 @@
-/* components/Layout/Layout.jsx */
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+ /* components/Layout/Layout.jsx */
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../Icon/Icon';
 import { useLayout } from '../../contexts/LayoutContext';
@@ -10,6 +10,22 @@ import SearchOverlay from '../SearchOverlay/SearchOverlay';
 import ClassSwitcher from '../ClassSwitcher/ClassSwitcher';
 
 const EXCLUDED_PATHS = ['/login', '/register'];
+const SCROLL_STORAGE_KEY = 'scroll-positions';
+
+function loadScrollMap() {
+  try {
+    return new Map(JSON.parse(sessionStorage.getItem(SCROLL_STORAGE_KEY) || '[]'));
+  } catch {
+    return new Map();
+  }
+}
+
+function persistScrollMap(map) {
+  try {
+    sessionStorage.setItem(SCROLL_STORAGE_KEY, JSON.stringify([...map.entries()]));
+  } catch {
+  }
+}
 
 export default function Layout({ children, showFooter = true }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -22,15 +38,44 @@ export default function Layout({ children, showFooter = true }) {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const { logo, siteName, navigation, footer, groups, level, theme, toggleTheme, isAuthenticated, refreshUser, activeGroupId } = useLayout();
   const { user } = useAuth();
   const isAuthPage = EXCLUDED_PATHS.includes(location.pathname);
 
+  const scrollPositions = useRef(loadScrollMap());
+  const persistTimeout = useRef(null);
+  const routeKey = location.key || 'default';
+
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 10);
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      setScrolled(window.scrollY > 10);
+      scrollPositions.current.set(routeKey, window.scrollY);
+      clearTimeout(persistTimeout.current);
+      persistTimeout.current = setTimeout(() => persistScrollMap(scrollPositions.current), 200);
+    };
     window.addEventListener('scroll', handler, { passive: true });
     return () => window.removeEventListener('scroll', handler);
-  }, []);
+  }, [routeKey]);
+
+  useLayoutEffect(() => {
+    const restore = () => {
+      if (navigationType === 'POP' && scrollPositions.current.has(routeKey)) {
+        window.scrollTo(0, scrollPositions.current.get(routeKey));
+      } else {
+        window.scrollTo(0, 0);
+      }
+    };
+    restore();
+    const raf = requestAnimationFrame(restore);
+    return () => cancelAnimationFrame(raf);
+  }, [routeKey, navigationType]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -233,8 +278,8 @@ export default function Layout({ children, showFooter = true }) {
 
       <motion.main
         id="main-content"
-        key={location.pathname}
-        initial={{ opacity: 0, y: 20 }}
+        key={routeKey}
+        initial={navigationType === 'POP' ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
