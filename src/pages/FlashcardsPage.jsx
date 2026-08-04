@@ -15,6 +15,7 @@ import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
 import Card from '../components/Card/Card';
 import EmptyState from '../components/EmptyState/EmptyState';
+import { useLayout } from '../contexts/LayoutContext';
 
 const STAGE = { LOADING: 'loading', SUBJECT: 'subject', STUDY: 'study', COMPLETE: 'complete' };
 
@@ -24,6 +25,7 @@ export default function FlashcardsPage() {
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
   const { level, class_name, displayName } = useLevelFilter();
+  const { bootstrap } = useLayout();
   const [stage, setStage] = useState(STAGE.LOADING);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [sessionResult, setSessionResult] = useState(null);
@@ -84,6 +86,12 @@ export default function FlashcardsPage() {
     setStage(STAGE.SUBJECT);
   }
 
+  function getEmptyStateImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
+    return comp?.properties?.image_url || null;
+  }
+
   if (!isReady || access.isPending) return <PendingApprovalScreen />;
   if (!access.canAccess) return <AccessDenied />;
 
@@ -99,7 +107,7 @@ export default function FlashcardsPage() {
     return (
       <div className="section" style={{ textAlign: 'center', paddingTop: 'var(--space-16)' }}>
         <EmptyState
-          icon="exclamation-triangle"
+          image={getEmptyStateImage('general')}
           title="Error"
           description={error}
           action={<Button onClick={init}>Try Again</Button>}
@@ -124,7 +132,7 @@ export default function FlashcardsPage() {
 
           {decks.length === 0 ? (
             <EmptyState
-              icon="layer-group"
+              image={getEmptyStateImage('flashcards')}
               title="No Decks Available"
               description={`No flashcard decks found for ${classLabel || levelName || 'your level'}.`}
             />
