@@ -12,6 +12,7 @@ import {
   saveReadingProgress,
   getReadingProgress
 } from '../api/client';
+import EmptyState from '../components/EmptyState/EmptyState';
 
 function normalizeReactions(data) {
   return {
@@ -22,7 +23,7 @@ function normalizeReactions(data) {
 
 export default function NoteDetail() {
   const { user } = useAuth();
-  const { groups } = useLayout();
+  const { groups, bootstrap } = useLayout();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const noteId = searchParams.get('id');
@@ -34,9 +35,16 @@ export default function NoteDetail() {
   const [commentInput, setCommentInput] = useState('');
   const [readProgress, setReadProgress] = useState(0);
   const [progressSaved, setProgressSaved] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
   const contentRef = useRef(null);
   const progressTimer = useRef(null);
   const startTime = useRef(Date.now());
+
+  function getEmptyStateImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
+    return comp?.properties?.image_url || null;
+  }
 
   useEffect(() => {
     if (!noteId) {
@@ -71,6 +79,7 @@ export default function NoteDetail() {
         }
       } catch (err) {
         console.error(err);
+        setFetchError('Failed to load the note. Please try again.');
       }
     };
     init();
@@ -134,6 +143,23 @@ export default function NoteDetail() {
 
   function handleBack() {
     navigate(`/notes?highlight=${noteId}`);
+  }
+
+  if (fetchError || (!note && !noteId)) {
+    return (
+      <div className="section" style={{ paddingTop: 'var(--space-16)' }}>
+        <EmptyState
+          image={getEmptyStateImage('notes')}
+          title="Note Unavailable"
+          description={fetchError || 'The requested note could not be found.'}
+          action={
+            <button className="btn btn-primary" onClick={() => navigate('/notes')}>
+              Browse Notes
+            </button>
+          }
+        />
+      </div>
+    );
   }
 
   return (
