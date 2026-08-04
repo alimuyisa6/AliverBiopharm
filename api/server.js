@@ -59,6 +59,6 @@ export default async function handler(req, res) {
     await mod.handler(req, res, path, ctx);
     if (!res.writableEnded) res.status(405).json({ error: getVagueErrorMessage() });
   } catch (err) {
-    gatemanErrorResponse(res, err, moduleName, path);
+    await gatemanErrorResponse(res, err, moduleName, path, ctx);
   }
 }
