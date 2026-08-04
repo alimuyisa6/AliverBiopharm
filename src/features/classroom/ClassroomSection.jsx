@@ -107,10 +107,10 @@ export function ClassroomSection({ user }) {
       )}
 
       <div className="classroom-section-actions">
-        <button className="btn-primary" onClick={() => navigate('/classroom')}>
+        <button className="btn btn-primary" onClick={() => navigate('/classroom')}>
           <i className="fa-solid fa-users"></i> {user ? 'Enter Classroom' : 'Login to Join'}
         </button>
-        <button className="btn-download" onClick={() => navigate('/tutor/apply')}>
+        <button className="btn btn-secondary" onClick={() => navigate('/tutor/apply')}>
           <i className="fa-solid fa-user-tie"></i> Become a Tutor
         </button>
       </div>
