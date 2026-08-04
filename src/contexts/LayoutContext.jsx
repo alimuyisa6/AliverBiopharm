@@ -3,19 +3,42 @@ import { createContext, useContext, useState, useEffect, useMemo, useCallback } 
 import { useAuth } from './AuthContext';
 import { bootstrapPlatform, switchClass } from '../api/cachedClient';
 import { getAllSiteSections } from '../api/client';
+import { getCachedStale } from '../utils/cache';
 
 export const LayoutContext = createContext(null);
 
+const KNOWN_LEVEL_KEY = 'known_level';
+
+function getKnownLevel() {
+  try {
+    return localStorage.getItem(KNOWN_LEVEL_KEY) || 'O-Level';
+  } catch {
+    return 'O-Level';
+  }
+}
+
+function setKnownLevel(level) {
+  try {
+    if (level) localStorage.setItem(KNOWN_LEVEL_KEY, level);
+  } catch {
+  }
+}
+
 export function LayoutProvider({ children }) {
   const { user, loading: authLoading, refresh } = useAuth();
-  const [bootstrap, setBootstrap] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  const effectiveLevel = user?.profile?.active_level_id || user?.profile?.track || getKnownLevel();
+  const activeGroupId = user?.profile?.active_group_id || null;
+
+  const [bootstrap, setBootstrap] = useState(() => getCachedStale(`bootstrap_${effectiveLevel}`));
+  const [loading, setLoading] = useState(() => !getCachedStale(`bootstrap_${effectiveLevel}`));
   const [switching, setSwitching] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
-  const [sections, setSections] = useState({});
+  const [sections, setSections] = useState(() => getCachedStale('site_sections') || {});
 
-  const effectiveLevel = user?.profile?.active_level_id || user?.profile?.track || 'O-Level';
-  const activeGroupId = user?.profile?.active_group_id || null;
+  useEffect(() => {
+    setKnownLevel(effectiveLevel);
+  }, [effectiveLevel]);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -27,12 +50,27 @@ export function LayoutProvider({ children }) {
   }, [theme]);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
+
+    const cachedBootstrap = getCachedStale(`bootstrap_${effectiveLevel}`);
+    const cachedSections = getCachedStale('site_sections');
+
+    if (cachedBootstrap) {
+      setBootstrap(cachedBootstrap);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+    if (cachedSections) {
+      setSections(cachedSections);
+    }
+
     Promise.allSettled([
       bootstrapPlatform(effectiveLevel),
       getAllSiteSections()
     ])
       .then(([bootstrapResult, sectionsResult]) => {
+        if (cancelled) return;
         if (bootstrapResult.status === 'fulfilled') {
           setBootstrap(bootstrapResult.value);
         } else {
@@ -44,7 +82,13 @@ export function LayoutProvider({ children }) {
           console.error('getAllSiteSections failed', sectionsResult.reason);
         }
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [effectiveLevel, activeGroupId]);
 
   const toggleTheme = useCallback(() => {
@@ -62,7 +106,7 @@ export function LayoutProvider({ children }) {
   }, [refresh]);
 
   const value = useMemo(() => {
-    const isReady = !loading && !authLoading;
+    const isReady = !authLoading && (!loading || !!bootstrap);
     if (!isReady || !bootstrap) {
       return {
         loading: true, bootstrap: null, logo: null, siteName: 'AliverBiopharm', navigation: [],
