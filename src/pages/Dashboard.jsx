@@ -22,7 +22,7 @@ import Container from '../components/Container/Container';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { level } = useLayout();
+  const { level, bootstrap } = useLayout();
   const access = useContentAccess();
   const [dashboard, setDashboard] = useState(null);
   const [achievements, setAchievements] = useState([]);
@@ -53,10 +53,20 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, [access.canAccess]);
 
+  function getEmptyStateImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
+    return comp?.properties?.image_url || null;
+  }
+
   if (!access.canAccess) {
     return (
       <Container>
-        <EmptyState icon="lock" title="Access Restricted" description="Your account does not have access to this area." />
+        <EmptyState
+          image={getEmptyStateImage('dashboard')}
+          title="Access Restricted"
+          description="Your account does not have access to this area."
+        />
       </Container>
     );
   }
