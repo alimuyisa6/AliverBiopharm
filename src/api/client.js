@@ -1,4 +1,4 @@
-let csrfToken = null;
+ let csrfToken = null;
 const API_BASE = '/api/server';
 
 const pendingRequests = new Map();
@@ -6,6 +6,10 @@ const requestQueue = [];
 let processingQueue = false;
 const MAX_CONCURRENT = 3;
 let activeRequests = 0;
+
+let cacheVersionPromise = null;
+let cacheVersionFetchedAt = 0;
+const CACHE_VERSION_TTL_MS = 10000;
 
 function handleRestrictionResponse(errorData) {
   pendingRequests.clear();
@@ -90,6 +94,22 @@ async function getRequest(module, path, params = {}) {
   });
 }
 
+async function getCacheVersion() {
+  const now = Date.now();
+  if (!cacheVersionPromise || now - cacheVersionFetchedAt > CACHE_VERSION_TTL_MS) {
+    cacheVersionFetchedAt = now;
+    cacheVersionPromise = getRequest('platform', 'cache_version')
+      .then((d) => d?.version || 1)
+      .catch(() => 1);
+  }
+  return cacheVersionPromise;
+}
+
+async function getVersionedRequest(module, path, params = {}) {
+  const v = await getCacheVersion();
+  return getRequest(module, path, { ...params, v });
+}
+
 export { getRequest, apiCall };
 
 export async function signin(email, password, turnstile_token, mfa_code) { return apiCall('auth', 'signin', { email, password, turnstile_token, mfa_code }); }
@@ -101,14 +121,14 @@ export async function changePassword(current_password, new_password) { return ap
 export async function requestHandoff() { return apiCall('auth', 'handoff_create', {}); }
 export async function exchangeHandoff(token) { return apiCall('auth', 'handoff_exchange', { token }); }
 
-export async function bootstrapPlatform(level) { return getRequest('platform', 'bootstrap', { level }); }
-export async function getPlatformConfig(level) { return getRequest('platform', 'config', { level }); }
-export async function getHeader(level) { return getRequest('platform', 'header', { level }); }
-export async function getFooter(level) { return getRequest('platform', 'footer', { level }); }
-export async function getLandingPage(level) { return getRequest('platform', 'landing', { level }); }
-export async function getOnboardingConfig(level) { return getRequest('platform', 'onboarding_config', { level }); }
-export async function getUIComponents(level) { return getRequest('platform', 'ui_components', { level }); }
-export async function getPlatformSections(levelId) { return getRequest('platform', 'sections', { level_id: levelId }); }
+export async function bootstrapPlatform(level) { return getVersionedRequest('platform', 'bootstrap', { level }); }
+export async function getPlatformConfig(level) { return getVersionedRequest('platform', 'config', { level }); }
+export async function getHeader(level) { return getVersionedRequest('platform', 'header', { level }); }
+export async function getFooter(level) { return getVersionedRequest('platform', 'footer', { level }); }
+export async function getLandingPage(level) { return getVersionedRequest('platform', 'landing', { level }); }
+export async function getOnboardingConfig(level) { return getVersionedRequest('platform', 'onboarding_config', { level }); }
+export async function getUIComponents(level) { return getVersionedRequest('platform', 'ui_components', { level }); }
+export async function getPlatformSections(levelId) { return getVersionedRequest('platform', 'sections', { level_id: levelId }); }
 
 export async function getAllSiteSections() { return getRequest('site', 'get_all_site_sections'); }
 export async function getSectionHeadings() { return getRequest('site', 'get_section_headings'); }
