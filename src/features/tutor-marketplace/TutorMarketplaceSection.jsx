@@ -38,7 +38,7 @@ export default function TutorMarketplaceSection() {
   if (loading) {
     return (
       <section className="section">
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div className="tutor-section-loading">
           <Spinner size="lg" />
         </div>
       </section>
@@ -65,7 +65,7 @@ export default function TutorMarketplaceSection() {
               />
             ))}
           </div>
-          <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
+          <div className="tutor-section-footer">
             <Link to="/tutors" className="btn btn-primary">
               Browse All Tutors
             </Link>
@@ -76,11 +76,11 @@ export default function TutorMarketplaceSection() {
           title="No tutors available yet"
           description="Be the first to join our marketplace and start teaching. Check back soon or apply to become a tutor."
           action={
-            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'center' }}>
+            <div className="tutor-empty-actions">
               <Link to="/tutors" className="btn btn-secondary">
                 Browse anyway
               </Link>
-              <Link to="/apply-tutor" className="btn btn-primary">
+              <Link to="/tutor/apply" className="btn btn-primary">
                 Apply as a Tutor
               </Link>
             </div>
