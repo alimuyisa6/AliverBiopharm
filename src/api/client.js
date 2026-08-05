@@ -403,3 +403,47 @@ export async function trackPdfPreview(pdfId) { return apiCall('resources', 'trac
 export async function trackPdfDownload(pdfId) { return apiCall('resources', 'track_pdf_download', { pdf_id: pdfId }); }
 export async function submitResource(payload) { return apiCall('resources', 'submit_resource', { payload }); }
 export async function getAllRatings() { return getRequest('resources', 'get_all_ratings'); }
+
+export async function listTutors({ unit_id, country, district, teaching_mode, search, limit = 12, offset = 0 } = {}) {
+  const params = new URLSearchParams();
+  if (unit_id) params.set('unit_id', unit_id);
+  if (country) params.set('country', country);
+  if (district) params.set('district', district);
+  if (teaching_mode) params.set('teaching_mode', teaching_mode);
+  if (search) params.set('search', search);
+  params.set('limit', String(limit));
+  params.set('offset', String(offset));
+  return getRequest('tutor-marketplace', `list?${params.toString()}`);
+}
+
+export async function getTutorDetail(profileId) {
+  return getRequest('tutor-marketplace', 'detail', { profile_id: profileId });
+}
+
+export async function getMyTutorProfile() {
+  return getRequest('tutor-marketplace', 'my_profile');
+}
+
+export async function createOrUpdateTutorProfile(payload) {
+  return apiCall('tutor-marketplace', 'create_profile', payload);
+}
+
+export async function updateTutorEmployment(employment) {
+  return apiCall('tutor-marketplace', 'update_employment', { employment });
+}
+
+export async function uploadVerification(fileId, verificationType) {
+  return apiCall('tutor-marketplace', 'upload_verification', { file_id: fileId, verification_type: verificationType });
+}
+
+export async function activateListing(profileId, paymentId) {
+  return apiCall('tutor-marketplace', 'activate_listing', { profile_id: profileId, payment_id: paymentId });
+}
+
+export async function sendContactRequest(tutorUserId, message) {
+  return apiCall('tutor-marketplace', 'contact', { tutor_id: tutorUserId, message });
+}
+
+export async function respondContactRequest(requestId, action) {
+  return apiCall('tutor-marketplace', 'respond_contact', { request_id: requestId, action });
+}
