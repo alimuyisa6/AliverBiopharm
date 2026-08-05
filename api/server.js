@@ -1,4 +1,4 @@
- /* api/server.js — REPLACEMENT */
+ /* api/server.js */
 import { passGate, gatemanErrorResponse } from '../lib/gateman.js';
 import { getVagueErrorMessage } from '../lib/threat-shield.js';
 
