@@ -1,5 +1,7 @@
  import React, { useState } from 'react';
 
+const ACCENTS = ['blue', 'teal', 'violet', 'amber', 'emerald'];
+
 export function FaqAccordion({ items }) {
   const [activeIndex, setActiveIndex] = useState(null);
   if (!items || !Array.isArray(items)) return null;
@@ -12,19 +14,28 @@ export function FaqAccordion({ items }) {
         Straightforward answers about our platform, resources, tools, and membership options.
       </p>
       <div className="home-faq-list">
-        {items.filter(Boolean).map((item, idx) => (
-          <div key={idx} className={`home-faq-item${activeIndex === idx ? ' active' : ''}`}>
-            <button
-              className="home-faq-question"
-              onClick={() => setActiveIndex(activeIndex === idx ? null : idx)}
-              aria-expanded={activeIndex === idx}
+        {items.filter(Boolean).map((item, idx) => {
+          const accent = ACCENTS[idx % ACCENTS.length];
+          return (
+            <div
+              key={idx}
+              className={`home-faq-item home-faq-${accent}${activeIndex === idx ? ' active' : ''}`}
             >
-              <span>{item.question}</span>
-              <span className="home-faq-plus">+</span>
-            </button>
-            <div className="home-faq-answer"><p>{item.answer}</p></div>
-          </div>
-        ))}
+              <button
+                className="home-faq-question"
+                onClick={() => setActiveIndex(activeIndex === idx ? null : idx)}
+                aria-expanded={activeIndex === idx}
+              >
+                <span className="home-faq-icon">
+                  <i className="fa-solid fa-circle-question"></i>
+                </span>
+                <span className="home-faq-question-text">{item.question}</span>
+                <span className="home-faq-plus">+</span>
+              </button>
+              <div className="home-faq-answer"><p>{item.answer}</p></div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
