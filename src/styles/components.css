@@ -24,6 +24,7 @@
 @import './legal.css';
 @import './glossary.css';
 @import './note-detail.css';
+@import './home-faq.css';
 
 .profile-picture-upload {
   display: flex;
