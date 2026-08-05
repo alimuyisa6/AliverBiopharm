@@ -25,6 +25,7 @@
 @import './glossary.css';
 @import './note-detail.css';
 @import './team-faq.css';
+@import './tutor.css';
 
 .profile-picture-upload {
   display: flex;
