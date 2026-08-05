@@ -238,6 +238,12 @@ export function invalidateFlashcardCache() {
   invalidateCacheByPattern('flashcard');
 }
 
+export const listTutorsCached = (filters = {}) =>
+  withArgsCache((f) => `tutors_${JSON.stringify(f)}`, api.listTutors)(filters);
+
+export const getTutorDetailCached = (profileId) =>
+  withCache(`tutor_detail_${profileId}`, () => api.getTutorDetail(profileId))();
+
 export {
   signup,
   signin,
