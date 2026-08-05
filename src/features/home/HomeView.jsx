@@ -16,6 +16,7 @@ import { FaqAccordion } from './FaqAccordion';               // new
 import { BlogGrid } from './BlogGrid';                         // new
 import { TeamScroll } from './TeamScroll';                     // new
 import { ClassroomSection } from '../classroom/ClassroomSection'; // new
+import TutorMarketplaceSection from '../tutor-marketplace/TutorMarketplaceSection';
 
 const CONTENT_TYPES = [
   { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes', color: 'blue' },
@@ -120,10 +121,12 @@ export default function HomeView(props) {
 
       <ContentTypeCards navigate={navigate} user={user} sections={sections} />
 
-      {/* Live classroom teaser – now directly on homepage */}
+      
       <ClassroomSection user={user} />
-
-      <CommunitySection
+      
+      <TutorMarketplaceSection />
+      
+     <CommunitySection
         activity={communityActivity}
         weeklyChallenge={sections?.weekly_challenge}
         weeklyChallengeAnswer={weeklyChallengeAnswer}
