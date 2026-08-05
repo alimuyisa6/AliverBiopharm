@@ -11,17 +11,18 @@ export function FaqAccordion({ items }) {
       <p className="section-subtitle">
         Straightforward answers about our platform, resources, tools, and membership options.
       </p>
-      <div className="faq-list">
+      <div className="home-faq-list">
         {items.filter(Boolean).map((item, idx) => (
-          <div key={idx} className={`faq-item${activeIndex === idx ? ' active' : ''}`}>
+          <div key={idx} className={`home-faq-item${activeIndex === idx ? ' active' : ''}`}>
             <button
-              className="faq-question"
+              className="home-faq-question"
               onClick={() => setActiveIndex(activeIndex === idx ? null : idx)}
+              aria-expanded={activeIndex === idx}
             >
               <span>{item.question}</span>
-              <span className="faq-plus">+</span>
+              <span className="home-faq-plus">+</span>
             </button>
-            <div className="faq-answer"><p>{item.answer}</p></div>
+            <div className="home-faq-answer"><p>{item.answer}</p></div>
           </div>
         ))}
       </div>
