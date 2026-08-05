@@ -262,6 +262,11 @@ body.dark-mode .card-emerald {
   align-items: start;
 }
 
+.pricing-cta-btn {
+  margin-top: var(--space-4);
+  width: 100%;
+}
+
 /* Home level banner */
 .home-level-banner {
   padding-top: var(--space-8);
