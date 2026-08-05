@@ -31,6 +31,7 @@ const MODULE_MAP = {
   site:              () => import('../lib/site.js'),
   upload:            () => import('../lib/upload.js'),
   'weekly-challenge':() => import('../lib/weekly-challenge.js'),
+'tutor-marketplace': () => import('../lib/tutor-marketplace.js'),
 };
 
 export default async function handler(req, res) {
