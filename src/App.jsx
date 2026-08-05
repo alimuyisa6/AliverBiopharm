@@ -1,4 +1,5 @@
- import { Routes, Route, useLocation, useNavigationType, useNavigate } from 'react-router-dom';
+// src/App.jsx
+import { Routes, Route, useLocation, useNavigationType, useNavigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
@@ -62,32 +63,34 @@ function AppRoutes() {
   return (
     <>
       <ScrollManager />
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Layout><Home /></Layout>} />
-          <Route path="/login" element={<Layout><Auth /></Layout>} />
-          <Route path="/register" element={<Layout><Auth /></Layout>} />
-          <Route path="/dashboard" element={<Layout><ProtectedRoute><Dashboard /></ProtectedRoute></Layout>} />
-          <Route path="/profile" element={<Layout><ProtectedRoute><Profile /></ProtectedRoute></Layout>} />
-          <Route path="/onboarding" element={<Layout><ProtectedRoute><OnboardingFlow /></ProtectedRoute></Layout>} />
-          <Route path="/quiz" element={<Layout><ProtectedRoute><Quiz /></ProtectedRoute></Layout>} />
-          <Route path="/past-papers" element={<Layout><PastPapers /></Layout>} />
-          <Route path="/recall" element={<Layout><ProtectedRoute><BioRecall /></ProtectedRoute></Layout>} />
-          <Route path="/notes/read" element={<Layout><ProtectedRoute><NoteDetail /></ProtectedRoute></Layout>} />
-          <Route path="/glossary/:slug" element={<Layout><ProtectedRoute><Glossary /></ProtectedRoute></Layout>} />
-          <Route path="/glossary" element={<Layout><ProtectedRoute><Glossary /></ProtectedRoute></Layout>} />
-          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-          <Route path="/flashcards" element={<Layout><ProtectedRoute><FlashcardsPage /></ProtectedRoute></Layout>} />
-          <Route path="/terms" element={<Layout><LegalPage type="terms" /></Layout>} />
-          <Route path="/privacy" element={<Layout><LegalPage type="privacy" /></Layout>} />
-          <Route path="/classroom" element={<Layout><ProtectedRoute><Classroom /></ProtectedRoute></Layout>} />
-          <Route path="/classroom/:roomId" element={<Layout><ProtectedRoute><ClassroomRoom /></ProtectedRoute></Layout>} />
-          <Route path="/tutor/apply" element={<Layout><ProtectedRoute><TutorApply /></ProtectedRoute></Layout>} />
-          <Route path="/tutor/dashboard" element={<Layout><ProtectedRoute><TutorDashboard /></ProtectedRoute></Layout>} />
-          <Route path="/tutors" element={<Layout><TutorMarketplace /></Layout>} />
-          <Route path="*" element={<Layout><div className="section" style={{ textAlign: 'center', paddingTop: 'var(--space-16)' }}><h1>404</h1><p>Page not found</p></div></Layout>} />
-        </Routes>
-      </AnimatePresence>
+      <Layout>
+        <AnimatePresence mode="wait">
+          <Routes location={location}>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Auth />} />
+            <Route path="/register" element={<Auth />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/onboarding" element={<ProtectedRoute><OnboardingFlow /></ProtectedRoute>} />
+            <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+            <Route path="/past-papers" element={<PastPapers />} />
+            <Route path="/recall" element={<ProtectedRoute><BioRecall /></ProtectedRoute>} />
+            <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
+            <Route path="/glossary/:slug" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
+            <Route path="/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
+            <Route path="/terms" element={<LegalPage type="terms" />} />
+            <Route path="/privacy" element={<LegalPage type="privacy" />} />
+            <Route path="/classroom" element={<ProtectedRoute><Classroom /></ProtectedRoute>} />
+            <Route path="/classroom/:roomId" element={<ProtectedRoute><ClassroomRoom /></ProtectedRoute>} />
+            <Route path="/tutor/apply" element={<ProtectedRoute><TutorApply /></ProtectedRoute>} />
+            <Route path="/tutor/dashboard" element={<ProtectedRoute><TutorDashboard /></ProtectedRoute>} />
+            <Route path="/tutors" element={<TutorMarketplace />} />
+            <Route path="*" element={<div className="section" style={{ textAlign: 'center', paddingTop: 'var(--space-16)' }}><h1>404</h1><p>Page not found</p></div>} />
+          </Routes>
+        </AnimatePresence>
+      </Layout>
     </>
   );
 }
