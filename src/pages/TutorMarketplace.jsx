@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLevelFilter } from '../hooks/useLevelFilter';
@@ -66,15 +66,13 @@ export default function TutorMarketplace() {
 
   return (
     <div className="tutor-marketplace-page">
-      <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
+      <div className="section tutor-page-section">
         <span className="sec-label">Tutor Marketplace</span>
-        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
+        <h1 className="section-title tutor-page-title">
           Find a Tutor {levelName ? `– ${levelName}` : ''}
         </h1>
         {classLabel && (
-          <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
-            {classLabel}
-          </p>
+          <p className="tutor-class-label">{classLabel}</p>
         )}
 
         <nav className="breadcrumb">
@@ -84,8 +82,8 @@ export default function TutorMarketplace() {
           {levelName && <><Icon name="chevron-right" className="breadcrumb-sep" /><span>{levelName}</span></>}
         </nav>
 
-        <div style={{ marginBottom: 'var(--space-6)', display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ flex: 1, maxWidth: '320px', position: 'relative' }}>
+        <div className="tutor-controls-row">
+          <div className="tutor-search-wrap">
             <input
               type="text"
               placeholder="Search by name, subject..."
@@ -93,15 +91,15 @@ export default function TutorMarketplace() {
               onChange={e => setSearch(e.target.value)}
               className="input"
             />
-            <Icon name="search" style={{ position: 'absolute', right: 'var(--space-3)', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
+            <Icon name="search" className="tutor-search-icon" />
           </div>
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
+          <p className="tutor-results-count">
             {loading ? 'Loading...' : `${total} tutor${total !== 1 ? 's' : ''} found`}
           </p>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 'var(--space-10)' }}>
+          <div className="tutor-loading-wrap">
             <Spinner size="lg" />
           </div>
         ) : tutors.length === 0 ? (
@@ -114,18 +112,18 @@ export default function TutorMarketplace() {
           <div className="grid grid-cols-3">
             {tutors.map(tutor => (
               <div key={tutor.id} className="card">
-                <div className="card-image-placeholder" style={{ background: 'var(--primary-light)' }}>
-                  <Icon name="user-graduate" style={{ fontSize: '2rem' }} />
+                <div className="card-image-placeholder tutor-card-avatar">
+                  <Icon name="user-graduate" />
                 </div>
                 <div className="card-body">
                   <h3 className="card-title">{tutor.display_name}</h3>
                   {tutor.headline && <p className="card-text">{tutor.headline}</p>}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-3)' }}>
+                  <div className="tutor-chip-row">
                     {tutor.teaching_mode && <span className="chip">{tutor.teaching_mode === 'online' ? 'Online' : tutor.teaching_mode === 'physical' ? 'In-Person' : 'Both'}</span>}
                     {tutor.hourly_rate > 0 && <span className="chip">{tutor.hourly_rate} UGX/h</span>}
                   </div>
                 </div>
-                <div className="card-footer" style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                <div className="card-footer tutor-card-footer">
                   <Button size="sm" variant="secondary" onClick={() => navigate(`/tutor/${tutor.id}`)}>View Profile</Button>
                   {user && <Button size="sm" onClick={() => handleContact(tutor)}>Contact</Button>}
                 </div>
@@ -135,7 +133,7 @@ export default function TutorMarketplace() {
         )}
 
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-2)', marginTop: 'var(--space-8)' }}>
+          <div className="tutor-pagination">
             <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
               <Icon name="chevron-left" />
             </Button>
@@ -148,7 +146,7 @@ export default function TutorMarketplace() {
               }, [])
               .map((p, idx) =>
                 p === '...' ? (
-                  <span key={`ellipsis-${idx}`} style={{ padding: 'var(--space-2)' }}>...</span>
+                  <span key={`ellipsis-${idx}`} className="tutor-pagination-ellipsis">...</span>
                 ) : (
                   <Button
                     key={p}
