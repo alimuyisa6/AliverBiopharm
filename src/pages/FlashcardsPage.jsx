@@ -1,4 +1,4 @@
- /* pages/FlashcardsPage.jsx */
+/* pages/FlashcardsPage.jsx */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -37,10 +37,8 @@ export default function FlashcardsPage() {
   const classLabel = class_name || '';
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    if (!user) return;
+    if (!isReady || !access.canAccess) return;
     init();
   }, [user, isReady, access.canAccess, level, class_name]);
 
@@ -184,7 +182,7 @@ export default function FlashcardsPage() {
       <FlashcardProgress
         result={sessionResult}
         onRestart={handleRestart}
-        onHome={() => navigate('/')}
+        onHome={() => navigate('/')} 
       />
     );
   }
