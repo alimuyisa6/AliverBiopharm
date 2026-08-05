@@ -22,6 +22,7 @@ import LegalPage from './pages/LegalPage';
 import Auth from './pages/Auth';
 import TutorApply from './pages/TutorApply';
 import TutorDashboard from './pages/TutorDashboard';
+import TutorMarketplace from './pages/TutorMarketplace';
 
 function ScrollManager() {
   const location = useLocation();
@@ -83,6 +84,7 @@ function AppRoutes() {
           <Route path="/classroom/:roomId" element={<Layout><ProtectedRoute><ClassroomRoom /></ProtectedRoute></Layout>} />
           <Route path="/tutor/apply" element={<Layout><ProtectedRoute><TutorApply /></ProtectedRoute></Layout>} />
           <Route path="/tutor/dashboard" element={<Layout><ProtectedRoute><TutorDashboard /></ProtectedRoute></Layout>} />
+          <Route path="/tutors" element={<Layout><TutorMarketplace /></Layout>} />
           <Route path="*" element={<Layout><div className="section" style={{ textAlign: 'center', paddingTop: 'var(--space-16)' }}><h1>404</h1><p>Page not found</p></div></Layout>} />
         </Routes>
       </AnimatePresence>
