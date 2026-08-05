@@ -2,6 +2,8 @@
 
 const AUTO_SCROLL_SPEED = 0.6;
 const RESUME_DELAY_MS = 2500;
+const MANUAL_STEP = 300;
+const ACCENTS = ['blue', 'teal', 'violet', 'amber', 'emerald'];
 
 export function TeamScroll({ members }) {
   const trackRef = useRef(null);
@@ -50,6 +52,12 @@ export function TeamScroll({ members }) {
     }, RESUME_DELAY_MS);
   }, []);
 
+  const scrollByStep = useCallback((direction) => {
+    pause();
+    trackRef.current?.scrollBy({ left: direction * MANUAL_STEP, behavior: 'smooth' });
+    scheduleResume();
+  }, [pause, scheduleResume]);
+
   if (!safeMembers.length) return null;
 
   return (
@@ -59,42 +67,67 @@ export function TeamScroll({ members }) {
       <p className="section-subtitle">
         Distinguished pharmacologists, molecular biologists, and clinical researchers with decades of combined teaching experience.
       </p>
-      <div
-        className="team-scroll-container"
-        ref={trackRef}
-        onMouseEnter={pause}
-        onMouseLeave={scheduleResume}
-        onTouchStart={pause}
-        onTouchEnd={scheduleResume}
-        onPointerDown={pause}
-        onPointerUp={scheduleResume}
-      >
-        {loopMembers.map((member, idx) => (
-          <div key={`${member.name}-${idx}`} className="team-card">
-            <div className="team-avatar">
-              {member.avatar_url ? (
-                <img src={member.avatar_url} alt={member.name} />
-              ) : (
-                <i className="fa-solid fa-user-tie" />
-              )}
-            </div>
-            <h3>{member.name}</h3>
-            <div className="team-title">{member.title || 'Faculty Member'}</div>
-            <p>{member.bio}</p>
-            <div className="team-social">
-              {member.linkedin && (
-                <a href={member.linkedin} target="_blank" rel="noreferrer">
-                  <i className="fa-brands fa-linkedin-in" />
-                </a>
-              )}
-              {member.twitter && (
-                <a href={member.twitter} target="_blank" rel="noreferrer">
-                  <i className="fa-brands fa-x-twitter" />
-                </a>
-              )}
-            </div>
-          </div>
-        ))}
+
+      <div className="team-scroll-wrap">
+        <button
+          type="button"
+          className="team-scroll-nav prev"
+          onClick={() => scrollByStep(-1)}
+          aria-label="Scroll faculty left"
+        >
+          <i className="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <div
+          className="team-scroll-container"
+          ref={trackRef}
+          onMouseEnter={pause}
+          onMouseLeave={scheduleResume}
+          onTouchStart={pause}
+          onTouchEnd={scheduleResume}
+          onPointerDown={pause}
+          onPointerUp={scheduleResume}
+        >
+          {loopMembers.map((member, idx) => {
+            const accent = ACCENTS[idx % ACCENTS.length];
+            return (
+              <div key={`${member.name}-${idx}`} className={`team-card team-card-${accent}`}>
+                <i className="fa-solid fa-quote-right team-card-quote"></i>
+                <div className="team-avatar">
+                  {member.avatar_url ? (
+                    <img src={member.avatar_url} alt={member.name} />
+                  ) : (
+                    <i className="fa-solid fa-user-tie" />
+                  )}
+                </div>
+                <h3>{member.name}</h3>
+                <div className="team-title">{member.title || 'Faculty Member'}</div>
+                <p>{member.bio}</p>
+                <div className="team-social">
+                  {member.linkedin && (
+                    <a href={member.linkedin} target="_blank" rel="noreferrer">
+                      <i className="fa-brands fa-linkedin-in" />
+                    </a>
+                  )}
+                  {member.twitter && (
+                    <a href={member.twitter} target="_blank" rel="noreferrer">
+                      <i className="fa-brands fa-x-twitter" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          className="team-scroll-nav next"
+          onClick={() => scrollByStep(1)}
+          aria-label="Scroll faculty right"
+        >
+          <i className="fa-solid fa-chevron-right"></i>
+        </button>
       </div>
     </section>
   );
