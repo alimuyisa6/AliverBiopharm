@@ -21,7 +21,7 @@ export function PricingCards({ plans }) {
                 <li key={f}><i className="fa-solid fa-check" /> {f}</li>
               ))}
             </ul>
-            <button className="btn-primary mt-4">{plan.cta_text || 'Subscribe'}</button>
+            <button className="btn btn-primary pricing-cta-btn">{plan.cta_text || 'Subscribe'}</button>
           </div>
         ))}
       </div>
