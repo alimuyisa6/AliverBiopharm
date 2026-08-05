@@ -404,17 +404,17 @@ export async function trackPdfDownload(pdfId) { return apiCall('resources', 'tra
 export async function submitResource(payload) { return apiCall('resources', 'submit_resource', { payload }); }
 export async function getAllRatings() { return getRequest('resources', 'get_all_ratings'); }
 
-export async function listTutors({ unit_id, country, district, teaching_mode, search, limit = 12, offset = 0 } = {}) {
-  const params = new URLSearchParams();
-  if (unit_id) params.set('unit_id', unit_id);
-  if (country) params.set('country', country);
-  if (district) params.set('district', district);
-  if (teaching_mode) params.set('teaching_mode', teaching_mode);
-  if (search) params.set('search', search);
-  params.set('limit', String(limit));
-  params.set('offset', String(offset));
-  return getRequest('tutor-marketplace', `list?${params.toString()}`);
-}
+ export async function listTutors({ unit_id, country, district, teaching_mode, search, limit = 12, offset = 0 } = {}) {
+  const params = {};
+  if (unit_id) params.unit_id = unit_id;
+  if (country) params.country = country;
+  if (district) params.district = district;
+  if (teaching_mode) params.teaching_mode = teaching_mode;
+  if (search) params.search = search;
+  if (limit !== undefined) params.limit = String(limit);
+  if (offset !== undefined) params.offset = String(offset);
+  return getRequest('tutor-marketplace', 'list', params);
+ }
 
 export async function getTutorDetail(profileId) {
   return getRequest('tutor-marketplace', 'detail', { profile_id: profileId });
