@@ -31,12 +31,12 @@ export function FlashcardSection({ headingTitle, headingSubtitle, onStartStudy, 
         ))}
       </div>
       <div className="fc-actions-row">
-        <button className="btn-primary" onClick={onStartStudy}>
+        <button className="btn btn-primary" onClick={onStartStudy}>
           <i className="fa-solid fa-layer-group"></i>
           {user ? 'Start Studying' : 'Login to Study'}
         </button>
         {user && (
-          <button className="btn-download fc-browse-btn" onClick={onBrowseDecks}>
+          <button className="btn btn-secondary fc-browse-btn" onClick={onBrowseDecks}>
             <i className="fa-solid fa-arrow-right"></i> Browse Decks
           </button>
         )}
