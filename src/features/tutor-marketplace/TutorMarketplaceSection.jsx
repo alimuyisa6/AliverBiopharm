@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { listTutorsCached } from '../../api/cachedClient';
 import { sendContactRequest } from '../../api/client';
 import TutorCard from './TutorCard';
 import Spinner from '../../components/Spinner/Spinner';
+import EmptyState from '../../components/EmptyState/EmptyState';
+import Button from '../../components/Button/Button';
 import { useToast } from '../../components/Toast/Toast';
 
 export default function TutorMarketplaceSection() {
@@ -43,23 +45,48 @@ export default function TutorMarketplaceSection() {
     );
   }
 
-  if (!tutors.length) return null;
-
   return (
     <section className="section reveal">
       <span className="sec-label">Tutor Marketplace</span>
       <h2 className="section-title">Find a Tutor</h2>
-      <p className="section-subtitle">Connect with qualified tutors for personalised learning</p>
+      <p className="section-subtitle">
+        Connect with qualified tutors for personalised learning
+      </p>
 
-      <div className="grid grid-cols-3">
-        {tutors.map(tutor => (
-          <TutorCard key={tutor.id} tutor={tutor} user={user} onContact={handleContact} />
-        ))}
-      </div>
-
-      <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
-        <Link to="/tutors" className="btn btn-primary">Browse All Tutors</Link>
-      </div>
+      {tutors.length > 0 ? (
+        <>
+          <div className="grid grid-cols-3">
+            {tutors.map((tutor) => (
+              <TutorCard
+                key={tutor.id}
+                tutor={tutor}
+                user={user}
+                onContact={handleContact}
+              />
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
+            <Link to="/tutors" className="btn btn-primary">
+              Browse All Tutors
+            </Link>
+          </div>
+        </>
+      ) : (
+        <EmptyState
+          title="No tutors available yet"
+          description="Be the first to join our marketplace and start teaching. Check back soon or apply to become a tutor."
+          action={
+            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'center' }}>
+              <Link to="/tutors" className="btn btn-secondary">
+                Browse anyway
+              </Link>
+              <Link to="/apply-tutor" className="btn btn-primary">
+                Apply as a Tutor
+              </Link>
+            </div>
+          }
+        />
+      )}
     </section>
   );
 }
