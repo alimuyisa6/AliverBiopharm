@@ -1,4 +1,4 @@
-// features/pdfs/PdfPreviewModal.jsx
+ // features/pdfs/PdfPreviewModal.jsx
 import React from 'react';
 
 export function PdfPreviewModal({ pdf, onClose, onDownload }) {
@@ -15,8 +15,8 @@ export function PdfPreviewModal({ pdf, onClose, onDownload }) {
           <iframe src={pdf.file_url} frameBorder="0"></iframe>
         </div>
         <div className="pdf-preview-footer">
-          <button className="pdf-preview-download-btn" onClick={() => onDownload(pdf)}>Download PDF</button>
-          <button className="pdf-preview-back-btn" onClick={onClose}>Back to Library</button>
+          <button className="btn btn-primary" onClick={() => onDownload(pdf)}>Download PDF</button>
+          <button className="btn btn-ghost" onClick={onClose}>Back to Library</button>
         </div>
       </div>
     </div>
