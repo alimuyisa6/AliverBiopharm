@@ -1,7 +1,56 @@
- import React from 'react';
+ import React, { useRef, useEffect, useCallback } from 'react';
+
+const AUTO_SCROLL_SPEED = 0.6;
+const RESUME_DELAY_MS = 2500;
 
 export function TeamScroll({ members }) {
-  if (!members || !Array.isArray(members)) return null;
+  const trackRef = useRef(null);
+  const pausedRef = useRef(false);
+  const resumeTimeoutRef = useRef(null);
+  const rafRef = useRef(null);
+
+  const safeMembers = Array.isArray(members) ? members.filter(Boolean) : [];
+  const loopMembers = safeMembers.length > 1 ? [...safeMembers, ...safeMembers] : safeMembers;
+
+  useEffect(() => {
+    if (!safeMembers.length) return;
+    const track = trackRef.current;
+    if (!track) return;
+
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    function step() {
+      if (!pausedRef.current && track) {
+        track.scrollLeft += AUTO_SCROLL_SPEED;
+        const halfWidth = track.scrollWidth / 2;
+        if (halfWidth > 0 && track.scrollLeft >= halfWidth) {
+          track.scrollLeft -= halfWidth;
+        }
+      }
+      rafRef.current = requestAnimationFrame(step);
+    }
+    rafRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    };
+  }, [safeMembers.length]);
+
+  const pause = useCallback(() => {
+    pausedRef.current = true;
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+  }, []);
+
+  const scheduleResume = useCallback(() => {
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = setTimeout(() => {
+      pausedRef.current = false;
+    }, RESUME_DELAY_MS);
+  }, []);
+
+  if (!safeMembers.length) return null;
 
   return (
     <section id="team" className="section reveal">
@@ -10,9 +59,18 @@ export function TeamScroll({ members }) {
       <p className="section-subtitle">
         Distinguished pharmacologists, molecular biologists, and clinical researchers with decades of combined teaching experience.
       </p>
-      <div className="team-scroll-container">
-        {members.filter(Boolean).map(member => (
-          <div key={member.name} className="team-card">
+      <div
+        className="team-scroll-container"
+        ref={trackRef}
+        onMouseEnter={pause}
+        onMouseLeave={scheduleResume}
+        onTouchStart={pause}
+        onTouchEnd={scheduleResume}
+        onPointerDown={pause}
+        onPointerUp={scheduleResume}
+      >
+        {loopMembers.map((member, idx) => (
+          <div key={`${member.name}-${idx}`} className="team-card">
             <div className="team-avatar">
               {member.avatar_url ? (
                 <img src={member.avatar_url} alt={member.name} />
