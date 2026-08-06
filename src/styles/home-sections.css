@@ -1,0 +1,27 @@
+.home-page > section:not(.hero):not(.home-level-banner) {
+  position: relative;
+  isolation: isolate;
+  background: var(--bg-page);
+}
+
+.home-page > section:not(.hero):not(.home-level-banner):nth-of-type(odd) {
+  background: var(--bg-card);
+}
+
+.home-page > section:not(.hero):not(.home-level-banner)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 3px;
+  border-radius: 0 0 var(--radius-full) var(--radius-full);
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+@media (max-width: 640px) {
+  .home-page > section:not(.hero):not(.home-level-banner)::before {
+    width: 44px;
+  }
+}
