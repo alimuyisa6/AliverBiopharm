@@ -7,8 +7,6 @@ export default function AdminLauncher() {
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
-  console.log('AdminLauncher user:', user);
-
   if (!user?.is_admin) return null;
 
   async function openAdminDashboard() {
@@ -26,7 +24,7 @@ export default function AdminLauncher() {
       onClick={openAdminDashboard}
       disabled={loading}
       className="btn btn-primary btn-sm"
-      style={{ position: 'fixed', bottom: 'var(--space-6)', right: 'var(--space-6)', zIndex: 50 }}
+      style={{ position: 'fixed', bottom: 0, left: 0, zIndex: 50 }}
     >
       <Icon name="shield-halved" />
       {loading ? 'Opening…' : 'Admin'}
