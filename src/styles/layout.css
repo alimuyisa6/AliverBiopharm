@@ -1,4 +1,4 @@
-/* styles/layout.css */
+ /* styles/layout.css */
 .site-header {
   position: fixed;
   top: 0;
@@ -46,7 +46,7 @@ body.dark-mode .site-header {
 }
 
 .header-logo img {
-  height: 60px;
+  height: 44px;
   width: auto;
 }
 
@@ -59,7 +59,7 @@ body.dark-mode .site-header {
 }
 
 .main-nav-link {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: var(--weight-medium);
   color: var(--text-dim);
   text-decoration: none;
@@ -256,7 +256,7 @@ body.dark-mode .site-header {
   justify-content: space-between;
   align-items: center;
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--text-dim);
 }
 
 .footer-bottom-nav {
@@ -322,4 +322,3 @@ body.dark-mode .site-header {
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
- 
