@@ -1,4 +1,4 @@
- /* pages/TutorApply.jsx */
+/* pages/TutorApply.jsx */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -51,6 +51,17 @@ export default function TutorApply() {
     load();
   }, []);
 
+  // If user already has a signup track, pre-select and skip level selection
+  useEffect(() => {
+    if (user?.profile?.track && levels.length && step === 1) {
+      const matched = levels.find(l => (l.key === user.profile.track) || (l.display_name === user.profile.track));
+      if (matched) {
+        setSelectedLevel(matched);
+        setStep(2);
+      }
+    }
+  }, [user, levels, step]);
+
   const handleLevelSelect = (lvl) => {
     setSelectedLevel(lvl);
     setSelectedClass(null);
@@ -78,14 +89,16 @@ export default function TutorApply() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedLevel || !selectedClass || selectedTopics.length === 0) {
+    // determine level to submit: prefer stored signup level
+    const levelToSubmit = user?.profile?.track || selectedLevel?.key;
+    if (!levelToSubmit || !selectedClass || selectedTopics.length === 0) {
       addToast('Please complete all required fields', 'error');
       return;
     }
     setSubmitting(true);
     try {
       await applyAsTutor(
-        selectedLevel.key,
+        levelToSubmit,
         selectedClass.name,
         selectedTopics,
         qualifications,
@@ -187,7 +200,8 @@ export default function TutorApply() {
           ))}
         </div>
 
-        {step === 1 && (
+        {/* Hide level selector if user already has a signup track */}
+        {!user?.profile?.track && step === 1 && (
           <div>
             <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your level to teach</h3>
             <div className="grid grid-cols-3">
