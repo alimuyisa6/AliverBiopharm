@@ -1,5 +1,4 @@
-  /* components/Layout/Layout.jsx */
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+ import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../Icon/Icon';
@@ -8,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { signout } from '../../api/client';
 import SearchOverlay from '../SearchOverlay/SearchOverlay';
 import ClassSwitcher from '../ClassSwitcher/ClassSwitcher';
+import AdminLauncher from '../AdminLauncher';
 
 const EXCLUDED_PATHS = ['/login', '/register'];
 const SCROLL_STORAGE_KEY = 'scroll-positions';
@@ -177,6 +177,7 @@ export default function Layout({ children, showFooter = true }) {
       )}
 
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <AdminLauncher />
 
       <AnimatePresence>
         {mobileOpen && (
