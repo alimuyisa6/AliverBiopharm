@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import { useLevelFilter } from '../hooks/useLevelFilter';
-import { getClassroomLevels, getClassroomTopics, applyAsTutor } from '../api/client';
+import { getClassroomLevels, getClassroomTopics, applyAsTutor, getTutorStatus } from '../api/client';
 import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
@@ -39,19 +39,16 @@ export default function TutorApply() {
       try {
         const [levelsData, statusRes] = await Promise.all([
           getClassroomLevels(),
-          fetch('/api/server?module=classroom&path=tutor_status', { credentials: 'include' }).then(r => r.json()).catch(() => ({})),
+          getTutorStatus(),
         ]);
         setLevels(levelsData || []);
-        if (statusRes?.application) {
-          setExistingApplication(statusRes.application);
-        }
+        if (statusRes?.application) setExistingApplication(statusRes.application);
       } catch {}
       setLoading(false);
     }
     load();
   }, []);
 
-  // If user already has a signup track, pre-select and skip level selection
   useEffect(() => {
     if (user?.profile?.track && levels.length && step === 1) {
       const matched = levels.find(l => (l.key === user.profile.track) || (l.display_name === user.profile.track));
@@ -89,10 +86,14 @@ export default function TutorApply() {
   };
 
   const handleSubmit = async () => {
-    // determine level to submit: prefer stored signup level
-    const levelToSubmit = user?.profile?.track || selectedLevel?.key;
+    const storedTrack = user?.profile?.track;
+    const levelToSubmit = storedTrack || selectedLevel?.key;
     if (!levelToSubmit || !selectedClass || selectedTopics.length === 0) {
       addToast('Please complete all required fields', 'error');
+      return;
+    }
+    if (storedTrack && selectedLevel && selectedLevel.key !== storedTrack) {
+      addToast('Submitted level does not match your signup level', 'error');
       return;
     }
     setSubmitting(true);
@@ -200,7 +201,6 @@ export default function TutorApply() {
           ))}
         </div>
 
-        {/* Hide level selector if user already has a signup track */}
         {!user?.profile?.track && step === 1 && (
           <div>
             <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your level to teach</h3>
