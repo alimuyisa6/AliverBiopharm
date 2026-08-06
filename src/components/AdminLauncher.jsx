@@ -1,5 +1,4 @@
- /* components/AdminLauncher.jsx */
-import { useContext, useState } from 'react';
+ import { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { requestHandoff } from '../api/client';
 import Icon from './Icon/Icon';
@@ -7,6 +6,8 @@ import Icon from './Icon/Icon';
 export default function AdminLauncher() {
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
+
+  console.log('AdminLauncher user:', user);
 
   if (!user?.is_admin) return null;
 
