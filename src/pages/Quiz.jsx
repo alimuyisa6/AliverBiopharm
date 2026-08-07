@@ -1,6 +1,5 @@
- /* pages/Quiz.jsx */
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
@@ -9,8 +8,7 @@ import { useContentAccess } from '../hooks/useContentAccess';
 import { useToast } from '../components/Toast/Toast';
 import {
   getQuizTopics, getQuizBlock, checkDailyRetry, checkQuizAnswer,
-  recordDailyVisit, getUserStreak, getUserAchievements, saveAchievement,
-  saveQuizState, getQuizState, clearQuizState, trackEvent,
+  recordDailyVisit, getUserStreak,
   getLeaderboard, startQuizSession, trackTabSwitch, submitQuizWithSession, getUnits,
 } from '../api/cachedClient';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
@@ -28,14 +26,11 @@ import Button from '../components/Button/Button';
 import Modal from '../components/Modal/Modal';
 import Input from '../components/Input/Input';
 
-const MAX_TAB_SWITCHES = 3;
-
 export default function Quiz() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
-  const { level, class_name, showAll, displayName } = useLevelFilter();
+  const { level, class_name, displayName } = useLevelFilter();
   const { groups } = useLayout();
   const addToast = useToast();
 
@@ -45,7 +40,6 @@ export default function Quiz() {
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [userAnswers, setUserAnswers] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [quizStartTime, setQuizStartTime] = useState(null);
   const [currentBlock, setCurrentBlock] = useState(0);
   const [totalBlocks, setTotalBlocks] = useState(0);
   const [resultData, setResultData] = useState(null);
@@ -55,16 +49,13 @@ export default function Quiz() {
   const [streak, setStreak] = useState(0);
   const [topicSearch, setTopicSearch] = useState('');
   const [timeLeft, setTimeLeft] = useState(null);
-  const [showResumeModal, setShowResumeModal] = useState(false);
-  const [resumeData, setResumeData] = useState(null);
-  const [soundEnabled] = useState(() => localStorage.getItem('quiz_sound') !== 'off');
   const [confidence, setConfidence] = useState([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
   const [answerSubmitting, setAnswerSubmitting] = useState(false);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
-  const [integrityOverlay, setIntegrityOverlay] = useState(false);
-  const integrityIntervalRef = useRef(null);
+  const [maxTabSwitches, setMaxTabSwitches] = useState(3);
+  const [integrityOverlay, setIntegrityOverlay] = useState(null);
 
   const SPINNER_WORDS = ['Reviewing...', 'Checking...', 'Analyzing...', 'Verifying...', 'Processing...'];
 
@@ -75,15 +66,8 @@ export default function Quiz() {
         setLoading(true);
         if (user) {
           await recordDailyVisit();
-          const [streakData, savedState] = await Promise.all([
-            getUserStreak(),
-            getQuizState(),
-          ]);
+          const streakData = await getUserStreak();
           setStreak(streakData?.count || 0);
-          if (savedState?.state) {
-            setResumeData(savedState.state);
-            setShowResumeModal(true);
-          }
         }
       } catch {
         addToast('Failed to load data', 'error');
@@ -108,6 +92,46 @@ export default function Quiz() {
       .then(topics => setAllTopics(Array.isArray(topics) ? topics : []))
       .catch(() => {});
   }, [activeUnitId]);
+
+  useEffect(() => {
+    if (timeLeft === null || resultData) return;
+    if (timeLeft <= 0) {
+      submitBlock();
+      return;
+    }
+    const id = setInterval(() => setTimeLeft(t => (t === null ? t : t - 1)), 1000);
+    return () => clearInterval(id);
+  }, [timeLeft, resultData]);
+
+  useEffect(() => {
+    if (!activeUnitId || !quizQuestions.length || resultData) return;
+    const onVisibilityChange = async () => {
+      if (document.visibilityState !== 'hidden') return;
+      try {
+        const result = await trackTabSwitch(activeUnitId, currentBlock);
+        setTabSwitchCount(result.tab_switches ?? tabSwitchCount + 1);
+        setMaxTabSwitches(result.max_allowed ?? maxTabSwitches);
+        if (result.auto_submitted) {
+          setIntegrityOverlay(result.message || 'Quiz locked due to a tab-switch violation.');
+        }
+      } catch {
+        addToast('Failed to record tab switch', 'error');
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [activeUnitId, currentBlock, quizQuestions.length, resultData, tabSwitchCount, maxTabSwitches]);
+
+  useEffect(() => {
+    if (!integrityOverlay) return;
+    const id = setTimeout(() => {
+      setIntegrityOverlay(null);
+      setCurrentTopic('');
+      setQuizQuestions([]);
+      setResultData(null);
+    }, 10000);
+    return () => clearTimeout(id);
+  }, [integrityOverlay]);
 
   const filteredTopics = useMemo(() => {
     if (!Array.isArray(allTopics)) return [];
@@ -135,7 +159,16 @@ export default function Quiz() {
     setAnswerSubmitting(true);
     const q = quizQuestions[currentIndex];
     try {
-      const result = await checkQuizAnswer({ question_id: q.id, selected_option: optionLetter });
+      const result = await checkQuizAnswer({
+        unit_id: activeUnitId,
+        block_number: currentBlock,
+        question_id: q.id,
+        selected_option: optionLetter,
+      });
+      if (result.auto_submitted) {
+        setIntegrityOverlay('Time limit exceeded. This block was auto-submitted.');
+        return;
+      }
       const newAnswers = [...userAnswers];
       newAnswers[currentIndex] = {
         selected: optionLetter,
@@ -163,17 +196,14 @@ export default function Quiz() {
       id: q.id,
       selectedOption: userAnswers[idx]?.selected || 'X',
     }));
-    const timeTaken = Math.round((Date.now() - new Date(quizStartTime).getTime()) / 1000);
     setLoading(true);
     try {
-      const result = await submitQuizWithSession(activeUnitId, currentBlock, answersPayload, timeTaken);
-      sessionStorage.removeItem('quiz_resume');
-      clearQuizState().catch(() => {});
-      if (result.auto_submitted) return;
+      const result = await submitQuizWithSession(activeUnitId, currentBlock, answersPayload);
+      setTimeLeft(null);
       setResultData(result);
       const topics = await getQuizTopics(activeUnitId);
       setAllTopics(Array.isArray(topics) ? topics : []);
-    } catch (err) {
+    } catch {
       addToast('Submission failed', 'error');
     } finally {
       setLoading(false);
@@ -204,21 +234,22 @@ export default function Quiz() {
     setCurrentBlock(blockNum);
     setLoading(true);
     try {
-      await startQuizSession(activeUnitId, blockNum);
-      setTabSwitchCount(0);
+      const session = await startQuizSession(activeUnitId, blockNum);
+      setTabSwitchCount(session.tab_switches || 0);
+      setMaxTabSwitches(session.max_allowed || 3);
       const data = await getQuizBlock(activeUnitId, blockNum);
       if (!data?.questions?.length) {
         addToast('No questions available.', 'error');
         return;
       }
       setQuizQuestions(data.questions);
-      setUserAnswers(new Array(data.questions.length).fill(null));
+      const priorAnswers = (data.prior_answers || []).map(a => a ? { selected: a.selected, correct: a.correct } : null);
+      setUserAnswers(priorAnswers.length === data.questions.length ? priorAnswers : new Array(data.questions.length).fill(null));
       setConfidence(new Array(data.questions.length).fill(null));
       setCurrentIndex(0);
-      setQuizStartTime(new Date());
       setResultData(null);
-      setTimeLeft(600);
-    } catch (err) {
+      setTimeLeft(data.time_left ?? 600);
+    } catch {
       addToast('Failed to load block', 'error');
     } finally {
       setLoading(false);
@@ -313,7 +344,7 @@ export default function Quiz() {
               )}
               {filteredTopics.map(topic => {
                 const hasQuestions = (topic.question_count || 0) > 0 && (topic.total_blocks || 0) > 0;
-                const allDone = hasQuestions && topic.completed_blocks?.length === topic.total_blocks;
+                const allDone = topic.all_done ?? (hasQuestions && topic.completed_blocks?.length === topic.total_blocks);
                 if (hasQuestions && !allDone) {
                   return (
                     <button key={topic.topic_name} className="card card-clickable" onClick={() => openTopicBlocks(topic.topic_name, topic.total_blocks)}>
@@ -354,9 +385,9 @@ export default function Quiz() {
                 <Icon name={resultData.passed ? 'circle-check' : 'circle-xmark'} />
                 {resultData.passed ? 'Passed' : 'Not passed'}
               </span>
-              {tabSwitchCount > 0 && (
+              {resultData.tab_switches > 0 && (
                 <p className="quiz-tabswitch-warning">
-                  <Icon name="exclamation-triangle" /> {tabSwitchCount} tab switch{tabSwitchCount > 1 ? 'es' : ''} recorded
+                  <Icon name="exclamation-triangle" /> {resultData.tab_switches} tab switch{resultData.tab_switches > 1 ? 'es' : ''} recorded
                 </p>
               )}
             </div>
@@ -388,6 +419,13 @@ export default function Quiz() {
           </div>
         ) : quizQuestions.length > 0 ? (
           <div>
+            {integrityOverlay && (
+              <div className="quiz-integrity-overlay">
+                <Icon name="exclamation-triangle" />
+                <p>{integrityOverlay}</p>
+              </div>
+            )}
+
             <div className="quiz-nav-pills">
               {quizQuestions.map((_, idx) => {
                 let cls = 'btn btn-sm btn-ghost';
@@ -418,6 +456,12 @@ export default function Quiz() {
                 </div>
                 <ProgressBar value={timeLeft} max={600} variant="primary" />
               </div>
+            )}
+
+            {tabSwitchCount > 0 && (
+              <p className="quiz-tabswitch-warning">
+                <Icon name="exclamation-triangle" /> {tabSwitchCount}/{maxTabSwitches} tab switches
+              </p>
             )}
 
             <ProgressBar value={currentIndex + 1} max={quizQuestions.length} variant="gradient" />
@@ -531,7 +575,7 @@ export default function Quiz() {
             <li><Icon name="circle-check" className="quiz-rules-icon is-success" /> Full explanations on review</li>
             <li><Icon name="circle-check" className="quiz-rules-icon is-success" /> 10-minute time limit</li>
             <li><Icon name="exclamation-triangle" className="quiz-rules-icon is-warning" /> Tab switches are recorded</li>
-            <li><Icon name="exclamation-triangle" className="quiz-rules-icon is-error" /> {MAX_TAB_SWITCHES} tab switches auto-submits and locks for 48 hours</li>
+            <li><Icon name="exclamation-triangle" className="quiz-rules-icon is-error" /> 3 tab switches auto-submits and locks for 48 hours</li>
           </ul>
           <div className="quiz-rules-submit">
             <Button onClick={confirmStartBlock} className="quiz-rules-submit-btn">I understand, let's begin!</Button>
