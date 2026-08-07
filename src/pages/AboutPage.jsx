@@ -1,6 +1,6 @@
  import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getSections } from '../api/sections';
+import { getAllSiteSections } from '../../api/client';   // ← updated import
 import { FaEnvelope, FaLocationDot, FaLinkedinIn, FaXTwitter, FaInstagram, FaGlobe } from 'react-icons/fa6';
 
 function RichText({ text }) {
@@ -86,7 +86,7 @@ export default function AboutPage() {
   const [sections, setSections] = useState(null);
 
   useEffect(() => {
-    getSections().then(setSections);
+    getAllSiteSections().then(setSections);
   }, []);
 
   if (!sections) return null;
