@@ -5,6 +5,7 @@ import Icon from '../Icon/Icon';
 import { useLayout } from '../../contexts/LayoutContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { signout } from '../../api/client';
+import { getRequest } from '../../api/client';                     // ← added import
 import SearchOverlay from '../SearchOverlay/SearchOverlay';
 import ClassSwitcher from '../ClassSwitcher/ClassSwitcher';
 import AdminLauncher from '../AdminLauncher';
@@ -106,11 +107,8 @@ export default function Layout({ children, showFooter = true }) {
   const fetchNavNotes = async (groupId) => {
     setLoadingNavNotes(true);
     try {
-      const res = await fetch(`/api/server?module=notes&path=nav_list&group_id=${groupId}`, { credentials: 'include' });
-      const data = await res.json();
-      if (data && !data.error) {
-        setNavNotes(prev => ({ ...prev, [groupId]: data }));
-      }
+      const data = await getRequest('notes', 'nav_list', { group_id: groupId });
+      setNavNotes(prev => ({ ...prev, [groupId]: data }));
     } catch (e) {
     } finally {
       setLoadingNavNotes(false);
