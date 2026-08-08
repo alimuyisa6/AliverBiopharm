@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { signup, getCurriculumLevels } from '../api/client';
@@ -213,9 +213,7 @@ export default function Auth() {
     resetTurnstile();
   }
 
-  // Step 0: collects email/password/full name, validated against the exact
-  // rules auth.js enforces server-side, so nobody reaches onboarding with
-  // a password the API is just going to reject anyway.
+ 
   async function handleRegister(e) {
     e.preventDefault();
     setError('');
@@ -232,9 +230,7 @@ export default function Auth() {
     if (mode === 'register') setOnboardingStep(1);
   }
 
-  // Step 2 (level selection) goes straight to signup — there is no step 3.
-  // auth.js's signup handler auto-assigns the default class/group for the
-  // chosen level; the frontend has no say in which class that is.
+ 
   async function handleOnboardingFinish(selectedRole, selectedLevel) {
     setError('');
     if (!selectedRole || !selectedLevel) { setError('Please complete all onboarding steps'); return; }
@@ -408,22 +404,29 @@ export default function Auth() {
                   )}
                   {!levelsLoading && !levelsError && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                      {levels.map(lvl => (
-                        <button key={lvl.key}
-                          className={`card card-clickable ${track === lvl.display_name ? 'card-selected' : ''}`}
-                          style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-5)' }}
-                          disabled={submitting}
-                          onClick={() => { setTrack(lvl.display_name); handleOnboardingFinish(role, lvl.display_name); }}>
-                          <Icon name={lvl.icon || 'graduation-cap'} style={{ fontSize: '1.5rem' }} />
-                          <div>
-                            <div style={{ fontWeight: 700 }}>{lvl.display_name}</div>
-                            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
-                              {(lvl.classes?.length || 0)} {lvl.classes?.length === 1 ? 'class' : 'classes'} available
+                      {levels.map(lvl => {
+                        const value = lvl.display_name;
+                        const rowKey = lvl.key || lvl.id || value;
+                        const classCount = Array.isArray(lvl.classes) ? lvl.classes.length : null;
+                        return (
+                          <button key={rowKey}
+                            className={`card card-clickable ${track === value ? 'card-selected' : ''}`}
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-5)' }}
+                            disabled={submitting}
+                            onClick={() => { setTrack(value); handleOnboardingFinish(role, value); }}>
+                            <Icon name={lvl.icon || 'graduation-cap'} style={{ fontSize: '1.5rem' }} />
+                            <div>
+                              <div style={{ fontWeight: 700 }}>{lvl.display_name}</div>
+                              {classCount !== null && (
+                                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
+                                  {classCount} {classCount === 1 ? 'class' : 'classes'} available
+                                </div>
+                              )}
                             </div>
-                          </div>
-                          {submitting && track === lvl.display_name && <Spinner size="sm" />}
-                        </button>
-                      ))}
+                            {submitting && track === value && <Spinner size="sm" />}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                   <button className="btn btn-ghost" style={{ marginTop: 'var(--space-6)' }} disabled={submitting}
@@ -512,4 +515,3 @@ export default function Auth() {
     </div>
   );
 }
- 
