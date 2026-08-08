@@ -1,7 +1,7 @@
- import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { signup, getClassSequence, getPharmacyPrograms } from '../api/client';
+import { signup, getCurriculumLevels } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '../components/Toast/Toast';
 import Input from '../components/Input/Input';
@@ -11,11 +11,22 @@ import Spinner from '../components/Spinner/Spinner';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 
-const TRACKS = [
-  { value: 'O-Level', icon: 'seedling', label: 'O-Level', description: 'Senior 1 – 4' },
-  { value: 'A-Level', icon: 'flask', label: 'A-Level', description: 'Senior 5 – 6' },
-  { value: 'Pharmacy', icon: 'capsules', label: 'Pharmacy', description: 'Certificate, Diploma, Degree' },
-];
+// Mirrors the exact rule in auth.js's signup/change_password handlers:
+// 10-128 chars, at least 3 of {upper, lower, digit, special}. Kept in sync
+// on purpose so a password that passes here never gets rejected by the API.
+function validatePasswordRules(password) {
+  if (!password || password.length < 10) return 'Password must be at least 10 characters';
+  if (password.length > 128) return 'Password must not exceed 128 characters';
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasDigit = /[0-9]/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+  const categories = [hasUpper, hasLower, hasDigit, hasSpecial].filter(Boolean).length;
+  if (categories < 3) {
+    return 'Password must contain at least 3 of: uppercase letter, lowercase letter, number, special character';
+  }
+  return null;
+}
 
 export default function Auth() {
   const location = useLocation();
@@ -31,11 +42,19 @@ export default function Auth() {
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Onboarding is exactly two steps now, matching what auth.js's signup
+  // handler actually accepts: role, then level. There is no third
+  // "pick your specific class" step — the backend auto-assigns the
+  // default group for the chosen level server-side.
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [role, setRole] = useState(null);
   const [track, setTrack] = useState(null);
-  const [className, setClassName] = useState(null);
-  const [classes, setClasses] = useState([]);
+
+  // Levels come from curriculum_levels via the database, not a hardcoded
+  // list — same endpoint classroom.js's getLevels() already serves.
+  const [levels, setLevels] = useState([]);
+  const [levelsLoading, setLevelsLoading] = useState(false);
+  const [levelsError, setLevelsError] = useState('');
 
   const [mfaStep, setMfaStep] = useState(false);
   const [mfaCode, setMfaCode] = useState('');
@@ -50,19 +69,17 @@ export default function Auth() {
     ? `${location.state.from.pathname}${location.state.from.search || ''}`
     : '/dashboard';
 
+  // Fetch the real level list from the database the first time the level
+  // step is reached, rather than shipping a static copy of it in the bundle.
   useEffect(() => {
-    if (track) {
-      if (track === 'Pharmacy') {
-        getPharmacyPrograms()
-          .then(data => setClasses((data || []).map(p => ({ value: p.program_name, label: p.program_name, description: p.description }))))
-          .catch(() => setClasses([]));
-      } else {
-        getClassSequence(track)
-          .then(data => setClasses((data || []).map(c => ({ value: c.class_name, label: c.class_name }))))
-          .catch(() => setClasses([]));
-      }
-    }
-  }, [track]);
+    if (onboardingStep !== 2 || levels.length || levelsLoading) return;
+    setLevelsLoading(true);
+    setLevelsError('');
+    getCurriculumLevels()
+      .then(data => setLevels(data || []))
+      .catch(() => setLevelsError('Could not load available levels. Please try again.'))
+      .finally(() => setLevelsLoading(false));
+  }, [onboardingStep, levels.length, levelsLoading]);
 
   const renderWidget = useCallback((container) => {
     if (!window.turnstile || !container || widgetIdRef.current) return;
@@ -196,27 +213,39 @@ export default function Auth() {
     resetTurnstile();
   }
 
+  // Step 0: collects email/password/full name, validated against the exact
+  // rules auth.js enforces server-side, so nobody reaches onboarding with
+  // a password the API is just going to reject anyway.
   async function handleRegister(e) {
     e.preventDefault();
     setError('');
-    if (!fullName.trim()) { setError('Full name is required'); return; }
+
+    const trimmedName = fullName.trim();
+    if (trimmedName.length < 2 || trimmedName.length > 100) {
+      setError('Full name must be between 2 and 100 characters');
+      return;
+    }
     if (password !== confirm) { setError('Passwords do not match'); return; }
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    const passwordError = validatePasswordRules(password);
+    if (passwordError) { setError(passwordError); return; }
+
     if (mode === 'register') setOnboardingStep(1);
   }
 
-  async function handleOnboardingFinish() {
+  // Step 2 (level selection) goes straight to signup — there is no step 3.
+  // auth.js's signup handler auto-assigns the default class/group for the
+  // chosen level; the frontend has no say in which class that is.
+  async function handleOnboardingFinish(selectedRole, selectedLevel) {
     setError('');
-    if (!role || !track || !className) { setError('Please complete all onboarding steps'); return; }
+    if (!selectedRole || !selectedLevel) { setError('Please complete all onboarding steps'); return; }
     const token = getTurnstileToken();
     if (!token) { setError('Verification expired.'); return; }
     setSubmitting(true);
     try {
       await signup(email, password, token, {
         full_name: fullName.trim(),
-        role,
-        track,
-        class_name: className
+        role: selectedRole,
+        level: selectedLevel,
       });
       setSuccess(true);
       setTimeout(() => navigate(redirectTo, { replace: true }), 1500);
@@ -229,9 +258,8 @@ export default function Auth() {
   }
 
   const progressPct = () => {
-    if (onboardingStep === 1) return 35;
-    if (onboardingStep === 2) return 70;
-    if (onboardingStep === 3) return 100;
+    if (onboardingStep === 1) return 50;
+    if (onboardingStep === 2) return 100;
     return 0;
   };
 
@@ -344,7 +372,7 @@ export default function Auth() {
               )}
               {onboardingStep === 1 && (
                 <div>
-                  <span className="sec-label" style={{ textAlign: 'left' }}>Step 1 of 3</span>
+                  <span className="sec-label" style={{ textAlign: 'left' }}>Step 1 of 2</span>
                   <h3 style={{ marginBottom: 'var(--space-6)' }}>I am a...</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                     <button className={`card card-clickable ${role === 'student' ? 'card-selected' : ''}`}
@@ -362,52 +390,46 @@ export default function Auth() {
               )}
               {onboardingStep === 2 && (
                 <div>
-                  <span className="sec-label" style={{ textAlign: 'left' }}>Step 2 of 3</span>
-                  <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your track</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                    {TRACKS.map(t => (
-                      <button key={t.value}
-                        className={`card card-clickable ${track === t.value ? 'card-selected' : ''}`}
-                        style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-5)' }}
-                        onClick={() => { setTrack(t.value); setClassName(null); setOnboardingStep(3); }}>
-                        <Icon name={t.icon} style={{ fontSize: '1.5rem' }} />
-                        <div>
-                          <div style={{ fontWeight: 700 }}>{t.label}</div>
-                          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>{t.description}</div>
-                        </div>
+                  <span className="sec-label" style={{ textAlign: 'left' }}>Step 2 of 2</span>
+                  <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your level</h3>
+                  {levelsLoading && (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-6)' }}>
+                      <Spinner />
+                    </div>
+                  )}
+                  {levelsError && (
+                    <div className="alert alert-error" style={{ marginBottom: 'var(--space-4)' }}>
+                      <Icon name="exclamation-triangle" /> {levelsError}
+                      <button className="btn btn-ghost btn-sm" style={{ marginLeft: 'var(--space-3)' }}
+                        onClick={() => { setLevels([]); setLevelsError(''); }}>
+                        Retry
                       </button>
-                    ))}
-                  </div>
-                  <button className="btn btn-ghost" style={{ marginTop: 'var(--space-6)' }}
+                    </div>
+                  )}
+                  {!levelsLoading && !levelsError && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                      {levels.map(lvl => (
+                        <button key={lvl.key}
+                          className={`card card-clickable ${track === lvl.display_name ? 'card-selected' : ''}`}
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-5)' }}
+                          disabled={submitting}
+                          onClick={() => { setTrack(lvl.display_name); handleOnboardingFinish(role, lvl.display_name); }}>
+                          <Icon name={lvl.icon || 'graduation-cap'} style={{ fontSize: '1.5rem' }} />
+                          <div>
+                            <div style={{ fontWeight: 700 }}>{lvl.display_name}</div>
+                            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
+                              {(lvl.classes?.length || 0)} {lvl.classes?.length === 1 ? 'class' : 'classes'} available
+                            </div>
+                          </div>
+                          {submitting && track === lvl.display_name && <Spinner size="sm" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <button className="btn btn-ghost" style={{ marginTop: 'var(--space-6)' }} disabled={submitting}
                     onClick={() => { setOnboardingStep(1); setTrack(null); }}>
                     <Icon name="arrow-left" /> Back
                   </button>
-                </div>
-              )}
-              {onboardingStep === 3 && (
-                <div>
-                  <span className="sec-label" style={{ textAlign: 'left' }}>Step 3 of 3</span>
-                  <h3 style={{ marginBottom: 'var(--space-6)' }}>
-                    {track === 'Pharmacy' ? 'Select your programme' : 'Select your class'}
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-                    {classes.map(c => (
-                      <button key={c.value}
-                        className={`card card-clickable ${className === c.value ? 'card-selected' : ''}`}
-                        style={{ padding: 'var(--space-5)' }}
-                        onClick={() => setClassName(c.value)}>
-                        <span style={{ fontWeight: 600 }}>{c.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--space-8)' }}>
-                    <button className="btn btn-ghost" onClick={() => setOnboardingStep(2)}>
-                      <Icon name="arrow-left" /> Back
-                    </button>
-                    <Button onClick={handleOnboardingFinish} loading={submitting} disabled={!className}>
-                      <Icon name="check" /> Complete
-                    </Button>
-                  </div>
                 </div>
               )}
             </motion.div>
@@ -456,7 +478,7 @@ export default function Auth() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   disabled={submitting}
-                  hint={mode === 'register' ? 'Minimum 8 characters' : undefined}
+                  hint={mode === 'register' ? 'Minimum 10 characters, with at least 3 of: uppercase, lowercase, number, symbol' : undefined}
                 />
                 {mode === 'register' && (
                   <Input
@@ -490,3 +512,4 @@ export default function Auth() {
     </div>
   );
 }
+ 
