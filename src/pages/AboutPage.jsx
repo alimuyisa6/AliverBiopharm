@@ -1,6 +1,6 @@
  import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllSiteSections } from '../../api/client';   // ← updated import
+import { getAllSiteSections } from '../api/client';
 import { FaEnvelope, FaLocationDot, FaLinkedinIn, FaXTwitter, FaInstagram, FaGlobe } from 'react-icons/fa6';
 
 function RichText({ text }) {
