@@ -30,7 +30,7 @@ import { getVagueErrorMessage } from '../lib/threat-shield.js';
   recall:                 () => import('../lib/recall.js'),
   resources:              () => import('../lib/resources.js'),
   search:                 () => import('../lib/search.js'),
-  'site-sections':        () => import('../lib/site-sections.js'),
+  'site-sections':        () => import('../lib/site.js'),
   'trust-safety':         () => import('../lib/trust-safety.js'),      // NEW
   upload:                 () => import('../lib/upload.js'),
   tutors:                 () => import('../lib/tutors.js'),
