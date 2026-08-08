@@ -2,7 +2,7 @@
 import { passGate, gatemanErrorResponse } from '../lib/gateman.js';
 import { getVagueErrorMessage } from '../lib/threat-shield.js';
 
-const MODULE_MAP = {
+ const MODULE_MAP = {
   auth:                   () => import('../lib/auth.js'),
   admin:                  () => import('../lib/admin.js'),
   security:               () => import('../lib/security-center.js'),
@@ -16,20 +16,23 @@ const MODULE_MAP = {
   'daily-challenge':      () => import('../lib/daily-challenge.js'),
   flashcards:             () => import('../lib/flashcards.js'),
   glossary:               () => import('../lib/glossary.js'),
-  interactions:           () => import('../lib/engagement.js'),   
+  'institutions':         () => import('../lib/institutions.js'),      // NEW
+  interactions:           () => import('../lib/engagement.js'),
   lab:                    () => import('../lib/lab.js'),
   notes:                  () => import('../lib/notes.js'),
   'past-papers':          () => import('../lib/past-papers.js'),
-  platform:               () => import('../lib/platform.js'),    
+  'payments-escrow':      () => import('../lib/payments-escrow.js'),   // NEW
+  platform:               () => import('../lib/platform.js'),
   premium:                () => import('../lib/premium.js'),
-  profile:                () => import('../lib/profile.js'), 
+  profile:                () => import('../lib/profile.js'),
   'profile-picture':      () => import('../lib/profile-picture.js'),
   quiz:                   () => import('../lib/quiz.js'),
   recall:                 () => import('../lib/recall.js'),
-  resources:              () => import('../lib/resources.js'),    
+  resources:              () => import('../lib/resources.js'),
   search:                 () => import('../lib/search.js'),
   'site-sections':        () => import('../lib/site-sections.js'),
-  upload:                 () => import('../lib/upload.js'),   
+  'trust-safety':         () => import('../lib/trust-safety.js'),      // NEW
+  upload:                 () => import('../lib/upload.js'),
   tutors:                 () => import('../lib/tutors.js'),
   articles:               () => import('../lib/articles.js'),
   'pdf-resources':        () => import('../lib/pdf-resources.js'),
