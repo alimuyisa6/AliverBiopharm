@@ -17,7 +17,7 @@ import { getVagueErrorMessage } from '../lib/threat-shield.js';
   flashcards:             () => import('../lib/flashcards.js'),
   glossary:               () => import('../lib/glossary.js'),
   'institutions':         () => import('../lib/institutions.js'),      // NEW
-  interactions:           () => import('../lib/engagement.js'),
+  interactions:           () => import('../lib/interactions.js'),
   lab:                    () => import('../lib/lab.js'),
   notes:                  () => import('../lib/notes.js'),
   'past-papers':          () => import('../lib/past-papers.js'),
