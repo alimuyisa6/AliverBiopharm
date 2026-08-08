@@ -1,16 +1,20 @@
  /* pages/Recall.jsx */
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
-import { useLayout } from '../contexts/LayoutContext';
 import { useToast } from '../components/Toast/Toast';
 import {
-  getRecallSession, checkRecallSession, getRecallStats,
-  getRecallAchievements, getRecallDashboard, getRecallTopics,
-  continueRecallSession, submitRecallAnswer, completeRecallSession,
+  getRecallStats,
+  getRecallAchievements,
+  getRecallDashboard,
+  getRecallTopics,
+  startRecallSession,
+  continueRecallSession,
+  submitRecallAnswer,
+  completeRecallSession,
   getLeaderboard,
 } from '../api/cachedClient';
 import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
@@ -74,20 +78,30 @@ async function playTone(type) {
   } catch {}
 }
 
+function computeXpProgress(totalXp) {
+  const xp = totalXp || 0;
+  const lvl = Math.floor(xp / 100) + 1;
+  const into = xp % 100;
+  const toNext = 100 - into;
+  const pct = into;
+  return { level: lvl, xpIntoLevel: into, xpToNext: toNext, progressPercent: pct };
+}
+
+const ENERGY_DRAIN_PER_QUESTION = 4;
+
 export default function BioRecall() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
   const { level, class_name, showAll, displayName } = useLevelFilter();
-  const { groups } = useLayout();
   const addToast = useToast();
 
-  const [sessionQuestions, setSessionQuestions] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
   const [sessionActive, setSessionActive] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [userAnswersRecord, setUserAnswersRecord] = useState([]);
   const [sessionId, setSessionId] = useState(null);
   const [xpTotal, setXpTotal] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
@@ -95,7 +109,6 @@ export default function BioRecall() {
   const [brainEnergy, setBrainEnergy] = useState(100);
   const [showReport, setShowReport] = useState(false);
   const [sessionReport, setSessionReport] = useState(null);
-  const [dashboardData, setDashboardData] = useState(null);
   const [achievementsList, setAchievementsList] = useState([]);
   const [topicModalOpen, setTopicModalOpen] = useState(false);
   const [topicList, setTopicList] = useState([]);
@@ -113,6 +126,11 @@ export default function BioRecall() {
   const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
+
+  useEffect(() => {
     if (!isReady || !access.canAccess || access.isPending) return;
     loadUserProgress();
   }, [isReady, access.canAccess, access.isPending]);
@@ -124,21 +142,20 @@ export default function BioRecall() {
         getRecallDashboard().catch(() => null),
         getRecallStats().catch(() => null),
         getRecallAchievements().catch(() => []),
-        getRecallTopics(groups?.[0]?.id).catch(() => []),
+        getRecallTopics().catch(() => []),
         getLeaderboard(level || 'O-Level', 10).catch(() => []),
       ]);
       if (!isMounted.current) return;
       if (dash) {
-        setDashboardData(dash);
         setXpTotal(dash.total_xp || 0);
         setStreakDays(dash.current_streak || 0);
         setRankTitle(dash.rank_title || 'Beginner');
-        const prog = computeXpProgress(dash.total_xp || 0);
-        setXpProgress(prog);
+        setXpProgress(dash.xp_progress || computeXpProgress(dash.total_xp || 0));
+        if (typeof dash.brain_energy === 'number') setBrainEnergy(dash.brain_energy);
       }
       if (stats) {
         setMasteryTopics(stats.mastery_topics || {});
-        setBrainEnergy(stats.brain_energy || 100);
+        if (typeof stats.brain_energy === 'number') setBrainEnergy(stats.brain_energy);
       }
       setAchievementsList(Array.isArray(achievements) ? achievements : []);
       setTopicList(Array.isArray(topics) ? topics : []);
@@ -158,17 +175,18 @@ export default function BioRecall() {
     setTopicModalOpen(false);
     setLoading(true);
     try {
-      const session = await getRecallSession(topic.unit_id);
-      if (session?.questions?.length) {
-        setSessionQuestions(session.questions);
-        setSessionId(session.session_id);
-        setCurrentIndex(0);
-        setSessionActive(true);
-        setUserAnswersRecord([]);
-        setQuestionStartTime(new Date());
-      } else {
+      const started = await startRecallSession(topic.unit_id);
+      if (!started?.session_id || !started?.current_question) {
         addToast('No questions available for this topic', 'warning');
+        return;
       }
+      setSessionId(started.session_id);
+      setTotalQuestions(started.total_questions || 0);
+      setCurrentIndex(started.current_index || 0);
+      setCurrentQuestion(started.current_question);
+      setFeedbackResult(null);
+      setSessionActive(true);
+      setQuestionStartTime(new Date());
     } catch {
       addToast('Failed to start session', 'error');
     } finally {
@@ -178,37 +196,33 @@ export default function BioRecall() {
 
   async function handleSubmitAnswer() {
     const answer = answerInputRef.current?.value?.trim();
-    if (!answer) return;
+    if (!answer || !currentQuestion) return;
     setAnalyzing(true);
     try {
       const result = await submitRecallAnswer(
         sessionId,
-        sessionQuestions[currentIndex].id,
+        currentQuestion.id,
         answer,
         '',
         questionStartTime?.toISOString()
       );
-      const newRecord = {
-        question_id: sessionQuestions[currentIndex].id,
-        user_answer: answer,
-        strength: result.strength,
-        correct_answer: result.correct_answer,
-        explanation: result.explanation,
-        xp_earned: result.xp_earned,
-      };
-      setUserAnswersRecord(prev => [...prev, newRecord]);
       setFeedbackResult(result);
       if (soundEnabled) {
         if (result.strength === 'excellent') playTone('excellent');
         else if (result.strength === 'strong') playTone('strong');
         else playTone('developing');
       }
-      if (result.xp_earned) {
-        setXpTotal(prev => prev + result.xp_earned);
-        const newXp = (xpTotal || 0) + result.xp_earned;
-        const prog = computeXpProgress(newXp);
-        setXpProgress(prog);
+      if (typeof result.total_xp === 'number') {
+        setXpTotal(result.total_xp);
+        setXpProgress(computeXpProgress(result.total_xp));
+      } else if (result.xp_earned) {
+        setXpTotal(prev => {
+          const newTotal = (prev || 0) + result.xp_earned;
+          setXpProgress(computeXpProgress(newTotal));
+          return newTotal;
+        });
       }
+      setBrainEnergy(prev => Math.max(0, (prev ?? 100) - ENERGY_DRAIN_PER_QUESTION));
     } catch {
       addToast('Failed to submit answer', 'error');
     } finally {
@@ -217,33 +231,40 @@ export default function BioRecall() {
     }
   }
 
-  function handleNextQuestion() {
-    const nextIndex = currentIndex + 1;
-    if (nextIndex < sessionQuestions.length) {
-      setCurrentIndex(nextIndex);
+  async function handleNextQuestion() {
+    if (!feedbackResult) return;
+
+    if (feedbackResult.is_complete) {
+      setLoading(true);
+      try {
+        const result = await completeRecallSession(sessionId);
+        setSessionReport(result?.report || null);
+        if (result?.streak_info?.current_streak != null) {
+          setStreakDays(result.streak_info.current_streak);
+        }
+      } catch {
+        addToast('Failed to complete session', 'error');
+      } finally {
+        setSessionActive(false);
+        setShowReport(true);
+        setLoading(false);
+      }
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const cont = await continueRecallSession(sessionId);
+      setCurrentQuestion(cont.current_question || null);
+      setCurrentIndex(cont.current_index || 0);
+      setTotalQuestions(cont.total_questions || totalQuestions);
       setFeedbackResult(null);
       setQuestionStartTime(new Date());
-    } else {
-      setSessionActive(false);
-      setShowReport(true);
-      handleCompleteSession();
+    } catch {
+      addToast('Failed to load next question', 'error');
+    } finally {
+      setLoading(false);
     }
-  }
-
-  async function handleCompleteSession() {
-    try {
-      const result = await completeRecallSession(sessionId);
-      setSessionReport(result?.report || null);
-    } catch {}
-  }
-
-  function computeXpProgress(totalXp) {
-    const xp = totalXp || 0;
-    const lvl = Math.floor(xp / 100) + 1;
-    const into = xp % 100;
-    const toNext = 100 - into;
-    const pct = into;
-    return { level: lvl, xpIntoLevel: into, xpToNext: toNext, progressPercent: pct };
   }
 
   const toggleSound = () => {
@@ -270,7 +291,6 @@ export default function BioRecall() {
     );
   }
 
-  const currentQuestion = sessionQuestions[currentIndex];
   const topicEntries = Object.entries(masteryTopics).filter(([t]) => t && t !== 'null').slice(0, 6);
   const levelName = displayName || level?.id || '';
   const classLabel = class_name || '';
@@ -386,11 +406,11 @@ export default function BioRecall() {
                 <p className="recall-leaderboard-empty">No data yet. Be the first!</p>
               ) : (
                 leaderboard.map((entry, idx) => (
-                  <div key={idx} className="card recall-leaderboard-row">
+                  <div key={entry.user_id || idx} className="card recall-leaderboard-row">
                     <span className={`recall-rank ${rankClass(idx)}`}>
                       #{idx + 1}
                     </span>
-                    <span className="recall-entry-name">{entry.user_name || entry.email || 'Anonymous'}</span>
+                    <span className="recall-entry-name">{entry.display_name || 'Anonymous Learner'}</span>
                     <span>{entry.total_xp} XP</span>
                     <span className="badge badge-primary">Level {entry.recall_level}</span>
                   </div>
@@ -409,9 +429,9 @@ export default function BioRecall() {
 
         {sessionActive && currentQuestion && (
           <div>
-            <ProgressBar value={currentIndex + 1} max={sessionQuestions.length} variant="gradient" />
+            <ProgressBar value={currentIndex + 1} max={totalQuestions} variant="gradient" />
             <p className="quiz-progress-label">
-              Question {currentIndex + 1} of {sessionQuestions.length}
+              Question {currentIndex + 1} of {totalQuestions}
               {selectedTopic?.topic_name && <> – {selectedTopic.topic_name}</>}
             </p>
 
@@ -434,8 +454,8 @@ export default function BioRecall() {
                     <Icon name="paper-plane" /> Submit
                   </Button>
                 ) : (
-                  <Button onClick={handleNextQuestion}>
-                    {currentIndex + 1 < sessionQuestions.length ? 'Next Question' : 'Finish Session'} <Icon name="arrow-right" />
+                  <Button onClick={handleNextQuestion} loading={loading} disabled={loading}>
+                    {feedbackResult.is_complete ? 'Finish Session' : 'Next Question'} <Icon name="arrow-right" />
                   </Button>
                 )}
               </div>
@@ -454,6 +474,7 @@ export default function BioRecall() {
                   </div>
                 </div>
                 <p><strong>Correct answer:</strong> {feedbackResult.correct_answer}</p>
+                {feedbackResult.note && <p className="recall-feedback-note">{feedbackResult.note}</p>}
                 {feedbackResult.explanation && <p className="recall-feedback-explanation">{feedbackResult.explanation}</p>}
               </Card>
             )}
@@ -485,8 +506,9 @@ export default function BioRecall() {
               </div>
             </div>
             <p>Mastery Score: {sessionReport.mastery_score || 0}%</p>
+            <p className="recall-report-time">Total time: {sessionReport.total_time_formatted} · Avg: {sessionReport.avg_time_formatted} per question</p>
             <div className="recall-report-actions">
-              <Button onClick={() => { setShowReport(false); setSessionActive(false); setTopicModalOpen(true); }}>
+              <Button onClick={() => { setShowReport(false); setSessionActive(false); loadUserProgress(); setTopicModalOpen(true); }}>
                 <Icon name="rotate" /> Study Another Topic
               </Button>
               <Button variant="secondary" onClick={() => navigate('/')}>
