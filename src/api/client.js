@@ -221,6 +221,18 @@ export async function getRecallAchievements() { return getRequest('recall', 'ach
 export async function getRecallDashboard() { return getRequest('recall', 'dashboard'); }
 export async function getRecallTopics(groupId) { return getRequest('recall', 'topics', { group_id: groupId }); }
 
+// The user's currently-selected level for the recall/practice feature.
+// Backend-persisted under the recall module — NOT the same as the
+// account-level track/level set at signup (that lives under user_profiles
+// via auth.js/profile.js). This is scoped to what recall.js exposes.
+// NOTE: recall.js has not been shared yet, so these two paths
+// ('selected_level' / 'set_selected_level') are a best-effort guess at
+// naming, matching the existing snake_case convention in this module
+// ('session_check', 'first_visit', etc). Confirm against the actual
+// recall.js handler and adjust the path strings below if they differ.
+export async function getSelectedLevel() { return getRequest('recall', 'selected_level'); }
+export async function setSelectedLevel(level) { return apiCall('recall', 'set_selected_level', { level }); }
+
 export async function getClassroomLevels() { return getRequest('classroom', 'levels'); }
 export async function getClassroomTopics(groupId, level) { return getRequest('classroom', 'topics', { group_id: groupId, level }); }
 export async function listClassrooms(unitId, groupId) { return getRequest('classroom', 'list', { unit_id: unitId, group_id: groupId }); }
