@@ -87,8 +87,6 @@ function computeXpProgress(totalXp) {
   return { level: lvl, xpIntoLevel: into, xpToNext: toNext, progressPercent: pct };
 }
 
-const ENERGY_DRAIN_PER_QUESTION = 4;
-
 export default function BioRecall() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -103,15 +101,18 @@ export default function BioRecall() {
   const [sessionActive, setSessionActive] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const [sessionQuote, setSessionQuote] = useState(null);
   const [xpTotal, setXpTotal] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
   const [masteryTopics, setMasteryTopics] = useState({});
-  const [brainEnergy, setBrainEnergy] = useState(100);
+  const [accuracy, setAccuracy] = useState(0);
   const [showReport, setShowReport] = useState(false);
   const [sessionReport, setSessionReport] = useState(null);
+  const [newlyAwarded, setNewlyAwarded] = useState([]);
   const [achievementsList, setAchievementsList] = useState([]);
   const [topicModalOpen, setTopicModalOpen] = useState(false);
   const [topicList, setTopicList] = useState([]);
+  const [levelMeta, setLevelMeta] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [loading, setLoading] = useState(true);
   const [feedbackResult, setFeedbackResult] = useState(null);
@@ -138,12 +139,12 @@ export default function BioRecall() {
   async function loadUserProgress() {
     setLoading(true);
     try {
-      const [dash, stats, achievements, topics, lb] = await Promise.all([
+      const [dash, stats, achievements, topicsRes, lb] = await Promise.all([
         getRecallDashboard().catch(() => null),
         getRecallStats().catch(() => null),
         getRecallAchievements().catch(() => []),
-        getRecallTopics().catch(() => []),
-        getLeaderboard(level || 'O-Level', 10).catch(() => []),
+        getRecallTopics().catch(() => ({ level: null, units: [] })),
+        getLeaderboard(displayName || level || null, 10).catch(() => []),
       ]);
       if (!isMounted.current) return;
       if (dash) {
@@ -151,14 +152,16 @@ export default function BioRecall() {
         setStreakDays(dash.current_streak || 0);
         setRankTitle(dash.rank_title || 'Beginner');
         setXpProgress(dash.xp_progress || computeXpProgress(dash.total_xp || 0));
-        if (typeof dash.brain_energy === 'number') setBrainEnergy(dash.brain_energy);
+        if (dash.level_meta) setLevelMeta(dash.level_meta);
+        if (typeof dash.accuracy === 'number') setAccuracy(dash.accuracy);
       }
       if (stats) {
         setMasteryTopics(stats.mastery_topics || {});
-        if (typeof stats.brain_energy === 'number') setBrainEnergy(stats.brain_energy);
+        if (typeof stats.accuracy === 'number') setAccuracy(stats.accuracy);
       }
       setAchievementsList(Array.isArray(achievements) ? achievements : []);
-      setTopicList(Array.isArray(topics) ? topics : []);
+      setTopicList(Array.isArray(topicsRes?.units) ? topicsRes.units : []);
+      if (topicsRes?.level) setLevelMeta(prev => prev || topicsRes.level);
       setLeaderboard(Array.isArray(lb) ? lb : []);
     } catch {
       addToast('Failed to load data', 'error');
@@ -184,6 +187,8 @@ export default function BioRecall() {
       setTotalQuestions(started.total_questions || 0);
       setCurrentIndex(started.current_index || 0);
       setCurrentQuestion(started.current_question);
+      setSessionQuote(started.quote || null);
+      if (started.level) setLevelMeta(started.level);
       setFeedbackResult(null);
       setSessionActive(true);
       setQuestionStartTime(new Date());
@@ -222,7 +227,6 @@ export default function BioRecall() {
           return newTotal;
         });
       }
-      setBrainEnergy(prev => Math.max(0, (prev ?? 100) - ENERGY_DRAIN_PER_QUESTION));
     } catch {
       addToast('Failed to submit answer', 'error');
     } finally {
@@ -239,6 +243,7 @@ export default function BioRecall() {
       try {
         const result = await completeRecallSession(sessionId);
         setSessionReport(result?.report || null);
+        setNewlyAwarded(Array.isArray(result?.newly_awarded) ? result.newly_awarded : []);
         if (result?.streak_info?.current_streak != null) {
           setStreakDays(result.streak_info.current_streak);
         }
@@ -292,8 +297,11 @@ export default function BioRecall() {
   }
 
   const topicEntries = Object.entries(masteryTopics).filter(([t]) => t && t !== 'null').slice(0, 6);
-  const levelName = displayName || level?.id || '';
+  const levelName = levelMeta?.display_name || displayName || level?.id || '';
+  const unitLabel = levelMeta?.unit_label || 'Topic';
+  const groupLabel = levelMeta?.group_label || 'Class';
   const classLabel = class_name || '';
+  const levelIcon = levelMeta?.icon || 'brain';
 
   function rankClass(idx) {
     if (idx === 0) return 'is-gold';
@@ -312,14 +320,14 @@ export default function BioRecall() {
         </nav>
 
         <div className="recall-header">
-          <span className="sec-label">{level === 'Pharmacy' ? 'RecallRx' : 'BioRecall'}</span>
+          <span className="sec-label">BioRecall</span>
           <h1 className="section-title recall-page-title">
-            {level === 'Pharmacy' ? 'RecallRx' : `BioRecall ${levelName}`}
+            BioRecall {levelName}
           </h1>
           {levelName && (
             <div className="recall-chips-row">
-              <span className="chip recall-chip-level">{levelName}</span>
-              {classLabel && <span className="chip recall-chip-class">{classLabel}</span>}
+              <span className="chip recall-chip-level" style={levelMeta?.color ? { backgroundColor: levelMeta.color } : undefined}>{levelName}</span>
+              {classLabel && <span className="chip recall-chip-class">{groupLabel}: {classLabel}</span>}
             </div>
           )}
         </div>
@@ -327,9 +335,9 @@ export default function BioRecall() {
         {!sessionActive && !showReport && (
           <>
             <div className="card recall-intro-card">
-              <Icon name="brain" className="recall-intro-icon" />
+              <Icon name={levelIcon} className="recall-intro-icon" />
               <Button onClick={openTopicModal} size="lg">
-                Continue to Topics{levelName ? ` in ${levelName}` : ''}
+                Continue to {unitLabel}s{levelName ? ` in ${levelName}` : ''}
               </Button>
               <div className="recall-intro-stats">
                 <div>
@@ -356,10 +364,10 @@ export default function BioRecall() {
 
               <Card>
                 <div className="recall-stat-card-inner">
-                  <Icon name="brain" className="recall-stat-card-icon is-primary" />
-                  <h3 className="recall-stat-card-heading">Brain Energy</h3>
-                  <ProgressBar value={brainEnergy} max={100} variant="primary" />
-                  <p className="recall-stat-card-footer">{brainEnergy}% remaining</p>
+                  <Icon name="bullseye" className="recall-stat-card-icon is-primary" />
+                  <h3 className="recall-stat-card-heading">Accuracy</h3>
+                  <ProgressBar value={accuracy} max={100} variant="primary" />
+                  <p className="recall-stat-card-footer">{accuracy}% across all sessions</p>
                 </div>
               </Card>
 
@@ -369,7 +377,7 @@ export default function BioRecall() {
                   <h3 className="recall-stat-card-heading">Achievements</h3>
                   <div className="recall-badge-row">
                     {achievementsList.slice(0, 6).map((ach) => (
-                      <span key={ach.key} className="badge badge-accent" title={ach.title}>
+                      <span key={ach.id} className="badge badge-accent" title={ach.name}>
                         <Icon name={ach.icon || 'medal'} />
                       </span>
                     ))}
@@ -381,7 +389,7 @@ export default function BioRecall() {
             {topicEntries.length > 0 && (
               <div className="recall-topics-section">
                 <h3 className="recall-section-heading">
-                  Topic Mastery {levelName ? `in ${levelName}` : ''}{classLabel ? ` – ${classLabel}` : ''}
+                  {unitLabel} Mastery {levelName ? `in ${levelName}` : ''}{classLabel ? ` – ${classLabel}` : ''}
                 </h3>
                 <div className="grid grid-cols-3">
                   {topicEntries.map(([topic, mastery]) => (
@@ -434,6 +442,12 @@ export default function BioRecall() {
               Question {currentIndex + 1} of {totalQuestions}
               {selectedTopic?.topic_name && <> – {selectedTopic.topic_name}</>}
             </p>
+
+            {sessionQuote && (
+              <p className="recall-quote">
+                "{sessionQuote.quote}"{sessionQuote.author ? ` — ${sessionQuote.author}` : ''}
+              </p>
+            )}
 
             <Card className="recall-question-card">
               <h3 className="recall-question-heading">{currentQuestion.question_text}</h3>
@@ -507,9 +521,23 @@ export default function BioRecall() {
             </div>
             <p>Mastery Score: {sessionReport.mastery_score || 0}%</p>
             <p className="recall-report-time">Total time: {sessionReport.total_time_formatted} · Avg: {sessionReport.avg_time_formatted} per question</p>
+
+            {newlyAwarded.length > 0 && (
+              <div className="recall-report-achievements">
+                <h4>New Achievements</h4>
+                <div className="recall-badge-row">
+                  {newlyAwarded.map((ach) => (
+                    <span key={ach.id} className="badge badge-accent" title={ach.description || ach.name}>
+                      <Icon name={ach.icon || 'medal'} /> {ach.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="recall-report-actions">
-              <Button onClick={() => { setShowReport(false); setSessionActive(false); loadUserProgress(); setTopicModalOpen(true); }}>
-                <Icon name="rotate" /> Study Another Topic
+              <Button onClick={() => { setShowReport(false); setSessionActive(false); setNewlyAwarded([]); loadUserProgress(); setTopicModalOpen(true); }}>
+                <Icon name="rotate" /> Study Another {unitLabel}
               </Button>
               <Button variant="secondary" onClick={() => navigate('/')}>
                 <Icon name="home" /> Home
@@ -518,10 +546,10 @@ export default function BioRecall() {
           </Card>
         )}
 
-        <Modal open={topicModalOpen} onClose={closeTopicModal} title={`Select a Topic${levelName ? ` in ${levelName}` : ''}${classLabel ? ` – ${classLabel}` : ''}`}>
+        <Modal open={topicModalOpen} onClose={closeTopicModal} title={`Select a ${unitLabel}${levelName ? ` in ${levelName}` : ''}${classLabel ? ` – ${classLabel}` : ''}`}>
           <div className="recall-topic-modal-list">
             {topicList.length === 0 && (
-              <p className="recall-topic-modal-empty">No topics available for your level.</p>
+              <p className="recall-topic-modal-empty">No {unitLabel.toLowerCase()}s available for your level.</p>
             )}
             {topicList.map((topic) => (
               <button
