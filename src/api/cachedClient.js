@@ -132,6 +132,9 @@ export const getRecallTopics = (groupId) =>
 export const getRecallStats = () =>
   withCache('recall_stats', api.getRecallStats, false)();
 
+export const startRecallSession = (unitId) =>
+  api.getRecallSession(unitId);
+
 export const getRecallAchievements = () =>
   withCache('recall_achievements', api.getRecallAchievements, false)();
 
