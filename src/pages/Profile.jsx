@@ -1,8 +1,8 @@
- /* pages/Profile.jsx */
+/* pages/Profile.jsx */
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
-import { updateProfile, changePassword, requestLevelChange, getProfile } from '../api/client';
+import { updateProfile, changePassword, requestLevelChange, getProfile, getCurriculumLevels } from '../api/client';
 import PageHeader from '../components/PageHeader/PageHeader';
 import Container from '../components/Container/Container';
 import Input from '../components/Input/Input';
@@ -11,8 +11,6 @@ import ProfilePictureUpload from '../components/ProfilePictureUpload/ProfilePict
 import Spinner from '../components/Spinner/Spinner';
 import Icon from '../components/Icon/Icon';
 import { useToast } from '../components/Toast/Toast';
-
-const TRACKS = ['O-Level', 'A-Level', 'Pharmacy'];
 
 export default function Profile() {
   const { user, refresh } = useAuth();
@@ -33,6 +31,9 @@ export default function Profile() {
 
   const [profileMeta, setProfileMeta] = useState(null);
 
+  const [availableLevels, setAvailableLevels] = useState([]);
+  const [availableLevelsLoading, setAvailableLevelsLoading] = useState(false);
+
   useEffect(() => {
     if (user?.full_name) setFullName(user.full_name);
   }, [user]);
@@ -40,6 +41,20 @@ export default function Profile() {
   useEffect(() => {
     getProfile().then(setProfileMeta).catch(() => {});
   }, [user]);
+
+  useEffect(() => {
+    if (!profileMeta || profileMeta.role === 'teacher' || availableLevels.length || availableLevelsLoading) return;
+    setAvailableLevelsLoading(true);
+    getCurriculumLevels()
+      .then(data => setAvailableLevels(data || []))
+      .catch(() => {})
+      .finally(() => setAvailableLevelsLoading(false));
+  }, [profileMeta, availableLevels.length, availableLevelsLoading]);
+
+  const levelChangeOptions = useMemo(
+    () => availableLevels.filter(lvl => lvl.display_name !== profileMeta?.track),
+    [availableLevels, profileMeta]
+  );
 
   const passwordStrength = useMemo(() => {
     if (!newPassword) return { score: 0, label: '', color: '' };
@@ -157,10 +172,10 @@ export default function Profile() {
           <form onSubmit={handleLevelChangeRequest}>
             <div className="form-group">
               <label className="form-label">New Level</label>
-              <select className="form-select" value={levelReqTrack} onChange={(e) => setLevelReqTrack(e.target.value)} required>
+              <select className="form-select" value={levelReqTrack} onChange={(e) => setLevelReqTrack(e.target.value)} required disabled={availableLevelsLoading}>
                 <option value="">Select Level</option>
-                {TRACKS.filter((t) => t !== profileMeta?.track).map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                {levelChangeOptions.map((lvl) => (
+                  <option key={lvl.id || lvl.key || lvl.display_name} value={lvl.display_name}>{lvl.display_name}</option>
                 ))}
               </select>
             </div>
@@ -175,3 +190,4 @@ export default function Profile() {
     </Container>
   );
 }
+ 
