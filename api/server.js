@@ -27,6 +27,7 @@ import { getVagueErrorMessage } from '../lib/threat-shield.js';
   profile:                () => import('../lib/profile.js'),
   'profile-picture':      () => import('../lib/profile-picture.js'),
   quiz:                   () => import('../lib/quiz.js'),
+ dashboard:               () => import('../lib/dashboard.js'),
   recall:                 () => import('../lib/recall.js'),
   resources:              () => import('../lib/resources.js'),
   search:                 () => import('../lib/search.js'),
