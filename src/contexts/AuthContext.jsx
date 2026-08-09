@@ -1,12 +1,21 @@
  import { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getUser, signin, signout, getProfile } from '../api/client';
+import { getUser, signin, signout } from '../api/client';
 import Spinner from '../components/Spinner/Spinner';
 
 export const AuthContext = createContext(null);
 
 const REFRESH_INTERVAL = 12 * 60 * 1000;
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000;
+
+const DEFAULT_PROFILE = {
+  role: 'student',
+  track: null,
+  class_name: null,
+  onboarding_completed: false,
+  is_approved_teacher: false,
+  approved_track: null,
+};
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -19,17 +28,9 @@ export function AuthProvider({ children }) {
     try {
       const data = await getUser();
       if (data?.user) {
-        const profile = await getProfile();
         setUser({
           ...data.user,
-          profile: profile || {
-            role: 'student',
-            track: null,
-            class_name: null,
-            onboarding_completed: false,
-            is_approved_teacher: false,
-            approved_track: null,
-          },
+          profile: data.user.profile || DEFAULT_PROFILE,
         });
         lastActivityRef.current = Date.now();
       } else {
@@ -62,7 +63,10 @@ export function AuthProvider({ children }) {
     const resetTimer = () => {
       lastActivityRef.current = Date.now();
       clearTimeout(inactivityRef.current);
-      inactivityRef.current = setTimeout(() => setUser(null), INACTIVITY_TIMEOUT);
+      inactivityRef.current = setTimeout(() => {
+        signout().catch(() => {});
+        setUser(null);
+      }, INACTIVITY_TIMEOUT);
     };
 
     ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((ev) =>
@@ -80,7 +84,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password, turnstileToken, mfaCode) => {
     const result = await signin(email, password, turnstileToken, mfaCode);
-    if (result?.mfa_required) return result;
+    if (result?.mfa_required || result?.passkey_required) return result;
     await checkAuth();
     return result;
   }, [checkAuth]);
@@ -117,7 +121,6 @@ export function ProtectedRoute({ children }) {
     (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') ||
     (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding');
 
- 
   useLayoutEffect(() => {
     if (loading) return;
 
