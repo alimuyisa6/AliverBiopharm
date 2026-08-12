@@ -1,6 +1,4 @@
-/* styles/recall.css */
-
-.recall-loading-wrap {
+ .recall-loading-wrap {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -55,14 +53,22 @@
   gap: var(--space-8);
 }
 
-.recall-intro-stat-icon.is-warm { color: var(--warm); }
-.recall-intro-stat-icon.is-accent { color: var(--accent); }
+.recall-intro-stat-icon.is-warm {
+  color: var(--warm);
+}
+
+.recall-intro-stat-icon.is-accent {
+  color: var(--accent);
+}
 
 .recall-intro-stat-text {
   margin-left: var(--space-2);
 }
 
 .recall-cards-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(3, 1fr);
   margin-bottom: var(--space-8);
 }
 
@@ -75,9 +81,17 @@
   font-size: 2rem;
 }
 
-.recall-stat-card-icon.is-warm { color: var(--warm); }
-.recall-stat-card-icon.is-primary { color: var(--primary); }
-.recall-stat-card-icon.is-accent { color: var(--accent); }
+.recall-stat-card-icon.is-warm {
+  color: var(--warm);
+}
+
+.recall-stat-card-icon.is-primary {
+  color: var(--primary);
+}
+
+.recall-stat-card-icon.is-accent {
+  color: var(--accent);
+}
 
 .recall-stat-card-heading {
   margin: var(--space-4) 0;
@@ -146,10 +160,21 @@
   font-weight: 700;
 }
 
-.recall-rank.is-gold { color: var(--warm); }
-.recall-rank.is-silver { color: var(--primary); }
-.recall-rank.is-bronze { color: var(--accent); }
-.recall-rank.is-default { color: var(--text-dim); }
+.recall-rank.is-gold {
+  color: var(--warm);
+}
+
+.recall-rank.is-silver {
+  color: var(--primary);
+}
+
+.recall-rank.is-bronze {
+  color: var(--accent);
+}
+
+.recall-rank.is-default {
+  color: var(--text-dim);
+}
 
 .recall-entry-name {
   flex: 1;
@@ -199,9 +224,17 @@
   font-size: 2rem;
 }
 
-.recall-feedback-icon.is-excellent { color: var(--success); }
-.recall-feedback-icon.is-strong { color: var(--primary); }
-.recall-feedback-icon.is-developing { color: var(--warm); }
+.recall-feedback-icon.is-excellent {
+  color: var(--success);
+}
+
+.recall-feedback-icon.is-strong {
+  color: var(--primary);
+}
+
+.recall-feedback-icon.is-developing {
+  color: var(--warm);
+}
 
 .recall-feedback-xp {
   color: var(--text-dim);
@@ -234,9 +267,17 @@
   font-weight: var(--weight-black);
 }
 
-.recall-report-value.is-success { color: var(--success); }
-.recall-report-value.is-primary { color: var(--primary); }
-.recall-report-value.is-warm { color: var(--warm); }
+.recall-report-value.is-success {
+  color: var(--success);
+}
+
+.recall-report-value.is-primary {
+  color: var(--primary);
+}
+
+.recall-report-value.is-warm {
+  color: var(--warm);
+}
 
 .recall-report-label {
   font-size: var(--text-sm);
@@ -267,4 +308,31 @@
 .recall-topic-modal-count {
   font-size: var(--text-xs);
   color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .recall-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recall-intro-stats,
+  .recall-report-stats {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .recall-answer-actions,
+  .recall-report-actions {
+    flex-direction: column;
+  }
+
+  .recall-leaderboard-row {
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .recall-entry-name {
+    flex: 1 1 100%;
+  }
 }
