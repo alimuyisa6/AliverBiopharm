@@ -61,7 +61,7 @@ export default function NotificationBell({ user }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const handleMarkRead = async (id, actionUrl) => {
+  async function handleMarkRead(id, actionUrl) {
     try {
       await markNotificationRead(id);
     } catch {}
@@ -70,18 +70,18 @@ export default function NotificationBell({ user }) {
     setUnreadCount((prev) => Math.max(0, prev - 1));
 
     if (actionUrl) window.location.href = actionUrl;
-  };
+  }
 
-  const handleMarkAllRead = async () => {
+  async function handleMarkAllRead() {
     try {
       await markAllNotificationsRead();
     } catch {}
 
     setNotifications((prev) => prev.map((item) => ({ ...item, is_read: true })));
     setUnreadCount(0);
-  };
+  }
 
-  const handleDismiss = async (event, id) => {
+  async function handleDismiss(event, id) {
     event.stopPropagation();
 
     try {
@@ -90,9 +90,9 @@ export default function NotificationBell({ user }) {
 
     setNotifications((prev) => prev.filter((item) => item.id !== id));
     setUnreadCount((prev) => Math.max(0, prev - 1));
-  };
+  }
 
-  const formatTime = (dateStr) => {
+  function formatTime(dateStr) {
     if (!dateStr) return '';
 
     const date = new Date(dateStr);
@@ -107,7 +107,7 @@ export default function NotificationBell({ user }) {
     if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
 
     return date.toLocaleDateString();
-  };
+  }
 
   if (!user?.id) return null;
 
@@ -124,8 +124,8 @@ export default function NotificationBell({ user }) {
 
       {open && (
         <div className="dropdown-menu notification-dropdown">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-3) var(--space-4)' }}>
-            <span style={{ fontWeight: 600 }}>Notifications</span>
+          <div className="notification-dropdown-header">
+            <span className="notification-dropdown-title">Notifications</span>
             {unreadCount > 0 && (
               <button className="btn btn-ghost btn-sm" onClick={handleMarkAllRead}>Mark all read</button>
             )}
@@ -133,33 +133,36 @@ export default function NotificationBell({ user }) {
 
           <div className="dropdown-divider" />
 
-          <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+          <div className="notification-list">
             {loading && notifications.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 'var(--space-6)' }}>
-                <Icon name="bell" style={{ fontSize: '2rem', color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }} />
-                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>Loading...</p>
+              <div className="notification-empty">
+                <Icon name="bell" className="notification-empty-icon" />
+                <p>Loading...</p>
               </div>
             ) : !loading && notifications.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 'var(--space-6)' }}>
-                <Icon name="bell" style={{ fontSize: '2rem', color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }} />
-                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>No notifications yet</p>
+              <div className="notification-empty">
+                <Icon name="bell" className="notification-empty-icon" />
+                <p>No notifications yet</p>
               </div>
             ) : (
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`dropdown-item ${notification.is_read ? '' : 'notification-unread'}`}
+                  className={`notification-item ${notification.is_read ? '' : 'notification-unread'}`}
                   onClick={() => handleMarkRead(notification.id, notification.action_url)}
-                  style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--space-1)' }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', width: '100%' }}>
-                    <Icon name={notification.icon === 'dna' ? 'microscope' : notification.icon || 'bell'} style={{ color: notification.color || 'var(--primary)' }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: notification.is_read ? 400 : 600, fontSize: 'var(--text-sm)' }}>{notification.title}</div>
-                      {notification.body && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-dim)' }}>{notification.body}</div>}
-                      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{formatTime(notification.created_at)}</div>
+                  <div className="notification-item-row">
+                    <Icon
+                      name={notification.icon === 'dna' ? 'microscope' : notification.icon || 'bell'}
+                      className="notification-item-icon"
+                      style={{ color: notification.color || 'var(--primary)' }}
+                    />
+                    <div className="notification-item-content">
+                      <div className="notification-item-title">{notification.title}</div>
+                      {notification.body && <div className="notification-item-body">{notification.body}</div>}
+                      <div className="notification-item-time">{formatTime(notification.created_at)}</div>
                     </div>
-                    <button className="btn btn-ghost btn-sm btn-icon" onClick={(event) => handleDismiss(event, notification.id)}>
+                    <button className="notification-dismiss" onClick={(event) => handleDismiss(event, notification.id)}>
                       <Icon name="xmark" />
                     </button>
                   </div>
