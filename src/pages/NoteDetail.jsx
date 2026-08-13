@@ -1,10 +1,10 @@
- import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+ /* pages/NoteDetail.jsx */
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import {
   getNoteDetail,
-  getContentDetail,
   getReactions,
   toggleReaction,
   addComment,
@@ -13,6 +13,8 @@ import {
   getReadingProgress
 } from '../api/client';
 import EmptyState from '../components/EmptyState/EmptyState';
+import Spinner from '../components/Spinner/Spinner';
+import Button from '../components/Button/Button';
 
 function normalizeReactions(data) {
   return {
@@ -23,7 +25,7 @@ function normalizeReactions(data) {
 
 export default function NoteDetail() {
   const { user } = useAuth();
-  const { groups, bootstrap } = useLayout();
+  const { bootstrap } = useLayout();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const noteId = searchParams.get('id');
@@ -35,6 +37,7 @@ export default function NoteDetail() {
   const [commentInput, setCommentInput] = useState('');
   const [readProgress, setReadProgress] = useState(0);
   const [progressSaved, setProgressSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const contentRef = useRef(null);
   const progressTimer = useRef(null);
@@ -42,8 +45,9 @@ export default function NoteDetail() {
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
-    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
-    return comp?.properties?.image_url || null;
+    const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
+
+    return component?.properties?.image_url || null;
   }
 
   useEffect(() => {
@@ -51,63 +55,78 @@ export default function NoteDetail() {
       navigate('/notes');
       return;
     }
+
+    let mounted = true;
+
     const init = async () => {
       try {
         const data = await getNoteDetail(noteId);
+
+        if (!mounted) return;
+
         setNote(data);
-        if (data.breadcrumb) setBreadcrumb(data.breadcrumb);
-        else if (data.unit_title) {
-          setBreadcrumb([
-            { label: 'Home', href: '/' },
-            ...(data.unit_title.group_name ? [{ label: data.unit_title.group_name, href: `/group/${data.unit_id}` }] : []),
-            { label: data.unit_title.unit_name, href: null }
-          ]);
-        }
+        setBreadcrumb(data.breadcrumb || []);
 
         const [reactionData, commentData] = await Promise.all([
           getReactions('note', data.id),
           getComments('note', data.id)
         ]);
+
+        if (!mounted) return;
+
         setReactions(normalizeReactions(reactionData));
         setComments(commentData?.comments || []);
 
         if (user) {
           const progress = await getReadingProgress(noteId);
-          if (progress?.scroll_position) {
-            setTimeout(() => window.scrollTo({ top: progress.scroll_position, behavior: 'smooth' }), 500);
+
+          if (mounted && progress?.scroll_position) {
+            setTimeout(() => {
+              window.scrollTo({ top: progress.scroll_position, behavior: 'smooth' });
+            }, 500);
           }
         }
-      } catch (err) {
-        console.error(err);
-        setFetchError('Failed to load the note. Please try again.');
+      } catch {
+        if (mounted) setFetchError('Failed to load the note. Please try again.');
+      } finally {
+        if (mounted) setLoading(false);
       }
     };
+
     init();
+
     return () => {
+      mounted = false;
+
       if (progressTimer.current) clearTimeout(progressTimer.current);
     };
   }, [noteId, navigate, user]);
 
   useEffect(() => {
     if (!user || !note) return;
+
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const pct = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
-      setReadProgress(pct);
+      const percentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+
+      setReadProgress(percentage);
+
       if (progressTimer.current) clearTimeout(progressTimer.current);
+
       progressTimer.current = setTimeout(async () => {
         const timeSpent = Math.round((Date.now() - startTime.current) / 1000);
+
         try {
-          await saveReadingProgress(noteId, pct, scrollTop, timeSpent, pct >= 90);
+          await saveReadingProgress(noteId, percentage, scrollTop, timeSpent, percentage >= 90);
           setProgressSaved(true);
           setTimeout(() => setProgressSaved(false), 2000);
-        } catch (err) {
-          console.error(err);
-        }
+        } catch {}
       }, 1500);
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, [user, note, noteId]);
 
@@ -116,13 +135,14 @@ export default function NoteDetail() {
       navigate('/login');
       return;
     }
+
     try {
       await toggleReaction('note', noteId, reactionType);
+
       const updated = await getReactions('note', noteId);
+
       setReactions(normalizeReactions(updated));
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   }
 
   async function handleComment() {
@@ -130,22 +150,32 @@ export default function NoteDetail() {
       navigate('/login');
       return;
     }
+
     if (!commentInput.trim()) return;
+
     try {
       await addComment('note', noteId, commentInput.trim());
       setCommentInput('');
+
       const updated = await getComments('note', noteId);
+
       setComments(updated?.comments || []);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
   }
 
   function handleBack() {
     navigate(`/notes?highlight=${noteId}`);
   }
 
-  if (fetchError || (!note && !noteId)) {
+  if (loading) {
+    return (
+      <div className="fcd-loading-wrap">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (fetchError || !note) {
     return (
       <div className="section" style={{ paddingTop: 'var(--space-16)' }}>
         <EmptyState
@@ -153,9 +183,9 @@ export default function NoteDetail() {
           title="Note Unavailable"
           description={fetchError || 'The requested note could not be found.'}
           action={
-            <button className="btn btn-primary" onClick={() => navigate('/notes')}>
+            <Button onClick={() => navigate('/notes')}>
               Browse Notes
-            </button>
+            </Button>
           }
         />
       </div>
@@ -164,13 +194,14 @@ export default function NoteDetail() {
 
   return (
     <>
-      <div className="note-progress-bar" style={{ width: `${readProgress}%` }}></div>
+      <div className="note-progress-bar" style={{ width: `${readProgress}%` }} />
 
       <div className="note-detail-container">
         <div className="note-detail-header">
           <button className="note-back-btn" onClick={handleBack}>
             <i className="fa-solid fa-arrow-left"></i> Back to Notes
           </button>
+
           {user && (
             <div className="note-progress-indicator">
               <i className={`fa-solid fa-circle-check ${progressSaved ? 'progress-saved' : 'progress-unsaved'}`}></i>
@@ -180,12 +211,18 @@ export default function NoteDetail() {
         </div>
 
         <div className="breadcrumb note-breadcrumb">
-          {breadcrumb.map((crumb, i) => (
-            <span key={i}>
-              {crumb.href ? <Link to={crumb.href} className="breadcrumb-link">{crumb.label}</Link> : <span className="breadcrumb-current">{crumb.label}</span>}
-              {i < breadcrumb.length - 1 && <span className="breadcrumb-sep">›</span>}
+          {breadcrumb.map((crumb, index) => (
+            <span key={index}>
+              {crumb.href ? (
+                <Link to={crumb.href} className="breadcrumb-link">{crumb.label}</Link>
+              ) : (
+                <span className="breadcrumb-current">{crumb.label}</span>
+              )}
+
+              {index < breadcrumb.length - 1 && <span className="breadcrumb-sep">›</span>}
             </span>
           ))}
+
           {note?.unit_title?.group_name && (
             <span className="note-class-badge">{note.unit_title.group_name}</span>
           )}
@@ -197,22 +234,24 @@ export default function NoteDetail() {
               {note?.unit_title?.group_name && (
                 <span className="note-tag note-tag-group">{note.unit_title.group_name}</span>
               )}
+
               {note?.unit_title?.unit_name && (
                 <span className="note-tag note-tag-unit">{note.unit_title.unit_name}</span>
               )}
             </div>
 
-            <h1 className="note-title">{note?.title || note?.unit_title?.unit_name || 'Note'}</h1>
+            <h1 className="note-title">{note.title}</h1>
           </div>
 
           <div
             className="notes-content-container"
-            dangerouslySetInnerHTML={{ __html: note?.content || '<p>Content not available.</p>' }}
+            dangerouslySetInnerHTML={{ __html: note.content || '<p>Content not available.</p>' }}
           />
         </article>
 
         <div className="note-reactions-section">
           <p className="note-reactions-label">Was this helpful?</p>
+
           <div className="note-reactions-buttons">
             {[
               { type: 'like', icon: 'fa-thumbs-up', label: 'Helpful' },
@@ -221,7 +260,7 @@ export default function NoteDetail() {
             ].map(({ type, icon, label }) => (
               <button
                 key={type}
-                className={`note-reaction-btn ${(reactions.user || []).includes(type) ? 'active' : ''}`}
+                className={`note-reaction-btn ${reactions.user.includes(type) ? 'active' : ''}`}
                 onClick={() => handleReaction(type)}
               >
                 <i className={`fa-regular ${icon}`}></i> {label}
@@ -244,8 +283,8 @@ export default function NoteDetail() {
                 className="note-comment-input"
                 placeholder="Share a thought or ask a question..."
                 value={commentInput}
-                onChange={e => setCommentInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleComment()}
+                onChange={(event) => setCommentInput(event.target.value)}
+                onKeyDown={(event) => event.key === 'Enter' && handleComment()}
               />
               <button className="note-comment-submit" onClick={handleComment}>
                 Post
@@ -260,15 +299,17 @@ export default function NoteDetail() {
 
           <div className="note-comments-list">
             {comments.length === 0 ? (
-              <p className="note-comments-empty">No comments yet. Be the first to share your thoughts.</p>
+              <p className="note-comments-empty">No comments yet.</p>
             ) : (
-              comments.filter(Boolean).map((c) => (
-                <div key={c.id || c.created_at} className="note-comment-item">
+              comments.filter(Boolean).map((comment) => (
+                <div key={comment.id || comment.created_at} className="note-comment-item">
                   <div className="note-comment-header">
-                    <strong className="note-comment-author">{c.user_name}</strong>
-                    <span className="note-comment-date">{new Date(c.created_at).toLocaleDateString()}</span>
+                    <strong className="note-comment-author">{comment.user_name}</strong>
+                    <span className="note-comment-date">
+                      {new Date(comment.created_at).toLocaleDateString()}
+                    </span>
                   </div>
-                  <p className="note-comment-text">{c.body || c.comment}</p>
+                  <p className="note-comment-text">{comment.body || comment.comment}</p>
                 </div>
               ))
             )}
