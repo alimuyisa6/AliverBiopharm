@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
+ /* pages/Dashboard.jsx */
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import { getUserDashboard } from '../api/cachedClient';
 import { useContentAccess } from '../hooks/useContentAccess';
+import { useSecurityUiLock } from '../hooks/useSecurityUiLock';
 import PageHeader from '../components/PageHeader/PageHeader';
 import StatCard from '../components/StatCard/StatCard';
 import ProgressBar from '../components/ProgressBar/ProgressBar';
 import Spinner from '../components/Spinner/Spinner';
+import Skeleton from '../components/Skeleton/Skeleton';
 import EmptyState from '../components/EmptyState/EmptyState';
 import Icon from '../components/Icon/Icon';
 import Container from '../components/Container/Container';
@@ -16,6 +19,8 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { level, bootstrap } = useLayout();
   const access = useContentAccess();
+  const { locked, reason } = useSecurityUiLock();
+
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,19 +30,30 @@ export default function Dashboard() {
       setLoading(false);
       return;
     }
+
+    let mounted = true;
+
     getUserDashboard()
-      .then(setSummary)
-      .catch(err => {
-        console.error('Dashboard fetch failed', err);
-        setError('Unable to load your dashboard right now. Please try again later.');
+      .then((data) => {
+        if (mounted) setSummary(data);
       })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (mounted) setError('Unable to load your dashboard right now. Please try again later.');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, [access.canAccess]);
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
-    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
-    return comp?.properties?.image_url || null;
+    const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
+
+    return component?.properties?.image_url || null;
   }
 
   if (!access.canAccess) {
@@ -52,28 +68,48 @@ export default function Dashboard() {
     );
   }
 
-  if (loading || !summary) {
+  if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <Spinner size="lg" />
-      </div>
+      <Container>
+        <div className="dashboard-skeleton">
+          <Skeleton height={48} width="60%" style={{ marginBottom: 'var(--space-6)' }} />
+          <div className="grid grid-cols-4">
+            <Skeleton height={120} />
+            <Skeleton height={120} />
+            <Skeleton height={120} />
+            <Skeleton height={120} />
+          </div>
+        </div>
+      </Container>
     );
   }
 
-  if (error) {
+  if (error || !summary) {
     return (
       <Container>
         <EmptyState
           image={getEmptyStateImage('error')}
           title="Something went wrong"
-          description={error}
+          description={error || 'Dashboard unavailable.'}
         />
       </Container>
     );
   }
 
-  const { platform, recall, quiz, notes, achievements, weak_areas, recent_activity, unit_xp } = summary;
+  const { platform, recall, quiz, notes, achievements, weak_areas, recent_activity, unit_xp, analytics } = summary;
   const levelColor = level?.id === 'Pharmacy' ? 'accent' : level?.id === 'A-Level' ? 'secondary' : 'primary';
+
+  if (locked) {
+    return (
+      <Container>
+        <EmptyState
+          icon="lock"
+          title="Action temporarily disabled"
+          description={reason || 'Suspicious activity detected. Please try again later.'}
+        />
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -147,8 +183,32 @@ export default function Dashboard() {
           </h3>
           <div className="grid grid-cols-3">
             <StatCard icon="star" value={`${recall.best_mastery}%`} label="Best Recall Mastery" color="warm" />
-            <StatCard icon="dna" value={recall.topics_practiced} label="Recall Topics Practiced" color="secondary" />
+            <StatCard icon="flask" value={recall.topics_practiced} label="Recall Topics Practiced" color="secondary" />
             <StatCard icon="medal" value={achievements.earned_count} label="Achievements" color="accent" />
+          </div>
+        </div>
+      )}
+
+      {analytics?.recommendations?.length > 0 && (
+        <div style={{ marginBottom: 'var(--space-10)' }}>
+          <h3 style={{ marginBottom: 'var(--space-6)' }}>
+            <Icon name="lightbulb" style={{ marginRight: 'var(--space-3)', color: 'var(--accent)' }} />
+            Recommended For You
+          </h3>
+          <div className="grid grid-cols-3">
+            {analytics.recommendations.slice(0, 3).map((item, idx) => (
+              <Link
+                key={idx}
+                to={item.type === 'due_review' ? '/recall' : item.type === 'weak_topic' ? '/quiz' : '/flashcards'}
+                className="card card-clickable"
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="card-body">
+                  <h4 className="card-title">{item.title}</h4>
+                  <p className="card-text">{item.reason}</p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       )}
@@ -156,14 +216,14 @@ export default function Dashboard() {
       {weak_areas?.length > 0 && (
         <div style={{ marginBottom: 'var(--space-10)' }}>
           <h3 style={{ marginBottom: 'var(--space-6)' }}>
-            <Icon name="alert-circle" style={{ marginRight: 'var(--space-3)', color: 'var(--danger)' }} />
+            <Icon name="lightbulb" style={{ marginRight: 'var(--space-3)', color: 'var(--warm)' }} />
             Weak Areas
           </h3>
           <ul style={{ listStyle: 'none', padding: 0 }}>
-            {weak_areas.map((w, idx) => (
+            {weak_areas.map((weak, idx) => (
               <li key={idx} style={{ padding: 'var(--space-2) 0', borderBottom: '1px solid var(--border-light)' }}>
-                <span style={{ fontWeight: 600 }}>{w.concept}</span>
-                <span style={{ marginLeft: 'var(--space-3)', color: 'var(--text-dim)' }}>({w.incorrect_attempts} incorrect)</span>
+                <span style={{ fontWeight: 600 }}>{weak.concept}</span>
+                <span style={{ marginLeft: 'var(--space-3)', color: 'var(--text-dim)' }}>({weak.incorrect_attempts} incorrect)</span>
               </li>
             ))}
           </ul>
@@ -174,11 +234,14 @@ export default function Dashboard() {
         <div style={{ marginBottom: 'var(--space-10)' }}>
           <h3 style={{ marginBottom: 'var(--space-6)' }}>Recent Activity</h3>
           <ul style={{ listStyle: 'none', padding: 0 }}>
-            {recent_activity.map((act, idx) => (
+            {recent_activity.map((activity, idx) => (
               <li key={idx} style={{ padding: 'var(--space-2) 0', display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                <Icon name={act.type === 'recall' ? 'brain' : 'graduation-cap'} style={{ color: act.type === 'recall' ? 'var(--primary)' : 'var(--secondary)' }} />
-                <span>{act.details}</span>
-                <span style={{ marginLeft: 'auto', color: 'var(--text-dim)' }}>{new Date(act.date).toLocaleDateString()}</span>
+                <Icon
+                  name={activity.type === 'recall' ? 'brain' : activity.type === 'quiz' ? 'graduation-cap' : 'book-open'}
+                  style={{ color: activity.type === 'recall' ? 'var(--primary)' : 'var(--secondary)' }}
+                />
+                <span>{activity.details}</span>
+                <span style={{ marginLeft: 'auto', color: 'var(--text-dim)' }}>{new Date(activity.date).toLocaleDateString()}</span>
               </li>
             ))}
           </ul>
@@ -189,8 +252,8 @@ export default function Dashboard() {
         <div style={{ marginBottom: 'var(--space-10)' }}>
           <h3 style={{ marginBottom: 'var(--space-6)' }}>Unit XP</h3>
           <div className="grid grid-cols-3">
-            {unit_xp.map((ux, idx) => (
-              <StatCard key={idx} icon="star" value={ux.xp} label={ux.unit_id} color="accent" />
+            {unit_xp.map((unit, idx) => (
+              <StatCard key={idx} icon="star" value={unit.xp} label={unit.unit_id} color="accent" />
             ))}
           </div>
         </div>
