@@ -105,6 +105,11 @@ import {
   FaFlag,
   FaStop,
   FaCheckDouble,
+  FaPaperPlane,
+  FaThumbsUp,
+  FaShieldHalved,
+  FaPlay,
+  FaSearch,
   FaXTwitter,
   FaLinkedinIn,
   FaInstagram,
@@ -115,8 +120,7 @@ import {
   FaWhatsapp,
   FaDiscord,
   FaPinterestP,
-  FaRedditAlien,
-  FaSearch
+  FaRedditAlien
 } from 'react-icons/fa6';
 
 const ICON_MAP = {
@@ -228,6 +232,7 @@ const ICON_MAP = {
   flag: FaFlag,
   stop: FaStop,
   'check-double': FaCheckDouble,
+  search: FaSearch,
   'x-twitter': FaXTwitter,
   linkedin: FaLinkedinIn,
   instagram: FaInstagram,
@@ -238,8 +243,7 @@ const ICON_MAP = {
   whatsapp: FaWhatsapp,
   discord: FaDiscord,
   pinterest: FaPinterestP,
-  reddit: FaRedditAlien,
-  search: FaSearch
+  reddit: FaRedditAlien
 };
 
 const Icon = memo(function Icon({ name, size, className, ...props }) {
