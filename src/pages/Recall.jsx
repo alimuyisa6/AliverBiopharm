@@ -1,10 +1,11 @@
- /* pages/Recall.jsx */
+/* pages/Recall.jsx */
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
+import { useSecurityUiLock } from '../hooks/useSecurityUiLock';
 import { useToast } from '../components/Toast/Toast';
 import {
   getRecallStats,
@@ -47,6 +48,7 @@ export default function BioRecall() {
   const navigate = useNavigate();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
+  const { locked, reason } = useSecurityUiLock();
   const { level, class_name, showAll, displayName } = useLevelFilter();
   const addToast = useToast();
 
@@ -144,6 +146,11 @@ export default function BioRecall() {
   const closeTopicModal = () => setTopicModalOpen(false);
 
   async function handleStartSession(topic) {
+    if (locked) {
+      addToast(reason || 'Action temporarily disabled', 'error');
+      return;
+    }
+
     setSelectedTopic(topic);
     setTopicModalOpen(false);
     setLoading(true);
@@ -172,6 +179,11 @@ export default function BioRecall() {
   }
 
   async function handleSubmitAnswer() {
+    if (locked) {
+      addToast(reason || 'Action temporarily disabled', 'error');
+      return;
+    }
+
     const answer = answerInputRef.current?.value?.trim();
 
     if (!answer || !currentQuestion) return;
@@ -202,7 +214,7 @@ export default function BioRecall() {
   }
 
   async function handleNextQuestion() {
-    if (!feedbackResult) return;
+    if (locked || !feedbackResult) return;
 
     if (feedbackResult.is_complete) {
       setLoading(true);
@@ -243,7 +255,7 @@ export default function BioRecall() {
     }
   }
 
-  const toggleSound = () => {
+  function toggleSound() {
     setSoundEnabled((prev) => {
       const next = !prev;
 
@@ -253,7 +265,7 @@ export default function BioRecall() {
 
       return next;
     });
-  };
+  }
 
   if (!isReady || access.loading) {
     return (
@@ -300,7 +312,7 @@ export default function BioRecall() {
         <div className="recall-header">
           <span className="sec-label">BioRecall</span>
           <h1 className="section-title recall-page-title">
-            BioRecall {levelName}
+            BioRecall<br />{levelName}
           </h1>
 
           {levelName && (
@@ -315,8 +327,8 @@ export default function BioRecall() {
           <>
             {sectionLoading ? (
               <div className="recall-skeleton">
-                <Skeleton height={140} style={{ marginBottom: 'var(--space-6)' }} />
-                <div className="grid grid-cols-3">
+                <Skeleton height={140} />
+                <div className="recall-skeleton-grid">
                   <Skeleton height={100} />
                   <Skeleton height={100} />
                   <Skeleton height={100} />
@@ -326,7 +338,7 @@ export default function BioRecall() {
               <>
                 <div className="card recall-intro-card">
                   <Icon name={levelIcon} className="recall-intro-icon" />
-                  <Button onClick={openTopicModal} size="lg">
+                  <Button onClick={openTopicModal} size="lg" disabled={locked}>
                     Continue to {unitLabel}s{levelName ? ` in ${levelName}` : ''}
                   </Button>
                   <div className="recall-intro-stats">
@@ -379,7 +391,7 @@ export default function BioRecall() {
                 {topicEntries.length > 0 && (
                   <div className="recall-topics-section">
                     <h3 className="recall-section-heading">
-                      {unitLabel} Mastery {levelName ? `in ${levelName}` : ''}{classLabel ? ` – ${classLabel}` : ''}
+                      {unitLabel} Mastery<br />{levelName ? `in ${levelName}` : ''}{classLabel ? ` – ${classLabel}` : ''}
                     </h3>
                     <div className="grid grid-cols-3">
                       {topicEntries.map(([topic, mastery]) => (
@@ -398,7 +410,7 @@ export default function BioRecall() {
 
                 <div className="recall-leaderboard-section">
                   <h3 className="recall-section-heading">
-                    Leaderboard {levelName ? `– ${levelName}` : ''}
+                    Leaderboard<br />{levelName ? `– ${levelName}` : ''}
                   </h3>
                   {leaderboard.length === 0 ? (
                     <p className="recall-leaderboard-empty">No data yet. Be the first!</p>
@@ -441,7 +453,7 @@ export default function BioRecall() {
 
             <Card className="recall-question-card">
               <h3 className="recall-question-heading">{currentQuestion.question_text}</h3>
-              <Input ref={answerInputRef} placeholder="Type your answer..." disabled={analyzing} />
+              <Input ref={answerInputRef} placeholder="Type your answer..." disabled={analyzing || locked} />
 
               {analyzing && (
                 <div className="recall-analyzing-row">
@@ -452,11 +464,11 @@ export default function BioRecall() {
 
               <div className="recall-answer-actions">
                 {!feedbackResult ? (
-                  <Button onClick={handleSubmitAnswer} disabled={analyzing} loading={analyzing}>
+                  <Button onClick={handleSubmitAnswer} disabled={analyzing || locked} loading={analyzing}>
                     <Icon name="paper-plane" /> Submit
                   </Button>
                 ) : (
-                  <Button onClick={handleNextQuestion} loading={loading} disabled={loading}>
+                  <Button onClick={handleNextQuestion} loading={loading} disabled={loading || locked}>
                     {feedbackResult.is_complete ? 'Finish Session' : 'Next Question'} <Icon name="arrow-right" />
                   </Button>
                 )}
@@ -520,7 +532,7 @@ export default function BioRecall() {
             )}
 
             <div className="recall-report-actions">
-              <Button onClick={() => { setShowReport(false); setSessionActive(false); setNewlyAwarded([]); loadUserProgress(); setTopicModalOpen(true); }}>
+              <Button onClick={() => { setShowReport(false); setSessionActive(false); setNewlyAwarded([]); loadUserProgress(); setTopicModalOpen(true); }} disabled={locked}>
                 <Icon name="rotate" /> Study Another {unitLabel}
               </Button>
               <Button variant="secondary" onClick={() => navigate('/')}>
@@ -541,6 +553,7 @@ export default function BioRecall() {
                 key={topic.unit_id}
                 className="btn btn-secondary recall-topic-modal-btn"
                 onClick={() => handleStartSession(topic)}
+                disabled={locked}
               >
                 <span>{topic.topic_name}</span>
                 <span className="recall-topic-modal-count">{topic.question_count} questions</span>
@@ -551,4 +564,4 @@ export default function BioRecall() {
       </div>
     </div>
   );
-}
+} 
