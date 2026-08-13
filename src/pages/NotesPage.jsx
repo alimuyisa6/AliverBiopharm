@@ -1,82 +1,69 @@
+/* pages/PdfLibraryPage.jsx */
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import { useContentAccess } from '../hooks/useContentAccess';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useLayout } from '../contexts/LayoutContext';
-import { getNotesList, getNotesStructure } from '../api/client';
+import { getPdfsByLevel } from '../api/client';
 import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
+import Skeleton from '../components/Skeleton/Skeleton';
 import EmptyState from '../components/EmptyState/EmptyState';
 import Button from '../components/Button/Button';
 import Container from '../components/Container/Container';
 
-export default function NotesPage() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+export default function PdfLibraryPage() {
   const access = useContentAccess();
   const { level, class_name, displayName } = useLevelFilter();
   const { bootstrap } = useLayout();
 
-  const [notes, setNotes] = useState([]);
-  const [structure, setStructure] = useState([]);
+  const [pdfs, setPdfs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeUnitId, setActiveUnitId] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!access.canAccess) {
       setLoading(false);
       return;
     }
-    loadContent();
+
+    let mounted = true;
+
+    loadPdfs(mounted);
+
+    return () => {
+      mounted = false;
+    };
   }, [access.canAccess, level, class_name]);
 
-  async function loadContent() {
+  async function loadPdfs(mounted = true) {
     setLoading(true);
-    try {
-      const structureData = await getNotesStructure();
-      const units = Array.isArray(structureData) ? structureData : [];
-      setStructure(units);
 
-      if (units.length) {
-        const firstUnitId = units[0].unit_id;
-        setActiveUnitId(firstUnitId);
-        const notesData = await getNotesList(firstUnitId);
-        setNotes(Array.isArray(notesData) ? notesData : []);
-      } else {
-        setNotes([]);
-      }
+    try {
+      const data = await getPdfsByLevel();
+
+      if (mounted) setPdfs(Array.isArray(data) ? data : []);
     } catch {
-      setNotes([]);
-      setStructure([]);
+      if (mounted) setError('Failed to load PDF resources.');
     } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleUnitSelect(unitId) {
-    setActiveUnitId(unitId);
-    try {
-      const notesData = await getNotesList(unitId);
-      setNotes(Array.isArray(notesData) ? notesData : []);
-    } catch {
-      setNotes([]);
+      if (mounted) setLoading(false);
     }
   }
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
-    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
-    return comp?.properties?.image_url || null;
+    const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
+
+    return component?.properties?.image_url || null;
   }
 
   if (!access.canAccess) {
     return (
       <Container>
         <EmptyState
-          image={getEmptyStateImage('notes')}
+          image={getEmptyStateImage('pdfs')}
           title="Access Restricted"
-          description="Your account does not have access to study notes."
+          description="Your account does not have access to the PDF library."
         />
       </Container>
     );
@@ -87,72 +74,57 @@ export default function NotesPage() {
 
   return (
     <Container>
-      <div className="notes-page">
-        <span className="sec-label">Study Notes</span>
+      <div className="pdf-library-page">
+        <span className="sec-label">PDF Library</span>
         <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-3)' }}>
-          Notes{levelName ? ` – ${levelName}` : ''}
+          PDF Resources{levelName ? ` – ${levelName}` : ''}
         </h1>
-        {classLabel && (
-          <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>
-            {classLabel}
-          </p>
-        )}
+
+        {classLabel && <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>{classLabel}</p>}
 
         <nav className="breadcrumb">
           <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
           <Icon name="chevron-right" className="breadcrumb-sep" />
-          <span>Notes</span>
+          <span>PDF Library</span>
         </nav>
 
-        {structure.length > 0 && (
-          <div className="notes-unit-tabs" style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-6)', flexWrap: 'wrap' }}>
-            {structure.map((unit) => (
-              <Button
-                key={unit.unit_id}
-                variant={activeUnitId === unit.unit_id ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => handleUnitSelect(unit.unit_id)}
-              >
-                {unit.unit_name}
-              </Button>
-            ))}
-          </div>
-        )}
-
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-16)' }}>
-            <Spinner size="lg" />
+          <div className="grid grid-cols-3">
+            <Skeleton height={160} />
+            <Skeleton height={160} />
+            <Skeleton height={160} />
           </div>
-        ) : notes.length === 0 ? (
+        ) : error ? (
           <EmptyState
-            image={getEmptyStateImage('notes')}
-            title="No Notes Available"
-            description={`No study notes found for ${classLabel || levelName || 'your level'}.`}
+            image={getEmptyStateImage('error')}
+            title="Error"
+            description={error}
+            action={<Button onClick={() => loadPdfs()}>Try Again</Button>}
+          />
+        ) : pdfs.length === 0 ? (
+          <EmptyState
+            image={getEmptyStateImage('pdfs')}
+            title="No PDFs Available"
+            description={`No PDF resources found for ${classLabel || levelName || 'your level'}.`}
           />
         ) : (
           <div className="grid grid-cols-3">
-            {notes.map((note) => (
-              <button
-                key={note.id}
-                className="card card-clickable"
-                onClick={() => navigate(`/notes/read?id=${note.id}`)}
-              >
-                <div className="card-image-placeholder">
-                  <Icon name="book-open" style={{ fontSize: '2rem', color: 'var(--primary)' }} />
+            {pdfs.map((pdf) => (
+              <div key={pdf.id} className="card">
+                <div className="card-image-placeholder" style={{ background: 'var(--warm-light)' }}>
+                  <Icon name="file-pdf" style={{ fontSize: '2rem', color: 'var(--error)' }} />
                 </div>
                 <div className="card-body">
-                  <h3 className="card-title">{note.title}</h3>
-                  {note.content_preview && (
-                    <p className="card-text">{note.content_preview}</p>
-                  )}
-                  {note.read_time && (
-                    <span className="chip" style={{ marginTop: 'var(--space-3)' }}>{note.read_time}</span>
-                  )}
+                  <h3 className="card-title">{pdf.title}</h3>
+                  {pdf.author && <p className="card-text">{pdf.author}</p>}
+                  {pdf.file_size && <span className="chip">{pdf.file_size}</span>}
                 </div>
                 <div className="card-footer">
-                  <span className="btn btn-primary btn-sm">Read Note</span>
+                  <a href={pdf.file_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
+                    <Icon name="download" /> Download
+                  </a>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}
