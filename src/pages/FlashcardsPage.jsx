@@ -1,190 +1,131 @@
- /* components/FlashcardDeckView.jsx */
+ /* pages/FlashcardsPage.jsx */
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
+import { useLevelFilter } from '../hooks/useLevelFilter';
+import { useContentAccess } from '../hooks/useContentAccess';
+import { useSecurityUiLock } from '../hooks/useSecurityUiLock';
+import { PendingApprovalScreen } from '../components/access/PendingApprovalScreen';
+import { AccessDenied } from '../components/access/AccessDenied';
+import FlashcardDeckView from '../components/FlashcardDeckView';
+import FlashcardProgress from '../components/Flashcardprogress';
 import {
-  getFlashcardDeck,
-  toggleFlashcardKnown,
-  toggleFlashcardBookmark,
-  rateFlashcard,
-  checkFlashcardAnswer,
-  startFlashcardSession,
-  updateFlashcardSession
+  completeFlashcardSession,
+  getKnownFlashcards,
+  getFlashcardDecks
 } from '../api/cachedClient';
-import Icon from './Icon/Icon';
-import Button from './Button/Button';
-import ProgressBar from './ProgressBar/ProgressBar';
-import Spinner from './Spinner/Spinner';
-import { useToast } from './Toast/Toast';
+import Icon from '../components/Icon/Icon';
+import Spinner from '../components/Spinner/Spinner';
+import Skeleton from '../components/Skeleton/Skeleton';
+import Button from '../components/Button/Button';
+import Card from '../components/Card/Card';
+import EmptyState from '../components/EmptyState/EmptyState';
+import { useLayout } from '../contexts/LayoutContext';
+import { useToast } from '../components/Toast/Toast';
 
-const MODES = [
-  { value: 'flip', icon: 'rotate', label: 'Flip' },
-  { value: 'typed', icon: 'keyboard', label: 'Typed' },
-  { value: 'multiple_choice', icon: 'list-check', label: 'MCQ' },
-  { value: 'structure_identification', icon: 'microscope', label: 'Structure' }
-];
-
-const MODE_CARD_COLOR = {
-  flip: 'card-blue',
-  typed: 'card-teal',
-  multiple_choice: 'card-violet',
-  structure_identification: 'card-amber'
+const STAGE = {
+  LOADING: 'loading',
+  SUBJECT: 'subject',
+  STUDY: 'study',
+  COMPLETE: 'complete'
 };
 
-export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode: initialMode = 'flip', onComplete }) {
-  const [deck, setDeck] = useState(null);
-  const [cards, setCards] = useState([]);
-  const [index, setIndex] = useState(0);
-  const [mode, setMode] = useState(initialMode);
-  const [flipped, setFlipped] = useState(false);
-  const [known, setKnown] = useState(new Set(knownIds));
-  const [bookmarked, setBookmarked] = useState(new Set());
-  const [sessionId, setSessionId] = useState(null);
-  const [typedAnswer, setTypedAnswer] = useState('');
-  const [feedback, setFeedback] = useState(null);
-  const [mcAnswered, setMcAnswered] = useState(null);
-  const [structureTab, setStructureTab] = useState('name');
-  const [loading, setLoading] = useState(true);
+export default function FlashcardsPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { isReady } = useRequireOnboarding();
+  const access = useContentAccess();
+  const { locked, reason } = useSecurityUiLock();
+  const { level, class_name, displayName } = useLevelFilter();
+  const { bootstrap } = useLayout();
   const addToast = useToast();
 
-  const card = cards[index] || null;
+  const [stage, setStage] = useState(STAGE.LOADING);
+  const [selectedDeck, setSelectedDeck] = useState(null);
+  const [sessionResult, setSessionResult] = useState(null);
+  const [knownIds, setKnownIds] = useState([]);
+  const [decks, setDecks] = useState([]);
+  const [error, setError] = useState(null);
+
+  const levelName = displayName || level || '';
+  const classLabel = class_name || '';
 
   useEffect(() => {
-    loadDeck();
-  }, [deckMeta.id]);
+    if (!user || !isReady || !access.canAccess) return;
 
-  useEffect(() => {
-    const handler = (event) => {
-      if (event.key === 'ArrowRight') handleNext();
-      if (event.key === 'ArrowLeft') handlePrev();
-      if (event.key === ' ') {
-        event.preventDefault();
-        setFlipped((current) => !current);
-      }
+    init();
+  }, [user, isReady, access.canAccess, level, class_name]);
+
+  async function init() {
+    setStage(STAGE.LOADING);
+
+    try {
+      const [knownData, decksData] = await Promise.all([
+        getKnownFlashcards(),
+        getFlashcardDecks({})
+      ]);
+
+      setKnownIds(knownData || []);
+      setDecks(decksData || []);
+      setStage(STAGE.SUBJECT);
+    } catch {
+      setError('Failed to load flashcards. Please refresh.');
+    }
+  }
+
+  function handleDeckSelect(deck) {
+    if (locked) {
+      addToast(reason || 'Action temporarily disabled', 'error');
+      return;
+    }
+
+    setSelectedDeck(deck);
+    setStage(STAGE.STUDY);
+  }
+
+  async function handleStudyComplete({ sessionId, total }) {
+    let result = {
+      total,
+      correct: 0,
+      incorrect: 0,
+      score: 0
     };
 
-    window.addEventListener('keydown', handler);
-
-    return () => window.removeEventListener('keydown', handler);
-  }, [index, cards.length]);
-
-  async function loadDeck() {
-    setLoading(true);
-
-    try {
-      const data = await getFlashcardDeck(deckMeta.id);
-
-      setDeck(data);
-      setCards(data.cards || []);
-
-      const session = await startFlashcardSession(deckMeta.id, mode);
-
-      setSessionId(session?.session_id || null);
-    } catch {
-      addToast('Failed to load deck', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function resetCard() {
-    setFlipped(false);
-    setTypedAnswer('');
-    setFeedback(null);
-    setMcAnswered(null);
-    setStructureTab('name');
-  }
-
-  function handleNext() {
-    if (index >= cards.length - 1) return;
-
-    setIndex((current) => current + 1);
-    resetCard();
-  }
-
-  function handlePrev() {
-    if (index <= 0) return;
-
-    setIndex((current) => current - 1);
-    resetCard();
-  }
-
-  async function handleToggleKnown() {
-    if (!card) return;
-
-    try {
-      await toggleFlashcardKnown(card.id);
-
-      setKnown((prev) => {
-        const next = new Set(prev);
-
-        if (next.has(card.id)) next.delete(card.id);
-        else next.add(card.id);
-
-        return next;
-      });
-    } catch {}
-  }
-
-  async function handleToggleBookmark() {
-    if (!card) return;
-
-    try {
-      await toggleFlashcardBookmark(card.id);
-
-      setBookmarked((prev) => {
-        const next = new Set(prev);
-
-        if (next.has(card.id)) next.delete(card.id);
-        else next.add(card.id);
-
-        return next;
-      });
-    } catch {}
-  }
-
-  async function handleRate(difficulty) {
-    if (!card) return;
-
-    try {
-      await rateFlashcard(card.id, difficulty);
-    } catch {}
-  }
-
-  async function handleCheckTyped(checkType = 'answer') {
-    if (!card || !typedAnswer.trim()) return;
-
-    try {
-      const result = await checkFlashcardAnswer(card.id, typedAnswer.trim(), checkType);
-
-      setFeedback(result);
-
-      if (sessionId) {
-        await updateFlashcardSession(sessionId, card.id, result.correct, index).catch(() => {});
-      }
-    } catch {}
-  }
-
-  async function handleMCSelect(optionIndex) {
-    if (!card || mcAnswered !== null) return;
-
-    const correct = optionIndex === card.mc_correct_index;
-
-    setMcAnswered(optionIndex);
-    setFeedback({
-      correct,
-      strength: correct ? 'excellent' : 'incorrect',
-      correct_answer: card.mc_options?.[card.mc_correct_index]
-    });
-
     if (sessionId) {
-      await updateFlashcardSession(sessionId, card.id, correct, index).catch(() => {});
+      try {
+        const data = await completeFlashcardSession(sessionId);
+
+        result = {
+          total: data.card_count ?? total,
+          correct: data.correct ?? 0,
+          incorrect: data.incorrect ?? 0,
+          score: data.score ?? 0
+        };
+      } catch {}
     }
+
+    setSessionResult(result);
+    setStage(STAGE.COMPLETE);
   }
 
-  function handleFinish() {
-    onComplete({ sessionId, total: cards.length });
+  function handleRestart() {
+    setSelectedDeck(null);
+    setSessionResult(null);
+    setStage(STAGE.SUBJECT);
   }
 
-  if (loading) {
+  function getEmptyStateImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
+
+    return component?.properties?.image_url || null;
+  }
+
+  if (!isReady || access.isPending) return <PendingApprovalScreen />;
+  if (!access.canAccess) return <AccessDenied />;
+
+  if (stage === STAGE.LOADING) {
     return (
       <div className="fcd-loading-wrap">
         <Spinner size="lg" />
@@ -192,230 +133,95 @@ export default function FlashcardDeckView({ deck: deckMeta, knownIds = [], mode:
     );
   }
 
-  if (!card) {
+  if (error) {
     return (
-      <div className="section fcd-empty">
-        <Icon name="layer-group" className="fcd-empty-icon" />
-        <p>No cards in this deck yet.</p>
-        <Button variant="ghost" onClick={() => onComplete({ sessionId, total: 0 })} icon="arrow-left">
-          Back
-        </Button>
+      <div className="section flashcard-error">
+        <EmptyState
+          image={getEmptyStateImage('general')}
+          title="Error"
+          description={error}
+          action={<Button onClick={init}>Try Again</Button>}
+        />
       </div>
     );
   }
 
-  const isKnown = known.has(card.id);
-  const isBookmarked = bookmarked.has(card.id);
-  const isLast = index === cards.length - 1;
-  const cardColor = MODE_CARD_COLOR[mode] || 'card-blue';
+  if (stage === STAGE.SUBJECT) {
+    return (
+      <div className="flashcards-page">
+        <div className="section flashcard-subject-section">
+          <span className="sec-label">Study Tools</span>
+          <h1 className="section-title flashcard-title">
+            Flashcards<br />{levelName ? `– ${levelName}` : ''}
+          </h1>
 
-  return (
-    <div className="flashcard-deck-view">
-      <div className="section fcd-section">
-        <div className="fcd-progress-row">
-          <ProgressBar value={index + 1} max={cards.length} variant="gradient" />
-        </div>
+          {classLabel && <p className="flashcard-class">{classLabel}</p>}
 
-        <div className="fcd-mode-row">
-          {MODES.map((item) => (
-            <Button
-              key={item.value}
-              variant={mode === item.value ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => { setMode(item.value); resetCard(); }}
-              icon={item.icon}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
+          <p className="section-subtitle flashcard-subtitle">
+            Select a deck to start studying.
+          </p>
 
-        <div className="fcd-meta-row">
-          <span className="fcd-meta-index">{index + 1} / {cards.length}</span>
-          {deck?.title && <span className="fcd-meta-title">{deck.title}</span>}
-        </div>
-
-        {mode === 'flip' && (
-          <div className={`card ${cardColor} fcd-question-card is-flip`} onClick={() => setFlipped((current) => !current)}>
-            {!flipped ? (
-              <div>
-                <span className="chip fcd-answer-chip">Question</span>
-                <h3 className="fcd-card-heading">{card.front_text}</h3>
-                {card.image_url && <img src={card.image_url} alt="" className="fcd-card-image" />}
-                <p className="fcd-tap-hint"><Icon name="hand" /> Tap to flip</p>
-              </div>
-            ) : (
-              <div>
-                <span className="chip fcd-answer-chip is-correct">Answer</span>
-                <h3 className="fcd-card-heading">{card.back_text}</h3>
-              </div>
-            )}
-          </div>
-        )}
-
-        {mode === 'typed' && (
-          <div>
-            <div className={`card ${cardColor} fcd-question-card-static`}>
-              <span className="chip fcd-answer-chip">Question</span>
-              <h3>{card.front_text}</h3>
-              {card.image_url && <img src={card.image_url} alt="" className="fcd-card-image" />}
-            </div>
-
-            <div className="fcd-input-row">
-              <input
-                className="form-input"
-                placeholder="Type your answer..."
-                value={typedAnswer}
-                onChange={(event) => setTypedAnswer(event.target.value)}
-                onKeyDown={(event) => { if (event.key === 'Enter') handleCheckTyped(); }}
-                disabled={!!feedback}
-              />
-              {!feedback && (
-                <Button onClick={() => handleCheckTyped()} disabled={!typedAnswer.trim()} icon="check">
-                  Check
-                </Button>
-              )}
-            </div>
-
-            {feedback && (
-              <div className={`alert ${feedback.correct ? 'alert-success' : 'alert-error'}`}>
-                <Icon name={feedback.correct ? 'circle-check' : 'circle-xmark'} />
-                <span>
-                  {feedback.correct ? 'Correct. ' : 'Incorrect. '}
-                  Correct answer: <strong>{feedback.correct_answer}</strong>
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {mode === 'multiple_choice' && (
-          <div>
-            <div className={`card ${cardColor} fcd-question-card-static`}>
-              <span className="chip fcd-answer-chip">Question</span>
-              <h3>{card.front_text}</h3>
-            </div>
-
-            {card.mc_options?.length > 0 ? (
-              <div className="fcd-mc-list">
-                {card.mc_options.map((option, optionIndex) => {
-                  let variant = 'secondary';
-
-                  if (mcAnswered !== null) {
-                    if (optionIndex === card.mc_correct_index) variant = 'primary';
-                    else if (optionIndex === mcAnswered) variant = 'danger';
-                  }
-
-                  return (
-                    <Button
-                      key={optionIndex}
-                      variant={variant}
-                      onClick={() => handleMCSelect(optionIndex)}
-                      disabled={mcAnswered !== null}
-                    >
-                      <span className="fcd-mc-option-letter">{String.fromCharCode(65 + optionIndex)}</span>
-                      {option}
-                    </Button>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="fcd-mc-empty">No MCQ options for this card.</p>
-            )}
-
-            {feedback && (
-              <div className={`alert ${feedback.correct ? 'alert-success' : 'alert-error'}`}>
-                <Icon name={feedback.correct ? 'circle-check' : 'circle-xmark'} />
-                <span>
-                  {feedback.correct ? 'Correct. ' : `Incorrect. Answer: `}
-                  <strong>{feedback.correct_answer}</strong>
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {mode === 'structure_identification' && (
-          <div>
-            <div className={`card ${cardColor} fcd-question-card-static`}>
-              <span className="chip fcd-answer-chip">Structure</span>
-              {card.image_url ? (
-                <img src={card.image_url} alt={card.structure_name || 'Structure'} className="fcd-structure-image" />
-              ) : (
-                <div className="fcd-structure-placeholder">
-                  <Icon name="image" className="fcd-structure-placeholder-icon" />
-                  <p>{card.structure_name || 'Image coming soon'}</p>
-                </div>
-              )}
-            </div>
-
-            <div className="fcd-structure-tabs">
-              <Button variant={structureTab === 'name' ? 'primary' : 'ghost'} size="sm" onClick={() => setStructureTab('name')} icon="tag">
-                Name
-              </Button>
-              <Button variant={structureTab === 'function' ? 'primary' : 'ghost'} size="sm" onClick={() => setStructureTab('function')} icon="gear">
-                Function
-              </Button>
-            </div>
-
-            <div className="fcd-input-row">
-              <input
-                className="form-input"
-                placeholder={structureTab === 'name' ? 'What is this structure called?' : 'What is its function?'}
-                value={typedAnswer}
-                onChange={(event) => setTypedAnswer(event.target.value)}
-                onKeyDown={(event) => { if (event.key === 'Enter') handleCheckTyped(structureTab); }}
-                disabled={!!feedback}
-              />
-              {!feedback && (
-                <Button onClick={() => handleCheckTyped(structureTab)} disabled={!typedAnswer.trim()} icon="check">
-                  Check
-                </Button>
-              )}
-            </div>
-
-            {feedback && (
-              <div className={`alert ${feedback.correct ? 'alert-success' : 'alert-error'}`}>
-                <Icon name={feedback.correct ? 'circle-check' : 'circle-xmark'} />
-                <span>
-                  {feedback.correct ? 'Correct. ' : 'Not quite. '}
-                  {structureTab === 'name'
-                    ? <>Structure: <strong>{feedback.correct_answer || card.structure_name}</strong></>
-                    : <>Function: <strong>{feedback.correct_answer}</strong></>}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="fcd-rate-row">
-          <Button variant="ghost" size="sm" onClick={() => handleRate('easy')}>Easy</Button>
-          <Button variant="ghost" size="sm" onClick={() => handleRate('medium')}>Medium</Button>
-          <Button variant="ghost" size="sm" onClick={() => handleRate('hard')}>Hard</Button>
-        </div>
-
-        <div className="fcd-actions-row">
-          <Button variant={isKnown ? 'primary' : 'ghost'} size="sm" onClick={handleToggleKnown} icon={isKnown ? 'circle-check' : 'circle'}>
-            {isKnown ? 'Known' : 'Mark Known'}
-          </Button>
-          <Button variant={isBookmarked ? 'warm' : 'ghost'} size="sm" onClick={handleToggleBookmark} icon="bookmark">
-            {isBookmarked ? 'Saved' : 'Save'}
-          </Button>
-        </div>
-
-        <div className="fcd-nav-row">
-          <Button variant="secondary" onClick={handlePrev} disabled={index === 0} icon="arrow-left" />
-          {isLast ? (
-            <Button onClick={handleFinish} icon="flag-checkered">Finish</Button>
+          {decks.length === 0 ? (
+            <EmptyState
+              image={getEmptyStateImage('flashcards')}
+              title="No Decks Available"
+              description={`No flashcard decks found for ${classLabel || levelName || 'your level'}.`}
+            />
           ) : (
-            <Button onClick={handleNext} icon="arrow-right" />
+            <div className="flashcard-decks-grid">
+              {decks.map((deck) => (
+                <Card key={deck.id}>
+                  <div className="card-image-placeholder">
+                    <Icon name="layer-group" className="flashcard-deck-icon" />
+                  </div>
+
+                  <div className="card-body">
+                    <h3 className="card-title">{deck.title}</h3>
+                    <p className="card-text">{deck.description || 'No description'}</p>
+
+                    {deck.card_types && (
+                      <div className="flashcard-type-row">
+                        {deck.card_types.map((type) => (
+                          <span key={type} className="chip">{type.replace('_', ' ')}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="card-footer">
+                    <Button size="sm" icon="play" onClick={() => handleDeckSelect(deck)} disabled={locked}>
+                      Start
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
-
-        <p className="fcd-keyboard-hint">
-          <Icon name="keyboard" /> Arrow keys navigate · Space flips
-        </p>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (stage === STAGE.STUDY && selectedDeck) {
+    return (
+      <FlashcardDeckView
+        deck={selectedDeck}
+        knownIds={knownIds}
+        mode="flip"
+        onComplete={handleStudyComplete}
+      />
+    );
+  }
+
+  if (stage === STAGE.COMPLETE) {
+    return (
+      <FlashcardProgress
+        result={sessionResult}
+        onRestart={handleRestart}
+        onHome={() => navigate('/')}
+      />
+    );
+  }
+
+  return null;
 }
