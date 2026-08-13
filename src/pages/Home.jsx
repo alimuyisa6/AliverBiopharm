@@ -16,7 +16,7 @@ import {
   getChatMessages,
   sendChatMessage,
   deleteChatMessage,
-  checkAdminOnline,
+  checkAdminOnline
 } from '../api/cachedClient';
 import { getSections } from '../api/sections';
 import HomeView from '../features/home/HomeView';
@@ -45,74 +45,95 @@ export default function Home() {
   const [contactStatus, setContactStatus] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState(null);
+
   const currentYear = new Date().getFullYear();
 
   const activeGroupName = useMemo(() => {
     if (!user?.profile?.active_group_id || !groups?.length) return null;
-    const found = groups.find(g => g.id === user.profile.active_group_id);
+
+    const found = groups.find((group) => group.id === user.profile.active_group_id);
+
     return found ? found.name : null;
   }, [user, groups]);
 
   useEffect(() => {
     const levelId = level?.id || 'O-Level';
+
     getSections(levelId).then(setSections).catch(() => {});
     getPublicStats().then(setPublicStats).catch(() => {});
     getCommunityActivity().then(setCommunityActivity).catch(() => {});
-    checkAdminOnline().then(res => setAdminOnline(res?.online)).catch(() => {});
+    checkAdminOnline().then((res) => setAdminOnline(res?.online)).catch(() => {});
 
     if (user) {
       getContinueReading()
-        .then(data => setContinueLearning(Array.isArray(data) ? data : []))
+        .then((data) => setContinueLearning(Array.isArray(data) ? data : []))
         .catch(() => {});
+
       getUserStreak()
-        .then(res => setStreak(res?.count || 0))
+        .then((res) => setStreak(res?.count || 0))
         .catch(() => {});
     }
   }, [user, level]);
 
   const handleMoodSubmit = useCallback(async () => {
     if (!moodSelected) return;
-    try { await submitMood(moodSelected, moodMessage); setMoodSubmitted(true); } catch {}
+
+    try {
+      await submitMood(moodSelected, moodMessage);
+      setMoodSubmitted(true);
+    } catch {}
   }, [moodSelected, moodMessage]);
 
-  const handleWeeklyChallengeSubmit = useCallback(async (i, correct, explanation) => {
+  const handleWeeklyChallengeSubmit = useCallback(async (index, correct, explanation) => {
     if (!user) return;
-    setWeeklyChallengeAnswer({ correct: i === correct, explanation });
-    try { await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), i); } catch {}
+
+    setWeeklyChallengeAnswer({ correct: index === correct, explanation });
+
+    try {
+      await submitWeeklyChallenge(new Date().toISOString().slice(0, 10), index);
+    } catch {}
   }, [user]);
 
-  const handleContactSubmit = useCallback(async (e) => {
-    e.preventDefault();
+  const handleContactSubmit = useCallback(async (event) => {
+    event.preventDefault();
+
     if (!contactForm.name || !contactForm.email || !contactForm.message) return;
+
     try {
       await submitContact(contactForm);
       setContactStatus({ success: true, message: 'Message sent!' });
       setContactForm({ name: '', email: '', subject: '', message: '' });
-    } catch (err) {
-      setContactStatus({ success: false, message: err.message });
+    } catch (error) {
+      setContactStatus({ success: false, message: error.message });
     }
   }, [contactForm]);
 
-  const handleNewsletterSubmit = useCallback(async (e) => {
-    e.preventDefault();
+  const handleNewsletterSubmit = useCallback(async (event) => {
+    event.preventDefault();
+
     if (!newsletterEmail) return;
+
     try {
       await subscribeNewsletter(newsletterEmail);
       setNewsletterStatus({ success: true, message: 'Subscribed!' });
       setNewsletterEmail('');
-    } catch (err) {
-      setNewsletterStatus({ success: false, message: err.message });
+    } catch (error) {
+      setNewsletterStatus({ success: false, message: error.message });
     }
   }, [newsletterEmail]);
 
   const handleRequestChat = useCallback(async () => {
     if (!user) return;
+
     try {
       const res = await requestChat();
+
       setChatRoomId(res?.room_id);
       setChatOpen(true);
+
       if (res?.room_id) {
         const messages = await getChatMessages(res.room_id);
+
         setChatMessages(Array.isArray(messages) ? messages : []);
       }
     } catch {}
@@ -120,18 +141,23 @@ export default function Home() {
 
   const handleSendChat = useCallback(async () => {
     if (!chatInput.trim() || !chatRoomId) return;
+
     try {
       await sendChatMessage(chatRoomId, chatInput);
       setChatInput('');
+
       const messages = await getChatMessages(chatRoomId);
+
       setChatMessages(Array.isArray(messages) ? messages : []);
     } catch {}
   }, [chatInput, chatRoomId]);
 
-  const handleDeleteChatMsg = useCallback(async (msgId) => {
+  const handleDeleteChatMsg = useCallback(async (messageId) => {
     try {
-      await deleteChatMessage(msgId);
+      await deleteChatMessage(messageId);
+
       const messages = await getChatMessages(chatRoomId);
+
       setChatMessages(Array.isArray(messages) ? messages : []);
     } catch {}
   }, [chatRoomId]);
