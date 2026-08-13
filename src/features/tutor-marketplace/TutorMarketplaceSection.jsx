@@ -1,4 +1,5 @@
- import { useState, useEffect } from 'react';
+ /* features/tutor-marketplace/TutorMarketplaceSection.jsx */
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { listTutorsCached } from '../../api/cachedClient';
@@ -6,7 +7,6 @@ import { sendContactRequest } from '../../api/client';
 import TutorCard from './TutorCard';
 import Spinner from '../../components/Spinner/Spinner';
 import EmptyState from '../../components/EmptyState/EmptyState';
-import Button from '../../components/Button/Button';
 import { useToast } from '../../components/Toast/Toast';
 
 export default function TutorMarketplaceSection() {
@@ -27,6 +27,7 @@ export default function TutorMarketplaceSection() {
       addToast('Please sign in to contact a tutor', 'warning');
       return;
     }
+
     try {
       await sendContactRequest(tutor.user_id, '');
       addToast('Request sent!', 'success');
@@ -48,7 +49,9 @@ export default function TutorMarketplaceSection() {
   return (
     <section className="section reveal">
       <span className="sec-label">Tutor Marketplace</span>
-      <h2 className="section-title">Find a Tutor</h2>
+      <h2 className="section-title">
+        Find a<br />Tutor
+      </h2>
       <p className="section-subtitle">
         Connect with qualified tutors for personalised learning
       </p>
@@ -57,18 +60,12 @@ export default function TutorMarketplaceSection() {
         <>
           <div className="grid grid-cols-3">
             {tutors.map((tutor) => (
-              <TutorCard
-                key={tutor.id}
-                tutor={tutor}
-                user={user}
-                onContact={handleContact}
-              />
+              <TutorCard key={tutor.id} tutor={tutor} user={user} onContact={handleContact} />
             ))}
           </div>
+
           <div className="tutor-section-footer">
-            <Link to="/tutors" className="btn btn-primary">
-              Browse All Tutors
-            </Link>
+            <Link to="/tutors" className="btn btn-primary">Browse All Tutors</Link>
           </div>
         </>
       ) : (
@@ -77,12 +74,8 @@ export default function TutorMarketplaceSection() {
           description="Be the first to join our marketplace and start teaching. Check back soon or apply to become a tutor."
           action={
             <div className="tutor-empty-actions">
-              <Link to="/tutors" className="btn btn-secondary">
-                Browse anyway
-              </Link>
-              <Link to="/tutor/apply" className="btn btn-primary">
-                Apply as a Tutor
-              </Link>
+              <Link to="/tutors" className="btn btn-secondary">Browse anyway</Link>
+              <Link to="/tutor/apply" className="btn btn-primary">Apply as a Tutor</Link>
             </div>
           }
         />
