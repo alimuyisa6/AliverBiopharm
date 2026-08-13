@@ -1,6 +1,6 @@
  /* pages/Classroom.jsx */
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
@@ -19,7 +19,7 @@ const STATUS_ICONS = {
   upcoming: 'clock',
   open_floor: 'users',
   ended: 'circle-check',
-  offline: 'circle',
+  offline: 'circle'
 };
 
 const STATUS_LABELS = {
@@ -27,7 +27,7 @@ const STATUS_LABELS = {
   upcoming: 'Upcoming',
   open_floor: 'Open Floor',
   ended: 'Ended',
-  offline: 'Offline',
+  offline: 'Offline'
 };
 
 export default function Classroom() {
@@ -45,34 +45,44 @@ export default function Classroom() {
 
   useEffect(() => {
     if (!groups?.length || !user) return;
+
     const groupId = user?.profile?.active_group_id || groups[0]?.id;
+
     if (!groupId) return;
-    getUnits({ group_id: groupId }).then(units => {
-      if (units?.length) setActiveUnitId(units[0].id);
-    }).catch(() => {});
+
+    getUnits({ group_id: groupId })
+      .then((units) => {
+        if (units?.length) setActiveUnitId(units[0].id);
+      })
+      .catch(() => {});
   }, [groups, user]);
 
   useEffect(() => {
     if (!isReady || !access.canAccess || access.isPending || !activeUnitId) return;
+
     fetchRooms();
   }, [isReady, access.canAccess, access.isPending, activeUnitId]);
 
   const fetchRooms = async () => {
     setLoading(true);
     setError(null);
+
     try {
       const data = await listClassrooms(activeUnitId, null);
+
       setRooms(data || []);
     } catch {
       setError('Failed to load classrooms');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
-    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
-    return comp?.properties?.image_url || null;
+    const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
+
+    return component?.properties?.image_url || null;
   }
 
   if (!isReady || access.isPending) return <PendingApprovalScreen />;
@@ -96,9 +106,8 @@ export default function Classroom() {
         <h1 className="section-title classroom-page-title">
           Classrooms{levelName ? ` – ${levelName}` : ''}
         </h1>
-        {classLabel && (
-          <p className="classroom-class-label">{classLabel}</p>
-        )}
+
+        {classLabel && <p className="classroom-class-label">{classLabel}</p>}
 
         {levelName && !showAll && (
           <div className="classroom-level-chips">
@@ -106,6 +115,7 @@ export default function Classroom() {
             {classLabel && <span className="chip classroom-chip-class">{classLabel}</span>}
           </div>
         )}
+
         {showAll && (
           <div className="classroom-teacher-badge-wrap">
             <span className="badge badge-primary">All Levels (Teacher Access)</span>
@@ -123,7 +133,7 @@ export default function Classroom() {
           <EmptyState
             image={getEmptyStateImage('classrooms')}
             title="No Classrooms Available"
-            description={`No active rooms for ${classLabel || levelName || 'your level'}. Check back later or start a discussion.`}
+            description={`No active rooms for ${classLabel || levelName || 'your level'}. Check back later.`}
             action={
               <Button onClick={() => navigate('/tutor/apply')}>
                 <Icon name="user-pen" /> Become a Tutor
@@ -134,8 +144,9 @@ export default function Classroom() {
 
         {!loading && !error && rooms.length > 0 && (
           <div className="grid grid-cols-3">
-            {rooms.map(room => {
+            {rooms.map((room) => {
               const statusKey = STATUS_LABELS[room.status] ? room.status : 'offline';
+
               return (
                 <div key={room.id} className={`card classroom-room-card status-${statusKey}`}>
                   <div className="card-image-placeholder">
@@ -145,24 +156,29 @@ export default function Classroom() {
                       <Icon name="users" className="classroom-room-status-icon" />
                     )}
                   </div>
+
                   <div className="classroom-room-status-bar">
                     <Icon name={STATUS_ICONS[room.status] || 'circle'} />
                     <span>{STATUS_LABELS[room.status] || room.status}</span>
                   </div>
+
                   <div className="card-body">
                     <h3 className="card-title">{room.title}</h3>
                     <p className="card-text">{room.topic_name} · {room.class_name}</p>
+
                     {room.tutor_name && (
                       <p className="card-text classroom-room-meta">
                         <Icon name="user" /> {room.tutor_name}
                       </p>
                     )}
+
                     {room.participant_count > 0 && (
                       <p className="card-text classroom-room-meta">
                         <Icon name="users" /> {room.participant_count} participants
                       </p>
                     )}
                   </div>
+
                   <div className="card-footer">
                     {room.status === 'live' || room.status === 'open_floor' ? (
                       <Button size="sm" onClick={() => navigate(`/classroom/${room.id}`)}>
