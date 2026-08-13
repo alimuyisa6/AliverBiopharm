@@ -1,4 +1,10 @@
-import { getCached, setCache, invalidateCache, invalidateCacheByPattern } from '../utils/cache';
+ /* api/cachedClient.js */
+import {
+  getCached,
+  setCache,
+  invalidateCache,
+  invalidateCacheByPattern
+} from '../utils/cache';
 import * as api from './client';
 
 const inFlight = new Map();
@@ -7,7 +13,9 @@ function withCache(key, fetcher, cacheEnabled = true) {
   return async (...args) => {
     if (cacheEnabled) {
       const cached = getCached(key);
+
       if (cached) return cached;
+
       if (inFlight.has(key)) return inFlight.get(key);
     }
 
@@ -21,6 +29,7 @@ function withCache(key, fetcher, cacheEnabled = true) {
       });
 
     if (cacheEnabled) inFlight.set(key, promise);
+
     return promise;
   };
 }
@@ -28,9 +37,12 @@ function withCache(key, fetcher, cacheEnabled = true) {
 function withArgsCache(keyFn, fetcher, cacheEnabled = true) {
   return async (...args) => {
     const key = keyFn(...args);
+
     if (cacheEnabled) {
       const cached = getCached(key);
+
       if (cached) return cached;
+
       if (inFlight.has(key)) return inFlight.get(key);
     }
 
@@ -44,6 +56,7 @@ function withArgsCache(keyFn, fetcher, cacheEnabled = true) {
       });
 
     if (cacheEnabled) inFlight.set(key, promise);
+
     return promise;
   };
 }
@@ -64,10 +77,10 @@ export const getFilterOptions = () =>
   withCache('filter_options', api.getFilterOptions)();
 
 export const getPdfsByLevel = (unitId) =>
-  withCache(`pdfs_${unitId}`, () => api.getPdfsByLevel(unitId))();
+  withCache(`pdfs_${unitId || 'all'}`, () => api.getPdfsByLevel(unitId))();
 
 export const getNotesStructure = (unitId) =>
-  withCache(`notes_structure_${unitId}`, () => api.getNotesStructure(unitId))();
+  withCache(`notes_structure_${unitId || 'all'}`, () => api.getNotesList(unitId))();
 
 export const getNoteContent = (noteId) =>
   withCache(`note_content_${noteId}`, () => api.getNoteContent(noteId), false)();
@@ -91,10 +104,13 @@ export const getPastPaper = (id) =>
   withCache(`past_paper_${id}`, () => api.getPastPaper(id))();
 
 export const getGlossaryTerms = (level, category, search) =>
-  withArgsCache((l, c, s) => `glossary_${l}_${c || ''}_${s || ''}`, api.getGlossaryTerms)(level, category, search);
+  withArgsCache(
+    (l, c, s) => `glossary_${l}_${c || ''}_${s || ''}`,
+    api.getGlossaryTerms
+  )(level, category, search);
 
 export const getGlossaryCategories = (level) =>
-  withCache(`glossary_categories_${level}`, () => api.getGlossaryCategories(level))();
+  withCache(`glossary_categories_${level || 'all'}`, () => api.getGlossaryCategories(level))();
 
 export const getInfoSection = (section) =>
   withCache(`info_section_${section}`, () => api.getInfoSection(section))();
@@ -130,7 +146,7 @@ export const getLeaderboard = (level, limit = 20) =>
   withCache(`leaderboard_${level}_${limit}`, () => api.getLeaderboard(level, limit))();
 
 export const getRecallTopics = (groupId) =>
-  withCache(`recall_topics_${groupId}`, () => api.getRecallTopics(groupId))();
+  withCache(`recall_topics_${groupId || 'all'}`, () => api.getRecallTopics(groupId), false)();
 
 export const getRecallStats = () =>
   withCache('recall_stats', api.getRecallStats, false)();
@@ -169,10 +185,16 @@ export const checkAdminOnline = () =>
   withCache('admin_online', api.checkAdminOnline, false)();
 
 export const getClassroomTopics = (groupId, level) =>
-  withArgsCache((g, l) => `classroom_topics_${g}_${l || ''}`, api.getClassroomTopics)(groupId, level);
+  withArgsCache(
+    (g, l) => `classroom_topics_${g}_${l || ''}`,
+    api.getClassroomTopics
+  )(groupId, level);
 
 export const listClassrooms = (unitId, groupId) =>
-  withArgsCache((u, g) => `classroom_list_${u}_${g || ''}`, api.listClassrooms)(unitId, groupId);
+  withArgsCache(
+    (u, g) => `classroom_list_${u}_${g || ''}`,
+    api.listClassrooms
+  )(unitId, groupId);
 
 export const getLiveClassroomFeed = () =>
   withCache('classroom_live_feed', api.getLiveClassroomFeed)();
@@ -180,14 +202,14 @@ export const getLiveClassroomFeed = () =>
 export const getClassroomLevels = () =>
   withCache('classroom_levels', api.getClassroomLevels)();
 
-export const getClassroomRoom = (room_id) =>
-  withCache(`classroom_room_${room_id}`, () => api.getClassroomRoom(room_id), false)();
+export const getClassroomRoom = (roomId) =>
+  withCache(`classroom_room_${roomId}`, () => api.getClassroomRoom(roomId), false)();
 
-export const getClassroomMessages = (room_id) =>
-  withCache(`classroom_messages_${room_id}`, () => api.getClassroomMessages(room_id), false)();
+export const getClassroomMessages = (roomId) =>
+  withCache(`classroom_messages_${roomId}`, () => api.getClassroomMessages(roomId), false)();
 
-export const getClassroomParticipants = (room_id) =>
-  withCache(`classroom_participants_${room_id}`, () => api.getClassroomParticipants(room_id), false)();
+export const getClassroomParticipants = (roomId) =>
+  withCache(`classroom_participants_${roomId}`, () => api.getClassroomParticipants(roomId), false)();
 
 export const getTutorStatus = () =>
   api.getTutorStatus();
@@ -207,31 +229,12 @@ export const checkQuizAnswer = (payload) =>
 export const getQuizSessionStatus = () =>
   api.getQuizSessionStatus();
 
-export const getAuditLog = () =>
-  withCache('audit_log', api.getAuditLog, false)();
-
-export const setupMfa = () =>
-  api.setupMfa();
-
-export const confirmMfa = (code) =>
-  api.confirmMfa(code);
-
-export const disableMfa = (userId) =>
-  api.disableMfa(userId);
-
 export const getUnits = (filters = {}) =>
   withArgsCache((f) => `units_${JSON.stringify(f)}`, api.getUnits)(filters);
 
-export function invalidateNoteCache(id) { invalidateCache(`note_content_${id}`); }
-export function invalidateChatCache(roomId) { invalidateCache(`chat_${roomId}`); }
-export function invalidateClassroomCache(room_id) {
-  invalidateCache(`classroom_room_${room_id}`);
-  invalidateCache(`classroom_messages_${room_id}`);
-  invalidateCache(`classroom_participants_${room_id}`);
-}
-
 export const switchClass = async (groupId) => {
   const result = await api.switchClass(groupId);
+
   invalidateCacheByPattern('bootstrap_');
   invalidateCacheByPattern('units_');
   invalidateCacheByPattern('user_');
@@ -240,16 +243,35 @@ export const switchClass = async (groupId) => {
   invalidateCacheByPattern('leaderboard_');
   invalidateCacheByPattern('classroom_topics_');
   invalidateCacheByPattern('classroom_list_');
+
   return result;
 };
+
 export function invalidateRecallCache() {
   invalidateCacheByPattern('recall_');
 }
+
 export function invalidateUserCache() {
   invalidateCacheByPattern('user_');
 }
+
 export function invalidateFlashcardCache() {
   invalidateCacheByPattern('flashcard');
+}
+
+export function invalidateNoteCache(id) {
+  invalidateCache(`note_content_${id}`);
+  invalidateCache(`note_preview_${id}`);
+}
+
+export function invalidateChatCache(roomId) {
+  invalidateCache(`chat_${roomId}`);
+}
+
+export function invalidateClassroomCache(roomId) {
+  invalidateCache(`classroom_room_${roomId}`);
+  invalidateCache(`classroom_messages_${roomId}`);
+  invalidateCache(`classroom_participants_${roomId}`);
 }
 
 export const listTutorsCached = (filters = {}) =>
@@ -346,7 +368,6 @@ export {
   addQuizQuestionsBatch,
   getRecallSession,
   checkRecallSession,
-  checkFirstVisit,
   continueRecallSession,
   submitRecallAnswer,
   completeRecallSession,
@@ -376,7 +397,6 @@ export {
   adminListApplications,
   adminListComplaints,
   adminResolveComplaint,
-  adminEndClassroom,
   submitContact,
   subscribeNewsletter,
   getNotifications,
@@ -442,5 +462,5 @@ export {
   getAllRatings,
   trackPdfPreview,
   trackPdfDownload,
-  submitResource,
+  submitResource
 } from './client';
