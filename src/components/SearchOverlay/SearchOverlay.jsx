@@ -1,4 +1,4 @@
- /* components/SearchOverlay/SearchOverlay.jsx */
+/* components/SearchOverlay/SearchOverlay.jsx */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,7 +11,7 @@ const CATEGORIES = [
   { key: 'glossary_term', label: 'Glossary', icon: 'book-open', path: (item) => `/glossary/${item.slug}` },
   { key: 'past_paper', label: 'Past Papers', icon: 'file-lines', path: () => '/past-papers' },
   { key: 'flashcard_deck', label: 'Flashcards', icon: 'layer-group', path: () => '/flashcards' },
-  { key: 'curriculum_unit', label: 'Quizzes', icon: 'clipboard-check', path: () => '/quiz' },
+  { key: 'curriculum_unit', label: 'Quizzes', icon: 'clipboard-check', path: () => '/quiz' }
 ];
 
 export default function SearchOverlay({ open, onClose }) {
@@ -33,22 +33,30 @@ export default function SearchOverlay({ open, onClose }) {
   }, [open]);
 
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    const handler = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+
     if (open) document.addEventListener('keydown', handler);
+
     return () => document.removeEventListener('keydown', handler);
   }, [open, onClose]);
 
   const runSearch = useCallback((value) => {
     clearTimeout(debounceRef.current);
+
     if (value.trim().length < 2) {
       setResults(null);
       setLoading(false);
       return;
     }
+
     setLoading(true);
+
     debounceRef.current = setTimeout(async () => {
       try {
         const data = await globalSearch(value.trim(), activeGroupId ? { group_id: activeGroupId } : {});
+
         setResults(data);
       } catch {
         setResults(null);
@@ -58,9 +66,9 @@ export default function SearchOverlay({ open, onClose }) {
     }, 350);
   }, [activeGroupId]);
 
-  const handleChange = (e) => {
-    setQuery(e.target.value);
-    runSearch(e.target.value);
+  const handleChange = (event) => {
+    setQuery(event.target.value);
+    runSearch(event.target.value);
   };
 
   const handleResultClick = (url) => {
@@ -94,6 +102,7 @@ export default function SearchOverlay({ open, onClose }) {
               <Icon name="xmark" />
             </button>
           </div>
+
           {loading && (
             <div className="search-results">
               <div style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
@@ -101,21 +110,25 @@ export default function SearchOverlay({ open, onClose }) {
               </div>
             </div>
           )}
+
           {!loading && hasResults && (
             <div className="search-results">
-              {CATEGORIES.map((cat) => {
-                const items = results.results.filter((r) => r.type === cat.key);
+              {CATEGORIES.map((category) => {
+                const items = results.results.filter((item) => item.type === category.key);
+
                 if (!items.length) return null;
+
                 return (
-                  <div key={cat.key} className="search-result-group">
-                    <div className="search-result-group-label">{cat.label}</div>
+                  <div key={category.key} className="search-result-group">
+                    <div className="search-result-group-label">{category.label}</div>
+
                     {items.map((item, idx) => (
                       <button
                         key={idx}
                         className="search-result-item"
-                        onClick={() => handleResultClick(cat.path(item))}
+                        onClick={() => handleResultClick(category.path(item))}
                       >
-                        <Icon name={cat.icon} className="search-result-icon" />
+                        <Icon name={category.icon === 'dna' ? 'microscope' : category.icon} className="search-result-icon" />
                         <div>
                           <div className="search-result-title">{item.title}</div>
                           {item.preview && <div className="search-result-meta">{item.preview}</div>}
@@ -127,6 +140,7 @@ export default function SearchOverlay({ open, onClose }) {
               })}
             </div>
           )}
+
           {!loading && query.length >= 2 && !hasResults && (
             <div className="search-results">
               <div className="search-empty">No results for "{query}"</div>
@@ -136,4 +150,4 @@ export default function SearchOverlay({ open, onClose }) {
       )}
     </AnimatePresence>
   );
-}
+} 
