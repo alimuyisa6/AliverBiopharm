@@ -1,4 +1,4 @@
-/* components/Card/Card.jsx */
+ /* components/Card/Card.jsx */
 import { forwardRef } from 'react';
 import Icon from '../Icon/Icon';
 
@@ -8,6 +8,8 @@ const Card = forwardRef(function Card(
 ) {
   const isClickable = !!onClick;
   const Wrapper = isClickable ? 'button' : 'div';
+
+  const safeIcon = icon === 'dna' ? 'microscope' : icon;
 
   return (
     <Wrapper
@@ -20,14 +22,16 @@ const Card = forwardRef(function Card(
         <img src={image} alt={title || ''} className="card-image" loading="lazy" />
       ) : (
         <div className="card-image-placeholder">
-          {icon && <Icon name={icon} />}
+          {safeIcon && <Icon name={safeIcon} />}
         </div>
       )}
+
       <div className="card-body">
         {title && <h3 className="card-title">{title}</h3>}
         {description && <p className="card-text">{description}</p>}
         {children}
       </div>
+
       {footer && <div className="card-footer">{footer}</div>}
     </Wrapper>
   );
