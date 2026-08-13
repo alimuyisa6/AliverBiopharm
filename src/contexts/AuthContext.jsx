@@ -1,4 +1,5 @@
- import { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+ /* contexts/AuthContext.jsx */
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getUser, signin, signout } from '../api/client';
 import Spinner from '../components/Spinner/Spinner';
@@ -14,7 +15,7 @@ const DEFAULT_PROFILE = {
   class_name: null,
   onboarding_completed: false,
   is_approved_teacher: false,
-  approved_track: null,
+  approved_track: null
 };
 
 export function AuthProvider({ children }) {
@@ -27,11 +28,13 @@ export function AuthProvider({ children }) {
   const checkAuth = useCallback(async () => {
     try {
       const data = await getUser();
+
       if (data?.user) {
         setUser({
           ...data.user,
-          profile: data.user.profile || DEFAULT_PROFILE,
+          profile: data.user.profile || DEFAULT_PROFILE
         });
+
         lastActivityRef.current = Date.now();
       } else {
         setUser(null);
@@ -62,44 +65,62 @@ export function AuthProvider({ children }) {
 
     const resetTimer = () => {
       lastActivityRef.current = Date.now();
+
       clearTimeout(inactivityRef.current);
+
       inactivityRef.current = setTimeout(() => {
         signout().catch(() => {});
         setUser(null);
       }, INACTIVITY_TIMEOUT);
     };
 
-    ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((ev) =>
-      window.addEventListener(ev, resetTimer, { passive: true })
-    );
+    ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((event) => {
+      window.addEventListener(event, resetTimer, { passive: true });
+    });
 
     resetTimer();
 
     return () => {
-      ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((ev) =>
-        window.removeEventListener(ev, resetTimer)
-      );
+      ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((event) => {
+        window.removeEventListener(event, resetTimer);
+      });
     };
   }, [user, checkAuth]);
 
   const login = useCallback(async (email, password, turnstileToken, mfaCode) => {
     const result = await signin(email, password, turnstileToken, mfaCode);
+
     if (result?.mfa_required || result?.passkey_required) return result;
+
     await checkAuth();
+
     return result;
   }, [checkAuth]);
 
   const logout = useCallback(async () => {
     clearInterval(refreshRef.current);
     clearTimeout(inactivityRef.current);
-    try { await signout(); } catch {}
+
+    try {
+      await signout();
+    } catch {}
+
     setUser(null);
   }, []);
 
   const refresh = useCallback(() => checkAuth(), [checkAuth]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, logout, refresh }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        isAuthenticated: !!user,
+        login,
+        logout,
+        refresh
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -107,7 +128,9 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
+
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+
   return ctx;
 }
 
@@ -119,20 +142,28 @@ export function ProtectedRoute({ children }) {
   const needsRedirect =
     !user ||
     (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') ||
-    (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding');
+    (user.profile?.role === 'teacher' &&
+      !user.profile?.is_approved_teacher &&
+      location.pathname !== '/onboarding');
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (loading) return;
 
     if (!user) {
       navigate('/login', { replace: true, state: { from: location } });
       return;
     }
+
     if (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') {
       navigate('/onboarding', { replace: true });
       return;
     }
-    if (user.profile?.role === 'teacher' && !user.profile?.is_approved_teacher && location.pathname !== '/onboarding') {
+
+    if (
+      user.profile?.role === 'teacher' &&
+      !user.profile?.is_approved_teacher &&
+      location.pathname !== '/onboarding'
+    ) {
       navigate('/onboarding', { replace: true });
     }
   }, [user, loading, location.pathname, navigate]);
