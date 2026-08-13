@@ -1,4 +1,4 @@
- /* features/quiz/QuizChallenges.jsx */
+/* features/quiz/QuizChallenges.jsx */
 import { useEffect, useState } from 'react';
 import { getRequest } from '../../api/client';
 import Icon from '../../components/Icon/Icon';
@@ -9,6 +9,7 @@ export default function QuizChallenges({ user, level, class_name }) {
 
   useEffect(() => {
     if (!user) return;
+
     getRequest('interactions', 'daily-challenge').then(setChallenge).catch(() => {});
   }, [user]);
 
@@ -20,16 +21,17 @@ export default function QuizChallenges({ user, level, class_name }) {
   return (
     <div className="card card-amber quiz-challenge-card">
       <Icon name="rocket" className="quiz-challenge-icon" />
+
       <div className="quiz-challenge-body">
         <h4 className="quiz-challenge-title">
           {challenge.title}
-          {levelName && (
-            <span className="quiz-challenge-sublabel"> — {levelName}{classLabel ? ` · ${classLabel}` : ''}</span>
-          )}
+          {levelName && <span className="quiz-challenge-sublabel"> — {levelName}{classLabel ? ` · ${classLabel}` : ''}</span>}
         </h4>
+
         <p className="quiz-challenge-reward">{challenge.reward_xp} XP reward</p>
         <ProgressBar value={challenge.progress} max={challenge.target} variant="warm" />
       </div>
+
       <div className="quiz-challenge-status">
         {challenge.completed ? (
           <Icon name="circle-check" className="icon-complete" />
@@ -39,4 +41,4 @@ export default function QuizChallenges({ user, level, class_name }) {
       </div>
     </div>
   );
-}
+} 
