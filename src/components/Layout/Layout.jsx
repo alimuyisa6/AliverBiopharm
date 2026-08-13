@@ -173,22 +173,17 @@ export default function Layout({ children, showFooter = true }) {
             </nav>
 
             <div className="nav-actions">
-              {isAuthenticated && (
-                <span className="class-switcher-wrap">
-                  <ClassSwitcher />
-                </span>
-              )}
+              {isAuthenticated && <ClassSwitcher />}
 
               <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setSearchOpen(true)} aria-label="Search">
                 <Icon name="magnifying-glass" />
               </button>
 
               {isAuthenticated ? (
-                <div className="dropdown">
-                  <button className="btn btn-ghost btn-sm" onClick={() => {}}>
-                    <Icon name="user" />
-                  </button>
-                </div>
+                <button className="btn btn-ghost btn-sm" onClick={handleSignout} disabled={signingOut}>
+                  <Icon name="right-from-bracket" />
+                  {signingOut ? 'Signing out...' : 'Sign Out'}
+                </button>
               ) : (
                 <>
                   <Link to="/login" className="btn btn-ghost btn-sm">Sign In</Link>
@@ -293,8 +288,7 @@ export default function Layout({ children, showFooter = true }) {
                       <Icon name="gear" /> Profile
                     </Link>
                     <button className="mobile-nav-link" onClick={handleSignout} disabled={signingOut}>
-                      <Icon name="right-from-bracket" />
-                      {signingOut ? 'Signing out...' : 'Sign Out'}
+                      <Icon name="right-from-bracket" /> Sign Out
                     </button>
                   </>
                 ) : (
