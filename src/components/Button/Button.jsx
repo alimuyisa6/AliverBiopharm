@@ -1,4 +1,4 @@
-/* components/Button/Button.jsx */
+ /* components/Button/Button.jsx */
 import { forwardRef } from 'react';
 import Icon from '../Icon/Icon';
 
@@ -12,14 +12,17 @@ const Button = forwardRef(function Button(
     size === 'sm' ? 'btn-sm' : size === 'lg' ? 'btn-lg' : '',
     loading ? 'btn-loading' : '',
     !children && icon ? 'btn-icon' : '',
-    className,
+    className
   ].filter(Boolean).join(' ');
+
+  const safeIcon = icon === 'dna' ? 'microscope' : icon;
+  const safeIconRight = iconRight === 'dna' ? 'microscope' : iconRight;
 
   return (
     <button ref={ref} className={cls} disabled={loading || props.disabled} {...props}>
-      {loading ? null : icon ? <Icon name={icon} /> : null}
+      {loading ? null : safeIcon ? <Icon name={safeIcon} /> : null}
       {children && <span>{children}</span>}
-      {!loading && iconRight ? <Icon name={iconRight} /> : null}
+      {!loading && safeIconRight ? <Icon name={safeIconRight} /> : null}
     </button>
   );
 });
