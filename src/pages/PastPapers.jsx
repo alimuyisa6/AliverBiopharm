@@ -1,10 +1,12 @@
-/* pages/PastPapers.jsx */
+ /* pages/PastPapers.jsx */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import {
-  getPastPapers, getPastPaperFilterOptions, getPastPaperDownloadUrl,
+  getPastPapers,
+  getPastPaperFilterOptions,
+  getPastPaperDownloadUrl
 } from '../api/client';
 import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
@@ -23,10 +25,16 @@ export default function PastPapers() {
   const [initializing, setInitializing] = useState(true);
   const [papers, setPapers] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
-    subjects: [], years: [], exam_boards: [], paper_types: [],
+    subjects: [],
+    years: [],
+    exam_boards: [],
+    paper_types: []
   });
   const [filters, setFilters] = useState({
-    subject: '', year: '', exam_board: '', paper_type: '',
+    subject: '',
+    year: '',
+    exam_board: '',
+    paper_type: ''
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -40,8 +48,9 @@ export default function PastPapers() {
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
-    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
-    return comp?.properties?.image_url || null;
+    const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
+
+    return component?.properties?.image_url || null;
   }
 
   useEffect(() => {
@@ -61,22 +70,27 @@ export default function PastPapers() {
 
   const loadPapers = async () => {
     setPapersLoading(true);
+
     try {
       const params = { page, limit: 12 };
+
       if (effectiveLevel) params.level = effectiveLevel;
       if (effectiveClass) params.class_name = effectiveClass;
       if (filters.subject) params.subject = filters.subject;
       if (filters.year) params.year = filters.year;
       if (filters.exam_board) params.exam_board = filters.exam_board;
       if (filters.paper_type) params.paper_type = filters.paper_type;
+
       const result = await getPastPapers(params);
+
       setPapers(result.papers || []);
       setTotalPages(result.total_pages || 1);
       setTotal(result.total || 0);
     } catch {
       addToast('Failed to load papers', 'error');
+    } finally {
+      setPapersLoading(false);
     }
-    setPapersLoading(false);
   };
 
   const handleDownload = async (paper) => {
@@ -84,19 +98,23 @@ export default function PastPapers() {
       addToast('Please sign in to download', 'warning');
       return;
     }
+
     setDownloadingId(paper.id);
+
     try {
       const result = await getPastPaperDownloadUrl(paper.id);
-      const a = document.createElement('a');
-      a.href = result.url;
-      a.download = paper.title + '.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (err) {
+      const anchor = document.createElement('a');
+
+      anchor.href = result.url;
+      anchor.download = `${paper.title}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+    } catch {
       addToast('Download failed', 'error');
+    } finally {
+      setDownloadingId(null);
     }
-    setDownloadingId(null);
   };
 
   const clearFilters = () => {
@@ -104,7 +122,12 @@ export default function PastPapers() {
     setPage(1);
   };
 
-  const activeFilterCount = [filters.subject, filters.year, filters.exam_board, filters.paper_type].filter(Boolean).length;
+  const activeFilterCount = [
+    filters.subject,
+    filters.year,
+    filters.exam_board,
+    filters.paper_type
+  ].filter(Boolean).length;
 
   if (initializing) {
     return (
@@ -122,49 +145,35 @@ export default function PastPapers() {
       <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
         <span className="sec-label">Exam Preparation</span>
         <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
-          Past Papers{levelName ? ` – ${levelName}` : ''}
+          Past Papers<br />{levelName ? `– ${levelName}` : ''}
         </h1>
-        {classLabel && (
-          <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
-            {classLabel}
-          </p>
-        )}
+
+        {classLabel && <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>{classLabel}</p>}
 
         <nav className="breadcrumb">
           <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
           <Icon name="chevron-right" className="breadcrumb-sep" />
           <span>Past Papers</span>
-          {levelName && <><Icon name="chevron-right" className="breadcrumb-sep" /><span>{levelName}</span></>}
-          {classLabel && <><Icon name="chevron-right" className="breadcrumb-sep" /><span>{classLabel}</span></>}
         </nav>
 
         {!user && (
-          <div className="alert alert-info" style={{ marginBottom: 'var(--space-6)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <Icon name="lock" style={{ marginRight: 'var(--space-3)' }} />
-              Sign in to download papers. You can browse freely.
-            </div>
-            <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
-              <Link to="/login" className="btn btn-secondary btn-sm">Sign In</Link>
-              <Link to="/register" className="btn btn-primary btn-sm">Register Free</Link>
-            </div>
+          <div className="alert alert-info" style={{ marginBottom: 'var(--space-6)' }}>
+            <Icon name="lock" /> Sign in to download papers. You can browse freely.
           </div>
         )}
 
         <div style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-6)', flexWrap: 'wrap', alignItems: 'center' }}>
-          <Button
-            variant={showFilters ? 'primary' : 'secondary'}
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-          >
+          <Button variant={showFilters ? 'primary' : 'secondary'} size="sm" onClick={() => setShowFilters((value) => !value)}>
             <Icon name="filter" /> Filters
-            {activeFilterCount > 0 && <span className="badge badge-primary" style={{ marginLeft: 'var(--space-2)' }}>{activeFilterCount}</span>}
+            {activeFilterCount > 0 && <span className="badge badge-primary">{activeFilterCount}</span>}
           </Button>
+
           {activeFilterCount > 0 && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
               <Icon name="xmark" /> Clear filters
             </Button>
           )}
+
           <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
             {papersLoading ? 'Loading...' : `${total} paper${total !== 1 ? 's' : ''} found`}
           </p>
@@ -174,27 +183,27 @@ export default function PastPapers() {
           <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)', display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
             <Select
               label="Subject"
-              options={filterOptions.subjects.map(s => ({ value: s, label: s }))}
+              options={filterOptions.subjects.map((subject) => ({ value: subject, label: subject }))}
               value={filters.subject}
-              onChange={e => setFilters(prev => ({ ...prev, subject: e.target.value }))}
+              onChange={(event) => setFilters((prev) => ({ ...prev, subject: event.target.value }))}
             />
             <Select
               label="Year"
-              options={filterOptions.years.map(y => ({ value: String(y), label: String(y) }))}
+              options={filterOptions.years.map((year) => ({ value: String(year), label: String(year) }))}
               value={filters.year}
-              onChange={e => setFilters(prev => ({ ...prev, year: e.target.value }))}
+              onChange={(event) => setFilters((prev) => ({ ...prev, year: event.target.value }))}
             />
             <Select
               label="Exam Board"
-              options={filterOptions.exam_boards.map(b => ({ value: b, label: b }))}
+              options={filterOptions.exam_boards.map((board) => ({ value: board, label: board }))}
               value={filters.exam_board}
-              onChange={e => setFilters(prev => ({ ...prev, exam_board: e.target.value }))}
+              onChange={(event) => setFilters((prev) => ({ ...prev, exam_board: event.target.value }))}
             />
             <Select
               label="Paper Type"
-              options={filterOptions.paper_types.map(t => ({ value: t, label: t }))}
+              options={filterOptions.paper_types.map((type) => ({ value: type, label: type }))}
               value={filters.paper_type}
-              onChange={e => setFilters(prev => ({ ...prev, paper_type: e.target.value }))}
+              onChange={(event) => setFilters((prev) => ({ ...prev, paper_type: event.target.value }))}
             />
           </div>
         )}
@@ -212,14 +221,16 @@ export default function PastPapers() {
           />
         ) : (
           <div className="grid grid-cols-3">
-            {papers.map(paper => (
+            {papers.map((paper) => (
               <div key={paper.id} className="card">
                 <div className="card-image-placeholder" style={{ background: 'var(--primary-light)' }}>
                   <Icon name="file-pdf" style={{ fontSize: '2rem', color: 'var(--error)' }} />
                 </div>
+
                 <div className="card-body">
                   <h3 className="card-title">{paper.title}</h3>
                   <p className="card-text">{paper.subject}</p>
+
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-3)' }}>
                     {paper.level && <span className="chip">{paper.level}</span>}
                     {paper.year && <span className="chip">{paper.year}</span>}
@@ -227,12 +238,9 @@ export default function PastPapers() {
                     {paper.class_name && <span className="chip">{paper.class_name}</span>}
                   </div>
                 </div>
+
                 <div className="card-footer">
-                  <Button
-                    size="sm"
-                    loading={downloadingId === paper.id}
-                    onClick={() => handleDownload(paper)}
-                  >
+                  <Button size="sm" loading={downloadingId === paper.id} onClick={() => handleDownload(paper)}>
                     <Icon name="download" />
                     {user ? 'Download' : 'Sign in to Download'}
                   </Button>
@@ -244,31 +252,24 @@ export default function PastPapers() {
 
         {totalPages > 1 && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-2)', marginTop: 'var(--space-8)' }}>
-            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+            <Button variant="secondary" size="sm" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1}>
               <Icon name="chevron-left" />
             </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
-              .reduce((acc, p, idx, arr) => {
-                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
-                acc.push(p);
-                return acc;
-              }, [])
-              .map((p, idx) =>
-                p === '...' ? (
-                  <span key={`ellipsis-${idx}`} style={{ padding: 'var(--space-2)' }}>...</span>
-                ) : (
-                  <Button
-                    key={p}
-                    variant={p === page ? 'primary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setPage(p)}
-                  >
-                    {p}
-                  </Button>
-                )
-              )}
-            <Button variant="secondary" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+
+            {Array.from({ length: totalPages }, (_, index) => index + 1)
+              .filter((item) => item === 1 || item === totalPages || Math.abs(item - page) <= 2)
+              .map((item) => (
+                <Button
+                  key={item}
+                  variant={item === page ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setPage(item)}
+                >
+                  {item}
+                </Button>
+              ))}
+
+            <Button variant="secondary" size="sm" onClick={() => setPage((current) => Math.min(totalPages, current + 1))} disabled={page === totalPages}>
               <Icon name="chevron-right" />
             </Button>
           </div>
@@ -276,4 +277,4 @@ export default function PastPapers() {
       </div>
     </div>
   );
-} 
+}
