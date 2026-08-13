@@ -1,4 +1,4 @@
-/* components/Input/Input.jsx */
+ /* components/Input/Input.jsx */
 import { forwardRef, useState } from 'react';
 import Icon from '../Icon/Icon';
 
@@ -10,6 +10,7 @@ const Input = forwardRef(function Input(
   const isPassword = type === 'password';
   const inputType = isPassword && showPassword ? 'text' : type;
   const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+  const safeIcon = icon === 'dna' ? 'microscope' : icon;
 
   return (
     <div className={`form-group ${className}`}>
@@ -18,8 +19,9 @@ const Input = forwardRef(function Input(
           {label}
         </label>
       )}
+
       <div className="input-wrapper">
-        {icon && <Icon name={icon} className="input-icon" />}
+        {safeIcon && <Icon name={safeIcon} className="input-icon" />}
         <input
           ref={ref}
           id={inputId}
@@ -27,17 +29,19 @@ const Input = forwardRef(function Input(
           className={`form-input ${error ? 'form-input-error' : ''}`}
           {...props}
         />
+
         {isPassword && (
           <button
             type="button"
             className="password-toggle"
-            onClick={() => setShowPassword((p) => !p)}
+            onClick={() => setShowPassword((value) => !value)}
             tabIndex={-1}
           >
             <Icon name={showPassword ? 'eye-slash' : 'eye'} />
           </button>
         )}
       </div>
+
       {hint && !error && <span className="form-hint">{hint}</span>}
       {error && <span className="form-error">{error}</span>}
     </div>
