@@ -1,6 +1,7 @@
- /* src/features/home/HomeView.jsx */
+ /* features/home/HomeView.jsx */
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
+import Button from '../../components/Button/Button';
 import { PlatformCards } from './PlatformCards';
 import { StatsGrid } from './StatsGrid';
 import { TestimonialSlider } from './TestimonialSlider';
@@ -10,13 +11,13 @@ import { CommunitySection } from '../community/CommunitySection';
 import { ContactSection } from '../contact/ContactSection';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
+import { FaqAccordion } from './FaqAccordion';
+import { BlogGrid } from './BlogGrid';
+import { TeamScroll } from './TeamScroll';
+import { ClassroomSection } from '../classroom/ClassroomSection';
+import TutorMarketplaceSection from '../tutor-marketplace/TutorMarketplaceSection';
 import Hero from '../../components/Hero/Hero';
 import { useLayout } from '../../contexts/LayoutContext';
-import { FaqAccordion } from './FaqAccordion';               // new
-import { BlogGrid } from './BlogGrid';                         // new
-import { TeamScroll } from './TeamScroll';                     // new
-import { ClassroomSection } from '../classroom/ClassroomSection'; // new
-import TutorMarketplaceSection from '../tutor-marketplace/TutorMarketplaceSection';
 
 const CONTENT_TYPES = [
   { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes', color: 'blue' },
@@ -24,7 +25,7 @@ const CONTENT_TYPES = [
   { key: 'pdfs', label: 'PDF Library', description: 'Downloadable guides and reference sheets', icon: 'file-pdf', route: '/pdfs', color: 'violet' },
   { key: 'quizzes', label: 'Quizzes', description: 'Block-by-block testing across every unit', icon: 'clipboard-check', route: '/quiz', color: 'amber' },
   { key: 'past_papers', label: 'Past Papers', description: 'Real exam papers by year and board', icon: 'file-lines', route: '/past-papers', color: 'emerald' },
-  { key: 'recall', label: 'Recall', description: 'Spaced-repetition for long-term memory', icon: 'brain', route: '/recall', color: 'blue' },
+  { key: 'recall', label: 'Recall', description: 'Spaced-repetition for long-term memory', icon: 'brain', route: '/recall', color: 'blue' }
 ];
 
 function ContentTypeCards({ navigate, user, sections }) {
@@ -32,8 +33,9 @@ function ContentTypeCards({ navigate, user, sections }) {
   const uiComponents = bootstrap?.ui_components || [];
 
   function getImage(key) {
-    const comp = uiComponents.find(c => c.component_key === `content_type_${key}`);
-    return comp?.properties?.image_url || null;
+    const component = uiComponents.find((item) => item.component_key === `content_type_${key}`);
+
+    return component?.properties?.image_url || null;
   }
 
   return (
@@ -45,30 +47,36 @@ function ContentTypeCards({ navigate, user, sections }) {
       <p className="section-subtitle">
         {sections?.section_headings?.content_types_subtitle || 'Pick where you want to start — every resource is tailored to your level.'}
       </p>
+
       <div className="grid grid-cols-3">
         {CONTENT_TYPES.map((type) => {
           const imageUrl = getImage(type.key);
+
           return (
-            <button
-              key={type.key}
-              className={`card card-${type.color} card-clickable`}
-              onClick={() => navigate(user ? type.route : '/login')}
-            >
+            <div key={type.key} className={`card card-${type.color}`}>
               {imageUrl ? (
                 <img src={imageUrl} alt={type.label} className="card-image" loading="lazy" />
               ) : (
                 <div className="card-image-placeholder">
-                  <Icon name={type.icon} />
+                  <Icon name={type.icon === 'dna' ? 'microscope' : type.icon} />
                 </div>
               )}
+
               <div className="card-body">
                 <h3 className="card-title">{type.label}</h3>
                 <p className="card-text">{type.description}</p>
               </div>
+
               <div className="card-footer">
-                <span className="btn btn-secondary btn-sm">Browse {type.label}</span>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => navigate(user ? type.route : '/login')}
+                >
+                  Browse {type.label}
+                </Button>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
@@ -78,14 +86,42 @@ function ContentTypeCards({ navigate, user, sections }) {
 
 export default function HomeView(props) {
   const {
-    sections, user, navigate, activeLevelName, activeGroupName,
-    publicStats, communityActivity, weeklyChallengeAnswer,
-    moodSelected, setMoodSelected, moodMessage, setMoodMessage, moodSubmitted,
-    continueLearning, streak, chatOpen, chatMessages, chatInput, adminOnline,
-    contactForm, contactStatus, newsletterEmail, newsletterStatus, currentYear,
-    handleWeeklyChallengeSubmit, handleContactSubmit, handleNewsletterSubmit,
-    handleMoodSubmit, sendChat, deleteChatMsg, setChatOpen, setChatInput,
-    setContactForm, setNewsletterEmail, chatBodyRef, requestChatRoom,
+    sections,
+    user,
+    navigate,
+    activeLevelName,
+    activeGroupName,
+    publicStats,
+    communityActivity,
+    weeklyChallengeAnswer,
+    moodSelected,
+    setMoodSelected,
+    moodMessage,
+    setMoodMessage,
+    moodSubmitted,
+    continueLearning,
+    streak,
+    chatOpen,
+    chatMessages,
+    chatInput,
+    adminOnline,
+    contactForm,
+    contactStatus,
+    newsletterEmail,
+    newsletterStatus,
+    currentYear,
+    handleWeeklyChallengeSubmit,
+    handleContactSubmit,
+    handleNewsletterSubmit,
+    handleMoodSubmit,
+    sendChat,
+    deleteChatMsg,
+    setChatOpen,
+    setChatInput,
+    setContactForm,
+    setNewsletterEmail,
+    chatBodyRef,
+    requestChatRoom
   } = props;
 
   return (
@@ -110,23 +146,23 @@ export default function HomeView(props) {
 
       <PlatformCards />
 
-      <StatsGrid stats={{
-        resources_count: publicStats?.resources_count || 0,
-        users_count: publicStats?.users_count || 0,
-        downloads_count: publicStats?.downloads_count || 0,
-        quiz_attempts: publicStats?.quiz_attempts || 0,
-      }} />
+      <StatsGrid
+        stats={{
+          resources_count: publicStats?.resources_count || 0,
+          users_count: publicStats?.users_count || 0,
+          downloads_count: publicStats?.downloads_count || 0,
+          quiz_attempts: publicStats?.quiz_attempts || 0
+        }}
+      />
 
       <ContinueLearningSection continueLearning={continueLearning} user={user} streak={streak} />
 
       <ContentTypeCards navigate={navigate} user={user} sections={sections} />
 
-      
       <ClassroomSection user={user} />
-      
       <TutorMarketplaceSection />
-      
-     <CommunitySection
+
+      <CommunitySection
         activity={communityActivity}
         weeklyChallenge={sections?.weekly_challenge}
         weeklyChallengeAnswer={weeklyChallengeAnswer}
@@ -143,14 +179,8 @@ export default function HomeView(props) {
       />
 
       <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
-
-      {/* FAQ accordion – displayed directly on homepage */}
       <FaqAccordion items={sections?.faq?.questions || []} />
-
-      {/* Blog section – from sections.blog.posts */}
       <BlogGrid posts={sections?.blog?.posts || []} />
-
-      {/* Team / Faculty section – from sections.team.members */}
       <TeamScroll members={sections?.team?.members || []} />
 
       <ContactSection
@@ -164,7 +194,7 @@ export default function HomeView(props) {
       <NewsletterForm
         email={newsletterEmail}
         status={newsletterStatus}
-        onChange={(e) => setNewsletterEmail(e.target.value)}
+        onChange={(event) => setNewsletterEmail(event.target.value)}
         onSubmit={handleNewsletterSubmit}
       />
 
