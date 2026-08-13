@@ -1,10 +1,11 @@
- /* pages/Quiz.jsx */
+/* pages/Quiz.jsx */
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useContentAccess } from '../hooks/useContentAccess';
+import { useSecurityUiLock } from '../hooks/useSecurityUiLock';
 import { useToast } from '../components/Toast/Toast';
 import {
   listQuizTopics,
@@ -34,6 +35,7 @@ export default function Quiz() {
   const { user, profile } = useAuth();
   const { isReady } = useRequireOnboarding();
   const access = useContentAccess();
+  const { locked, reason } = useSecurityUiLock();
   const { level, class_name, displayName } = useLevelFilter();
   const addToast = useToast();
 
@@ -167,7 +169,7 @@ export default function Quiz() {
   const navigateTo = (index) => setCurrentIndex(index);
 
   const selectAnswer = async (optionLetter) => {
-    if (userAnswers[currentIndex] !== null || answerSubmitting) return;
+    if (locked || userAnswers[currentIndex] !== null || answerSubmitting) return;
 
     setAnswerSubmitting(true);
 
@@ -210,7 +212,7 @@ export default function Quiz() {
   };
 
   const submitBlock = async () => {
-    if (!quizQuestions.length) return;
+    if (locked || !quizQuestions.length) return;
 
     const answersPayload = quizQuestions.map((question, index) => ({
       id: question.id,
@@ -244,8 +246,8 @@ export default function Quiz() {
   };
 
   const startBlock = async (blockNum) => {
-    if (!user) {
-      addToast('Please sign in.', 'error');
+    if (locked || !user) {
+      addToast(locked ? reason || 'Action temporarily disabled' : 'Please sign in.', 'error');
       return;
     }
 
@@ -288,9 +290,9 @@ export default function Quiz() {
 
       setQuizQuestions(data.questions);
 
-      const priorAnswers = (data.prior_answers || []).map((answer) => {
-        return answer ? { selected: answer.selected, correct: answer.correct } : null;
-      });
+      const priorAnswers = (data.prior_answers || []).map((answer) => (
+        answer ? { selected: answer.selected, correct: answer.correct } : null
+      ));
 
       setUserAnswers(
         priorAnswers.length === data.questions.length
@@ -337,7 +339,7 @@ export default function Quiz() {
       <div className="section quiz-page-section">
         <span className="sec-label">Assessments</span>
         <h1 className="section-title quiz-page-title">
-          Knowledge Quizzes {displayName ? `– ${displayName}` : ''}
+          Knowledge Quizzes<br />{displayName ? `– ${displayName}` : ''}
         </h1>
 
         {class_name && <p className="quiz-group-label">Current group: {class_name}</p>}
@@ -387,7 +389,7 @@ export default function Quiz() {
                       <p className="card-text">{topic.question_count} questions • {topic.total_blocks} blocks</p>
                     </div>
                     <div className="card-footer">
-                      <Button size="sm" onClick={() => openTopicBlocks(topic)}>Start</Button>
+                      <Button size="sm" onClick={() => openTopicBlocks(topic)} disabled={locked}>Start</Button>
                     </div>
                   </div>
                 );
@@ -433,9 +435,7 @@ export default function Quiz() {
                   <p className={`quiz-review-answer ${answer.isCorrect ? 'is-correct' : 'is-incorrect'}`}>
                     Your answer: {answer.userAnswerText}
                   </p>
-                  {!answer.isCorrect && (
-                    <p className="quiz-review-correct-answer">Correct: {answer.correctAnswerText}</p>
-                  )}
+                  {!answer.isCorrect && <p className="quiz-review-correct-answer">Correct: {answer.correctAnswerText}</p>}
                   {answer.explanation && <p className="quiz-review-explanation">{answer.explanation}</p>}
                 </div>
               ))}
@@ -443,7 +443,7 @@ export default function Quiz() {
 
             <div className="quiz-result-actions">
               {currentBlock + 1 < totalBlocks && (
-                <Button onClick={() => startBlock(currentBlock + 1)}>
+                <Button onClick={() => startBlock(currentBlock + 1)} disabled={locked}>
                   Next Block <Icon name="arrow-right" />
                 </Button>
               )}
@@ -534,7 +534,7 @@ export default function Quiz() {
                       key={option}
                       className={`${cls} quiz-option-btn`}
                       onClick={() => selectAnswer(option)}
-                      disabled={answered || answerSubmitting}
+                      disabled={answered || answerSubmitting || locked}
                     >
                       <span className="quiz-option-letter">{option}.</span>
                       <span>{quizQuestions[currentIndex][`option_${option.toLowerCase()}`]}</span>
@@ -547,11 +547,7 @@ export default function Quiz() {
             </div>
 
             <div className="quiz-nav-buttons">
-              <Button
-                variant="secondary"
-                onClick={() => { if (currentIndex > 0) navigateTo(currentIndex - 1); }}
-                disabled={currentIndex === 0}
-              >
+              <Button variant="secondary" onClick={() => { if (currentIndex > 0) navigateTo(currentIndex - 1); }} disabled={currentIndex === 0}>
                 <Icon name="arrow-left" /> Prev
               </Button>
 
@@ -561,14 +557,16 @@ export default function Quiz() {
                 ) : currentIndex < quizQuestions.length - 1 ? (
                   <Button onClick={() => navigateTo(currentIndex + 1)}>Next <Icon name="arrow-right" /></Button>
                 ) : allAnswered ? (
-                  <Button onClick={submitBlock}>Submit Block</Button>
+                  <Button onClick={submitBlock} disabled={locked}>Submit Block</Button>
                 ) : null
               )}
             </div>
           </div>
         ) : (
           <div className="quiz-blocks-page">
-            <h2 className="quiz-blocks-heading">{currentTopic}</h2>
+            <h2 className="quiz-blocks-heading">
+              {currentTopic}<br />
+            </h2>
             <p className="quiz-blocks-sub">{class_name ? `${class_name} – ` : ''}Select a block to start</p>
 
             {totalBlocks === 0 ? (
@@ -577,17 +575,17 @@ export default function Quiz() {
               <div className="quiz-blocks-grid">
                 {Array.from({ length: totalBlocks }).map((_, index) => {
                   const topicData = allTopics.find((topic) => topic.topic_name === currentTopic);
-                  const locked = topicData?.locked_blocks?.includes(index);
+                  const lockedBlock = topicData?.locked_blocks?.includes(index);
                   const completed = topicData?.completed_blocks?.includes(index);
 
                   return (
                     <button
                       key={index}
-                      className={`btn ${completed ? 'btn-primary' : locked ? 'btn-ghost' : 'btn-secondary'}`}
-                      disabled={locked}
+                      className={`btn ${completed ? 'btn-primary' : lockedBlock ? 'btn-ghost' : 'btn-secondary'}`}
+                      disabled={lockedBlock || locked}
                       onClick={() => startBlock(index)}
                     >
-                      {completed ? <Icon name="circle-check" /> : locked ? <Icon name="lock" /> : <Icon name="play" />}
+                      {completed ? <Icon name="circle-check" /> : lockedBlock ? <Icon name="lock" /> : <Icon name="play" />}
                       Block {index + 1}
                     </button>
                   );
@@ -618,4 +616,4 @@ export default function Quiz() {
       </div>
     </div>
   );
-}
+} 
