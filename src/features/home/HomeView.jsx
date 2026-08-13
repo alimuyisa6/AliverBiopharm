@@ -132,9 +132,7 @@ export default function HomeView(props) {
         <section className="section home-level-banner">
           <div className="home-level-banner-inner">
             <span className="sec-label">Your Level</span>
-            <h2 className="section-title home-level-title">
-              {activeLevelName}
-            </h2>
+            <h2 className="section-title home-level-title">{activeLevelName}</h2>
             {activeGroupName && (
               <p className="section-subtitle home-level-subtitle">
                 Currently studying <strong>{activeGroupName}</strong>
@@ -156,9 +154,7 @@ export default function HomeView(props) {
       />
 
       <ContinueLearningSection continueLearning={continueLearning} user={user} streak={streak} />
-
       <ContentTypeCards navigate={navigate} user={user} sections={sections} />
-
       <ClassroomSection user={user} />
       <TutorMarketplaceSection />
 
