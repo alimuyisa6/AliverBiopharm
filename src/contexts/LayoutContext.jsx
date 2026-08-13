@@ -20,8 +20,7 @@ function getKnownLevel() {
 function setKnownLevel(level) {
   try {
     if (level) localStorage.setItem(KNOWN_LEVEL_KEY, level);
-  } catch {
-  }
+  } catch {}
 }
 
 export function LayoutProvider({ children }) {
@@ -41,11 +40,7 @@ export function LayoutProvider({ children }) {
   }, [effectiveLevel]);
 
   useEffect(() => {
-    if (theme === 'dark') {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
+    document.body.classList.toggle('dark-mode', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 
@@ -61,9 +56,8 @@ export function LayoutProvider({ children }) {
     } else {
       setLoading(true);
     }
-    if (cachedSections) {
-      setSections(cachedSections);
-    }
+
+    if (cachedSections) setSections(cachedSections);
 
     Promise.allSettled([
       bootstrapPlatform(effectiveLevel),
@@ -71,15 +65,13 @@ export function LayoutProvider({ children }) {
     ])
       .then(([bootstrapResult, sectionsResult]) => {
         if (cancelled) return;
+
         if (bootstrapResult.status === 'fulfilled') {
           setBootstrap(bootstrapResult.value);
-        } else {
-          console.error('bootstrapPlatform failed', bootstrapResult.reason);
         }
+
         if (sectionsResult.status === 'fulfilled') {
           setSections(sectionsResult.value || {});
-        } else {
-          console.error('getAllSiteSections failed', sectionsResult.reason);
         }
       })
       .finally(() => {
@@ -92,11 +84,12 @@ export function LayoutProvider({ children }) {
   }, [effectiveLevel, activeGroupId]);
 
   const toggleTheme = useCallback(() => {
-    setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+    setTheme((current) => (current === 'light' ? 'dark' : 'light'));
   }, []);
 
   const handleSwitchClass = useCallback(async (groupId) => {
     setSwitching(true);
+
     try {
       await switchClass(groupId);
       await refresh();
@@ -108,12 +101,25 @@ export function LayoutProvider({ children }) {
   const value = useMemo(() => {
     if (!bootstrap) {
       return {
-        loading: true, bootstrap: null, logo: null, siteName: 'AliverBiopharm', navigation: [],
+        loading: true,
+        bootstrap: null,
+        logo: null,
+        siteName: 'AliverBiopharm',
+        navigation: [],
         footer: { quick_links: [], resource_links: [], community_links: [], social_links: {} },
-        groups: [], level: null, user, isAuthenticated: !!user,
-        colorTheme: {}, theme, toggleTheme, authLoading,
-        refreshUser: refresh, switchClass: handleSwitchClass, switching, activeGroupId,
-        sections,
+        groups: [],
+        level: null,
+        user,
+        isAuthenticated: !!user,
+        colorTheme: {},
+        theme,
+        toggleTheme,
+        authLoading,
+        refreshUser: refresh,
+        switchClass: handleSwitchClass,
+        switching,
+        activeGroupId,
+        sections
       };
     }
 
@@ -136,9 +142,21 @@ export function LayoutProvider({ children }) {
       switchClass: handleSwitchClass,
       switching,
       activeGroupId,
-      sections,
+      sections
     };
-  }, [bootstrap, loading, authLoading, user, theme, toggleTheme, refresh, handleSwitchClass, switching, activeGroupId, sections]);
+  }, [
+    bootstrap,
+    loading,
+    authLoading,
+    user,
+    theme,
+    toggleTheme,
+    refresh,
+    handleSwitchClass,
+    switching,
+    activeGroupId,
+    sections
+  ]);
 
   return (
     <LayoutContext.Provider value={value}>
@@ -149,6 +167,8 @@ export function LayoutProvider({ children }) {
 
 export function useLayout() {
   const ctx = useContext(LayoutContext);
+
   if (!ctx) throw new Error('useLayout must be used within LayoutProvider');
+
   return ctx;
 }
