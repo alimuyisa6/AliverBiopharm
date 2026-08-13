@@ -1,4 +1,5 @@
- import { Link } from 'react-router-dom';
+ /* components/Hero/Hero.jsx */
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLayout } from '../../contexts/LayoutContext';
 
@@ -19,17 +20,22 @@ export default function Hero() {
           <div className="hero-image-placeholder" />
         )}
       </div>
+
       <div className="hero-content">
         <h1 className="hero-title">
-          {isAuthenticated && levelName
-            ? `Master ${levelName}`
-            : 'Master Biology & Pharmacy'}
+          {isAuthenticated && levelName ? (
+            <>Master<br />{levelName}</>
+          ) : (
+            <>Master Biology<br />and Pharmacy</>
+          )}
         </h1>
+
         <p className="hero-subtitle">
           {isAuthenticated && groupName
             ? `Your ${groupName} learning journey continues. Access notes, quizzes, flashcards, and live classrooms tailored to your level.`
             : 'Structured notes, adaptive quizzes, spaced-repetition flashcards, and live classrooms — everything you need to excel in O-Level, A-Level, and Pharmacy.'}
         </p>
+
         <div className="hero-actions">
           {isAuthenticated ? (
             <>
@@ -43,6 +49,7 @@ export default function Hero() {
             </>
           )}
         </div>
+
         <div className="hero-border" />
       </div>
     </section>
