@@ -1,23 +1,23 @@
-/* pages/PdfLibraryPage.jsx */
+ /* pages/NotesPage.jsx */
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useContentAccess } from '../hooks/useContentAccess';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useLayout } from '../contexts/LayoutContext';
-import { getPdfsByLevel } from '../api/client';
+import { getNotesList } from '../api/client';
 import Icon from '../components/Icon/Icon';
-import Spinner from '../components/Spinner/Spinner';
 import Skeleton from '../components/Skeleton/Skeleton';
 import EmptyState from '../components/EmptyState/EmptyState';
 import Button from '../components/Button/Button';
 import Container from '../components/Container/Container';
 
-export default function PdfLibraryPage() {
+export default function NotesPage() {
+  const navigate = useNavigate();
   const access = useContentAccess();
   const { level, class_name, displayName } = useLevelFilter();
   const { bootstrap } = useLayout();
 
-  const [pdfs, setPdfs] = useState([]);
+  const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,22 +29,22 @@ export default function PdfLibraryPage() {
 
     let mounted = true;
 
-    loadPdfs(mounted);
+    loadContent(mounted);
 
     return () => {
       mounted = false;
     };
   }, [access.canAccess, level, class_name]);
 
-  async function loadPdfs(mounted = true) {
+  async function loadContent(mounted = true) {
     setLoading(true);
 
     try {
-      const data = await getPdfsByLevel();
+      const data = await getNotesList();
 
-      if (mounted) setPdfs(Array.isArray(data) ? data : []);
+      if (mounted) setNotes(Array.isArray(data) ? data : []);
     } catch {
-      if (mounted) setError('Failed to load PDF resources.');
+      if (mounted) setError('Failed to load notes.');
     } finally {
       if (mounted) setLoading(false);
     }
@@ -61,9 +61,9 @@ export default function PdfLibraryPage() {
     return (
       <Container>
         <EmptyState
-          image={getEmptyStateImage('pdfs')}
+          image={getEmptyStateImage('notes')}
           title="Access Restricted"
-          description="Your account does not have access to the PDF library."
+          description="Your account does not have access to study notes."
         />
       </Container>
     );
@@ -74,22 +74,22 @@ export default function PdfLibraryPage() {
 
   return (
     <Container>
-      <div className="pdf-library-page">
-        <span className="sec-label">PDF Library</span>
-        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-3)' }}>
-          PDF Resources{levelName ? ` – ${levelName}` : ''}
+      <div className="notes-page">
+        <span className="sec-label">Study Notes</span>
+        <h1 className="section-title notes-page-title">
+          Notes<br />{levelName ? `– ${levelName}` : ''}
         </h1>
 
-        {classLabel && <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>{classLabel}</p>}
+        {classLabel && <p className="notes-page-class">{classLabel}</p>}
 
         <nav className="breadcrumb">
           <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
           <Icon name="chevron-right" className="breadcrumb-sep" />
-          <span>PDF Library</span>
+          <span>Notes</span>
         </nav>
 
         {loading ? (
-          <div className="grid grid-cols-3">
+          <div className="notes-skeleton-grid">
             <Skeleton height={160} />
             <Skeleton height={160} />
             <Skeleton height={160} />
@@ -99,30 +99,32 @@ export default function PdfLibraryPage() {
             image={getEmptyStateImage('error')}
             title="Error"
             description={error}
-            action={<Button onClick={() => loadPdfs()}>Try Again</Button>}
+            action={<Button onClick={() => loadContent()}>Try Again</Button>}
           />
-        ) : pdfs.length === 0 ? (
+        ) : notes.length === 0 ? (
           <EmptyState
-            image={getEmptyStateImage('pdfs')}
-            title="No PDFs Available"
-            description={`No PDF resources found for ${classLabel || levelName || 'your level'}.`}
+            image={getEmptyStateImage('notes')}
+            title="No Notes Available"
+            description={`No study notes found for ${classLabel || levelName || 'your level'}.`}
           />
         ) : (
-          <div className="grid grid-cols-3">
-            {pdfs.map((pdf) => (
-              <div key={pdf.id} className="card">
-                <div className="card-image-placeholder" style={{ background: 'var(--warm-light)' }}>
-                  <Icon name="file-pdf" style={{ fontSize: '2rem', color: 'var(--error)' }} />
+          <div className="notes-grid">
+            {notes.map((note) => (
+              <div key={note.id} className="card notes-card">
+                <div className="card-image-placeholder">
+                  <Icon name="book-open" className="notes-card-icon" />
                 </div>
+
                 <div className="card-body">
-                  <h3 className="card-title">{pdf.title}</h3>
-                  {pdf.author && <p className="card-text">{pdf.author}</p>}
-                  {pdf.file_size && <span className="chip">{pdf.file_size}</span>}
+                  <h3 className="card-title">{note.title}</h3>
+                  {note.content_preview && <p className="card-text">{note.content_preview}</p>}
+                  {note.read_time && <span className="chip">{note.read_time}</span>}
                 </div>
+
                 <div className="card-footer">
-                  <a href={pdf.file_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
-                    <Icon name="download" /> Download
-                  </a>
+                  <Button size="sm" onClick={() => navigate(`/notes/read?id=${note.id}`)}>
+                    Read Note
+                  </Button>
                 </div>
               </div>
             ))}
