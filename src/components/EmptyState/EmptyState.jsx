@@ -9,9 +9,10 @@ export default function EmptyState({ icon, image, title, description, action }) 
       ) : icon ? (
         <Icon name={icon} className="empty-state-icon" />
       ) : null}
+
       {title && <h3 className="empty-state-title">{title}</h3>}
       {description && <p className="empty-state-text">{description}</p>}
-      {action}
+      {action && <div className="empty-state-action">{action}</div>}
     </div>
   );
 }
