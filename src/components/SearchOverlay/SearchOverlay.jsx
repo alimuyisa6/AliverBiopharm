@@ -1,4 +1,4 @@
-/* components/SearchOverlay/SearchOverlay.jsx */
+ /* components/SearchOverlay/SearchOverlay.jsx */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -66,15 +66,15 @@ export default function SearchOverlay({ open, onClose }) {
     }, 350);
   }, [activeGroupId]);
 
-  const handleChange = (event) => {
+  function handleChange(event) {
     setQuery(event.target.value);
     runSearch(event.target.value);
-  };
+  }
 
-  const handleResultClick = (url) => {
+  function handleResultClick(url) {
     onClose();
     navigate(url);
-  };
+  }
 
   const hasResults = results?.results?.length > 0;
 
@@ -104,10 +104,8 @@ export default function SearchOverlay({ open, onClose }) {
           </div>
 
           {loading && (
-            <div className="search-results">
-              <div style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
-                <div className="spinner" />
-              </div>
+            <div className="search-results search-loading">
+              <div className="spinner" />
             </div>
           )}
 
@@ -129,7 +127,7 @@ export default function SearchOverlay({ open, onClose }) {
                         onClick={() => handleResultClick(category.path(item))}
                       >
                         <Icon name={category.icon === 'dna' ? 'microscope' : category.icon} className="search-result-icon" />
-                        <div>
+                        <div className="search-result-content">
                           <div className="search-result-title">{item.title}</div>
                           {item.preview && <div className="search-result-meta">{item.preview}</div>}
                         </div>
@@ -150,4 +148,4 @@ export default function SearchOverlay({ open, onClose }) {
       )}
     </AnimatePresence>
   );
-} 
+}
