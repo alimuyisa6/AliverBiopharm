@@ -1,12 +1,16 @@
- /* pages/ClassroomRoom.jsx */
+/* pages/ClassroomRoom.jsx */
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import {
-  joinClassroom, leaveClassroom, getClassroomRoom,
-  getClassroomMessages, getClassroomParticipants,
-  sendClassroomMessage, raiseHand,
+  joinClassroom,
+  leaveClassroom,
+  getClassroomRoom,
+  getClassroomMessages,
+  getClassroomParticipants,
+  sendClassroomMessage,
+  raiseHand
 } from '../api/client';
 import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
@@ -53,76 +57,87 @@ export default function ClassroomRoom() {
     }
   }, [messages]);
 
-  const doJoinRoom = async () => {
-    try { await joinClassroom(roomId); } catch {}
-  };
+  async function doJoinRoom() {
+    try {
+      await joinClassroom(roomId);
+    } catch {}
+  }
 
-  const leaveRoomSilent = async () => {
-    try { await leaveClassroom(roomId); } catch {}
-  };
+  async function leaveRoomSilent() {
+    try {
+      await leaveClassroom(roomId);
+    } catch {}
+  }
 
-  const fetchRoom = async () => {
+  async function fetchRoom() {
     try {
       const data = await getClassroomRoom(roomId);
+
       setRoom(data);
       setLoading(false);
     } catch {
       setError('Failed to load room');
       setLoading(false);
     }
-  };
+  }
 
-  const fetchMessages = async () => {
+  async function fetchMessages() {
     try {
       const data = await getClassroomMessages(roomId);
+
       setMessages(data || []);
     } catch {}
-  };
+  }
 
-  const fetchParticipants = async () => {
+  async function fetchParticipants() {
     try {
       const data = await getClassroomParticipants(roomId);
+
       setParticipants(data || []);
     } catch {}
-  };
+  }
 
-  const handleSendMessage = async () => {
+  async function handleSendMessage() {
     if (!chatInput.trim()) return;
+
     const text = chatInput.trim();
+
     setChatInput('');
+
     try {
       await sendClassroomMessage(roomId, text);
       fetchMessages();
     } catch {}
-  };
+  }
 
-  const handleRaiseHand = async () => {
+  async function handleRaiseHand() {
     try {
       await raiseHand(roomId, !handRaised);
-      setHandRaised(!handRaised);
+      setHandRaised((value) => !value);
     } catch {}
-  };
+  }
 
-  const handleLeaveRoom = async () => {
+  async function handleLeaveRoom() {
     try {
       await leaveClassroom(roomId);
-      navigate('/classroom');
     } catch {
+    } finally {
       navigate('/classroom');
     }
-  };
+  }
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  function handleKeyDown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       handleSendMessage();
     }
-  };
+  }
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
-    const comp = uiComponents.find(c => c.component_key === `empty_state_${key}`);
-    return comp?.properties?.image_url || null;
+    const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
+
+    return component?.properties?.image_url || null;
   }
 
   if (loading) {
@@ -135,7 +150,7 @@ export default function ClassroomRoom() {
 
   if (error || !room) {
     return (
-      <div className="section quiz-blocks-page">
+      <div className="section classroom-room-error">
         <EmptyState
           image={getEmptyStateImage('classrooms')}
           title="Room Not Found"
@@ -159,14 +174,18 @@ export default function ClassroomRoom() {
         <Button variant="ghost" size="sm" icon onClick={handleLeaveRoom}>
           <Icon name="arrow-left" />
         </Button>
+
         <div className="classroom-room-header-info">
-          <h2 className="classroom-room-header-title">{room.title}</h2>
-          <div className="classroom-room-header-chips">
-            {room.topic_name && <span className="chip classroom-chip-topic">{room.topic_name}</span>}
-            {roomClass && <span className="chip classroom-chip-class">{roomClass}</span>}
-            {levelName && <span className="chip classroom-chip-level-alt">{levelName}</span>}
-          </div>
+          <h2 className="classroom-room-header-title">
+            {room.title}<br />
+            <span className="classroom-room-header-sub">
+              {room.topic_name && <span className="chip classroom-chip-topic">{room.topic_name}</span>}
+              {roomClass && <span className="chip classroom-chip-class">{roomClass}</span>}
+              {levelName && <span className="chip classroom-chip-level-alt">{levelName}</span>}
+            </span>
+          </h2>
         </div>
+
         <div className="classroom-room-live-indicator">
           <span className="status-dot status-dot-success" />
           <span className="classroom-room-live-label">Live</span>
@@ -176,50 +195,52 @@ export default function ClassroomRoom() {
       <div className="classroom-room-layout">
         <div className="classroom-chat-column">
           <div className="classroom-chat-body" ref={chatBodyRef}>
-            {messages.map(msg => (
-              <div key={msg.id} className="classroom-message">
-                {msg.message_type === 'system' ? (
+            {messages.map((message) => (
+              <div key={message.id} className="classroom-message">
+                {message.message_type === 'system' ? (
                   <div className="classroom-message-system">
                     <Icon name="circle-info" />
-                    {msg.content}
+                    {message.content}
                   </div>
-                ) : msg.message_type === 'resource' ? (
+                ) : message.message_type === 'resource' ? (
                   <div className="card classroom-message-resource">
                     <div className="classroom-message-resource-header">
-                      <strong>{msg.sender_name || 'Tutor'}</strong>
+                      <strong>{message.sender_name || 'Tutor'}</strong>
                       <span className="classroom-message-resource-time">
-                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
+
                     <div className="classroom-message-resource-file">
                       <Icon name="file-pdf" />
-                      <a href={msg.file_url} target="_blank" rel="noreferrer" download={msg.file_name}>
-                        {msg.file_name}
+                      <a href={message.file_url} target="_blank" rel="noreferrer" download={message.file_name}>
+                        {message.file_name}
                       </a>
                     </div>
                   </div>
                 ) : (
-                  <div className={`classroom-message-row${msg.user_id === user?.id ? ' is-own' : ''}`}>
+                  <div className={`classroom-message-row${message.user_id === user?.id ? ' is-own' : ''}`}>
                     <div className="classroom-message-bubble">
                       <div className="classroom-message-bubble-header">
-                        {msg.sender_name || 'User'}
+                        {message.sender_name || 'User'}
                         <span className="classroom-message-bubble-time">
-                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <p className="classroom-message-bubble-text">{msg.content}</p>
+                      <p className="classroom-message-bubble-text">{message.content}</p>
                     </div>
                   </div>
                 )}
               </div>
             ))}
           </div>
+
           <div className="classroom-chat-input-row">
             <textarea
               className="form-textarea classroom-chat-textarea"
               value={chatInput}
-              onChange={e => setChatInput(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onChange={(event) => setChatInput(event.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Type a message..."
               rows={1}
               maxLength={1000}
@@ -235,19 +256,20 @@ export default function ClassroomRoom() {
             <Icon name="users" />
             Participants ({participants.length})
           </h4>
+
           <div className="classroom-participants-list">
-            {participants.map(p => (
-              <div key={p.id || p.user_id} className="classroom-participant-row">
+            {participants.map((participant) => (
+              <div key={participant.id || participant.user_id} className="classroom-participant-row">
                 <Icon
-                  name={p.role === 'tutor' ? 'user-graduate' : p.role === 'admin' ? 'shield-halved' : 'user'}
+                  name={participant.role === 'tutor' ? 'user-graduate' : participant.role === 'admin' ? 'shield-halved' : 'user'}
                   className="classroom-participant-role-icon"
                 />
                 <div>
-                  <div className="classroom-participant-name">{p.user_name || 'User'}</div>
-                  <div className="classroom-participant-role">{p.role}</div>
+                  <div className="classroom-participant-name">{participant.user_name || 'User'}</div>
+                  <div className="classroom-participant-role">{participant.role}</div>
                 </div>
-                {p.is_muted && <Icon name="microphone-slash" className="classroom-participant-status-icon icon-muted" />}
-                {p.hand_raised && <Icon name="hand" className="classroom-participant-status-icon icon-handraised" />}
+                {participant.is_muted && <Icon name="microphone-slash" className="classroom-participant-status-icon icon-muted" />}
+                {participant.hand_raised && <Icon name="hand" className="classroom-participant-status-icon icon-handraised" />}
               </div>
             ))}
           </div>
@@ -256,6 +278,7 @@ export default function ClassroomRoom() {
             <Icon name="circle-info" />
             Room Info
           </h4>
+
           <div className="classroom-room-info-list">
             {room.level && <p><strong>Level:</strong> {room.level}</p>}
             {roomClass && <p><strong>Class:</strong> {roomClass}</p>}
@@ -267,7 +290,7 @@ export default function ClassroomRoom() {
       </div>
 
       <div className="classroom-room-footer">
-        <Button variant={isMuted ? 'ghost' : 'primary'} size="sm" disabled title="Mute controlled by tutor">
+        <Button variant={isMuted ? 'ghost' : 'primary'} size="sm" disabled>
           <Icon name={isMuted ? 'microphone-slash' : 'microphone'} />
           {isMuted ? 'Muted' : 'Unmuted'}
         </Button>
@@ -281,4 +304,4 @@ export default function ClassroomRoom() {
       </div>
     </div>
   );
-}
+} 
