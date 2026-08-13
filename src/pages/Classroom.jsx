@@ -1,4 +1,4 @@
- /* pages/Classroom.jsx */
+/* pages/Classroom.jsx */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -63,7 +63,7 @@ export default function Classroom() {
     fetchRooms();
   }, [isReady, access.canAccess, access.isPending, activeUnitId]);
 
-  const fetchRooms = async () => {
+  async function fetchRooms() {
     setLoading(true);
     setError(null);
 
@@ -76,7 +76,7 @@ export default function Classroom() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
@@ -104,7 +104,7 @@ export default function Classroom() {
       <div className="section classroom-list-section">
         <span className="sec-label">Live Learning</span>
         <h1 className="section-title classroom-page-title">
-          Classrooms{levelName ? ` – ${levelName}` : ''}
+          Classrooms<br />{levelName ? `– ${levelName}` : ''}
         </h1>
 
         {classLabel && <p className="classroom-class-label">{classLabel}</p>}
@@ -133,7 +133,7 @@ export default function Classroom() {
           <EmptyState
             image={getEmptyStateImage('classrooms')}
             title="No Classrooms Available"
-            description={`No active rooms for ${classLabel || levelName || 'your level'}. Check back later.`}
+            description={`No active rooms for ${classLabel || levelName || 'your level'}.`}
             action={
               <Button onClick={() => navigate('/tutor/apply')}>
                 <Icon name="user-pen" /> Become a Tutor
@@ -186,7 +186,8 @@ export default function Classroom() {
                       </Button>
                     ) : room.status === 'upcoming' ? (
                       <Button size="sm" variant="secondary" disabled>
-                        <Icon name="clock" /> {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <Icon name="clock" />
+                        {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </Button>
                     ) : (
                       <Button size="sm" variant="ghost" disabled>
@@ -202,4 +203,4 @@ export default function Classroom() {
       </div>
     </div>
   );
-}
+} 
