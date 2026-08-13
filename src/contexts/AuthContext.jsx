@@ -1,6 +1,6 @@
  /* contexts/AuthContext.jsx */
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getUser, signin, signout } from '../api/client';
 import Spinner from '../components/Spinner/Spinner';
 
@@ -34,7 +34,6 @@ export function AuthProvider({ children }) {
           ...data.user,
           profile: data.user.profile || DEFAULT_PROFILE
         });
-
         lastActivityRef.current = Date.now();
       } else {
         setUser(null);
@@ -65,7 +64,6 @@ export function AuthProvider({ children }) {
 
     const resetTimer = () => {
       lastActivityRef.current = Date.now();
-
       clearTimeout(inactivityRef.current);
 
       inactivityRef.current = setTimeout(() => {
@@ -139,32 +137,11 @@ export function ProtectedRoute({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const needsRedirect =
-    !user ||
-    (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') ||
-    (user.profile?.role === 'teacher' &&
-      !user.profile?.is_approved_teacher &&
-      location.pathname !== '/onboarding');
-
   useEffect(() => {
     if (loading) return;
 
     if (!user) {
       navigate('/login', { replace: true, state: { from: location } });
-      return;
-    }
-
-    if (!user.profile?.onboarding_completed && location.pathname !== '/onboarding') {
-      navigate('/onboarding', { replace: true });
-      return;
-    }
-
-    if (
-      user.profile?.role === 'teacher' &&
-      !user.profile?.is_approved_teacher &&
-      location.pathname !== '/onboarding'
-    ) {
-      navigate('/onboarding', { replace: true });
     }
   }, [user, loading, location.pathname, navigate]);
 
@@ -176,7 +153,7 @@ export function ProtectedRoute({ children }) {
     );
   }
 
-  if (needsRedirect) return null;
+  if (!user) return null;
 
   return children;
 }
