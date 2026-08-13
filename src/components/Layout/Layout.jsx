@@ -1,16 +1,18 @@
- import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+ /* components/Layout/Layout.jsx */
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../Icon/Icon';
 import { useLayout } from '../../contexts/LayoutContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { signout } from '../../api/client';
-import { getRequest } from '../../api/client';                     // ← added import
+import { getRequest } from '../../api/client';
 import SearchOverlay from '../SearchOverlay/SearchOverlay';
 import ClassSwitcher from '../ClassSwitcher/ClassSwitcher';
 import AdminLauncher from '../AdminLauncher';
 
 const EXCLUDED_PATHS = ['/login', '/register'];
+const ROOM_PATH_PREFIX = '/classroom/';
 const SCROLL_STORAGE_KEY = 'scroll-positions';
 
 function loadScrollMap() {
@@ -24,8 +26,7 @@ function loadScrollMap() {
 function persistScrollMap(map) {
   try {
     sessionStorage.setItem(SCROLL_STORAGE_KEY, JSON.stringify([...map.entries()]));
-  } catch {
-  }
+  } catch {}
 }
 
 export default function Layout({ children, showFooter = true }) {
@@ -40,9 +41,26 @@ export default function Layout({ children, showFooter = true }) {
   const location = useLocation();
   const navigate = useNavigate();
   const navigationType = useNavigationType();
-  const { logo, siteName, navigation, footer, groups, level, theme, toggleTheme, isAuthenticated, refreshUser, activeGroupId } = useLayout();
+
+  const {
+    logo,
+    siteName,
+    navigation,
+    footer,
+    groups,
+    level,
+    theme,
+    toggleTheme,
+    isAuthenticated,
+    refreshUser,
+    activeGroupId
+  } = useLayout();
+
   const { user } = useAuth();
+
   const isAuthPage = EXCLUDED_PATHS.includes(location.pathname);
+  const isRoomPage = location.pathname.startsWith(ROOM_PATH_PREFIX);
+  const hideFooter = isAuthPage || isRoomPage;
 
   const scrollPositions = useRef(loadScrollMap());
   const persistTimeout = useRef(null);
@@ -58,10 +76,13 @@ export default function Layout({ children, showFooter = true }) {
     const handler = () => {
       setScrolled(window.scrollY > 10);
       scrollPositions.current.set(routeKey, window.scrollY);
+
       clearTimeout(persistTimeout.current);
       persistTimeout.current = setTimeout(() => persistScrollMap(scrollPositions.current), 200);
     };
+
     window.addEventListener('scroll', handler, { passive: true });
+
     return () => window.removeEventListener('scroll', handler);
   }, [routeKey]);
 
@@ -73,8 +94,11 @@ export default function Layout({ children, showFooter = true }) {
         window.scrollTo(0, 0);
       }
     };
+
     restore();
+
     const raf = requestAnimationFrame(restore);
+
     return () => cancelAnimationFrame(raf);
   }, [routeKey, navigationType]);
 
@@ -85,31 +109,41 @@ export default function Layout({ children, showFooter = true }) {
 
   const handleSignout = async () => {
     setSigningOut(true);
+
     try {
       await signout();
       await refreshUser();
       navigate('/');
-    } catch {} finally {
+    } catch {
+    } finally {
       setSigningOut(false);
     }
   };
 
-  const groupedNav = groups.reduce((acc, g) => {
-    const existing = acc.find((item) => item.level_id === g.level_id);
+  const groupedNav = groups.reduce((acc, group) => {
+    const existing = acc.find((item) => item.level_id === group.level_id);
+
     if (existing) {
-      existing.classes.push(g);
+      existing.classes.push(group);
     } else {
-      acc.push({ level_id: g.level_id, level_name: g.level_id, classes: [g] });
+      acc.push({
+        level_id: group.level_id,
+        level_name: group.level_id,
+        classes: [group]
+      });
     }
+
     return acc;
   }, []);
 
   const fetchNavNotes = async (groupId) => {
     setLoadingNavNotes(true);
+
     try {
       const data = await getRequest('notes', 'nav_list', { group_id: groupId });
-      setNavNotes(prev => ({ ...prev, [groupId]: data }));
-    } catch (e) {
+
+      setNavNotes((prev) => ({ ...prev, [groupId]: data }));
+    } catch {
     } finally {
       setLoadingNavNotes(false);
     }
@@ -203,9 +237,11 @@ export default function Layout({ children, showFooter = true }) {
                       className="mobile-nav-accordion-trigger"
                       onClick={() => {
                         const nextOpen = accordionOpen === group.level_id ? null : group.level_id;
+
                         setAccordionOpen(nextOpen);
+
                         if (nextOpen) {
-                          group.classes.forEach(cls => {
+                          group.classes.forEach((cls) => {
                             if (!navNotes[cls.id]) fetchNavNotes(cls.id);
                           });
                         }
@@ -214,16 +250,18 @@ export default function Layout({ children, showFooter = true }) {
                       <span>{group.level_name}</span>
                       <Icon name={accordionOpen === group.level_id ? 'chevron-down' : 'chevron-right'} />
                     </button>
+
                     <div className={`mobile-nav-accordion-content ${accordionOpen === group.level_id ? 'open' : ''}`}>
                       {group.classes.map((cls) => (
                         <div key={cls.id} className="mobile-nav-class-group">
                           <Link to={`/class/${cls.id}`} className="mobile-nav-sub-link mobile-nav-class-link" onClick={() => setMobileOpen(false)}>
                             {cls.name}
                           </Link>
+
                           {navNotes[cls.id] ? (
-                            navNotes[cls.id].map(unit => (
+                            navNotes[cls.id].map((unit) => (
                               <div key={unit.unit_id} className="mobile-nav-unit-group">
-                                {unit.notes.map(note => (
+                                {unit.notes.map((note) => (
                                   <Link
                                     key={note.id}
                                     to={`/notes/read?id=${note.id}`}
@@ -285,7 +323,7 @@ export default function Layout({ children, showFooter = true }) {
         {children}
       </motion.main>
 
-      {!isAuthPage && showFooter && (
+      {!hideFooter && showFooter && (
         <footer className="footer">
           <div className="footer-inner">
             <div className="footer-brand">
@@ -293,6 +331,7 @@ export default function Layout({ children, showFooter = true }) {
                 {logo ? <img src={logo} alt={siteName} className="footer-logo" /> : siteName}
               </Link>
               <p className="footer-tagline">Advancing biology and pharmacy education for every learner.</p>
+
               {footer.social_links && Object.keys(footer.social_links).length > 0 && (
                 <div className="footer-social">
                   {Object.entries(footer.social_links).map(([platform, url]) => (
@@ -311,37 +350,41 @@ export default function Layout({ children, showFooter = true }) {
                 </div>
               )}
             </div>
+
             {footer.quick_links?.length > 0 && (
               <div>
                 <h4 className="footer-heading">Quick Links</h4>
                 <div className="footer-links">
-                  {footer.quick_links.map((item, i) => (
-                    <Link key={i} to={item.path} className="footer-link">{item.label}</Link>
+                  {footer.quick_links.map((item, index) => (
+                    <Link key={index} to={item.path} className="footer-link">{item.label}</Link>
                   ))}
                 </div>
               </div>
             )}
+
             {footer.resource_links?.length > 0 && (
               <div>
                 <h4 className="footer-heading">Resources</h4>
                 <div className="footer-links">
-                  {footer.resource_links.map((item, i) => (
-                    <Link key={i} to={item.path} className="footer-link">{item.label}</Link>
+                  {footer.resource_links.map((item, index) => (
+                    <Link key={index} to={item.path} className="footer-link">{item.label}</Link>
                   ))}
                 </div>
               </div>
             )}
+
             {footer.community_links?.length > 0 && (
               <div>
                 <h4 className="footer-heading">Community</h4>
                 <div className="footer-links">
-                  {footer.community_links.map((item, i) => (
-                    <Link key={i} to={item.path} className="footer-link">{item.label}</Link>
+                  {footer.community_links.map((item, index) => (
+                    <Link key={index} to={item.path} className="footer-link">{item.label}</Link>
                   ))}
                 </div>
               </div>
             )}
           </div>
+
           <div className="footer-bottom">
             <p>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</p>
             <nav className="footer-bottom-nav">
