@@ -1,6 +1,6 @@
  /* components/FileUpload/FileUpload.jsx */
 import { useState, useRef } from 'react';
-import { uploadUserFile, deleteUserFile } from '../../api/client';
+import { uploadFile, deleteUserFile } from '../../api/client';
 import Icon from '../Icon/Icon';
 import Button from '../Button/Button';
 import Spinner from '../Spinner/Spinner';
@@ -11,8 +11,9 @@ export default function FileUpload({ category, onUploadComplete }) {
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
+  async function handleUpload(event) {
+    const file = event.target.files[0];
+
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
@@ -21,6 +22,7 @@ export default function FileUpload({ category, onUploadComplete }) {
     }
 
     const formData = new FormData();
+
     formData.append('file', file);
     formData.append('category', category || 'general');
 
@@ -28,37 +30,39 @@ export default function FileUpload({ category, onUploadComplete }) {
     setError('');
 
     try {
-      const result = await uploadUserFile(formData);
+      const result = await uploadFile(formData);
+
       if (result.success) {
-        setFiles(prev => [result.file, ...prev]);
+        setFiles((prev) => [result.file, ...prev]);
         if (onUploadComplete) onUploadComplete(result.file);
-        e.target.value = '';
+        event.target.value = '';
       }
     } catch (err) {
       setError(err.message || 'Upload failed');
     } finally {
       setUploading(false);
     }
-  };
+  }
 
-  const handleDelete = async (fileId) => {
+  async function handleDelete(fileId) {
     try {
       await deleteUserFile(fileId);
-      setFiles(prev => prev.filter(f => f.id !== fileId));
-    } catch (err) {
+
+      setFiles((prev) => prev.filter((file) => file.id !== fileId));
+    } catch {
       setError('Failed to delete file');
     }
-  };
+  }
 
-  const getFileIcon = (mimeType) => {
+  function getFileIcon(mimeType) {
     if (mimeType === 'application/pdf') return 'file-pdf';
     if (mimeType && mimeType.startsWith('image/')) return 'image';
     return 'file-lines';
-  };
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+    <div className="file-upload">
+      <div className="file-upload-actions">
         <Button
           variant="secondary"
           size="sm"
@@ -68,27 +72,32 @@ export default function FileUpload({ category, onUploadComplete }) {
         >
           Upload File
         </Button>
+
         <input
           ref={fileInputRef}
           type="file"
           accept=".pdf,image/*"
           onChange={handleUpload}
           disabled={uploading}
-          style={{ display: 'none' }}
+          className="file-upload-input"
         />
+
         {uploading && <Spinner size="sm" />}
         {error && <span className="form-error">{error}</span>}
       </div>
 
       {files.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-          {files.map((f) => (
-            <div key={f.id} className="card" style={{ padding: 'var(--space-3) var(--space-4)', flexDirection: 'row', alignItems: 'center', gap: 'var(--space-3)' }}>
-              <Icon name={getFileIcon(f.file_mime_type)} style={{ color: f.file_mime_type === 'application/pdf' ? 'var(--error)' : 'var(--primary)', fontSize: '1.25rem' }} />
-              <span style={{ flex: 1, fontSize: 'var(--text-sm)', color: 'var(--text-main)' }}>{f.file_name}</span>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{(f.file_size / 1024).toFixed(0)} KB</span>
-              <Button variant="ghost" size="sm" icon onClick={() => handleDelete(f.id)}>
-                <Icon name="trash" style={{ color: 'var(--error)' }} />
+        <div className="file-upload-list">
+          {files.map((file) => (
+            <div key={file.id} className="card file-upload-card">
+              <Icon
+                name={getFileIcon(file.file_mime_type)}
+                className={file.file_mime_type === 'application/pdf' ? 'file-upload-icon pdf' : 'file-upload-icon'}
+              />
+              <span className="file-upload-name">{file.file_name}</span>
+              <span className="file-upload-size">{(file.file_size / 1024).toFixed(0)} KB</span>
+              <Button variant="ghost" size="sm" icon onClick={() => handleDelete(file.id)}>
+                <Icon name="trash" />
               </Button>
             </div>
           ))}
