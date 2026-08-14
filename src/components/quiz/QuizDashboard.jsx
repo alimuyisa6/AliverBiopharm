@@ -1,4 +1,4 @@
-/* features/quiz/QuizDashboard.jsx */
+ /* features/quiz/QuizDashboard.jsx */
 import { useEffect, useState } from 'react';
 import { getUserDashboard } from '../../api/cachedClient';
 import Icon from '../../components/Icon/Icon';
@@ -22,7 +22,7 @@ export default function QuizDashboard({ user, level, class_name }) {
     );
   }
 
-  const { platform, quiz } = summary;
+  const { platform, quiz, achievements } = summary;
   const levelName = level?.display_name || level?.id || '';
   const classLabel = class_name || '';
 
@@ -61,7 +61,7 @@ export default function QuizDashboard({ user, level, class_name }) {
 
         <div className="stat-card">
           <Icon name="medal" className="stat-icon stat-icon-accent" />
-          <div className="stat-value">{summary.achievements.earned_count}</div>
+          <div className="stat-value">{achievements?.earned_count || 0}</div>
           <div className="stat-label">Badges</div>
         </div>
 
@@ -79,4 +79,4 @@ export default function QuizDashboard({ user, level, class_name }) {
       </div>
     </div>
   );
-} 
+}
