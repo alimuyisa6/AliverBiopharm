@@ -1,4 +1,4 @@
-/* styles/notification.css */
+ /* styles/notification.css */
 .notification-bell {
   position: relative;
   display: inline-block;
@@ -25,8 +25,109 @@
 .notification-dropdown {
   right: 0;
   left: auto;
+  width: 360px;
+  max-width: calc(100vw - var(--space-6));
+  background:
+    linear-gradient(180deg, rgba(100, 116, 139, 0.05), rgba(255, 255, 255, 0)),
+    var(--bg-card);
 }
 
-.notification-unread {
-  background: var(--primary-light);
+.notification-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.notification-dropdown-title {
+  font-weight: var(--weight-semibold);
+  color: var(--text-main);
+}
+
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  gap: var(--space-3);
+  color: var(--text-dim);
+}
+
+.notification-empty-icon {
+  font-size: 2rem;
+  color: var(--text-muted);
+}
+
+.notification-item {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-default);
+  cursor: pointer;
+  transition: background var(--ease-fast);
+  background: rgba(100, 116, 139, 0.05);
+}
+
+.notification-item:hover {
+  background: var(--bg-card-hover);
+}
+
+.notification-item.unread,
+.notification-item.notification-unread {
+  background:
+    linear-gradient(90deg, rgba(59, 130, 246, 0.055), rgba(255, 255, 255, 0.4)),
+    var(--bg-card);
+}
+
+.notification-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.notification-item-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notification-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-item-title {
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  color: var(--text-main);
+}
+
+.notification-item-body {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+.notification-item-time {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.notification-dismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: var(--space-1);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.notification-dismiss:hover {
+  color: var(--error);
 }
