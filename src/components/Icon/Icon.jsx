@@ -1,4 +1,4 @@
- /* components/Icon/Icon.jsx */
+ /* src/components/Icon/Icon.jsx */
 import { createElement, memo } from 'react';
 import {
   FaBell,
@@ -109,7 +109,6 @@ import {
   FaThumbsUp,
   FaShieldHalved,
   FaPlay,
-  FaSearch,
   FaXTwitter,
   FaLinkedinIn,
   FaInstagram,
@@ -232,7 +231,7 @@ const ICON_MAP = {
   flag: FaFlag,
   stop: FaStop,
   'check-double': FaCheckDouble,
-  search: FaSearch,
+  search: FaMagnifyingGlass,
   'x-twitter': FaXTwitter,
   linkedin: FaLinkedinIn,
   instagram: FaInstagram,
