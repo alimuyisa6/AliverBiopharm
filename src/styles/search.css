@@ -1,11 +1,13 @@
-/* styles/search.css */
+ /* styles/search.css */
 .search-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: var(--z-modal);
-  background: var(--bg-card);
+  background:
+    linear-gradient(180deg, rgba(100, 116, 139, 0.08), rgba(255, 255, 255, 0)),
+    var(--bg-card);
   border-bottom: 1px solid var(--border-default);
   box-shadow: var(--shadow-xl);
   padding: var(--space-6);
@@ -62,6 +64,13 @@
   overflow-y: auto;
 }
 
+.search-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10);
+}
+
 .search-result-group {
   margin-bottom: var(--space-4);
 }
@@ -86,7 +95,7 @@
   cursor: pointer;
   transition: background var(--ease-fast);
   border: none;
-  background: none;
+  background: rgba(255, 255, 255, 0.08);
   width: 100%;
   text-align: left;
   font-family: inherit;
@@ -101,6 +110,11 @@
   font-size: 1.25rem;
   color: var(--primary);
   flex-shrink: 0;
+}
+
+.search-result-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .search-result-title {
