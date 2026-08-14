@@ -14,7 +14,7 @@ import Button from './Button/Button';
 import ProgressBar from './ProgressBar/ProgressBar';
 import Spinner from './Spinner/Spinner';
 import { useToast } from './Toast/Toast';
-import { useSecurityUiLock } from '../../hooks/useSecurityUiLock';
+import { useSecurityUiLock } from '../hooks/useSecurityUiLock';
 
 const MODES = [
   { value: 'flip', icon: 'rotate', label: 'Flip' },
