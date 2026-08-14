@@ -63,7 +63,6 @@ export default function TutorMarketplaceSection() {
               <TutorCard key={tutor.id} tutor={tutor} user={user} onContact={handleContact} />
             ))}
           </div>
-
           <div className="tutor-section-footer">
             <Link to="/tutors" className="btn btn-primary">Browse All Tutors</Link>
           </div>
