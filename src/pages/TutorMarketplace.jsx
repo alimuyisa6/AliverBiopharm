@@ -1,6 +1,6 @@
  /* pages/TutorMarketplace.jsx */
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { listTutorsCached } from '../api/cachedClient';
@@ -15,7 +15,6 @@ import { useLayout } from '../contexts/LayoutContext';
 
 export default function TutorMarketplace() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { bootstrap } = useLayout();
   const addToast = useToast();
   const { level, showAll, class_name } = useLevelFilter();
@@ -69,13 +68,6 @@ export default function TutorMarketplace() {
     }
   };
 
-  function getEmptyStateImage(key) {
-    const uiComponents = bootstrap?.ui_components || [];
-    const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
-
-    return component?.properties?.image_url || null;
-  }
-
   const levelName = showAll ? null : level;
   const classLabel = class_name || '';
 
@@ -104,7 +96,7 @@ export default function TutorMarketplace() {
               onChange={(event) => setSearch(event.target.value)}
               className="input"
             />
-            <Icon name="search" className="tutor-search-icon" />
+            <Icon name="magnifying-glass" className="tutor-search-icon" />
           </div>
 
           <p className="tutor-results-count">
@@ -118,7 +110,6 @@ export default function TutorMarketplace() {
           </div>
         ) : tutors.length === 0 ? (
           <EmptyState
-            image={getEmptyStateImage('tutors')}
             title="No Tutors Found"
             description="No tutors match your search criteria."
             action={<Button variant="secondary" onClick={() => setSearch('')}>Clear Search</Button>}
