@@ -7,7 +7,6 @@ import Input from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
-import { useToast } from '../components/Toast/Toast';
 
 const TURNSTILE_SITE_KEY = '0x4AAAAAADknPpI_XcH1KfPe';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -42,7 +41,6 @@ export default function Auth() {
   const location = useLocation();
   const navigate = useNavigate();
   const mode = location.pathname === '/register' ? 'register' : 'login';
-  const addToast = useToast();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -154,7 +152,7 @@ export default function Auth() {
     };
   }, [captchaSlot, renderWidget]);
 
-  const getTurnstileToken = () => {
+  function getTurnstileToken() {
     if (!window.turnstile || !widgetIdRef.current || !widgetReadyRef.current) return '';
 
     try {
@@ -162,9 +160,9 @@ export default function Auth() {
     } catch {
       return '';
     }
-  };
+  }
 
-  const resetTurnstile = () => {
+  function resetTurnstile() {
     if (!window.turnstile || !widgetIdRef.current) return;
 
     try {
@@ -174,7 +172,7 @@ export default function Auth() {
       widgetReadyRef.current = false;
       if (captchaSlot) renderWidget(captchaSlot);
     }
-  };
+  }
 
   async function handleLogin(event) {
     event.preventDefault();
@@ -314,43 +312,43 @@ export default function Auth() {
     }
   }
 
-  const progressPct = () => {
+  function progressPct() {
     if (onboardingStep === 1) return 50;
     if (onboardingStep === 2) return 100;
     return 0;
-  };
+  }
 
-  const switchMode = (nextMode) => {
+  function switchMode(nextMode) {
     navigate(nextMode === 'register' ? '/register' : '/login', {
       state: location.state,
       replace: true
     });
-  };
+  }
 
   return (
     <div className="auth-page">
       <div className="auth-form-panel">
-        <div style={{ maxWidth: 420, width: '100%' }}>
+        <div className="auth-form-container">
           {pendingConfirmation ? (
-            <div style={{ textAlign: 'center' }}>
-              <Icon name="envelope-circle-check" style={{ fontSize: '4rem', color: 'var(--primary)', marginBottom: 'var(--space-6)' }} />
-              <h2>Check Your Inbox</h2>
-              <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>{confirmationMessage}</p>
+            <div className="auth-state">
+              <Icon name="envelope-circle-check" className="auth-state-icon" />
+              <h2 className="auth-state-title">Check Your Inbox</h2>
+              <p className="auth-state-text">{confirmationMessage}</p>
               <Button variant="ghost" onClick={() => switchMode('login')}>
                 <Icon name="arrow-left" /> Back to sign in
               </Button>
             </div>
           ) : success ? (
-            <div style={{ textAlign: 'center' }}>
-              <Icon name="circle-check" style={{ fontSize: '4rem', color: 'var(--success)', marginBottom: 'var(--space-6)' }} />
-              <h2>Account Created</h2>
-              <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-6)' }}>Welcome to AliverBiopharm. Redirecting...</p>
+            <div className="auth-state">
+              <Icon name="circle-check" className="auth-state-icon auth-state-icon-success" />
+              <h2 className="auth-state-title">Account Created</h2>
+              <p className="auth-state-text">Welcome to AliverBiopharm. Redirecting...</p>
               <Spinner />
             </div>
           ) : mfaStep ? (
-            <div>
-              <h2>Two-Factor Verification</h2>
-              <p style={{ color: 'var(--text-dim)' }}>Enter the 6-digit code from your authenticator app</p>
+            <div className="auth-form-block">
+              <h2 className="auth-heading">Two-Factor Verification</h2>
+              <p className="auth-subheading">Enter the 6-digit code from your authenticator app</p>
 
               {mfaError && (
                 <div className="alert alert-error">
@@ -369,18 +367,18 @@ export default function Auth() {
                   onChange={(event) => setMfaCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
                   disabled={submitting}
                 />
-                <div ref={setCaptchaSlot} />
-                <Button type="submit" loading={submitting} style={{ width: '100%' }}>
+                <div ref={setCaptchaSlot} className="auth-captcha" />
+                <Button type="submit" loading={submitting} className="auth-submit">
                   Verify and Sign In
                 </Button>
               </form>
             </div>
           ) : onboardingStep > 0 ? (
-            <div>
-              <h2>Complete Your Profile</h2>
-              <p style={{ color: 'var(--text-dim)' }}>Help us personalise your learning experience</p>
+            <div className="auth-form-block">
+              <h2 className="auth-heading">Complete Your Profile</h2>
+              <p className="auth-subheading">Help us personalise your learning experience</p>
 
-              <div className="progress-track">
+              <div className="progress-track auth-progress">
                 <div className="progress-fill progress-gradient" style={{ width: `${progressPct()}%` }} />
               </div>
 
@@ -391,13 +389,19 @@ export default function Auth() {
               )}
 
               {onboardingStep === 1 && (
-                <div>
-                  <h3>I am a...</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                    <Button variant={role === 'student' ? 'primary' : 'secondary'} onClick={() => { setRole('student'); setOnboardingStep(2); }}>
+                <div className="auth-onboarding-step">
+                  <h3 className="auth-step-title">I am a...</h3>
+                  <div className="auth-options">
+                    <Button
+                      variant={role === 'student' ? 'primary' : 'secondary'}
+                      onClick={() => { setRole('student'); setOnboardingStep(2); }}
+                    >
                       <Icon name="user-graduate" /> Student
                     </Button>
-                    <Button variant={role === 'teacher' ? 'primary' : 'secondary'} onClick={() => { setRole('teacher'); setOnboardingStep(2); }}>
+                    <Button
+                      variant={role === 'teacher' ? 'primary' : 'secondary'}
+                      onClick={() => { setRole('teacher'); setOnboardingStep(2); }}
+                    >
                       <Icon name="user-pen" /> Teacher
                     </Button>
                   </div>
@@ -405,14 +409,14 @@ export default function Auth() {
               )}
 
               {onboardingStep === 2 && (
-                <div>
-                  <h3>Select your level</h3>
+                <div className="auth-onboarding-step">
+                  <h3 className="auth-step-title">Select your level</h3>
 
                   {levelsLoading && <Spinner />}
-                  {levelsError && <p style={{ color: 'var(--error)' }}>{levelsError}</p>}
+                  {levelsError && <p className="form-error">{levelsError}</p>}
 
                   {!levelsLoading && !levelsError && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                    <div className="auth-options">
                       {levels.map((lvl) => {
                         const value = lvl.display_name;
                         const rowKey = lvl.key || lvl.id || value;
@@ -425,7 +429,8 @@ export default function Auth() {
                             loading={submitting && track === value}
                             disabled={submitting}
                           >
-                            <Icon name={lvl.icon === 'dna' ? 'microscope' : lvl.icon || 'graduation-cap'} /> {lvl.display_name}
+                            <Icon name={lvl.icon === 'dna' ? 'microscope' : lvl.icon || 'graduation-cap'} />
+                            {lvl.display_name}
                           </Button>
                         );
                       })}
@@ -435,8 +440,13 @@ export default function Auth() {
               )}
             </div>
           ) : (
-            <div>
-              <h2>{mode === 'login' ? 'Sign In' : 'Create Account'}</h2>
+            <div className="auth-form-block">
+              <h2 className="auth-heading">
+                {mode === 'login' ? 'Sign In' : 'Create Account'}
+              </h2>
+              <p className="auth-subheading">
+                {mode === 'login' ? 'Access your account securely' : 'Join thousands of learners worldwide'}
+              </p>
 
               {error && (
                 <div className="alert alert-error">
@@ -491,14 +501,14 @@ export default function Auth() {
                   />
                 )}
 
-                <div ref={setCaptchaSlot} />
+                <div ref={setCaptchaSlot} className="auth-captcha" />
 
-                <Button type="submit" loading={submitting} style={{ width: '100%' }}>
+                <Button type="submit" loading={submitting} className="auth-submit">
                   {mode === 'login' ? <><Icon name="right-to-bracket" /> Sign In</> : <><Icon name="user-plus" /> Create Account</>}
                 </Button>
               </form>
 
-              <div style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
+              <div className="auth-switch">
                 {mode === 'login' ? (
                   <Button variant="ghost" size="sm" onClick={() => switchMode('register')}>Sign Up</Button>
                 ) : (
