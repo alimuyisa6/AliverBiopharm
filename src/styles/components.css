@@ -28,6 +28,118 @@
 @import './tutor.css';
 @import './home-sections.css';
 
+.auth-page {
+  display: flex;
+  min-height: calc(100vh - var(--header-height));
+  background:
+    radial-gradient(circle at 15% 20%, rgba(59, 130, 246, 0.06), transparent 30%),
+    radial-gradient(circle at 85% 15%, rgba(139, 92, 246, 0.06), transparent 28%),
+    var(--bg-page);
+}
+
+.auth-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+body.dark-mode .auth-form-panel {
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.auth-form-container {
+  max-width: 420px;
+  width: 100%;
+}
+
+.auth-form-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth-heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-black);
+  color: var(--text-main);
+  margin-bottom: var(--space-2);
+}
+
+.auth-subheading {
+  color: var(--text-dim);
+  margin-bottom: var(--space-6);
+  opacity: 0.88;
+}
+
+.auth-captcha {
+  margin-bottom: var(--space-6);
+}
+
+.auth-submit {
+  width: 100%;
+}
+
+.auth-switch {
+  margin-top: var(--space-6);
+  text-align: center;
+}
+
+.auth-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth-onboarding-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth-step-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text-main);
+  margin-bottom: var(--space-2);
+}
+
+.auth-progress {
+  margin-bottom: var(--space-6);
+}
+
+.auth-state {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.auth-state-icon {
+  font-size: 4rem;
+  color: var(--primary);
+}
+
+.auth-state-icon-success {
+  color: var(--success);
+}
+
+.auth-state-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-main);
+}
+
+.auth-state-text {
+  color: var(--text-dim);
+  margin-bottom: var(--space-4);
+  opacity: 0.86;
+}
+
 .profile-picture-upload {
   display: flex;
   flex-direction: column;
@@ -221,4 +333,14 @@
   margin-bottom: var(--space-4);
   font-size: var(--text-sm);
   color: var(--text-dim);
+}
+
+@media (max-width: 768px) {
+  .auth-form-panel {
+    padding: var(--space-6);
+  }
+
+  .auth-heading {
+    font-size: var(--text-2xl);
+  }
 }
