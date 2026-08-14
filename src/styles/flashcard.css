@@ -1,5 +1,4 @@
-/* styles/flashcard.css */
-
+ /* styles/flashcard.css */
 .fcd-section {
   padding-top: var(--space-6);
 }
@@ -160,7 +159,6 @@
   color: var(--text-muted);
 }
 
-/* Welcome flip card */
 .fcw-flip-container {
   perspective: 1000px;
   max-width: 400px;
@@ -204,7 +202,6 @@
   margin-bottom: var(--space-8);
 }
 
-/* Progress / results */
 .fcp-card {
   padding: var(--space-10);
   max-width: 500px;
@@ -220,6 +217,7 @@
 .fcp-message {
   color: var(--text-dim);
   margin-top: var(--space-3);
+  opacity: 0.86;
 }
 
 .fcp-stats-row {
@@ -251,7 +249,6 @@
   justify-content: center;
 }
 
-/* Flashcard preview section (homepage) */
 .fc-actions-row {
   display: flex;
   justify-content: center;
@@ -265,4 +262,44 @@
 
 .fc-browse-btn {
   padding: 10px 20px;
+}
+
+.flashcard-subject-section {
+  padding-top: var(--space-6);
+}
+
+.flashcard-title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.flashcard-class {
+  color: var(--text-dim);
+  margin-bottom: var(--space-4);
+  opacity: 0.82;
+}
+
+.flashcard-decks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+.flashcard-deck-icon {
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.flashcard-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 768px) {
+  .flashcard-decks-grid {
+    grid-template-columns: 1fr;
+  }
 }
