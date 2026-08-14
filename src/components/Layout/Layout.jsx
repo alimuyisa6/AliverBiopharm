@@ -12,7 +12,6 @@ import ClassSwitcher from '../ClassSwitcher/ClassSwitcher';
 import AdminLauncher from '../AdminLauncher';
 
 const EXCLUDED_PATHS = ['/login', '/register'];
-const ROOM_PATH_PREFIX = '/classroom/';
 const SCROLL_STORAGE_KEY = 'scroll-positions';
 
 function loadScrollMap() {
@@ -59,7 +58,7 @@ export default function Layout({ children, showFooter = true }) {
   const { user } = useAuth();
 
   const isAuthPage = EXCLUDED_PATHS.includes(location.pathname);
-  const isRoomPage = location.pathname.startsWith(ROOM_PATH_PREFIX);
+  const isRoomPage = location.pathname.startsWith('/classroom/');
   const hideFooter = isAuthPage || isRoomPage;
 
   const scrollPositions = useRef(loadScrollMap());
@@ -114,8 +113,7 @@ export default function Layout({ children, showFooter = true }) {
       await signout();
       await refreshUser();
       navigate('/');
-    } catch {
-    } finally {
+    } catch {} finally {
       setSigningOut(false);
     }
   };
@@ -143,8 +141,7 @@ export default function Layout({ children, showFooter = true }) {
       const data = await getRequest('notes', 'nav_list', { group_id: groupId });
 
       setNavNotes((prev) => ({ ...prev, [groupId]: data }));
-    } catch {
-    } finally {
+    } catch {} finally {
       setLoadingNavNotes(false);
     }
   };
@@ -173,17 +170,22 @@ export default function Layout({ children, showFooter = true }) {
             </nav>
 
             <div className="nav-actions">
-              {isAuthenticated && <ClassSwitcher />}
+              {isAuthenticated && (
+                <span className="class-switcher-wrap">
+                  <ClassSwitcher />
+                </span>
+              )}
 
               <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setSearchOpen(true)} aria-label="Search">
                 <Icon name="magnifying-glass" />
               </button>
 
               {isAuthenticated ? (
-                <button className="btn btn-ghost btn-sm" onClick={handleSignout} disabled={signingOut}>
-                  <Icon name="right-from-bracket" />
-                  {signingOut ? 'Signing out...' : 'Sign Out'}
-                </button>
+                <div className="dropdown">
+                  <button className="btn btn-ghost btn-sm" onClick={() => {}}>
+                    <Icon name="user" />
+                  </button>
+                </div>
               ) : (
                 <>
                   <Link to="/login" className="btn btn-ghost btn-sm">Sign In</Link>
@@ -288,7 +290,8 @@ export default function Layout({ children, showFooter = true }) {
                       <Icon name="gear" /> Profile
                     </Link>
                     <button className="mobile-nav-link" onClick={handleSignout} disabled={signingOut}>
-                      <Icon name="right-from-bracket" /> Sign Out
+                      <Icon name="right-from-bracket" />
+                      {signingOut ? 'Signing out...' : 'Sign Out'}
                     </button>
                   </>
                 ) : (
