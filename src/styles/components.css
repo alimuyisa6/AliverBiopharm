@@ -1,4 +1,4 @@
- /* styles/components.css — final imports */
+ /* styles/components.css */
 @import './button.css';
 @import './input.css';
 @import './card.css';
@@ -27,7 +27,6 @@
 @import './team-faq.css';
 @import './tutor.css';
 @import './home-sections.css';
-
 
 .profile-picture-upload {
   display: flex;
@@ -63,7 +62,7 @@
 .profile-picture-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,46 +89,136 @@
   filter: brightness(1.15);
 }
 
-.footer-social-link[data-platform="x-twitter"] {
-  background: #000000;
+.footer-social-link[data-platform="x-twitter"] { background: #000000; }
+.footer-social-link[data-platform="facebook"] { background: #1877F2; }
+.footer-social-link[data-platform="linkedin"] { background: #0A66C2; }
+.footer-social-link[data-platform="instagram"] { background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4); }
+.footer-social-link[data-platform="telegram"] { background: #26A5E4; }
+.footer-social-link[data-platform="youtube"] { background: #FF0000; }
+.footer-social-link[data-platform="tiktok"] { background: #000000; }
+.footer-social-link[data-platform="whatsapp"] { background: #25D366; }
+.footer-social-link[data-platform="discord"] { background: #5865F2; }
+.footer-social-link[data-platform="pinterest"] { background: #E60023; }
+.footer-social-link[data-platform="reddit"] { background: #FF4500; }
+
+.profile-picture-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
-.footer-social-link[data-platform="facebook"] {
-  background: #1877F2;
+.profile-picture-input {
+  display: none;
 }
 
-.footer-social-link[data-platform="linkedin"] {
-  background: #0A66C2;
+.profile-picture-error {
+  color: var(--error);
+  font-size: var(--text-xs);
+  margin-top: var(--space-2);
 }
 
-.footer-social-link[data-platform="instagram"] {
-  background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4);
+.file-upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.footer-social-link[data-platform="telegram"] {
-  background: #26A5E4;
+.file-upload-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
-.footer-social-link[data-platform="youtube"] {
-  background: #FF0000;
+.file-upload-input {
+  display: none;
 }
 
-.footer-social-link[data-platform="tiktok"] {
-  background: #000000;
+.file-upload-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-.footer-social-link[data-platform="whatsapp"] {
-  background: #25D366;
+.file-upload-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-card);
 }
 
-.footer-social-link[data-platform="discord"] {
-  background: #5865F2;
+.file-upload-icon {
+  color: var(--primary);
+  font-size: 1.25rem;
 }
 
-.footer-social-link[data-platform="pinterest"] {
-  background: #E60023;
+.file-upload-icon.pdf {
+  color: var(--error);
 }
 
-.footer-social-link[data-platform="reddit"] {
-  background: #FF4500;
+.file-upload-name {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+}
+
+.file-upload-size {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.pending-approval,
+.access-denied {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.pending-approval-card,
+.access-denied-card {
+  max-width: 480px;
+  width: 100%;
+  padding: var(--space-8);
+  text-align: center;
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.055), rgba(139, 92, 246, 0.055)),
+    var(--bg-card);
+}
+
+.pending-approval-icon,
+.access-denied-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+}
+
+.pending-approval-icon { color: var(--warning); }
+.access-denied-icon { color: var(--error); }
+
+.pending-approval-title,
+.access-denied-title {
+  margin-bottom: var(--space-3);
+}
+
+.pending-approval-text,
+.access-denied-text {
+  color: var(--text-dim);
+  margin-bottom: var(--space-6);
+  opacity: 0.84;
+}
+
+.pending-approval-alert {
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
+.pending-approval-contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-dim);
 }
