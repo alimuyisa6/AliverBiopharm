@@ -1,5 +1,4 @@
  /* styles/classroom.css */
-
 .classroom-loading {
   display: flex;
   justify-content: center;
@@ -21,7 +20,6 @@
   display: block;
 }
 
-/* Onboarding steps */
 .onboarding-steps {
   display: flex;
   align-items: center;
@@ -39,8 +37,13 @@
   font-weight: var(--weight-medium);
 }
 
-.onboarding-step.active { color: var(--text-main); }
-.onboarding-step.active:nth-of-type(1) { color: var(--primary); }
+.onboarding-step.active {
+  color: var(--text-main);
+}
+
+.onboarding-step.active:nth-of-type(1) {
+  color: var(--primary);
+}
 
 .step-number {
   width: 28px;
@@ -212,7 +215,6 @@
   margin-top: var(--space-8);
 }
 
-/* Live classroom feed */
 .classroom-level-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -296,9 +298,11 @@
   font-size: var(--text-sm);
   color: var(--text-dim);
   margin-bottom: var(--space-3);
+  opacity: 0.86;
 }
 
-.room-tutor-line, .room-duration-line {
+.room-tutor-line,
+.room-duration-line {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -340,12 +344,14 @@
 .status-bar-primary { background-color: var(--primary); }
 .status-bar-warm { background-color: var(--warm); }
 
-/* ===== Classroom listing page (pages/Classroom.jsx) ===== */
 .classroom-list-section {
   padding-top: var(--space-6);
 }
 
 .classroom-page-title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   text-align: left;
   margin: 0 0 var(--space-2);
 }
@@ -353,6 +359,7 @@
 .classroom-class-label {
   color: var(--text-dim);
   margin-bottom: var(--space-4);
+  opacity: 0.84;
 }
 
 .classroom-level-chips {
@@ -424,7 +431,6 @@
   gap: var(--space-2);
 }
 
-/* ===== Live classroom room (pages/ClassroomRoom.jsx) ===== */
 .classroom-room-page {
   display: flex;
   flex-direction: column;
@@ -451,6 +457,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.classroom-room-header-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
 }
 
 .classroom-room-header-chips {
@@ -647,6 +661,11 @@
   justify-content: space-between;
   align-items: center;
   background: var(--bg-card);
+}
+
+.classroom-room-error {
+  text-align: center;
+  padding-top: var(--space-16);
 }
 
 @media (max-width: 900px) {
