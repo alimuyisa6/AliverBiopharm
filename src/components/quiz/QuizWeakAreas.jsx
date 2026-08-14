@@ -13,7 +13,7 @@ export default function QuizWeakAreas({ user, onRecommend, level, class_name }) 
     getRequest('interactions', 'weak-areas').then(setWeak).catch(() => {});
   }, [user]);
 
-  if (!weak || !weak.weak_topics.length) return null;
+  if (!weak || !weak.weak_topics?.length) return null;
 
   const levelName = level?.display_name || level?.id || '';
   const classLabel = class_name || '';
