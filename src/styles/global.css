@@ -1,3 +1,4 @@
+ /* styles/main.css */
 @import './colors.css';
 @import './semantic.css';
 @import './typography.css';
@@ -80,7 +81,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: var(--weight-extrabold);
   line-height: var(--leading-snug);
-  letter-spacing: var(--tracking-normal);
+  letter-spacing: var(--tracking-wide);
   word-spacing: 0.08em;
   color: var(--text-main);
 }
@@ -89,6 +90,26 @@ h1 { font-size: var(--text-5xl); }
 h2 { font-size: var(--text-3xl); }
 h3 { font-size: var(--text-2xl); }
 h4 { font-size: var(--text-xl); }
+
+.section-title,
+.past-papers-title,
+.hero-title,
+.page-title,
+.card-title,
+.paper-modal-title {
+  letter-spacing: var(--tracking-wide);
+  word-spacing: 0.08em;
+}
+
+.section-subtitle,
+.past-papers-subtitle,
+.hero-subtitle,
+.page-subtitle,
+.card-subtitle {
+  color: var(--text-dim);
+  letter-spacing: var(--tracking-wider);
+  word-spacing: 0.05em;
+}
 
 .skip-link {
   position: absolute;
@@ -154,7 +175,7 @@ h4 { font-size: var(--text-xl); }
   font-size: var(--text-4xl);
   font-weight: var(--weight-black);
   line-height: var(--leading-snug);
-  letter-spacing: var(--tracking-normal);
+  letter-spacing: var(--tracking-wide);
   word-spacing: 0.08em;
   text-align: center;
   color: var(--text-main);
@@ -168,7 +189,7 @@ h4 { font-size: var(--text-xl); }
   font-size: var(--text-md);
   font-weight: var(--weight-normal);
   line-height: var(--leading-relaxed);
-  letter-spacing: var(--tracking-normal);
+  letter-spacing: var(--tracking-wider);
   word-spacing: 0.05em;
   text-align: center;
   color: var(--text-dim);
