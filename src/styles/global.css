@@ -80,8 +80,9 @@ ul, ol {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: var(--weight-extrabold);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-normal);
+  word-spacing: 0.08em;
   color: var(--text-main);
 }
 
@@ -153,8 +154,9 @@ h4 { font-size: var(--text-xl); }
   font-family: var(--font-heading);
   font-size: var(--text-4xl);
   font-weight: var(--weight-black);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-normal);
+  word-spacing: 0.08em;
   text-align: center;
   color: var(--text-main);
   text-wrap: balance;
@@ -164,9 +166,11 @@ h4 { font-size: var(--text-xl); }
 
 .section-subtitle {
   font-family: var(--font-body);
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
   font-weight: var(--weight-normal);
   line-height: var(--leading-relaxed);
+  letter-spacing: var(--tracking-normal);
+  word-spacing: 0.05em;
   text-align: center;
   color: var(--text-dim);
   max-width: 620px;
@@ -193,11 +197,21 @@ h4 { font-size: var(--text-xl); }
   .section {
     padding: var(--space-12) var(--space-4);
   }
+  
   .section-title {
     font-size: var(--text-3xl);
+    line-height: var(--leading-snug);
+    word-spacing: 0.06em;
     max-width: 100%;
   }
+  
   .section-subtitle {
     font-size: var(--text-base);
+    word-spacing: 0.04em;
   }
+  
+  h1 { font-size: var(--text-4xl); }
+  h2 { font-size: var(--text-2xl); }
+  h3 { font-size: var(--text-xl); }
+  h4 { font-size: var(--text-lg); }
 }
