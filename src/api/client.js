@@ -1370,3 +1370,15 @@ export async function savePaperFilterPreset(name, filters) {
 export async function deletePaperFilterPreset(presetId) {
   return apiCall('past-papers', 'delete_preset', { preset_id: presetId });
 }
+
+export async function getRecallDueQueue(limit = 20) {
+  return getRequest('recall', 'due_queue', { limit });
+}
+
+export async function submitRecallConfidence(sessionId, questionId, confidence) {
+  return apiCall('recall', 'submit_confidence', {
+    session_id: sessionId,
+    question_id: questionId,
+    confidence
+  });
+}
