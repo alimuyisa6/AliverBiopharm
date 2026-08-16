@@ -1,12 +1,16 @@
  /* pages/PastPapers.jsx */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import {
   getPastPapers,
   getPastPaperFilterOptions,
-  getPastPaperDownloadUrl
+  getPastPaperDownloadUrl,
+  togglePaperBookmark,
+  getBookmarkedPapers,
+  trackPaperView,
+  getDownloadHistory
 } from '../api/client';
 import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
@@ -15,6 +19,12 @@ import Select from '../components/Select/Select';
 import EmptyState from '../components/EmptyState/EmptyState';
 import { useToast } from '../components/Toast/Toast';
 import { useLayout } from '../contexts/LayoutContext';
+
+const TABS = [
+  { key: 'all', label: 'All Papers' },
+  { key: 'bookmarked', label: 'Bookmarked' },
+  { key: 'downloaded', label: 'Downloaded' }
+];
 
 export default function PastPapers() {
   const { user } = useAuth();
@@ -42,6 +52,9 @@ export default function PastPapers() {
   const [papersLoading, setPapersLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
+  const [downloadedIds, setDownloadedIds] = useState(new Set());
 
   const effectiveLevel = showAll ? null : level;
   const effectiveClass = showAll ? null : class_name;
@@ -62,26 +75,52 @@ export default function PastPapers() {
 
   useEffect(() => {
     setPage(1);
-  }, [effectiveLevel, effectiveClass]);
+  }, [effectiveLevel, effectiveClass, activeTab]);
+
+  useEffect(() => {
+    if (user) {
+      loadUserInteractions();
+    }
+  }, [user]);
 
   useEffect(() => {
     loadPapers();
-  }, [filters, page, effectiveLevel, effectiveClass]);
+  }, [filters, page, effectiveLevel, effectiveClass, activeTab]);
+
+  const loadUserInteractions = async () => {
+    try {
+      const [bookmarked, downloaded] = await Promise.all([
+        getBookmarkedPapers(1, 100),
+        getDownloadHistory(1, 100)
+      ]);
+
+      setBookmarkedIds(new Set((bookmarked.papers || []).map((paper) => paper.id)));
+      setDownloadedIds(new Set((downloaded.papers || []).map((paper) => paper.id)));
+    } catch {}
+  };
 
   const loadPapers = async () => {
     setPapersLoading(true);
 
     try {
-      const params = { page, limit: 12 };
+      let result;
 
-      if (effectiveLevel) params.level = effectiveLevel;
-      if (effectiveClass) params.class_name = effectiveClass;
-      if (filters.subject) params.subject = filters.subject;
-      if (filters.year) params.year = filters.year;
-      if (filters.exam_board) params.exam_board = filters.exam_board;
-      if (filters.paper_type) params.paper_type = filters.paper_type;
+      if (activeTab === 'bookmarked') {
+        result = await getBookmarkedPapers(page, 12);
+      } else if (activeTab === 'downloaded') {
+        result = await getDownloadHistory(page, 12);
+      } else {
+        const params = { page, limit: 12 };
 
-      const result = await getPastPapers(params);
+        if (effectiveLevel) params.level = effectiveLevel;
+        if (effectiveClass) params.class_name = effectiveClass;
+        if (filters.subject) params.subject = filters.subject;
+        if (filters.year) params.year = filters.year;
+        if (filters.exam_board) params.exam_board = filters.exam_board;
+        if (filters.paper_type) params.paper_type = filters.paper_type;
+
+        result = await getPastPapers(params);
+      }
 
       setPapers(result.papers || []);
       setTotalPages(result.total_pages || 1);
@@ -99,6 +138,11 @@ export default function PastPapers() {
       return;
     }
 
+    if (paper.locked || paper.is_premium) {
+      addToast('This paper requires premium access', 'warning');
+      return;
+    }
+
     setDownloadingId(paper.id);
 
     try {
@@ -110,10 +154,54 @@ export default function PastPapers() {
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
-    } catch {
-      addToast('Download failed', 'error');
+
+      setDownloadedIds((prev) => new Set([...prev, paper.id]));
+      addToast('Download started', 'success');
+    } catch (error) {
+      if (error.status === 403) {
+        addToast('Premium access required for this paper', 'warning');
+      } else {
+        addToast('Download failed', 'error');
+      }
     } finally {
       setDownloadingId(null);
+    }
+  };
+
+  const handleBookmark = async (paperId) => {
+    if (!user) {
+      addToast('Please sign in to bookmark', 'warning');
+      return;
+    }
+
+    try {
+      const result = await togglePaperBookmark(paperId);
+
+      setBookmarkedIds((prev) => {
+        const next = new Set(prev);
+
+        if (result.bookmarked) {
+          next.add(paperId);
+        } else {
+          next.delete(paperId);
+        }
+
+        return next;
+      });
+
+      if (activeTab === 'bookmarked') {
+        loadPapers();
+      }
+    } catch {
+      addToast('Failed to update bookmark', 'error');
+    }
+  };
+
+  const handlePaperOpen = async (paper) => {
+    if (user) {
+      try {
+        await trackPaperView(paper.id);
+      } catch {}
     }
   };
 
@@ -142,37 +230,39 @@ export default function PastPapers() {
 
   return (
     <div className="past-papers-page">
-      <div className="hero hero-editorial">
-        <div className="hero-content">
-          <span className="hero-eyebrow">
-            <span className="hero-eyebrow-line" />
-            Exam Preparation
-          </span>
-          <h1 className="hero-title">
-            Past Papers
-            {levelName && <span className="hero-title-dim"> · {levelName}</span>}
-          </h1>
-          {classLabel && <p className="hero-subtitle">{classLabel}</p>}
+      <div className="past-papers-hero">
+        <div className="past-papers-hero-inner">
+          <div className="past-papers-hero-content">
+            <span className="past-papers-eyebrow">
+              <span className="past-papers-eyebrow-line" />
+              Exam Preparation
+            </span>
+            <h1 className="past-papers-title">
+              Past Papers
+              {levelName && <span className="past-papers-title-dim"> · {levelName}</span>}
+            </h1>
+            {classLabel && <p className="past-papers-subtitle">{classLabel}</p>}
 
-          <nav className="breadcrumb">
-            <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
-            <Icon name="chevron-right" className="breadcrumb-sep" />
-            <span>Past Papers</span>
-          </nav>
-        </div>
+            <nav className="breadcrumb">
+              <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
+              <Icon name="chevron-right" className="breadcrumb-sep" />
+              <span>Past Papers</span>
+            </nav>
 
-        <div className="hero-meta">
-          <span className="hero-meta-item">
-            <strong>{total}</strong> papers
-          </span>
-          <span className="hero-meta-divider" />
-          <span className="hero-meta-item">
-            <strong>{filterOptions.years.length || '—'}</strong> years
-          </span>
-          <span className="hero-meta-divider" />
-          <span className="hero-meta-item">
-            <strong>{filterOptions.subjects.length || '—'}</strong> subjects
-          </span>
+            <div className="past-papers-meta">
+              <span className="past-papers-meta-item">
+                <strong>{total}</strong> papers
+              </span>
+              <span className="past-papers-meta-divider" />
+              <span className="past-papers-meta-item">
+                <strong>{filterOptions.years.length || '—'}</strong> years
+              </span>
+              <span className="past-papers-meta-divider" />
+              <span className="past-papers-meta-item">
+                <strong>{filterOptions.subjects.length || '—'}</strong> subjects
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -183,25 +273,46 @@ export default function PastPapers() {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-6)', flexWrap: 'wrap', alignItems: 'center' }}>
-          <Button variant={showFilters ? 'primary' : 'secondary'} size="sm" onClick={() => setShowFilters((value) => !value)}>
-            <Icon name="filter" /> Filters
-            {activeFilterCount > 0 && <span className="badge badge-primary">{activeFilterCount}</span>}
-          </Button>
-
-          {activeFilterCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
-              <Icon name="xmark" /> Clear filters
+        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-6)', flexWrap: 'wrap' }}>
+          {TABS.map((tab) => (
+            <Button
+              key={tab.key}
+              variant={activeTab === tab.key ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+              {tab.key === 'bookmarked' && bookmarkedIds.size > 0 && (
+                <span className="badge badge-primary">{bookmarkedIds.size}</span>
+              )}
+              {tab.key === 'downloaded' && downloadedIds.size > 0 && (
+                <span className="badge badge-primary">{downloadedIds.size}</span>
+              )}
             </Button>
-          )}
-
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-dim)' }}>
-            {papersLoading ? 'Loading...' : `${total} paper${total !== 1 ? 's' : ''} found`}
-          </p>
+          ))}
         </div>
 
-        {showFilters && (
-          <div className="card" style={{ padding: 'var(--space-6)', marginBottom: 'var(--space-6)', display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+        {activeTab === 'all' && (
+          <div className="past-papers-toolbar">
+            <Button variant={showFilters ? 'primary' : 'secondary'} size="sm" onClick={() => setShowFilters((value) => !value)}>
+              <Icon name="filter" /> Filters
+              {activeFilterCount > 0 && <span className="badge badge-primary">{activeFilterCount}</span>}
+            </Button>
+
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <Icon name="xmark" /> Clear filters
+              </Button>
+            )}
+
+            <p className="past-papers-count">
+              {papersLoading ? 'Loading...' : `${total} paper${total !== 1 ? 's' : ''} found`}
+            </p>
+          </div>
+        )}
+
+        {showFilters && activeTab === 'all' && (
+          <div className="past-papers-filters">
             <Select
               label="Subject"
               options={filterOptions.subjects.map((subject) => ({ value: subject, label: subject }))}
@@ -236,20 +347,44 @@ export default function PastPapers() {
         ) : papers.length === 0 ? (
           <EmptyState
             image={getEmptyStateImage('past_papers')}
-            title="No Papers Found"
-            description={`No past papers match your filters for ${classLabel || levelName || 'your level'}.`}
-            action={<Button variant="secondary" onClick={clearFilters}>Clear Filters</Button>}
+            title={activeTab === 'bookmarked' ? 'No Bookmarked Papers' : activeTab === 'downloaded' ? 'No Downloads Yet' : 'No Papers Found'}
+            description={
+              activeTab === 'bookmarked'
+                ? 'Bookmark papers to find them here later.'
+                : activeTab === 'downloaded'
+                  ? 'Papers you download will appear here.'
+                  : `No past papers match your filters for ${classLabel || levelName || 'your level'}.`
+            }
+            action={
+              activeTab === 'all' && (
+                <Button variant="secondary" onClick={clearFilters}>Clear Filters</Button>
+              )
+            }
           />
         ) : (
-          <div className="grid grid-cols-3">
+          <div className="past-papers-grid">
             {papers.map((paper) => (
-              <div key={paper.id} className="card paper-card">
+              <div key={paper.id} className={`card paper-card${paper.is_premium ? ' paper-card-premium' : ''}`}>
                 <div className="card-image-placeholder paper-card-icon">
                   <Icon name="file-pdf" style={{ fontSize: '2.5rem', color: 'var(--error)' }} />
+                  {paper.is_premium && (
+                    <span className="paper-premium-badge">
+                      <Icon name="crown" /> Premium
+                    </span>
+                  )}
                 </div>
 
                 <div className="card-body">
-                  <h3 className="card-title">{paper.title}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
+                    <h3 className="card-title">{paper.title}</h3>
+                    <button
+                      className={`paper-bookmark-btn${bookmarkedIds.has(paper.id) ? ' active' : ''}`}
+                      onClick={() => handleBookmark(paper.id)}
+                      aria-label={bookmarkedIds.has(paper.id) ? 'Remove bookmark' : 'Bookmark paper'}
+                    >
+                      <Icon name={bookmarkedIds.has(paper.id) ? 'bookmark-solid' : 'bookmark'} />
+                    </button>
+                  </div>
                   <p className="card-text">{paper.subject}</p>
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-3)' }}>
@@ -257,13 +392,23 @@ export default function PastPapers() {
                     {paper.year && <span className="chip chip-accent">{paper.year}</span>}
                     {paper.paper_type && <span className="chip chip-primary">{paper.paper_type}</span>}
                     {paper.class_name && <span className="chip">{paper.class_name}</span>}
+                    {downloadedIds.has(paper.id) && (
+                      <span className="chip chip-success">
+                        <Icon name="check" /> Downloaded
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="card-footer">
-                  <Button size="sm" loading={downloadingId === paper.id} onClick={() => handleDownload(paper)}>
-                    <Icon name="download" />
-                    {user ? 'Download' : 'Sign in to Download'}
+                  <Button
+                    size="sm"
+                    loading={downloadingId === paper.id}
+                    onClick={() => handleDownload(paper)}
+                    variant={paper.is_premium ? 'warm' : 'primary'}
+                  >
+                    <Icon name={paper.is_premium ? 'lock' : 'download'} />
+                    {paper.is_premium ? 'Premium Download' : user ? 'Download' : 'Sign in to Download'}
                   </Button>
                 </div>
               </div>
@@ -272,7 +417,7 @@ export default function PastPapers() {
         )}
 
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-2)', marginTop: 'var(--space-8)' }}>
+          <div className="past-papers-pagination">
             <Button variant="secondary" size="sm" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1}>
               <Icon name="chevron-left" />
             </Button>
