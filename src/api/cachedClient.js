@@ -148,6 +148,12 @@ export const getLeaderboard = (level, limit = 20) =>
 export const getRecallTopics = (groupId) =>
   withCache(`recall_topics_${groupId || 'all'}`, () => api.getRecallTopics(groupId), false)();
 
+export const getRecallDueQueue = (limit = 20) =>
+  withCache(`recall_due_queue_${limit}`, () => api.getRecallDueQueue(limit), false)();
+
+export const submitRecallConfidence = (sessionId, questionId, confidence) =>
+  api.submitRecallConfidence(sessionId, questionId, confidence);
+
 export const getRecallStats = () =>
   withCache('recall_stats', api.getRecallStats, false)();
 
