@@ -1,8 +1,8 @@
-/* pages/Profile.jsx */
+ /* pages/Profile.jsx */
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
-import { updateProfile, changePassword, requestLevelChange, getProfile, getCurriculumLevels } from '../api/client';
+import { updateProfile, changePassword, requestLevelChange, getProfile, getCurriculumLevels, updateDisplayName } from '../api/client';
 import PageHeader from '../components/PageHeader/PageHeader';
 import Container from '../components/Container/Container';
 import Input from '../components/Input/Input';
@@ -18,7 +18,9 @@ export default function Profile() {
   const addToast = useToast();
 
   const [fullName, setFullName] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
+  const [savingDisplayName, setSavingDisplayName] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -36,6 +38,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (user?.full_name) setFullName(user.full_name);
+    if (user?.profile?.display_name) setDisplayName(user.profile.display_name);
   }, [user]);
 
   useEffect(() => {
@@ -72,13 +75,19 @@ export default function Profile() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     const trimmed = fullName.trim();
+    const trimmedDisplayName = displayName.trim();
+
     if (trimmed.length < 2 || trimmed.length > 100) {
       addToast('Name must be between 2 and 100 characters', 'error');
       return;
     }
+
     setSavingProfile(true);
     try {
       await updateProfile(trimmed);
+      if (trimmedDisplayName && trimmedDisplayName.length >= 2) {
+        await updateDisplayName(trimmedDisplayName);
+      }
       await refresh();
       addToast('Profile updated', 'success');
     } catch (err) {
@@ -139,6 +148,7 @@ export default function Profile() {
           <div className="card" style={{ padding: 'var(--space-8)' }}>
             <h3 style={{ marginBottom: 'var(--space-6)' }}><Icon name="id-card" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />Personal Info</h3>
             <Input label="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} required disabled={savingProfile} />
+            <Input label="Display Name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} disabled={savingProfile} hint="Shown publicly on reviews and comments" />
             <Input label="Email" value={user?.email || ''} disabled />
             <Button type="submit" loading={savingProfile} icon="check">Save Changes</Button>
           </div>
@@ -190,4 +200,3 @@ export default function Profile() {
     </Container>
   );
 }
- 
