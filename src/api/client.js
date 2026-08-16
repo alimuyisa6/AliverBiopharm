@@ -1359,3 +1359,14 @@ export async function updateDisplayName(displayName) {
   return apiCall('profile', 'update_display_name', { display_name: displayName });
 }
 
+export async function getPaperFilterPresets() {
+  return getRequest('past-papers', 'get_presets');
+}
+
+export async function savePaperFilterPreset(name, filters) {
+  return apiCall('past-papers', 'save_preset', { name, filters });
+}
+
+export async function deletePaperFilterPreset(presetId) {
+  return apiCall('past-papers', 'delete_preset', { preset_id: presetId });
+}
