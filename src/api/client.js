@@ -1323,3 +1323,23 @@ export async function getResourceInteractions(resourceId) {
     resource_id: resourceId
   });
 }
+
+  export async function getPaperStats(paperId) {
+  return getRequest('past-papers', 'get_user_stats', { paper_id: paperId });
+}
+
+export async function togglePaperBookmark(paperId) {
+  return apiCall('past-papers', 'toggle_bookmark', { paper_id: paperId });
+}
+
+export async function getBookmarkedPapers(page = 1, limit = 20) {
+  return getRequest('past-papers', 'get_bookmarked', { page, limit });
+}
+
+export async function trackPaperView(paperId) {
+  return apiCall('past-papers', 'track_view', { paper_id: paperId });
+}
+
+export async function getDownloadHistory(page = 1, limit = 20) {
+  return getRequest('past-papers', 'get_download_history', { page, limit });
+}               
