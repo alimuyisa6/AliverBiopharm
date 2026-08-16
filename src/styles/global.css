@@ -215,3 +215,19 @@ h4 { font-size: var(--text-xl); }
   h3 { font-size: var(--text-xl); }
   h4 { font-size: var(--text-lg); }
 }
+
+
+main {
+  animation: pageFadeIn 0.3s ease;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
