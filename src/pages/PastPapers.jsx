@@ -142,20 +142,41 @@ export default function PastPapers() {
 
   return (
     <div className="past-papers-page">
+      <div className="hero hero-editorial">
+        <div className="hero-content">
+          <span className="hero-eyebrow">
+            <span className="hero-eyebrow-line" />
+            Exam Preparation
+          </span>
+          <h1 className="hero-title">
+            Past Papers
+            {levelName && <span className="hero-title-dim"> · {levelName}</span>}
+          </h1>
+          {classLabel && <p className="hero-subtitle">{classLabel}</p>}
+
+          <nav className="breadcrumb">
+            <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
+            <Icon name="chevron-right" className="breadcrumb-sep" />
+            <span>Past Papers</span>
+          </nav>
+        </div>
+
+        <div className="hero-meta">
+          <span className="hero-meta-item">
+            <strong>{total}</strong> papers
+          </span>
+          <span className="hero-meta-divider" />
+          <span className="hero-meta-item">
+            <strong>{filterOptions.years.length || '—'}</strong> years
+          </span>
+          <span className="hero-meta-divider" />
+          <span className="hero-meta-item">
+            <strong>{filterOptions.subjects.length || '—'}</strong> subjects
+          </span>
+        </div>
+      </div>
+
       <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
-        <span className="sec-label">Exam Preparation</span>
-        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
-          Past Papers<br />{levelName ? `– ${levelName}` : ''}
-        </h1>
-
-        {classLabel && <p style={{ color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>{classLabel}</p>}
-
-        <nav className="breadcrumb">
-          <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
-          <Icon name="chevron-right" className="breadcrumb-sep" />
-          <span>Past Papers</span>
-        </nav>
-
         {!user && (
           <div className="alert alert-info" style={{ marginBottom: 'var(--space-6)' }}>
             <Icon name="lock" /> Sign in to download papers. You can browse freely.
@@ -222,9 +243,9 @@ export default function PastPapers() {
         ) : (
           <div className="grid grid-cols-3">
             {papers.map((paper) => (
-              <div key={paper.id} className="card">
-                <div className="card-image-placeholder" style={{ background: 'var(--primary-light)' }}>
-                  <Icon name="file-pdf" style={{ fontSize: '2rem', color: 'var(--error)' }} />
+              <div key={paper.id} className="card paper-card">
+                <div className="card-image-placeholder paper-card-icon">
+                  <Icon name="file-pdf" style={{ fontSize: '2.5rem', color: 'var(--error)' }} />
                 </div>
 
                 <div className="card-body">
@@ -233,8 +254,8 @@ export default function PastPapers() {
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-3)' }}>
                     {paper.level && <span className="chip">{paper.level}</span>}
-                    {paper.year && <span className="chip">{paper.year}</span>}
-                    {paper.paper_type && <span className="chip">{paper.paper_type}</span>}
+                    {paper.year && <span className="chip chip-accent">{paper.year}</span>}
+                    {paper.paper_type && <span className="chip chip-primary">{paper.paper_type}</span>}
                     {paper.class_name && <span className="chip">{paper.class_name}</span>}
                   </div>
                 </div>
