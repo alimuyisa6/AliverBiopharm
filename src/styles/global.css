@@ -321,3 +321,42 @@ h4 { font-size: var(--text-xl); }
     opacity: 0;
   }
 }
+.skeleton {
+  background: var(--bg-card-hover);
+  position: relative;
+  overflow: hidden;
+  display: block;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: skeletonShimmer 1.5s infinite;
+  pointer-events: none;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+body.dark-mode .skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+}
