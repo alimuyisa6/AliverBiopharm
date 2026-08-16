@@ -1,5 +1,5 @@
 /* pages/PastPapers.jsx */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLevelFilter } from '../hooks/useLevelFilter';
@@ -13,9 +13,13 @@ import {
   getDownloadHistory,
   getPaperReviews,
   ratePaper,
-  deletePaperReview
+  deletePaperReview,
+  getPaperFilterPresets,
+  savePaperFilterPreset,
+  deletePaperFilterPreset
 } from '../api/client';
 import Icon from '../components/Icon/Icon';
+import Skeleton from '../components/Skeleton/Skeleton';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
 import Select from '../components/Select/Select';
@@ -64,6 +68,11 @@ export default function PastPapers() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('year_desc');
+  const [presets, setPresets] = useState([]);
+  const [presetName, setPresetName] = useState('');
+  const [showPresets, setShowPresets] = useState(false);
 
   const effectiveLevel = showAll ? null : level;
   const effectiveClass = showAll ? null : class_name;
@@ -84,17 +93,18 @@ export default function PastPapers() {
 
   useEffect(() => {
     setPage(1);
-  }, [effectiveLevel, effectiveClass, activeTab]);
+  }, [effectiveLevel, effectiveClass, activeTab, searchQuery]);
 
   useEffect(() => {
     if (user) {
       loadUserInteractions();
+      loadPresets();
     }
   }, [user]);
 
   useEffect(() => {
     loadPapers();
-  }, [filters, page, effectiveLevel, effectiveClass, activeTab]);
+  }, [filters, page, effectiveLevel, effectiveClass, activeTab, searchQuery, sortBy]);
 
   const loadUserInteractions = async () => {
     try {
@@ -105,6 +115,14 @@ export default function PastPapers() {
 
       setBookmarkedIds(new Set((bookmarked.papers || []).map((paper) => paper.id)));
       setDownloadedIds(new Set((downloaded.papers || []).map((paper) => paper.id)));
+    } catch {}
+  };
+
+  const loadPresets = async () => {
+    try {
+      const result = await getPaperFilterPresets();
+
+      setPresets(result || []);
     } catch {}
   };
 
@@ -123,6 +141,8 @@ export default function PastPapers() {
 
         if (effectiveLevel) params.level = effectiveLevel;
         if (effectiveClass) params.class_name = effectiveClass;
+        if (searchQuery.trim()) params.search = searchQuery.trim();
+        if (sortBy) params.sort = sortBy;
         if (filters.subject) params.subject = filters.subject;
         if (filters.year) params.year = filters.year;
         if (filters.exam_board) params.exam_board = filters.exam_board;
@@ -272,6 +292,36 @@ export default function PastPapers() {
     }
   };
 
+  const handleSavePreset = async () => {
+    if (!presetName.trim()) return;
+
+    try {
+      const preset = await savePaperFilterPreset(presetName.trim(), filters);
+
+      setPresets((prev) => [preset, ...prev.filter((p) => p.name !== preset.name)]);
+      setPresetName('');
+      addToast('Filter preset saved', 'success');
+    } catch {
+      addToast('Failed to save preset', 'error');
+    }
+  };
+
+  const handleApplyPreset = (preset) => {
+    setFilters(preset.filters || {});
+    setPage(1);
+    setShowPresets(false);
+  };
+
+  const handleDeletePreset = async (presetId) => {
+    try {
+      await deletePaperFilterPreset(presetId);
+
+      setPresets((prev) => prev.filter((p) => p.id !== presetId));
+    } catch {
+      addToast('Failed to delete preset', 'error');
+    }
+  };
+
   const clearFilters = () => {
     setFilters({ subject: '', year: '', exam_board: '', paper_type: '' });
     setPage(1);
@@ -340,7 +390,7 @@ export default function PastPapers() {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-6)', flexWrap: 'wrap' }}>
+        <div className="past-papers-tabs">
           {TABS.map((tab) => (
             <Button
               key={tab.key}
@@ -361,20 +411,85 @@ export default function PastPapers() {
 
         {activeTab === 'all' && (
           <div className="past-papers-toolbar">
+            <div className="search-input-wrapper past-papers-search-wrapper">
+              <input
+                type="search"
+                placeholder="Search papers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+                aria-label="Search papers"
+              />
+              <span className="search-input-icon">
+                <Icon name="magnifying-glass" />
+              </span>
+            </div>
+
+            <Select
+              label="Sort"
+              options={[
+                { value: 'year_desc', label: 'Newest' },
+                { value: 'year_asc', label: 'Oldest' },
+                { value: 'downloads', label: 'Most Downloaded' },
+                { value: 'rating', label: 'Highest Rated' }
+              ]}
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value)}
+            />
+
             <Button variant={showFilters ? 'primary' : 'secondary'} size="sm" onClick={() => setShowFilters((value) => !value)}>
               <Icon name="filter" /> Filters
               {activeFilterCount > 0 && <span className="badge badge-primary">{activeFilterCount}</span>}
             </Button>
 
+            {presets.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={() => setShowPresets((value) => !value)}>
+                <Icon name="bookmark" /> Presets
+              </Button>
+            )}
+
             {activeFilterCount > 0 && (
               <Button variant="ghost" size="sm" onClick={clearFilters}>
-                <Icon name="xmark" /> Clear filters
+                <Icon name="xmark" /> Clear
               </Button>
             )}
 
             <p className="past-papers-count">
               {papersLoading ? 'Loading...' : `${total} paper${total !== 1 ? 's' : ''} found`}
             </p>
+          </div>
+        )}
+
+        {showPresets && (
+          <div className="past-papers-presets">
+            {presets.length === 0 ? (
+              <p className="past-papers-presets-empty">No saved presets yet.</p>
+            ) : (
+              presets.map((preset) => (
+                <div key={preset.id} className="past-papers-preset-item">
+                  <button className="past-papers-preset-apply" onClick={() => handleApplyPreset(preset)}>
+                    <Icon name="bookmark" /> {preset.name}
+                  </button>
+                  <button className="past-papers-preset-delete" onClick={() => handleDeletePreset(preset.id)} aria-label={`Delete ${preset.name}`}>
+                    <Icon name="trash" />
+                  </button>
+                </div>
+              ))
+            )}
+
+            <div className="past-papers-preset-form">
+              <input
+                type="text"
+                placeholder="Preset name..."
+                value={presetName}
+                onChange={(e) => setPresetName(e.target.value)}
+                className="past-papers-preset-input"
+                maxLength={50}
+              />
+              <Button size="sm" variant="secondary" onClick={handleSavePreset} disabled={!presetName.trim()}>
+                Save
+              </Button>
+            </div>
           </div>
         )}
 
@@ -408,8 +523,20 @@ export default function PastPapers() {
         )}
 
         {papersLoading ? (
-          <div style={{ textAlign: 'center', padding: 'var(--space-10)' }}>
-            <Spinner size="lg" />
+          <div className="past-papers-skeleton-grid">
+            {Array.from({ length: 6 }, (_, index) => (
+              <div key={index} className="past-papers-skeleton-card">
+                <div className="past-papers-skeleton-icon">
+                  <Icon name="file-pdf" style={{ fontSize: '2.5rem', color: 'var(--border-default)' }} />
+                </div>
+                <div className="past-papers-skeleton-body">
+                  <Skeleton width="80%" height={20} borderRadius="var(--radius-sm)" />
+                  <Skeleton width="50%" height={14} borderRadius="var(--radius-sm)" />
+                  <Skeleton width="100%" height={14} borderRadius="var(--radius-sm)" />
+                  <Skeleton width="60%" height={14} borderRadius="var(--radius-sm)" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : papers.length === 0 ? (
           <EmptyState
@@ -442,7 +569,7 @@ export default function PastPapers() {
                 </div>
 
                 <div className="card-body">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
+                  <div className="paper-card-title-row">
                     <h3 className="card-title">{paper.title}</h3>
                     <button
                       className={`paper-bookmark-btn${bookmarkedIds.has(paper.id) ? ' active' : ''}`}
@@ -458,22 +585,22 @@ export default function PastPapers() {
                   <p className="card-text">{paper.subject}</p>
 
                   {paper.avg_rating > 0 && (
-                    <div className="paper-rating-stars" style={{ marginTop: 'var(--space-2)' }}>
+                    <div className="paper-rating-stars">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <span
                           key={star}
-                          style={{ color: star <= Math.round(paper.avg_rating) ? 'var(--warm)' : 'var(--border-strong)', fontSize: 'var(--text-sm)' }}
+                          className={star <= Math.round(paper.avg_rating) ? 'paper-star-filled' : 'paper-star-empty'}
                         >
                           <Icon name="star" />
                         </span>
                       ))}
-                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginLeft: 'var(--space-2)' }}>
+                      <span className="paper-rating-count-small">
                         ({paper.rating_count || 0})
                       </span>
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-3)' }}>
+                  <div className="paper-card-chips">
                     {paper.level && <span className="chip">{paper.level}</span>}
                     {paper.year && <span className="chip chip-accent">{paper.year}</span>}
                     {paper.paper_type && <span className="chip chip-primary">{paper.paper_type}</span>}
@@ -631,7 +758,7 @@ export default function PastPapers() {
                             </div>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                        <div className="paper-review-meta">
                           <span className="paper-review-date">
                             {new Date(review.created_at).toLocaleDateString()}
                           </span>
