@@ -454,9 +454,9 @@ export default function PastPapers() {
               </Button>
             )}
 
-            <p className="past-papers-count">
-              {papersLoading ? 'Loading...' : `${total} paper${total !== 1 ? 's' : ''} found`}
-            </p>
+           <p className="past-papers-count">
+  {total} paper{total !== 1 ? 's' : ''} found
+</p>
           </div>
         )}
 
