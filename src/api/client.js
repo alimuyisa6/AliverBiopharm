@@ -1343,3 +1343,15 @@ export async function trackPaperView(paperId) {
 export async function getDownloadHistory(page = 1, limit = 20) {
   return getRequest('past-papers', 'get_download_history', { page, limit });
 }               
+
+export async function getPaperReviews(paperId, page = 1, limit = 20) {
+  return getRequest('past-papers', 'get_reviews', { paper_id: paperId, page, limit });
+}
+
+export async function ratePaper(paperId, rating, comment = null) {
+  return apiCall('past-papers', 'rate_paper', { paper_id: paperId, rating, comment });
+}
+
+export async function deletePaperReview(paperId) {
+  return apiCall('past-papers', 'delete_review', { paper_id: paperId });
+}
