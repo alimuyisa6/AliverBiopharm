@@ -1385,3 +1385,11 @@ export async function submitRecallConfidence(sessionId, questionId, confidence) 
 export async function startRecallSession(unitId) {
   return apiCall('recall', 'start', { unit_id: unitId });
 }
+
+export async function getTrendingPapers(limit = 6) {
+  return getRequest('past-papers', 'get_trending', { limit });
+}
+
+export async function getRecommendedPapers(limit = 6) {
+  return getRequest('past-papers', 'get_recommended', { limit });
+}
