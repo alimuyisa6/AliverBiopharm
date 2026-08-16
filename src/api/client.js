@@ -1382,3 +1382,6 @@ export async function submitRecallConfidence(sessionId, questionId, confidence) 
     confidence
   });
 }
+export async function startRecallSession(unitId) {
+  return apiCall('recall', 'start', { unit_id: unitId });
+}
