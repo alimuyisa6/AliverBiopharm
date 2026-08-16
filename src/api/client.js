@@ -1355,3 +1355,7 @@ export async function ratePaper(paperId, rating, comment = null) {
 export async function deletePaperReview(paperId) {
   return apiCall('past-papers', 'delete_review', { paper_id: paperId });
 }
+export async function updateDisplayName(displayName) {
+  return apiCall('profile', 'update_display_name', { display_name: displayName });
+}
+
