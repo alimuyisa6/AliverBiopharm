@@ -1,4 +1,4 @@
- /* api/cachedClient.js */
+/* api/cachedClient.js */
 import {
   getCached,
   setCache,
@@ -158,7 +158,7 @@ export const getRecallStats = () =>
   withCache('recall_stats', api.getRecallStats, false)();
 
 export const startRecallSession = (unitId) =>
-  api.getRecallSession(unitId);
+  api.startRecallSession(unitId);
 
 export const getRecallAchievements = () =>
   withCache('recall_achievements', api.getRecallAchievements, false)();
@@ -166,11 +166,7 @@ export const getRecallAchievements = () =>
 export const getRecallDashboard = () =>
   withCache('recall_dashboard', api.getRecallDashboard, false)();
 
-export async function startRecallSession(unitId) {
-  return apiCall('recall', 'start', { unit_id: unitId });
-}
-
- export const getSelectedLevel = () =>
+export const getSelectedLevel = () =>
   withCache('recall_selected_level', api.getSelectedLevel, false)();
 
 export const getCommunityActivity = () =>
@@ -472,5 +468,19 @@ export {
   getAllRatings,
   trackPdfPreview,
   trackPdfDownload,
-  submitResource
+  submitResource,
+  getPaperStats,
+  togglePaperBookmark,
+  getBookmarkedPapers,
+  trackPaperView,
+  getDownloadHistory,
+  getPaperReviews,
+  ratePaper,
+  deletePaperReview,
+  updateDisplayName,
+  getPaperFilterPresets,
+  savePaperFilterPreset,
+  deletePaperFilterPreset,
+  getTrendingPapers,
+  getRecommendedPapers
 } from './client';
