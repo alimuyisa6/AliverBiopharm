@@ -154,9 +154,10 @@ export default function PastPapers() {
       setPapers(result.papers || []);
       setTotalPages(result.total_pages || 1);
       setTotal(result.total || 0);
-    } catch {
+      setPapersLoading(false);
+    } catch (error) {
+      console.error('[PAST_PAPERS_LOAD_ERROR]', error);
       addToast('Failed to load papers', 'error');
-    } finally {
       setPapersLoading(false);
     }
   };
@@ -454,9 +455,9 @@ export default function PastPapers() {
               </Button>
             )}
 
-           <p className="past-papers-count">
-  {total} paper{total !== 1 ? 's' : ''} found
-</p>
+            <p className="past-papers-count">
+              {total} paper{total !== 1 ? 's' : ''} found
+            </p>
           </div>
         )}
 
