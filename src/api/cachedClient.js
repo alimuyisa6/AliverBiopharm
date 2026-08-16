@@ -166,7 +166,11 @@ export const getRecallAchievements = () =>
 export const getRecallDashboard = () =>
   withCache('recall_dashboard', api.getRecallDashboard, false)();
 
-export const getSelectedLevel = () =>
+export async function startRecallSession(unitId) {
+  return apiCall('recall', 'start', { unit_id: unitId });
+}
+
+ export const getSelectedLevel = () =>
   withCache('recall_selected_level', api.getSelectedLevel, false)();
 
 export const getCommunityActivity = () =>
