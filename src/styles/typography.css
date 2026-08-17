@@ -1,11 +1,16 @@
-/* styles/typography.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@700;800;900&family=Outfit:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap');
+ /* styles/typography.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@700;800;900&family=Outfit:wght@500;600;700&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&family=Comfortaa:wght@400;700&family=Maven+Pro:wght@400;700&display=swap');
 
 :root {
   --font-heading: 'Poppins', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-button: 'Outfit', sans-serif;
   --font-mono: 'DM Mono', monospace;
+  --font-fraunces: 'Fraunces', serif;
+  --font-source-sans: 'Source Sans 3', sans-serif;
+  --font-open-sans: 'Open Sans', sans-serif;
+  --font-comfortaa: 'Comfortaa', sans-serif;
+  --font-maven-pro: 'Maven Pro', sans-serif;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
   --text-base: 0.9375rem;
@@ -33,3 +38,9 @@
   --weight-extrabold: 800;
   --weight-black: 900;
 }
+
+.font-fraunces { font-family: var(--font-fraunces); }
+.font-source-sans { font-family: var(--font-source-sans); }
+.font-open-sans { font-family: var(--font-open-sans); }
+.font-comfortaa { font-family: var(--font-comfortaa); }
+.font-maven-pro { font-family: var(--font-maven-pro); }
