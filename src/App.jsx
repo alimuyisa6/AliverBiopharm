@@ -1,11 +1,13 @@
  /* src/App.jsx */
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
 import { LayoutProvider } from './contexts/LayoutContext';
 import { ToastProvider } from './components/Toast/Toast';
 import Layout from './components/Layout/Layout';
 import ScrollMemory from './components/ScrollMemory';
 import PageTransition from './components/PageTransition';
+import Spinner from './components/Spinner/Spinner';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
@@ -26,8 +28,41 @@ import TutorApply from './pages/TutorApply';
 import TutorDashboard from './pages/TutorDashboard';
 import TutorMarketplace from './pages/TutorMarketplace';
 
+function GlobalLoader() {
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: 'var(--bg-page)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 9999,
+      transition: 'opacity 0.5s ease, visibility 0.5s ease'
+    }}>
+      <Spinner context="brand" size="lg" />
+    </div>
+  );
+}
+
 function AppRoutes() {
   const location = useLocation();
+  const [appLoading, setAppLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAppLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (appLoading) {
+    return <GlobalLoader />;
+  }
 
   return (
     <>
