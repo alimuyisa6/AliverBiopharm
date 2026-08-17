@@ -1,4 +1,4 @@
-/* pages/PastPapers.jsx */
+ /* pages/PastPapers.jsx */
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,6 +24,7 @@ import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
 import Select from '../components/Select/Select';
 import EmptyState from '../components/EmptyState/EmptyState';
+import Card from '../components/Card/Card';
 import { useToast } from '../components/Toast/Toast';
 import { useLayout } from '../contexts/LayoutContext';
 
@@ -685,7 +686,7 @@ export default function PastPapers() {
               Exam Preparation
             </span>
 
-            <h1 className="past-papers-title">
+            <h1 className="past-papers-title font-fraunces">
               Past Papers
               {levelName && (
                 <span className="past-papers-title-dim">
@@ -696,7 +697,7 @@ export default function PastPapers() {
             </h1>
 
             {classLabel && (
-              <p className="past-papers-subtitle">
+              <p className="past-papers-subtitle font-source-sans">
                 {classLabel}
               </p>
             )}
@@ -715,13 +716,13 @@ export default function PastPapers() {
                 className="breadcrumb-sep"
               />
 
-              <span>
+              <span className="font-maven-pro">
                 Past Papers
               </span>
             </nav>
 
             <div className="past-papers-meta">
-              <span className="past-papers-meta-item">
+              <span className="past-papers-meta-item font-poppins">
                 <strong>
                   {papersLoading
                     ? '—'
@@ -732,7 +733,7 @@ export default function PastPapers() {
 
               <span className="past-papers-meta-divider" />
 
-              <span className="past-papers-meta-item">
+              <span className="past-papers-meta-item font-poppins">
                 <strong>
                   {filterOptionsLoading
                     ? '—'
@@ -743,7 +744,7 @@ export default function PastPapers() {
 
               <span className="past-papers-meta-divider" />
 
-              <span className="past-papers-meta-item">
+              <span className="past-papers-meta-item font-poppins">
                 <strong>
                   {filterOptionsLoading
                     ? '—'
@@ -780,7 +781,7 @@ export default function PastPapers() {
               key={tab.key}
               variant={
                 activeTab === tab.key
-                  ? 'primary'
+                  ? 'pill'
                   : 'ghost'
               }
               size="sm"
@@ -859,8 +860,8 @@ export default function PastPapers() {
             <Button
               variant={
                 showFilters
-                  ? 'primary'
-                  : 'secondary'
+                  ? 'pill'
+                  : 'curved'
               }
               size="sm"
               onClick={() =>
@@ -905,7 +906,7 @@ export default function PastPapers() {
               </Button>
             )}
 
-            <p className="past-papers-count">
+            <p className="past-papers-count font-open-sans">
               {papersLoading
                 ? 'Loading papers...'
                 : `${total} paper${total !== 1 ? 's' : ''} found`}
@@ -968,7 +969,7 @@ export default function PastPapers() {
 
               <Button
                 size="sm"
-                variant="secondary"
+                variant="curved"
                 onClick={handleSavePreset}
                 disabled={!presetName.trim()}
               >
@@ -1055,54 +1056,15 @@ export default function PastPapers() {
         )}
 
         {papersLoading ? (
-          <div
-            className="past-papers-skeleton-grid"
-            aria-busy="true"
-            aria-label="Loading past papers"
-          >
-            {Array.from(
-              { length: 6 },
-              (_, index) => (
-                <div
-                  key={index}
-                  className="past-papers-skeleton-card"
-                >
-                  <div className="past-papers-skeleton-icon">
-                    <Skeleton
-                      width={48}
-                      height={56}
-                      borderRadius="var(--radius-md)"
-                    />
-                  </div>
-
-                  <div className="past-papers-skeleton-body">
-                    <Skeleton
-                      width="80%"
-                      height={20}
-                      borderRadius="var(--radius-sm)"
-                    />
-
-                    <Skeleton
-                      width="50%"
-                      height={14}
-                      borderRadius="var(--radius-sm)"
-                    />
-
-                    <Skeleton
-                      width="100%"
-                      height={14}
-                      borderRadius="var(--radius-sm)"
-                    />
-
-                    <Skeleton
-                      width="60%"
-                      height={14}
-                      borderRadius="var(--radius-sm)"
-                    />
-                  </div>
-                </div>
-              )
-            )}
+          <div className="past-papers-grid">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Card
+                key={index}
+                variant="mixed"
+                loading={true}
+                loadingLines={3}
+              />
+            ))}
           </div>
         ) : papers.length === 0 ? (
           <EmptyState
@@ -1130,7 +1092,7 @@ export default function PastPapers() {
             action={
               activeTab === 'all' && (
                 <Button
-                  variant="secondary"
+                  variant="curved"
                   onClick={clearFilters}
                 >
                   Clear Filters
@@ -1141,9 +1103,10 @@ export default function PastPapers() {
         ) : (
           <div className="past-papers-grid">
             {papers.map((paper) => (
-              <div
+              <Card
                 key={paper.id}
-                className={`card paper-card${
+                variant={paper.is_premium ? 'curved' : 'mixed'}
+                className={`paper-card${
                   paper.is_premium
                     ? ' paper-card-premium'
                     : ''
@@ -1171,7 +1134,7 @@ export default function PastPapers() {
 
                 <div className="card-body">
                   <div className="paper-card-title-row">
-                    <h3 className="card-title">
+                    <h3 className="card-title font-poppins">
                       {paper.title}
                     </h3>
 
@@ -1209,7 +1172,7 @@ export default function PastPapers() {
                     </button>
                   </div>
 
-                  <p className="card-text">
+                  <p className="card-text font-source-sans">
                     {paper.subject}
                   </p>
 
@@ -1285,6 +1248,7 @@ export default function PastPapers() {
                       downloadingId ===
                       paper.id
                     }
+                    loadingContext="data"
                     onClick={(event) => {
                       event.stopPropagation();
                       handleDownload(
@@ -1293,8 +1257,8 @@ export default function PastPapers() {
                     }}
                     variant={
                       paper.is_premium
-                        ? 'warm'
-                        : 'primary'
+                        ? 'inset'
+                        : 'pill'
                     }
                   >
                     <Icon
@@ -1312,7 +1276,7 @@ export default function PastPapers() {
                         : 'Sign in to Download'}
                   </Button>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -1321,7 +1285,7 @@ export default function PastPapers() {
           totalPages > 1 && (
             <div className="past-papers-pagination">
               <Button
-                variant="secondary"
+                variant="curved"
                 size="sm"
                 onClick={() =>
                   setPage(
@@ -1357,7 +1321,7 @@ export default function PastPapers() {
                     key={item}
                     variant={
                       item === page
-                        ? 'primary'
+                        ? 'pill'
                         : 'ghost'
                     }
                     size="sm"
@@ -1370,7 +1334,7 @@ export default function PastPapers() {
                 ))}
 
               <Button
-                variant="secondary"
+                variant="curved"
                 size="sm"
                 onClick={() =>
                   setPage(
@@ -1404,11 +1368,11 @@ export default function PastPapers() {
           >
             <div className="paper-modal-header">
               <div>
-                <h2 className="paper-modal-title">
+                <h2 className="paper-modal-title font-fraunces">
                   {selectedPaper.title}
                 </h2>
 
-                <p className="paper-modal-subject">
+                <p className="paper-modal-subject font-source-sans">
                   {selectedPaper.subject}
                 </p>
               </div>
@@ -1462,6 +1426,7 @@ export default function PastPapers() {
                     downloadingId ===
                     selectedPaper.id
                   }
+                  loadingContext="data"
                   onClick={() =>
                     handleDownload(
                       selectedPaper
@@ -1469,8 +1434,8 @@ export default function PastPapers() {
                   }
                   variant={
                     selectedPaper.is_premium
-                      ? 'warm'
-                      : 'primary'
+                      ? 'inset'
+                      : 'pill'
                   }
                 >
                   <Icon
@@ -1488,7 +1453,7 @@ export default function PastPapers() {
 
                 <Button
                   size="sm"
-                  variant="secondary"
+                  variant="curved"
                   onClick={() =>
                     handleBookmark(
                       selectedPaper.id
@@ -1514,7 +1479,7 @@ export default function PastPapers() {
               </div>
 
               <div className="paper-review-form">
-                <span className="paper-review-label">
+                <span className="paper-review-label font-poppins">
                   Rate this paper
                 </span>
 
@@ -1560,10 +1525,11 @@ export default function PastPapers() {
 
                 <Button
                   size="sm"
-                  variant="primary"
+                  variant="pill"
                   loading={
                     submittingReview
                   }
+                  loadingContext="brand"
                   onClick={
                     handleSubmitReview
                   }
@@ -1581,7 +1547,7 @@ export default function PastPapers() {
                       'var(--space-4)'
                   }}
                 >
-                  <Spinner size="sm" />
+                  <Spinner context="data" size="sm" />
                 </div>
               ) : reviews.length === 0 ? (
                 <p className="paper-reviews-empty">
@@ -1604,7 +1570,7 @@ export default function PastPapers() {
                             </div>
 
                             <div>
-                              <span className="paper-review-name">
+                              <span className="paper-review-name font-poppins">
                                 {review.display_name ||
                                   'Anonymous'}
                               </span>
@@ -1639,7 +1605,7 @@ export default function PastPapers() {
                           </div>
 
                           <div className="paper-review-meta">
-                            <span className="paper-review-date">
+                            <span className="paper-review-date font-open-sans">
                               {new Date(
                                 review.created_at
                               ).toLocaleDateString()}
@@ -1661,7 +1627,7 @@ export default function PastPapers() {
                         </div>
 
                         {review.comment && (
-                          <p className="paper-review-comment">
+                          <p className="paper-review-comment font-source-sans">
                             {review.comment}
                           </p>
                         )}
