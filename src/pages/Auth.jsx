@@ -343,7 +343,7 @@ export default function Auth() {
               <Icon name="circle-check" className="auth-state-icon auth-state-icon-success" />
               <h2 className="auth-state-title">Account Created</h2>
               <p className="auth-state-text">Welcome to AliverBiopharm. Redirecting...</p>
-              <Spinner />
+              <Spinner context="brand" />
             </div>
           ) : mfaStep ? (
             <div className="auth-form-block">
@@ -368,7 +368,7 @@ export default function Auth() {
                   disabled={submitting}
                 />
                 <div ref={setCaptchaSlot} className="auth-captcha" />
-                <Button type="submit" loading={submitting} className="auth-submit">
+                <Button type="submit" loading={submitting} loadingContext="brand" className="auth-submit">
                   Verify and Sign In
                 </Button>
               </form>
@@ -412,7 +412,7 @@ export default function Auth() {
                 <div className="auth-onboarding-step">
                   <h3 className="auth-step-title">Select your level</h3>
 
-                  {levelsLoading && <Spinner />}
+                  {levelsLoading && <Spinner context="data" size="sm" />}
                   {levelsError && <p className="form-error">{levelsError}</p>}
 
                   {!levelsLoading && !levelsError && (
@@ -424,9 +424,10 @@ export default function Auth() {
                         return (
                           <Button
                             key={rowKey}
-                            variant={track === value ? 'primary' : 'secondary'}
+                            variant={track === value ? 'pill' : 'curved'}
                             onClick={() => { setTrack(value); handleOnboardingFinish(role, value); }}
                             loading={submitting && track === value}
+                            loadingContext="conic"
                             disabled={submitting}
                           >
                             <Icon name={lvl.icon === 'dna' ? 'microscope' : lvl.icon || 'graduation-cap'} />
@@ -503,7 +504,13 @@ export default function Auth() {
 
                 <div ref={setCaptchaSlot} className="auth-captcha" />
 
-                <Button type="submit" loading={submitting} className="auth-submit">
+                <Button 
+                  type="submit" 
+                  loading={submitting} 
+                  loadingContext="brand"
+                  variant="pill"
+                  className="auth-submit"
+                >
                   {mode === 'login' ? <><Icon name="right-to-bracket" /> Sign In</> : <><Icon name="user-plus" /> Create Account</>}
                 </Button>
               </form>
