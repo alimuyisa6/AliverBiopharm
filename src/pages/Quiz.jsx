@@ -31,6 +31,7 @@ import Spinner from '../components/Spinner/Spinner';
 import Skeleton from '../components/Skeleton/Skeleton';
 import ProgressBar from '../components/ProgressBar/ProgressBar';
 import Button from '../components/Button/Button';
+import Card from '../components/Card/Card';
 import Modal from '../components/Modal/Modal';
 
 function createIdempotencyKey(prefix = 'quiz') {
@@ -55,6 +56,7 @@ export default function Quiz() {
   const [activeUnitId, setActiveUnitId] = useState(null);
   const [currentTopic, setCurrentTopic] = useState('');
   const [allTopics, setAllTopics] = useState([]);
+  const [topicsLoading, setTopicsLoading] = useState(true);
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [userAnswers, setUserAnswers] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -114,9 +116,12 @@ export default function Quiz() {
   useEffect(() => {
     if (!isReady || !access.canAccess || access.isPending) return;
 
+    setTopicsLoading(true);
+
     listQuizTopics(activeGroupId)
       .then((res) => setAllTopics(Array.isArray(res?.topics) ? res.topics : []))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setTopicsLoading(false));
   }, [isReady, access.canAccess, access.isPending, activeGroupId]);
 
   useEffect(() => {
@@ -362,7 +367,7 @@ export default function Quiz() {
   if (!isReady || access.loading) {
     return (
       <div className="fcd-loading-wrap">
-        <Spinner size="lg" />
+        <Spinner context="brand" size="lg" />
       </div>
     );
   }
@@ -373,7 +378,7 @@ export default function Quiz() {
   if (loading && !quizQuestions.length && !resultData && !currentTopic) {
     return (
       <div className="fcd-loading-wrap">
-        <Spinner size="lg" />
+        <Spinner context="brand" size="lg" />
       </div>
     );
   }
@@ -387,11 +392,11 @@ export default function Quiz() {
     <div className="quiz-page">
       <div className="section quiz-page-section">
         <span className="sec-label">Assessments</span>
-        <h1 className="section-title quiz-page-title">
+        <h1 className="section-title quiz-page-title font-fraunces">
           Knowledge Quizzes<br />{displayName ? `– ${displayName}` : ''}
         </h1>
 
-        {class_name && <p className="quiz-group-label">Current group: {class_name}</p>}
+        {class_name && <p className="quiz-group-label font-source-sans">Current group: {class_name}</p>}
 
         {user && streak > 0 && (
           <div className="quiz-streak-row">
@@ -404,7 +409,7 @@ export default function Quiz() {
         <nav className="breadcrumb">
           <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
           <Icon name="chevron-right" className="breadcrumb-sep" />
-          <span>Quizzes</span>
+          <span className="font-maven-pro">Quizzes</span>
         </nav>
 
         {!currentTopic && (
@@ -419,10 +424,14 @@ export default function Quiz() {
 
         {!currentTopic ? (
           <div className="grid grid-cols-3">
-            {allTopics.length === 0 ? (
+            {topicsLoading ? (
+              Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} variant="round" loading={true} loadingLines={2} />
+              ))
+            ) : allTopics.length === 0 ? (
               <div className="quiz-empty-topics">
                 <Icon name="layer-group" className="quiz-empty-icon" />
-                <p>No topics available.</p>
+                <p className="font-source-sans">No topics available.</p>
               </div>
             ) : (
               allTopics.map((topic) => {
@@ -431,79 +440,79 @@ export default function Quiz() {
 
                 if (hasQuestions && !allDone) {
                   return (
-                    <div key={topic.unit_id} className="card">
+                    <Card key={topic.unit_id} variant="mixed">
                       <div className="card-body">
-                        <h3 className="card-title">{topic.topic_name}</h3>
-                        <p className="card-text">{topic.question_count} questions • {topic.total_blocks} blocks</p>
+                        <h3 className="card-title font-poppins">{topic.topic_name}</h3>
+                        <p className="card-text font-source-sans">{topic.question_count} questions • {topic.total_blocks} blocks</p>
                       </div>
                       <div className="card-footer">
-                        <Button size="sm" onClick={() => openTopicBlocks(topic)} disabled={locked}>Start</Button>
+                        <Button variant="pill" size="sm" onClick={() => openTopicBlocks(topic)} disabled={locked}>Start</Button>
                       </div>
-                    </div>
+                    </Card>
                   );
                 }
 
                 return (
-                  <div key={topic.unit_id} className="card card-compact">
+                  <Card key={topic.unit_id} variant="pattern" className="card-compact">
                     <div className="card-body">
-                      <h3 className="card-title">{topic.topic_name}</h3>
-                      <p className="card-text">{topic.question_count} questions</p>
+                      <h3 className="card-title font-poppins">{topic.topic_name}</h3>
+                      <p className="card-text font-source-sans">{topic.question_count} questions</p>
                     </div>
-                  </div>
+                  </Card>
                 );
               })
             )}
           </div>
         ) : resultData ? (
           <div className="quiz-result-container">
-            <div className="card quiz-result-card">
+            <Card variant="curved" className="quiz-result-card">
               <Icon
                 name={resultData.passed ? 'trophy' : 'book-open'}
                 className={`quiz-result-icon ${resultData.passed ? 'is-pass' : 'is-fail'}`}
               />
-              <h2>{resultData.passed ? `Congratulations, ${user?.full_name || 'Learner'}!` : 'Block Complete'}</h2>
+              <h2 className="font-poppins">{resultData.passed ? `Congratulations, ${user?.full_name || 'Learner'}!` : 'Block Complete'}</h2>
               <div className={`quiz-result-score ${resultData.passed ? 'is-pass' : 'is-fail'}`}>
                 {resultData.percentage}%
               </div>
-              <p>{resultData.score}/{resultData.total} correct</p>
+              <p className="font-source-sans">{resultData.score}/{resultData.total} correct</p>
 
               {resultData.retry_available && (
-                <Button variant="warm" size="sm" onClick={() => openTopicBlocks({ topic_name: currentTopic, unit_id: activeUnitId, total_blocks: totalBlocks })}>
+                <Button variant="inset" size="sm" onClick={() => openTopicBlocks({ topic_name: currentTopic, unit_id: activeUnitId, total_blocks: totalBlocks })}>
                   Retry Wrong Questions
                 </Button>
               )}
-            </div>
+            </Card>
 
             <div className="quiz-review-section">
-              <h3 className="quiz-review-heading">Block {currentBlock + 1} Review – {currentTopic}</h3>
+              <h3 className="quiz-review-heading font-poppins">Block {currentBlock + 1} Review – {currentTopic}</h3>
 
               {(resultData.answers || []).map((answer, idx) => (
-                <div key={idx} className="card quiz-review-card">
+                <Card key={idx} variant="inset" className="quiz-review-card">
                   <div className="quiz-review-header">
                     <Icon
                       name={answer.isCorrect ? 'circle-check' : 'circle-xmark'}
                       className={`icon ${answer.isCorrect ? 'is-correct' : 'is-incorrect'}`}
                     />
-                    <span className="quiz-review-qnum">Q{idx + 1}</span>
+                    <span className="quiz-review-qnum font-poppins">Q{idx + 1}</span>
                   </div>
-                  <p>{answer.question}</p>
+                  <p className="font-source-sans">{answer.question}</p>
                   <p className={`quiz-review-answer ${answer.isCorrect ? 'is-correct' : 'is-incorrect'}`}>
                     Your answer: {answer.userAnswerText}
                   </p>
                   {!answer.isCorrect && <p className="quiz-review-correct-answer">Correct: {answer.correctAnswerText}</p>}
-                  {answer.explanation && <p className="quiz-review-explanation">{answer.explanation}</p>}
-                </div>
+                  {answer.explanation && <p className="quiz-review-explanation font-open-sans">{answer.explanation}</p>}
+                </Card>
               ))}
             </div>
 
             <div className="quiz-result-actions">
               {currentBlock + 1 < totalBlocks && (
-                <Button onClick={() => startBlock(currentBlock + 1)} disabled={locked}>
+                <Button variant="3d" onClick={() => startBlock(currentBlock + 1)} disabled={locked}>
                   Next Block <Icon name="arrow-right" />
                 </Button>
               )}
 
-              <Button variant="secondary" onClick={() => { setCurrentTopic(''); setResultData(null); }}>
+              <Button variant="curved" onClick={() => { setCurrentTopic(''); setResultData(null); }}>
                 <Icon name="arrow-left" /> All Topics
               </Button>
             </div>
@@ -513,7 +522,7 @@ export default function Quiz() {
             {integrityOverlay && (
               <div className="quiz-integrity-overlay">
                 <Icon name="exclamation-triangle" />
-                <p>{integrityOverlay}</p>
+                <p className="font-source-sans">{integrityOverlay}</p>
               </div>
             )}
 
@@ -522,13 +531,13 @@ export default function Quiz() {
                 let cls = 'btn btn-sm btn-ghost';
 
                 if (userAnswers[idx]) {
-                  cls = userAnswers[idx].correct ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-danger';
+                  cls = userAnswers[idx].correct ? 'btn btn-sm btn-pill' : 'btn btn-sm btn-danger';
                 }
 
                 return (
                   <button
                     key={idx}
-                    className={`${cls} ${idx === currentIndex ? 'btn-accent' : ''} quiz-nav-pill`}
+                    className={`${cls} ${idx === currentIndex ? 'btn-curved' : ''} quiz-nav-pill`}
                     onClick={() => {
                       if (!canNavigateTo(idx, userAnswers)) {
                         addToast('Answer previous questions first', 'warning');
@@ -547,7 +556,7 @@ export default function Quiz() {
             {timeLeft !== null && (
               <div className="quiz-timer-row">
                 <div className="quiz-timer-header">
-                  <span className="quiz-timer-label">Time remaining</span>
+                  <span className="quiz-timer-label font-poppins">Time remaining</span>
                   <span className={`quiz-timer-value ${timerClass}`}>
                     {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
                   </span>
@@ -557,19 +566,19 @@ export default function Quiz() {
             )}
 
             <ProgressBar value={currentIndex + 1} max={quizQuestions.length} variant="gradient" />
-            <p className="quiz-progress-label">
+            <p className="quiz-progress-label font-source-sans">
               Block {currentBlock + 1} • Q {currentIndex + 1}/{quizQuestions.length} – {currentTopic}
             </p>
 
             {answerSubmitting && (
               <div className="quiz-answering-indicator">
-                <Spinner size="sm" />
-                <span className="quiz-spinner-label">Checking</span>
+                <Spinner context="conic" size="sm" />
+                <span className="quiz-spinner-label font-maven-pro">Checking</span>
               </div>
             )}
 
-            <div className="card quiz-question-card">
-              <h3 className="quiz-question-heading">{quizQuestions[currentIndex].question_text}</h3>
+            <Card variant="mixed" className="quiz-question-card">
+              <h3 className="quiz-question-heading font-poppins">{quizQuestions[currentIndex].question_text}</h3>
 
               <div className="quiz-options-list">
                 {['A', 'B', 'C', 'D'].map((option) => {
@@ -577,10 +586,10 @@ export default function Quiz() {
                   const selected = userAnswers[currentIndex]?.selected;
                   const correctOption = userAnswers[currentIndex]?.correct_option;
 
-                  let cls = 'btn btn-secondary';
+                  let cls = 'btn btn-curved';
 
                   if (answered) {
-                    if (option === correctOption) cls = 'btn-primary';
+                    if (option === correctOption) cls = 'btn-pill';
                     else if (option === selected) cls = 'btn-danger';
                   }
 
@@ -591,8 +600,8 @@ export default function Quiz() {
                       onClick={() => selectAnswer(option)}
                       disabled={answered || answerSubmitting || locked}
                     >
-                      <span className="quiz-option-letter">{option}.</span>
-                      <span>{quizQuestions[currentIndex][`option_${option.toLowerCase()}`]}</span>
+                      <span className="quiz-option-letter font-poppins">{option}.</span>
+                      <span className="font-source-sans">{quizQuestions[currentIndex][`option_${option.toLowerCase()}`]}</span>
                       {answered && option === correctOption && <Icon name="circle-check" className="quiz-option-icon" />}
                       {answered && option === selected && option !== correctOption && <Icon name="circle-xmark" className="quiz-option-icon" />}
                     </button>
@@ -601,35 +610,35 @@ export default function Quiz() {
               </div>
 
               {quizMode === 'study' && userAnswers[currentIndex]?.explanation && (
-                <div className="quiz-review-explanation">
+                <div className="quiz-review-explanation font-open-sans">
                   {userAnswers[currentIndex].explanation}
                 </div>
               )}
-            </div>
+            </Card>
 
             <div className="quiz-nav-buttons">
-              <Button variant="secondary" onClick={() => { if (currentIndex > 0) navigateTo(currentIndex - 1); }} disabled={currentIndex === 0}>
+              <Button variant="curved" onClick={() => { if (currentIndex > 0) navigateTo(currentIndex - 1); }} disabled={currentIndex === 0}>
                 <Icon name="arrow-left" /> Prev
               </Button>
 
               {userAnswers[currentIndex] !== null && (
                 firstUnanswered !== -1 && firstUnanswered !== currentIndex ? (
-                  <Button onClick={() => navigateTo(firstUnanswered)}>Next <Icon name="arrow-right" /></Button>
+                  <Button variant="pill" onClick={() => navigateTo(firstUnanswered)}>Next <Icon name="arrow-right" /></Button>
                 ) : currentIndex < quizQuestions.length - 1 ? (
-                  <Button onClick={() => navigateTo(currentIndex + 1)}>Next <Icon name="arrow-right" /></Button>
+                  <Button variant="pill" onClick={() => navigateTo(currentIndex + 1)}>Next <Icon name="arrow-right" /></Button>
                 ) : allAnswered ? (
-                  <Button onClick={submitBlock} disabled={locked}>Submit Block</Button>
+                  <Button variant="3d" onClick={submitBlock} disabled={locked}>Submit Block</Button>
                 ) : null
               )}
             </div>
           </div>
         ) : (
           <div className="quiz-blocks-page">
-            <h2 className="quiz-blocks-heading">{currentTopic}</h2>
-            <p className="quiz-blocks-sub">{class_name ? `${class_name} – ` : ''}Select a block to start</p>
+            <h2 className="quiz-blocks-heading font-poppins">{currentTopic}</h2>
+            <p className="quiz-blocks-sub font-source-sans">{class_name ? `${class_name} – ` : ''}Select a block to start</p>
 
             {totalBlocks === 0 ? (
-              <p className="quiz-blocks-empty">No blocks available.</p>
+              <p className="quiz-blocks-empty font-open-sans">No blocks available.</p>
             ) : (
               <div className="quiz-blocks-grid">
                 {Array.from({ length: totalBlocks }).map((_, index) => {
@@ -640,7 +649,7 @@ export default function Quiz() {
                   return (
                     <button
                       key={index}
-                      className={`btn ${completed ? 'btn-primary' : lockedBlock ? 'btn-ghost' : 'btn-secondary'}`}
+                      className={`btn ${completed ? 'btn-pill' : lockedBlock ? 'btn-ghost' : 'btn-curved'}`}
                       disabled={lockedBlock || locked}
                       onClick={() => startBlock(index)}
                     >
@@ -669,7 +678,7 @@ export default function Quiz() {
             <li><Icon name="exclamation-triangle" className="quiz-rules-icon is-error" /> 3 tab switches auto-submits</li>
           </ul>
           <div className="quiz-rules-submit">
-            <Button onClick={confirmStartBlock} className="quiz-rules-submit-btn">Start</Button>
+            <Button variant="3d" onClick={confirmStartBlock} className="quiz-rules-submit-btn">Start</Button>
           </div>
         </Modal>
       </div>
