@@ -1,9 +1,20 @@
  /* components/Button/Button.jsx */
 import { forwardRef } from 'react';
 import Icon from '../Icon/Icon';
+import Spinner from '../Spinner/Spinner';
 
 const Button = forwardRef(function Button(
-  { children, variant = 'primary', size, icon, iconRight, loading, className = '', ...props },
+  { 
+    children, 
+    variant = 'primary',
+    size, 
+    icon, 
+    iconRight, 
+    loading, 
+    loadingContext = 'default',
+    className = '', 
+    ...props 
+  },
   ref
 ) {
   const cls = [
@@ -20,9 +31,15 @@ const Button = forwardRef(function Button(
 
   return (
     <button ref={ref} className={cls} disabled={loading || props.disabled} {...props}>
-      {loading ? null : safeIcon ? <Icon name={safeIcon} /> : null}
-      {children && <span>{children}</span>}
-      {!loading && safeIconRight ? <Icon name={safeIconRight} /> : null}
+      {loading ? (
+        <Spinner size="sm" context={loadingContext} />
+      ) : (
+        <>
+          {safeIcon && <Icon name={safeIcon} />}
+          {children && <span>{children}</span>}
+          {safeIconRight && <Icon name={safeIconRight} />}
+        </>
+      )}
     </button>
   );
 });
