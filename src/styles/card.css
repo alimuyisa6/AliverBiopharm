@@ -56,6 +56,39 @@ body.dark-mode .card-emerald {
   background: var(--bg-card-tinted);
 }
 
+.card-round {
+  border-radius: 50px;
+}
+
+.card-mixed {
+  border-radius: 0 30px 0 30px;
+}
+
+.card-inset {
+  border-radius: 12px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+  background: var(--bg-input);
+}
+
+.card-curved {
+  border-radius: 100px 0 100px 0;
+}
+
+.card-pattern {
+  border-radius: 12px;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bg-card-hover),
+    var(--bg-card-hover) 10px,
+    var(--bg-card) 10px,
+    var(--bg-card) 20px
+  );
+}
+
+.card-loading {
+  pointer-events: none;
+}
+
 .card-image {
   width: 100%;
   aspect-ratio: 1;
