@@ -92,6 +92,7 @@ export default function BioRecall() {
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewQuestion, setReviewQuestion] = useState(null);
   const [submittingConfidence, setSubmittingConfidence] = useState(false);
+  const [clozeAnswer, setClozeAnswer] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try {
       return localStorage.getItem('bioRecall_sound') !== 'off';
@@ -199,6 +200,7 @@ export default function BioRecall() {
       setSessionQuote(started.quote || null);
       if (started.level) setLevelMeta(started.level);
       setFeedbackResult(null);
+      setClozeAnswer('');
       setReviewMode(false);
       setSessionActive(true);
     } catch {
@@ -221,7 +223,8 @@ export default function BioRecall() {
     setSessionActive(false);
     setCurrentQuestion({
       id: item.question_id,
-      question_text: item.question_text
+      question_text: item.question_text,
+      question_type: 'open_ended'
     });
   }
 
@@ -251,7 +254,13 @@ export default function BioRecall() {
       return;
     }
 
-    const answer = answerInputRef.current?.value?.trim();
+    let answer = '';
+
+    if (currentQuestion?.question_type === 'cloze') {
+      answer = clozeAnswer.trim();
+    } else {
+      answer = answerInputRef.current?.value?.trim();
+    }
 
     if (!answer || !currentQuestion) return;
 
@@ -277,6 +286,7 @@ export default function BioRecall() {
     } finally {
       setAnalyzing(false);
       if (answerInputRef.current) answerInputRef.current.value = '';
+      setClozeAnswer('');
     }
   }
 
@@ -337,6 +347,7 @@ export default function BioRecall() {
       setCurrentIndex(cont.current_index || 0);
       setTotalQuestions(cont.total_questions || totalQuestions);
       setFeedbackResult(null);
+      setClozeAnswer('');
     } catch {
       addToast('Failed to load next question', 'error');
     } finally {
@@ -556,8 +567,32 @@ export default function BioRecall() {
             )}
 
             <Card className="recall-question-card">
-              <h3 className="recall-question-heading">{currentQuestion.question_text}</h3>
-              <Input ref={answerInputRef} placeholder="Type your answer..." disabled={analyzing || locked} />
+              {currentQuestion.question_type === 'cloze' && currentQuestion.cloze_template ? (
+                <div className="recall-cloze-container">
+                  <p className="recall-cloze-template">
+                    {currentQuestion.cloze_template.split('___').map((part, index, array) => (
+                      <span key={index}>
+                        {part}
+                        {index < array.length - 1 && (
+                          <input
+                            className="recall-cloze-blank"
+                            value={clozeAnswer}
+                            onChange={(e) => setClozeAnswer(e.target.value)}
+                            disabled={analyzing || locked}
+                            placeholder="..."
+                            aria-label="Fill in the blank"
+                          />
+                        )}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <h3 className="recall-question-heading">{currentQuestion.question_text}</h3>
+                  <Input ref={answerInputRef} placeholder="Type your answer..." disabled={analyzing || locked} />
+                </>
+              )}
 
               {analyzing && (
                 <div className="recall-analyzing-row">
