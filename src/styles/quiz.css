@@ -731,3 +731,20 @@
     text-align: center;
   }
 }
+
+.quiz-question-image-wrapper {
+  margin-bottom: var(--space-5);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+}
+
+.quiz-question-image {
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  object-fit: contain;
+  display: block;
+  background: var(--bg-card-hover);
+}
+  
