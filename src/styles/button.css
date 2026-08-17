@@ -1,4 +1,4 @@
-/* styles/button.css */
+ /* styles/button.css */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -94,6 +94,56 @@
   background: var(--red-700);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.30);
+}
+
+.btn-curved {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 0 20px 0 20px;
+}
+
+.btn-curved:hover:not(:disabled) {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-radius: 20px 0 20px 0;
+}
+
+.btn-pill {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-radius: 50px;
+  padding: 14px 32px;
+}
+
+.btn-pill:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-3d {
+  background: var(--secondary);
+  color: var(--text-inverse);
+  border-radius: 8px;
+  border-bottom: 4px solid var(--secondary-hover);
+}
+
+.btn-3d:hover:not(:disabled) {
+  border-bottom-width: 2px;
+  transform: translateY(2px);
+}
+
+.btn-inset {
+  background: var(--warm);
+  color: var(--text-inverse);
+  border-radius: 8px;
+  box-shadow: inset 0 -3px 0 var(--warm-hover);
+  font-weight: var(--weight-bold);
+}
+
+.btn-inset:hover:not(:disabled) {
+  box-shadow: inset 0 -6px 0 var(--warm-hover);
 }
 
 .btn-sm {
