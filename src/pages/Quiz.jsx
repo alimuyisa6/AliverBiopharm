@@ -1,4 +1,4 @@
- /* pages/Quiz.jsx */
+/* pages/Quiz.jsx */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -440,45 +440,28 @@ export default function Quiz() {
 
                 if (hasQuestions && !allDone) {
                   return (
-                    <Card key={topic.unit_id} variant="mixed">
-                      {topic.topic_image_url && (
-                        <div className="quiz-topic-image-wrapper">
-                          <img
-                            src={topic.topic_image_url}
-                            alt={topic.topic_name}
-                            className="quiz-topic-image"
-                            loading="lazy"
-                          />
-                        </div>
-                      )}
-                      <div className="card-body">
-                        <h3 className="card-title font-poppins">{topic.topic_name}</h3>
-                        <p className="card-text font-source-sans">{topic.question_count} questions • {topic.total_blocks} blocks</p>
-                      </div>
-                      <div className="card-footer">
-                        <Button variant="pill" size="sm" onClick={() => openTopicBlocks(topic)} disabled={locked}>Start</Button>
-                      </div>
-                    </Card>
+                    <Card
+                      key={topic.unit_id}
+                      image={topic.topic_image_url}
+                      title={topic.topic_name}
+                      description={`${topic.question_count} questions • ${topic.total_blocks} blocks`}
+                      footer={
+                        <Button variant="pill" size="sm" onClick={() => openTopicBlocks(topic)} disabled={locked}>
+                          Start
+                        </Button>
+                      }
+                    />
                   );
                 }
 
                 return (
-                  <Card key={topic.unit_id} variant="pattern" className="card-compact">
-                    {topic.topic_image_url && (
-                      <div className="quiz-topic-image-wrapper">
-                        <img
-                          src={topic.topic_image_url}
-                          alt={topic.topic_name}
-                          className="quiz-topic-image"
-                          loading="lazy"
-                        />
-                      </div>
-                    )}
-                    <div className="card-body">
-                      <h3 className="card-title font-poppins">{topic.topic_name}</h3>
-                      <p className="card-text font-source-sans">{topic.question_count} questions</p>
-                    </div>
-                  </Card>
+                  <Card
+                    key={topic.unit_id}
+                    image={topic.topic_image_url}
+                    title={topic.topic_name}
+                    description={`${topic.question_count} questions`}
+                    className="card-compact"
+                  />
                 );
               })
             )}
@@ -597,56 +580,46 @@ export default function Quiz() {
               </div>
             )}
 
-            <Card variant="mixed" className="quiz-question-card quiz-question-card-compact">
-              {quizQuestions[currentIndex].image_url && (
-                <div className="quiz-question-image-wrapper">
-                  <img
-                    src={quizQuestions[currentIndex].image_url}
-                    alt={quizQuestions[currentIndex].image_alt_text || quizQuestions[currentIndex].question_text || 'Quiz question diagram'}
-                    className="quiz-question-image"
-                    loading="lazy"
-                  />
+            <Card
+              image={quizQuestions[currentIndex].image_url}
+              className="quiz-question-card"
+            >
+              <h3 className="quiz-question-heading font-poppins">{quizQuestions[currentIndex].question_text}</h3>
+
+              <div className="quiz-options-list">
+                {['A', 'B', 'C', 'D'].map((option) => {
+                  const answered = userAnswers[currentIndex] !== null;
+                  const selected = userAnswers[currentIndex]?.selected;
+                  const correctOption = userAnswers[currentIndex]?.correct_option;
+
+                  let cls = 'btn btn-curved';
+
+                  if (answered) {
+                    if (option === correctOption) cls = 'btn-pill';
+                    else if (option === selected) cls = 'btn-danger';
+                  }
+
+                  return (
+                    <button
+                      key={option}
+                      className={`${cls} quiz-option-btn`}
+                      onClick={() => selectAnswer(option)}
+                      disabled={answered || answerSubmitting || locked}
+                    >
+                      <span className="quiz-option-letter font-poppins">{option}.</span>
+                      <span className="font-source-sans">{quizQuestions[currentIndex][`option_${option.toLowerCase()}`]}</span>
+                      {answered && option === correctOption && <Icon name="circle-check" className="quiz-option-icon" />}
+                      {answered && option === selected && option !== correctOption && <Icon name="circle-xmark" className="quiz-option-icon" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {quizMode === 'study' && userAnswers[currentIndex]?.explanation && (
+                <div className="quiz-review-explanation font-open-sans">
+                  {userAnswers[currentIndex].explanation}
                 </div>
               )}
-
-              <div className="quiz-question-body">
-                <h3 className="quiz-question-heading font-poppins">{quizQuestions[currentIndex].question_text}</h3>
-
-                <div className="quiz-options-list">
-                  {['A', 'B', 'C', 'D'].map((option) => {
-                    const answered = userAnswers[currentIndex] !== null;
-                    const selected = userAnswers[currentIndex]?.selected;
-                    const correctOption = userAnswers[currentIndex]?.correct_option;
-
-                    let cls = 'btn btn-curved';
-
-                    if (answered) {
-                      if (option === correctOption) cls = 'btn-pill';
-                      else if (option === selected) cls = 'btn-danger';
-                    }
-
-                    return (
-                      <button
-                        key={option}
-                        className={`${cls} quiz-option-btn`}
-                        onClick={() => selectAnswer(option)}
-                        disabled={answered || answerSubmitting || locked}
-                      >
-                        <span className="quiz-option-letter font-poppins">{option}.</span>
-                        <span className="font-source-sans">{quizQuestions[currentIndex][`option_${option.toLowerCase()}`]}</span>
-                        {answered && option === correctOption && <Icon name="circle-check" className="quiz-option-icon" />}
-                        {answered && option === selected && option !== correctOption && <Icon name="circle-xmark" className="quiz-option-icon" />}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {quizMode === 'study' && userAnswers[currentIndex]?.explanation && (
-                  <div className="quiz-review-explanation font-open-sans">
-                    {userAnswers[currentIndex].explanation}
-                  </div>
-                )}
-              </div>
             </Card>
 
             <div className="quiz-nav-buttons">
