@@ -1,4 +1,4 @@
-/* pages/Quiz.jsx */
+ /* pages/Quiz.jsx */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -577,7 +577,7 @@ export default function Quiz() {
               </div>
             )}
 
-            <Card variant="mixed" className="quiz-question-card">
+            <Card variant="mixed" className="quiz-question-card quiz-question-card-compact">
               {quizQuestions[currentIndex].image_url && (
                 <div className="quiz-question-image-wrapper">
                   <img
@@ -589,42 +589,44 @@ export default function Quiz() {
                 </div>
               )}
 
-              <h3 className="quiz-question-heading font-poppins">{quizQuestions[currentIndex].question_text}</h3>
+              <div className="quiz-question-body">
+                <h3 className="quiz-question-heading font-poppins">{quizQuestions[currentIndex].question_text}</h3>
 
-              <div className="quiz-options-list">
-                {['A', 'B', 'C', 'D'].map((option) => {
-                  const answered = userAnswers[currentIndex] !== null;
-                  const selected = userAnswers[currentIndex]?.selected;
-                  const correctOption = userAnswers[currentIndex]?.correct_option;
+                <div className="quiz-options-list">
+                  {['A', 'B', 'C', 'D'].map((option) => {
+                    const answered = userAnswers[currentIndex] !== null;
+                    const selected = userAnswers[currentIndex]?.selected;
+                    const correctOption = userAnswers[currentIndex]?.correct_option;
 
-                  let cls = 'btn btn-curved';
+                    let cls = 'btn btn-curved';
 
-                  if (answered) {
-                    if (option === correctOption) cls = 'btn-pill';
-                    else if (option === selected) cls = 'btn-danger';
-                  }
+                    if (answered) {
+                      if (option === correctOption) cls = 'btn-pill';
+                      else if (option === selected) cls = 'btn-danger';
+                    }
 
-                  return (
-                    <button
-                      key={option}
-                      className={`${cls} quiz-option-btn`}
-                      onClick={() => selectAnswer(option)}
-                      disabled={answered || answerSubmitting || locked}
-                    >
-                      <span className="quiz-option-letter font-poppins">{option}.</span>
-                      <span className="font-source-sans">{quizQuestions[currentIndex][`option_${option.toLowerCase()}`]}</span>
-                      {answered && option === correctOption && <Icon name="circle-check" className="quiz-option-icon" />}
-                      {answered && option === selected && option !== correctOption && <Icon name="circle-xmark" className="quiz-option-icon" />}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {quizMode === 'study' && userAnswers[currentIndex]?.explanation && (
-                <div className="quiz-review-explanation font-open-sans">
-                  {userAnswers[currentIndex].explanation}
+                    return (
+                      <button
+                        key={option}
+                        className={`${cls} quiz-option-btn`}
+                        onClick={() => selectAnswer(option)}
+                        disabled={answered || answerSubmitting || locked}
+                      >
+                        <span className="quiz-option-letter font-poppins">{option}.</span>
+                        <span className="font-source-sans">{quizQuestions[currentIndex][`option_${option.toLowerCase()}`]}</span>
+                        {answered && option === correctOption && <Icon name="circle-check" className="quiz-option-icon" />}
+                        {answered && option === selected && option !== correctOption && <Icon name="circle-xmark" className="quiz-option-icon" />}
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
+
+                {quizMode === 'study' && userAnswers[currentIndex]?.explanation && (
+                  <div className="quiz-review-explanation font-open-sans">
+                    {userAnswers[currentIndex].explanation}
+                  </div>
+                )}
+              </div>
             </Card>
 
             <div className="quiz-nav-buttons">
