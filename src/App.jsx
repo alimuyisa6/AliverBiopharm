@@ -8,6 +8,7 @@ import Layout from './components/Layout/Layout';
 import ScrollMemory from './components/ScrollMemory';
 import PageTransition from './components/PageTransition';
 import Spinner from './components/Spinner/Spinner';
+import ChartRegistry from './components/charts/ChartRegistry';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
@@ -105,6 +106,7 @@ export default function App() {
     <AuthProvider>
       <LayoutProvider>
         <ToastProvider>
+          <ChartRegistry />
           <AppRoutes />
         </ToastProvider>
       </LayoutProvider>
