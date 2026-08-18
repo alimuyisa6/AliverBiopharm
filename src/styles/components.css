@@ -16,8 +16,7 @@
 @import './toast.css';
 @import './notification.css';
 @import './chat.css';
-@import './quiz.css';
-@import './flashcard.css';
+ @import './flashcard.css';
 @import './classroom.css';
 @import './recall.css';
 @import './about.css';
@@ -28,6 +27,7 @@
 @import './tutor.css';
 @import './home-sections.css';
 @import './pastpapers.css';
+@import './quiz.css';
 .auth-page {
   display: flex;
   min-height: calc(100vh - var(--header-height));
