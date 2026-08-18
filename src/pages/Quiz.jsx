@@ -441,6 +441,16 @@ export default function Quiz() {
                 if (hasQuestions && !allDone) {
                   return (
                     <Card key={topic.unit_id} variant="mixed">
+                      {topic.topic_image_url && (
+                        <div className="quiz-topic-image-wrapper">
+                          <img
+                            src={topic.topic_image_url}
+                            alt={topic.topic_name}
+                            className="quiz-topic-image"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
                       <div className="card-body">
                         <h3 className="card-title font-poppins">{topic.topic_name}</h3>
                         <p className="card-text font-source-sans">{topic.question_count} questions • {topic.total_blocks} blocks</p>
@@ -454,6 +464,16 @@ export default function Quiz() {
 
                 return (
                   <Card key={topic.unit_id} variant="pattern" className="card-compact">
+                    {topic.topic_image_url && (
+                      <div className="quiz-topic-image-wrapper">
+                        <img
+                          src={topic.topic_image_url}
+                          alt={topic.topic_name}
+                          className="quiz-topic-image"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
                     <div className="card-body">
                       <h3 className="card-title font-poppins">{topic.topic_name}</h3>
                       <p className="card-text font-source-sans">{topic.question_count} questions</p>
