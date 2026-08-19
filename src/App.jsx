@@ -2,7 +2,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
-import { LayoutProvider } from './contexts/LayoutContext';
+import { LayoutProvider, useLayout } from './contexts/LayoutContext';
 import { ToastProvider } from './components/Toast/Toast';
 import Layout from './components/Layout/Layout';
 import ScrollMemory from './components/ScrollMemory';
@@ -49,20 +49,67 @@ function GlobalLoader() {
   );
 }
 
+function SetupRequired() {
+  return (
+    <div className="section setup-required-section">
+      <div className="card setup-required-card">
+        <div className="setup-required-icon">
+          <span>🔬</span>
+        </div>
+        <h1 className="setup-required-title">Complete Your Profile</h1>
+        <p className="setup-required-text">
+          To access learning resources, please create an account and select your level and class.
+        </p>
+        <div className="setup-required-actions">
+          <a href="/register" className="btn btn-primary btn-lg">Create Account</a>
+          <a href="/login" className="btn btn-secondary btn-lg">Sign In</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeatureRoute({ feature, children }) {
+  const { features } = useLayout();
+  const enabled = features[feature] ?? true;
+
+  if (!enabled) {
+    return (
+      <div className="section feature-disabled-section">
+        <div className="card feature-disabled-card">
+          <h2 className="feature-disabled-title">Feature Unavailable</h2>
+          <p className="feature-disabled-text">
+            This feature is not currently available for your level. Please check back later.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return children;
+}
+
 function AppRoutes() {
   const location = useLocation();
   const [appLoading, setAppLoading] = useState(true);
+  const { level, loading: layoutLoading, isAuthenticated } = useLayout();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setAppLoading(false);
-    }, 2000);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, []);
 
   if (appLoading) {
     return <GlobalLoader />;
+  }
+
+  const needsSetup = !layoutLoading && !level && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/register') && !location.pathname.startsWith('/about') && !location.pathname.startsWith('/terms') && !location.pathname.startsWith('/privacy') && location.pathname !== '/';
+
+  if (needsSetup) {
+    return <SetupRequired />;
   }
 
   return (
@@ -76,17 +123,17 @@ function AppRoutes() {
             <Route path="/register" element={<Auth />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
-            <Route path="/recall" element={<ProtectedRoute><Recall /></ProtectedRoute>} />
-            <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
-            <Route path="/classroom" element={<ProtectedRoute><Classroom /></ProtectedRoute>} />
-            <Route path="/classroom/:roomId" element={<ProtectedRoute><ClassroomRoom /></ProtectedRoute>} />
-            <Route path="/past-papers" element={<PastPapers />} />
+            <Route path="/quiz" element={<ProtectedRoute><FeatureRoute feature="quizzes"><Quiz /></FeatureRoute></ProtectedRoute>} />
+            <Route path="/recall" element={<ProtectedRoute><FeatureRoute feature="recall"><Recall /></FeatureRoute></ProtectedRoute>} />
+            <Route path="/flashcards" element={<ProtectedRoute><FeatureRoute feature="flashcards"><FlashcardsPage /></FeatureRoute></ProtectedRoute>} />
+            <Route path="/classroom" element={<ProtectedRoute><FeatureRoute feature="classrooms"><Classroom /></FeatureRoute></ProtectedRoute>} />
+            <Route path="/classroom/:roomId" element={<ProtectedRoute><FeatureRoute feature="classrooms"><ClassroomRoom /></FeatureRoute></ProtectedRoute>} />
+            <Route path="/past-papers" element={<FeatureRoute feature="past_papers"><PastPapers /></FeatureRoute>} />
             <Route path="/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
             <Route path="/notes/read" element={<ProtectedRoute><NoteDetail /></ProtectedRoute>} />
             <Route path="/pdfs" element={<ProtectedRoute><PdfLibraryPage /></ProtectedRoute>} />
-            <Route path="/glossary/:slug" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
-            <Route path="/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
+            <Route path="/glossary/:slug" element={<ProtectedRoute><FeatureRoute feature="glossary"><Glossary /></FeatureRoute></ProtectedRoute>} />
+            <Route path="/glossary" element={<ProtectedRoute><FeatureRoute feature="glossary"><Glossary /></FeatureRoute></ProtectedRoute>} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/terms" element={<LegalPage type="terms" />} />
             <Route path="/privacy" element={<LegalPage type="privacy" />} />
