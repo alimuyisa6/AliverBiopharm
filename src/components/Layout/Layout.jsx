@@ -52,7 +52,9 @@ export default function Layout({ children, showFooter = true }) {
     toggleTheme,
     isAuthenticated,
     refreshUser,
-    activeGroupId
+    activeGroupId,
+    features,
+    uiMap
   } = useLayout();
 
   const { user } = useAuth();
@@ -113,7 +115,9 @@ export default function Layout({ children, showFooter = true }) {
       await signout();
       await refreshUser();
       navigate('/');
-    } catch {} finally {
+    } catch {
+      navigate('/');
+    } finally {
       setSigningOut(false);
     }
   };
@@ -141,9 +145,31 @@ export default function Layout({ children, showFooter = true }) {
       const data = await getRequest('notes', 'nav_list', { group_id: groupId });
 
       setNavNotes((prev) => ({ ...prev, [groupId]: data }));
-    } catch {} finally {
+    } catch {
+      setNavNotes((prev) => ({ ...prev, [groupId]: [] }));
+    } finally {
       setLoadingNavNotes(false);
     }
+  };
+
+  const filteredNavigation = navigation.filter((link) => {
+    if (link.href === '/quiz' && features.quizzes === false) return false;
+    if (link.href === '/flashcards' && features.flashcards === false) return false;
+    if (link.href === '/past-papers' && features.past_papers === false) return false;
+    if (link.href === '/recall' && features.recall === false) return false;
+    if (link.href === '/classroom' && features.classrooms === false) return false;
+    return true;
+  });
+
+  const loginButton = uiMap.login_button || { label: 'Sign In', variant: 'outline', color: 'primary', icon: 'right-to-bracket' };
+  const signupButton = uiMap.signup_button || { label: 'Sign Up', variant: 'solid', color: 'primary', icon: 'user-plus' };
+  const searchIcon = uiMap.search_icon || { icon: 'magnifying-glass', size: 'sm' };
+  const themeIcon = theme === 'dark' ? 'sun' : 'moon';
+
+  const mapVariant = (variant) => {
+    if (variant === 'solid') return 'primary';
+    if (variant === 'outline') return 'secondary';
+    return 'ghost';
   };
 
   return (
@@ -158,12 +184,13 @@ export default function Layout({ children, showFooter = true }) {
             </Link>
 
             <nav className="main-nav">
-              {navigation.map((link) => (
+              {filteredNavigation.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
                   className={`main-nav-link${location.pathname === link.href ? ' active' : ''}`}
                 >
+                  {link.icon && <Icon name={link.icon} />}
                   {link.label}
                 </Link>
               ))}
@@ -177,24 +204,36 @@ export default function Layout({ children, showFooter = true }) {
               )}
 
               <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setSearchOpen(true)} aria-label="Search">
-                <Icon name="magnifying-glass" />
+                <Icon name={searchIcon.icon} />
               </button>
 
               {isAuthenticated ? (
                 <div className="dropdown">
-                  <button className="btn btn-ghost btn-sm" onClick={() => {}}>
+                  <button className="btn btn-ghost btn-sm" onClick={() => navigate('/profile')}>
                     <Icon name="user" />
                   </button>
                 </div>
               ) : (
                 <>
-                  <Link to="/login" className="btn btn-ghost btn-sm">Sign In</Link>
-                  <Link to="/register" className="btn btn-primary btn-sm">Sign Up</Link>
+                  <Link
+                    to="/login"
+                    className={`btn btn-${mapVariant(loginButton.variant)} btn-sm`}
+                  >
+                    {loginButton.icon && <Icon name={loginButton.icon} />}
+                    {loginButton.label}
+                  </Link>
+                  <Link
+                    to="/register"
+                    className={`btn btn-${mapVariant(signupButton.variant)} btn-sm`}
+                  >
+                    {signupButton.icon && <Icon name={signupButton.icon} />}
+                    {signupButton.label}
+                  </Link>
                 </>
               )}
 
               <button className="btn btn-ghost btn-sm btn-icon" onClick={toggleTheme} aria-label="Toggle theme">
-                <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+                <Icon name={themeIcon} />
               </button>
 
               <button className="hamburger-btn" onClick={() => setMobileOpen(true)} aria-label="Menu">
@@ -220,8 +259,9 @@ export default function Layout({ children, showFooter = true }) {
               transition={{ duration: 0.25 }}
             >
               <div className="mobile-nav-panel-inner">
-                {navigation.map((link) => (
+                {filteredNavigation.map((link) => (
                   <Link key={link.href} to={link.href} className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                    {link.icon && <Icon name={link.icon} />}
                     {link.label}
                   </Link>
                 ))}
@@ -297,10 +337,10 @@ export default function Layout({ children, showFooter = true }) {
                 ) : (
                   <>
                     <Link to="/login" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                      <Icon name="right-to-bracket" /> Sign In
+                      {loginButton.icon && <Icon name={loginButton.icon} />} {loginButton.label}
                     </Link>
                     <Link to="/register" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                      <Icon name="user-plus" /> Sign Up
+                      {signupButton.icon && <Icon name={signupButton.icon} />} {signupButton.label}
                     </Link>
                   </>
                 )}
