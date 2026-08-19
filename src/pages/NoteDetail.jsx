@@ -1,5 +1,5 @@
  /* pages/NoteDetail.jsx */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
@@ -10,7 +10,8 @@ import {
   addComment,
   getComments,
   saveReadingProgress,
-  getReadingProgress
+  getReadingProgress,
+  getNoteInternalLinks
 } from '../api/client';
 import EmptyState from '../components/EmptyState/EmptyState';
 import Spinner from '../components/Spinner/Spinner';
@@ -37,11 +38,15 @@ export default function NoteDetail() {
   const [commentInput, setCommentInput] = useState('');
   const [readProgress, setReadProgress] = useState(0);
   const [progressSaved, setProgressSaved] = useState(false);
+  const [internalLinks, setInternalLinks] = useState({ inline_links: [], related_links: [] });
+  const [linkPreview, setLinkPreview] = useState(null);
+  const [linkPreviewPosition, setLinkPreviewPosition] = useState({ x: 0, y: 0 });
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const contentRef = useRef(null);
   const progressTimer = useRef(null);
   const startTime = useRef(Date.now());
+  const previewTimer = useRef(null);
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
@@ -67,15 +72,20 @@ export default function NoteDetail() {
         setNote(data);
         setBreadcrumb(data.breadcrumb || []);
 
-        const [reactionData, commentData] = await Promise.all([
+        const [reactionData, commentData, linksData] = await Promise.all([
           getReactions('note', data.id),
-          getComments('note', data.id)
+          getComments('note', data.id),
+          getNoteInternalLinks(data.id)
         ]);
 
         if (!mounted) return;
 
         setReactions(normalizeReactions(reactionData));
         setComments(commentData?.comments || []);
+        setInternalLinks({
+          inline_links: linksData?.inline_links || [],
+          related_links: linksData?.related_links || []
+        });
 
         if (user) {
           const progress = await getReadingProgress(noteId);
@@ -99,6 +109,7 @@ export default function NoteDetail() {
       mounted = false;
 
       if (progressTimer.current) clearTimeout(progressTimer.current);
+      if (previewTimer.current) clearTimeout(previewTimer.current);
     };
   }, [noteId, navigate, user]);
 
@@ -129,6 +140,84 @@ export default function NoteDetail() {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [user, note, noteId]);
+
+  const enhanceContentWithLinks = useCallback((html, inlineLinks) => {
+    if (!html || !inlineLinks.length) return html;
+
+    let enhancedHtml = html;
+
+    for (const link of inlineLinks) {
+      if (!link.link_text) continue;
+
+      const escapedText = link.link_text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(?<!<[^>]*)(?<!href="[^"]*)(${escapedText})(?![^<]*>)`, 'gi');
+
+      enhancedHtml = enhancedHtml.replace(regex, (match) => {
+        return `<a href="/notes/read?id=${link.target_note_id}" class="note-inline-link" data-note-id="${link.target_note_id}" data-note-title="${link.target_title}" data-note-preview="${link.target_content_preview || ''}" data-note-read-time="${link.target_read_time || ''}">${match}</a>`;
+      });
+    }
+
+    return enhancedHtml;
+  }, []);
+
+  const handleInlineLinkClick = useCallback((event) => {
+    const link = event.target.closest('.note-inline-link');
+
+    if (!link) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const targetNoteId = link.dataset.noteId;
+
+    if (!targetNoteId) return;
+
+    navigate(`/notes/read?id=${targetNoteId}`);
+  }, [navigate]);
+
+  const handleInlineLinkHover = useCallback((event) => {
+    const link = event.target.closest('.note-inline-link');
+
+    if (!link) {
+      hideLinkPreview();
+      return;
+    }
+
+    const rect = link.getBoundingClientRect();
+    const targetTitle = link.dataset.noteTitle;
+    const targetPreview = link.dataset.notePreview;
+    const targetReadTime = link.dataset.noteReadTime;
+
+    setLinkPreview({
+      title: targetTitle,
+      preview: targetPreview,
+      read_time: targetReadTime
+    });
+    setLinkPreviewPosition({
+      x: rect.left,
+      y: rect.bottom + 8
+    });
+  }, []);
+
+  const hideLinkPreview = useCallback(() => {
+    setLinkPreview(null);
+  }, []);
+
+  useEffect(() => {
+    const contentElement = contentRef.current;
+
+    if (!contentElement) return;
+
+    contentElement.addEventListener('click', handleInlineLinkClick);
+    contentElement.addEventListener('mouseover', handleInlineLinkHover);
+    contentElement.addEventListener('mouseout', hideLinkPreview);
+
+    return () => {
+      contentElement.removeEventListener('click', handleInlineLinkClick);
+      contentElement.removeEventListener('mouseover', handleInlineLinkHover);
+      contentElement.removeEventListener('mouseout', hideLinkPreview);
+    };
+  }, [handleInlineLinkClick, handleInlineLinkHover, hideLinkPreview, note, internalLinks]);
 
   async function handleReaction(reactionType) {
     if (!user) {
@@ -192,9 +281,33 @@ export default function NoteDetail() {
     );
   }
 
+  const enhancedContent = enhanceContentWithLinks(note.content, internalLinks.inline_links);
+
   return (
     <>
       <div className="note-progress-bar" style={{ width: `${readProgress}%` }} />
+
+      {linkPreview && (
+        <div
+          className="note-link-preview"
+          style={{
+            left: `${linkPreviewPosition.x}px`,
+            top: `${linkPreviewPosition.y}px`
+          }}
+          onMouseEnter={() => {
+            if (previewTimer.current) clearTimeout(previewTimer.current);
+          }}
+          onMouseLeave={hideLinkPreview}
+        >
+          <strong className="note-link-preview-title">{linkPreview.title}</strong>
+          {linkPreview.preview && (
+            <p className="note-link-preview-text">{linkPreview.preview.slice(0, 120)}...</p>
+          )}
+          {linkPreview.read_time && (
+            <span className="note-link-preview-readtime">{linkPreview.read_time}</span>
+          )}
+        </div>
+      )}
 
       <div className="note-detail-container">
         <div className="note-detail-header">
@@ -245,9 +358,32 @@ export default function NoteDetail() {
 
           <div
             className="notes-content-container"
-            dangerouslySetInnerHTML={{ __html: note.content || '<p>Content not available.</p>' }}
+            dangerouslySetInnerHTML={{ __html: enhancedContent || '<p>Content not available.</p>' }}
           />
         </article>
+
+        {internalLinks.related_links.length > 0 && (
+          <div className="note-related-section">
+            <h3 className="note-related-title">
+              <i className="fa-solid fa-link"></i> Related Notes
+            </h3>
+            <div className="note-related-grid">
+              {internalLinks.related_links.map((link) => (
+                <button
+                  key={link.link_id}
+                  className="note-related-card"
+                  onClick={() => navigate(`/notes/read?id=${link.target_note_id}`)}
+                >
+                  <span className="note-related-link-type">{link.link_type}</span>
+                  <strong className="note-related-link-title">{link.target_title}</strong>
+                  {link.target_read_time && (
+                    <span className="note-related-link-readtime">{link.target_read_time}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="note-reactions-section">
           <p className="note-reactions-label">Was this helpful?</p>
