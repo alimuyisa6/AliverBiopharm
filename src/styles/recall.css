@@ -654,7 +654,6 @@
 
 .recall-analytics-card-icon {
   font-size: 2rem;
-  color: var(--primary);
   margin-bottom: var(--space-2);
 }
 
@@ -676,11 +675,15 @@
   align-self: flex-start;
 }
 
-.recall-analytics-detail {
-  padding: var(--space-6);
+.recall-graph-fullpage {
+  margin-bottom: var(--space-10);
 }
 
-.recall-analytics-detail-header {
+.recall-graph-fullpage-card {
+  padding: var(--space-6) var(--space-8);
+}
+
+.recall-graph-fullpage-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -689,33 +692,38 @@
   flex-wrap: wrap;
 }
 
-.recall-analytics-detail-title {
+.recall-graph-fullpage-title {
   font-family: var(--font-heading);
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   font-weight: var(--weight-bold);
   color: var(--text-main);
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin-bottom: var(--space-2);
 }
 
-.recall-analytics-detail-icon {
+.recall-graph-fullpage-icon {
+  font-size: 1.5rem;
   color: var(--primary);
 }
 
-.recall-analytics-detail-desc {
+.recall-graph-fullpage-desc {
   font-size: var(--text-sm);
   color: var(--text-dim);
   line-height: var(--leading-relaxed);
-  max-width: 480px;
+  max-width: 520px;
 }
 
-.recall-analytics-chart-area {
+.recall-graph-fullpage-area {
   margin-bottom: var(--space-6);
+  background: var(--bg-card-tinted);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  border: 1px solid var(--border-default);
 }
 
-.recall-analytics-insight {
+.recall-graph-fullpage-insight {
   display: flex;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
@@ -724,22 +732,23 @@
   border-radius: var(--radius-lg);
 }
 
-.recall-analytics-insight-icon {
+.recall-graph-fullpage-insight-icon {
   font-size: 1.5rem;
   color: var(--warm);
   flex-shrink: 0;
 }
 
-.recall-analytics-insight-label {
+.recall-graph-fullpage-insight-label {
   font-size: var(--text-xs);
   font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
   color: var(--warm);
   margin-bottom: var(--space-1);
+  display: block;
 }
 
-.recall-analytics-insight-text {
+.recall-graph-fullpage-insight-text {
   font-size: var(--text-sm);
   color: var(--text-dim);
   line-height: var(--leading-relaxed);
@@ -839,7 +848,11 @@
     grid-template-columns: 1fr;
   }
 
-  .recall-analytics-detail-header {
+  .recall-graph-fullpage-card {
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .recall-graph-fullpage-header {
     flex-direction: column;
   }
 }
@@ -857,4 +870,4 @@
   .recall-report-icon {
     font-size: 2.5rem;
   }
-}
+} 
