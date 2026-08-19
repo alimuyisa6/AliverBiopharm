@@ -15,6 +15,8 @@ const GRAPH_TYPES = [
     key: 'weekly_xp',
     title: 'Weekly XP Progress',
     icon: 'chart-line',
+    color: '#2563EB',
+    gradientTo: '#7C3AED',
     description: 'Track your XP earnings over the last 7 days. This shows your learning momentum and consistency.',
     insight: 'Consistent daily practice leads to steady XP growth. Aim for at least 20 XP per day to maintain your streak.'
   },
@@ -22,6 +24,7 @@ const GRAPH_TYPES = [
     key: 'confidence',
     title: 'Confidence Distribution',
     icon: 'chart-pie',
+    color: '#059669',
     description: 'See how well you recall concepts. Excellent means perfect recall, Strong means close, Developing means needs review.',
     insight: 'A healthy mix shows you are challenging yourself. Too many "Easy" ratings may mean the questions are too simple.'
   },
@@ -29,6 +32,7 @@ const GRAPH_TYPES = [
     key: 'topic_mastery',
     title: 'Topic Mastery Radar',
     icon: 'bullseye',
+    color: '#7C3AED',
     description: 'Compare your mastery across all biology topics. Each axis represents a topic, and the shape shows your strengths.',
     insight: 'A balanced shape means well-rounded knowledge. If one side is flat, focus more on that topic.'
   },
@@ -36,6 +40,7 @@ const GRAPH_TYPES = [
     key: 'questions_per_topic',
     title: 'Questions per Topic',
     icon: 'chart-bar',
+    color: '#0D9488',
     description: 'See how many questions you have answered in each topic. This shows where you spend your study time.',
     insight: 'Make sure your study time is distributed. Over-focusing on one topic may leave gaps elsewhere.'
   }
@@ -103,7 +108,8 @@ export default function RecallAnalyticsHub() {
             labels={dayLabels}
             label="XP"
             color="#2563EB"
-            height={280}
+            gradientTo="#7C3AED"
+            height={380}
           />
         );
       case 'confidence':
@@ -114,7 +120,7 @@ export default function RecallAnalyticsHub() {
             colors={['#059669', '#2563EB', '#D97706']}
             centerValue={`${stats.accuracy || 0}%`}
             centerLabel="Accuracy"
-            height={280}
+            height={380}
           />
         );
       case 'topic_mastery':
@@ -124,7 +130,7 @@ export default function RecallAnalyticsHub() {
             labels={topicNames.length ? topicNames : ['Biology', 'Cells', 'Plants', 'Insects', 'Kingdoms', 'Classification']}
             label="Mastery"
             color="#7C3AED"
-            height={300}
+            height={400}
           />
         );
       case 'questions_per_topic':
@@ -134,7 +140,7 @@ export default function RecallAnalyticsHub() {
             labels={topicNames.length ? topicNames : ['Biology', 'Cells', 'Plants', 'Insects', 'Kingdoms', 'Classification']}
             label="Questions"
             color="#0D9488"
-            height={300}
+            height={400}
             horizontal={true}
           />
         );
@@ -142,6 +148,39 @@ export default function RecallAnalyticsHub() {
         return null;
     }
   };
+
+  if (activeGraph && activeGraphData) {
+    return (
+      <div className="recall-graph-fullpage">
+        <Card className="recall-graph-fullpage-card">
+          <div className="recall-graph-fullpage-header">
+            <div>
+              <h3 className="recall-graph-fullpage-title">
+                <Icon name={activeGraphData.icon} className="recall-graph-fullpage-icon" />
+                {activeGraphData.title}
+              </h3>
+              <p className="recall-graph-fullpage-desc">{activeGraphData.description}</p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setActiveGraph(null)}>
+              <Icon name="arrow-left" /> Back to Graphs
+            </Button>
+          </div>
+
+          <div className="recall-graph-fullpage-area">
+            {renderGraph()}
+          </div>
+
+          <div className="recall-graph-fullpage-insight">
+            <Icon name="lightbulb" className="recall-graph-fullpage-insight-icon" />
+            <div>
+              <span className="recall-graph-fullpage-insight-label">Insight</span>
+              <p className="recall-graph-fullpage-insight-text">{activeGraphData.insight}</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="recall-analytics-hub">
@@ -155,49 +194,20 @@ export default function RecallAnalyticsHub() {
         </p>
       </div>
 
-      {!activeGraph ? (
-        <div className="recall-analytics-grid">
-          {GRAPH_TYPES.map((graph) => (
-            <Card key={graph.key} className="recall-analytics-card" onClick={() => setActiveGraph(graph.key)}>
-              <div className="recall-analytics-card-body">
-                <Icon name={graph.icon} className="recall-analytics-card-icon" />
-                <h4 className="recall-analytics-card-title">{graph.title}</h4>
-                <p className="recall-analytics-card-desc">{graph.description}</p>
-                <Button variant="ghost" size="sm" className="recall-analytics-card-btn">
-                  View Graph <Icon name="arrow-right" />
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card className="recall-analytics-detail">
-          <div className="recall-analytics-detail-header">
-            <div>
-              <h4 className="recall-analytics-detail-title">
-                <Icon name={activeGraphData?.icon} className="recall-analytics-detail-icon" />
-                {activeGraphData?.title}
-              </h4>
-              <p className="recall-analytics-detail-desc">{activeGraphData?.description}</p>
+      <div className="recall-analytics-grid">
+        {GRAPH_TYPES.map((graph) => (
+          <Card key={graph.key} className="recall-analytics-card" onClick={() => setActiveGraph(graph.key)}>
+            <div className="recall-analytics-card-body">
+              <Icon name={graph.icon} className="recall-analytics-card-icon" style={{ color: graph.color }} />
+              <h4 className="recall-analytics-card-title">{graph.title}</h4>
+              <p className="recall-analytics-card-desc">{graph.description}</p>
+              <Button variant="ghost" size="sm" className="recall-analytics-card-btn">
+                View Graph <Icon name="arrow-right" />
+              </Button>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setActiveGraph(null)}>
-              <Icon name="arrow-left" /> Back
-            </Button>
-          </div>
-
-          <div className="recall-analytics-chart-area">
-            {renderGraph()}
-          </div>
-
-          <div className="recall-analytics-insight">
-            <Icon name="lightbulb" className="recall-analytics-insight-icon" />
-            <div>
-              <span className="recall-analytics-insight-label">Insight</span>
-              <p className="recall-analytics-insight-text">{activeGraphData?.insight}</p>
-            </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        ))}
+      </div>
     </div>
   );
-}
+} 
