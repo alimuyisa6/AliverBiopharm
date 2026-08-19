@@ -9,6 +9,7 @@ import ScrollMemory from './components/ScrollMemory';
 import PageTransition from './components/PageTransition';
 import Spinner from './components/Spinner/Spinner';
 import ChartRegistry from './components/charts/ChartRegistry';
+import Seo from './components/Seo/Seo';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
@@ -31,19 +32,7 @@ import TutorMarketplace from './pages/TutorMarketplace';
 
 function GlobalLoader() {
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      background: 'var(--bg-page)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999,
-      transition: 'opacity 0.5s ease, visibility 0.5s ease'
-    }}>
+    <div className="global-loader">
       <Spinner context="brand" size="lg" />
     </div>
   );
@@ -53,12 +42,9 @@ function SetupRequired() {
   return (
     <div className="section setup-required-section">
       <div className="card setup-required-card">
-        <div className="setup-required-icon">
-          <span>🔬</span>
-        </div>
-        <h1 className="setup-required-title">Complete Your Profile</h1>
+        <h1 className="setup-required-title">Select Your Level</h1>
         <p className="setup-required-text">
-          To access learning resources, please create an account and select your level and class.
+          Your level is set during account creation. Please sign in with an existing account or create a new one to continue.
         </p>
         <div className="setup-required-actions">
           <a href="/register" className="btn btn-primary btn-lg">Create Account</a>
@@ -92,7 +78,7 @@ function FeatureRoute({ feature, children }) {
 function AppRoutes() {
   const location = useLocation();
   const [appLoading, setAppLoading] = useState(true);
-  const { level, loading: layoutLoading, isAuthenticated } = useLayout();
+  const { level, loading: layoutLoading } = useLayout();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -106,7 +92,8 @@ function AppRoutes() {
     return <GlobalLoader />;
   }
 
-  const needsSetup = !layoutLoading && !level && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/register') && !location.pathname.startsWith('/about') && !location.pathname.startsWith('/terms') && !location.pathname.startsWith('/privacy') && location.pathname !== '/';
+  const publicPaths = ['/login', '/register', '/about', '/terms', '/privacy', '/'];
+  const needsSetup = !layoutLoading && !level && !publicPaths.some((path) => location.pathname.startsWith(path));
 
   if (needsSetup) {
     return <SetupRequired />;
@@ -114,6 +101,7 @@ function AppRoutes() {
 
   return (
     <>
+      <Seo />
       <ScrollMemory />
       <PageTransition key={location.pathname}>
         <Layout>
