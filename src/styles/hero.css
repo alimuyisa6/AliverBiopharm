@@ -66,15 +66,15 @@
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   color: var(--text-main);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
 }
 
 .hero-subtitle {
-  font-size: var(--text-xl);
+  font-size: var(--text-base);
   color: var(--text-dim);
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-8);
-  max-width: 480px;
+  max-width: 420px;
 }
 
 .hero-actions {
@@ -121,6 +121,7 @@
   }
 
   .hero-subtitle {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
+    max-width: 100%;
   }
 }
