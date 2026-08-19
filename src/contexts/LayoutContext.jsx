@@ -7,44 +7,45 @@ import { getCachedStale } from '../utils/cache';
 
 export const LayoutContext = createContext(null);
 
-const KNOWN_LEVEL_KEY = 'known_level';
-
-function getKnownLevel() {
-  try {
-    return localStorage.getItem(KNOWN_LEVEL_KEY) || 'O-Level';
-  } catch {
-    return 'O-Level';
-  }
-}
-
-function setKnownLevel(level) {
-  try {
-    if (level) localStorage.setItem(KNOWN_LEVEL_KEY, level);
-  } catch {}
-}
-
 export function LayoutProvider({ children }) {
   const { user, loading: authLoading, refresh } = useAuth();
 
-  const effectiveLevel = user?.profile?.active_level_id || user?.profile?.track || getKnownLevel();
+  const effectiveLevel = user?.profile?.active_level_id || user?.profile?.track || null;
   const activeGroupId = user?.profile?.active_group_id || null;
 
-  const [bootstrap, setBootstrap] = useState(() => getCachedStale(`bootstrap_${effectiveLevel}`));
-  const [loading, setLoading] = useState(() => !getCachedStale(`bootstrap_${effectiveLevel}`));
+  const [bootstrap, setBootstrap] = useState(() => {
+    if (!effectiveLevel) return null;
+    return getCachedStale(`bootstrap_${effectiveLevel}`);
+  });
+
+  const [loading, setLoading] = useState(() => {
+    if (!effectiveLevel) return false;
+    return !getCachedStale(`bootstrap_${effectiveLevel}`);
+  });
+
   const [switching, setSwitching] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState('light');
   const [sections, setSections] = useState(() => getCachedStale('site_sections') || {});
 
   useEffect(() => {
-    setKnownLevel(effectiveLevel);
-  }, [effectiveLevel]);
+    if (document.documentElement) {
+      const storedTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      setTheme(storedTheme);
+    }
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', theme === 'dark');
-    localStorage.setItem('theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
   useEffect(() => {
+    if (!effectiveLevel) {
+      setBootstrap(null);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     const cachedBootstrap = getCachedStale(`bootstrap_${effectiveLevel}`);
@@ -84,7 +85,11 @@ export function LayoutProvider({ children }) {
   }, [effectiveLevel, activeGroupId]);
 
   const toggleTheme = useCallback(() => {
-    setTheme((current) => (current === 'light' ? 'dark' : 'light'));
+    setTheme((current) => {
+      const next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      return next;
+    });
   }, []);
 
   const handleSwitchClass = useCallback(async (groupId) => {
@@ -93,15 +98,80 @@ export function LayoutProvider({ children }) {
     try {
       await switchClass(groupId);
       await refresh();
+    } catch (error) {
+      console.error('[SWITCH_CLASS_ERROR]', error?.message || 'Failed to switch class');
+      throw new Error('We could not update your class. Please try again.');
     } finally {
       setSwitching(false);
     }
   }, [refresh]);
 
   const value = useMemo(() => {
+    const platformConfig = bootstrap?.platform || null;
+
+    const safeFeatures = {};
+    const safeFeatureKeys = [
+      'recall',
+      'videos',
+      'quizzes',
+      'articles',
+      'glossary',
+      'community',
+      'donations',
+      'classrooms',
+      'flashcards',
+      'past_papers',
+      'lab_simulations'
+    ];
+
+    for (const key of safeFeatureKeys) {
+      safeFeatures[key] = platformConfig?.features_enabled?.[key] ?? true;
+    }
+
+    const uiComponents = bootstrap?.ui_components || [];
+    const uiMap = {};
+
+    for (const component of uiComponents) {
+      if (component?.component_key) {
+        const { properties = {}, component_type = null } = component;
+        const safeProperties = {};
+
+        for (const key of Object.keys(properties)) {
+          if (['icon', 'label', 'color', 'variant', 'size'].includes(key)) {
+            safeProperties[key] = properties[key];
+          }
+        }
+
+        uiMap[component.component_key] = {
+          ...safeProperties,
+          component_type
+        };
+      }
+    }
+
+    const baseNav = bootstrap?.header?.nav_items || [];
+
+    const mergedNavigation = [
+      ...baseNav,
+      ...(platformConfig?.primary_nav || []).map((item, index) => ({
+        label: item?.label || '',
+        href: item?.href || '',
+        icon: item?.icon || null,
+        auth_required: item?.auth_required ?? false,
+        position: baseNav.length + index
+      })),
+      ...(platformConfig?.secondary_nav || []).map((item, index) => ({
+        label: item?.label || '',
+        href: item?.href || '',
+        icon: item?.icon || null,
+        auth_required: item?.auth_required ?? false,
+        position: baseNav.length + (platformConfig?.primary_nav?.length || 0) + index
+      }))
+    ].sort((a, b) => (a.position || 0) - (b.position || 0));
+
     if (!bootstrap) {
       return {
-        loading: true,
+        loading: false,
         bootstrap: null,
         logo: null,
         siteName: 'AliverBiopharm',
@@ -119,7 +189,10 @@ export function LayoutProvider({ children }) {
         switchClass: handleSwitchClass,
         switching,
         activeGroupId,
-        sections
+        sections,
+        features: safeFeatures,
+        uiMap: {},
+        platform: null
       };
     }
 
@@ -127,8 +200,8 @@ export function LayoutProvider({ children }) {
       loading: false,
       bootstrap,
       logo: bootstrap.universal?.logo_url || null,
-      siteName: bootstrap.universal?.site_name || 'AliverBiopharm',
-      navigation: bootstrap.header?.nav_items || [],
+      siteName: bootstrap.universal?.site_name || platformConfig?.site_name || 'AliverBiopharm',
+      navigation: mergedNavigation,
       footer: bootstrap.footer || { quick_links: [], resource_links: [], community_links: [], social_links: {} },
       groups: bootstrap.groups || [],
       level: bootstrap.level,
@@ -142,7 +215,10 @@ export function LayoutProvider({ children }) {
       switchClass: handleSwitchClass,
       switching,
       activeGroupId,
-      sections
+      sections,
+      features: safeFeatures,
+      uiMap,
+      platform: platformConfig
     };
   }, [
     bootstrap,
