@@ -12,7 +12,11 @@ export default function Hero() {
   const groupName = groups?.length > 0 ? groups[0].name : '';
 
   return (
-    <section className="hero">
+    <section className="hero hero-enhanced">
+      <div className="hero-vertical-text" aria-hidden="true">
+        Welcome to AliverBiopharm
+      </div>
+
       <div className="hero-image">
         {heroImage ? (
           <img src={heroImage} alt="" />
