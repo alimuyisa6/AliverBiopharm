@@ -1,7 +1,7 @@
-import { Radar } from 'react-chartjs-2';
+ import { Radar } from 'react-chartjs-2';
 import { useMemo } from 'react';
 
-export default function RadarChart({ data, labels, label, color = '#2563EB', height = 260 }) {
+export default function RadarChart({ data, labels, label, color = '#2563EB', height = 300 }) {
   const chartData = useMemo(() => ({
     labels,
     datasets: [
@@ -10,12 +10,15 @@ export default function RadarChart({ data, labels, label, color = '#2563EB', hei
         data,
         borderColor: color,
         backgroundColor: `${color}20`,
-        borderWidth: 2,
+        borderWidth: 2.5,
         pointBackgroundColor: color,
         pointBorderColor: '#FFFFFF',
         pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointHoverBackgroundColor: color,
+        pointHoverBorderColor: '#FFFFFF',
+        pointHoverBorderWidth: 3
       }
     ]
   }), [data, labels, label, color]);
@@ -28,11 +31,11 @@ export default function RadarChart({ data, labels, label, color = '#2563EB', hei
         beginAtZero: true,
         max: 100,
         grid: {
-          color: 'rgba(100, 116, 139, 0.15)',
+          color: 'rgba(100, 116, 139, 0.12)',
           circular: true
         },
         angleLines: {
-          color: 'rgba(100, 116, 139, 0.15)'
+          color: 'rgba(100, 116, 139, 0.12)'
         },
         pointLabels: {
           font: {
@@ -50,12 +53,20 @@ export default function RadarChart({ data, labels, label, color = '#2563EB', hei
     plugins: {
       legend: {
         display: false
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleFont: { weight: '700', size: 13 },
+        bodyFont: { size: 12 },
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: false
       }
     }
   }), []);
 
   return (
-    <div style={{ height }}>
+    <div style={{ height, width: '100%' }}>
       <Radar data={chartData} options={options} />
     </div>
   );
