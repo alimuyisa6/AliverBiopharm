@@ -1,4 +1,4 @@
-import {
+ import {
   Chart as ChartJS,
   ArcElement,
   CategoryScale,
@@ -25,7 +25,7 @@ ChartJS.register(
   Legend
 );
 
-ChartJS.defaults.font.family = "'Inter', sans-serif";
+ChartJS.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
 ChartJS.defaults.font.size = 12;
 ChartJS.defaults.color = '#64748B';
 ChartJS.defaults.borderColor = 'rgba(100, 116, 139, 0.1)';
