@@ -11,6 +11,7 @@ import SearchOverlay from '../SearchOverlay/SearchOverlay';
 import ClassSwitcher from '../ClassSwitcher/ClassSwitcher';
 import AdminLauncher from '../AdminLauncher';
 
+// Add /notes/read to excluded paths
 const EXCLUDED_PATHS = ['/login', '/register'];
 const SCROLL_STORAGE_KEY = 'scroll-positions';
 
@@ -59,9 +60,16 @@ export default function Layout({ children, showFooter = true }) {
 
   const { user } = useAuth();
 
+  // Check if it's an auth page OR note detail page
   const isAuthPage = EXCLUDED_PATHS.includes(location.pathname);
+  const isNoteDetailPage = location.pathname.startsWith('/notes/read');
   const isRoomPage = location.pathname.startsWith('/classroom/');
-  const hideFooter = isAuthPage || isRoomPage;
+  
+  // Hide header on auth pages and note detail pages
+  const hideHeader = isAuthPage || isNoteDetailPage;
+  
+  // Hide footer on auth pages, note detail pages, and room pages
+  const hideFooter = isAuthPage || isRoomPage || isNoteDetailPage;
 
   const scrollPositions = useRef(loadScrollMap());
   const persistTimeout = useRef(null);
@@ -176,7 +184,8 @@ export default function Layout({ children, showFooter = true }) {
     <div className="app-layout">
       <a href="#main-content" className="skip-link">Skip to content</a>
 
-      {!isAuthPage && (
+      {/* Changed from !isAuthPage to !hideHeader */}
+      {!hideHeader && (
         <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
           <div className="header-container">
             <Link to="/" className="header-logo">
@@ -360,6 +369,7 @@ export default function Layout({ children, showFooter = true }) {
         {children}
       </motion.main>
 
+      {/* Already had !hideFooter but now hideFooter includes note detail */}
       {!hideFooter && showFooter && (
         <footer className="footer">
           <div className="footer-inner">
