@@ -21,10 +21,10 @@ export default function QuizLearningPath({ level, class_name }) {
 
   return (
     <section className="section quiz-learning-path">
-      <h3 className="quiz-section-heading">
+      <h3 className="quiz-section-heading font-poppins">
         <Icon name="route" className="icon stat-icon-secondary" />
         Your Learning<br />Path{levelName ? ` in ${levelName}` : ''}
-        {class_name && <span className="quiz-section-heading-sub"> – {class_name}</span>}
+        {class_name && <span className="quiz-section-heading-sub font-maven-pro"> – {class_name}</span>}
       </h3>
 
       <div className="grid grid-cols-3">
@@ -34,8 +34,8 @@ export default function QuizLearningPath({ level, class_name }) {
               name={path.icon === 'dna' ? 'microscope' : path.icon || 'book-open'}
               className={`stat-icon ${path.completed ? 'stat-icon-success' : 'stat-icon-muted'}`}
             />
-            <div className="stat-value quiz-path-value">{path.topic_name}</div>
-            <div className="stat-label">{path.completed ? 'Completed' : 'Upcoming'}</div>
+            <div className="stat-value quiz-path-value font-maven-pro">{path.topic_name}</div>
+            <div className="stat-label font-source-sans">{path.completed ? 'Completed' : 'Upcoming'}</div>
           </div>
         ))}
       </div>
