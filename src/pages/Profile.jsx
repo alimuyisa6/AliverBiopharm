@@ -186,7 +186,7 @@ export default function Profile() {
                 <div className="progress-track" style={{ height: 4 }}>
                   <div className="progress-fill" style={{ width: `${(passwordStrength.score / 3) * 100}%`, background: passwordStrength.color }} />
                 </div>
-                <span style={{ fontSize: 'var(--text-xs)', color: passwordStrength.color }}>{passwordStrength.label}</span>
+                <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: passwordStrength.color }}>{passwordStrength.label}</span>
               </div>
             )}
             <Input label="Confirm New Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={savingPassword} />
@@ -199,12 +199,12 @@ export default function Profile() {
         <Card variant="curved" style={{ padding: 'var(--space-8)', marginTop: 'var(--space-10)', maxWidth: 560 }}>
           <h3 className="font-poppins" style={{ marginBottom: 'var(--space-4)' }}><Icon name="route" style={{ marginRight: 'var(--space-3)', color: 'var(--warm)' }} />Request Level Change</h3>
           <p className="font-source-sans" style={{ color: 'var(--text-dim)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-6)' }}>
-            Moving to a different level requires admin approval. Your current level is <strong>{profileMeta?.track || 'Not set'}</strong>.
+            Moving to a different level requires admin approval. Your current level is <strong className="font-poppins">{profileMeta?.track || 'Not set'}</strong>.
           </p>
           <form onSubmit={handleLevelChangeRequest}>
             <div className="form-group">
               <label className="form-label font-poppins">New Level</label>
-              <select className="form-select" value={levelReqTrack} onChange={(e) => setLevelReqTrack(e.target.value)} required disabled={availableLevelsLoading}>
+              <select className="form-select font-source-sans" value={levelReqTrack} onChange={(e) => setLevelReqTrack(e.target.value)} required disabled={availableLevelsLoading}>
                 <option value="">Select Level</option>
                 {levelChangeOptions.map((lvl) => (
                   <option key={lvl.id || lvl.key || lvl.display_name} value={lvl.display_name}>{lvl.display_name}</option>
@@ -214,7 +214,7 @@ export default function Profile() {
             </div>
             <div className="form-group">
               <label className="form-label font-poppins">Reason</label>
-              <textarea className="form-textarea" rows={3} value={levelReqReason} onChange={(e) => setLevelReqReason(e.target.value)} required />
+              <textarea className="form-textarea font-source-sans" rows={3} value={levelReqReason} onChange={(e) => setLevelReqReason(e.target.value)} required />
             </div>
             <Button type="submit" loading={levelReqLoading} loadingContext="brand" variant="inset" icon="route">Submit Request</Button>
           </form>
