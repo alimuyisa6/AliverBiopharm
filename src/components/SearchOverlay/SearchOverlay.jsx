@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../Icon/Icon';
 import { globalSearch, searchNotes } from '../../api/client';
 import { useLayout } from '../../contexts/LayoutContext';
+import DOMPurify from 'dompurify';
 
 const CATEGORIES = [
   { key: 'note', label: 'Notes', icon: 'book-open', path: (item) => `/notes/read?id=${item.id}` },
@@ -56,19 +57,16 @@ export default function SearchOverlay({ open, onClose }) {
       const trimmedQuery = value.trim();
 
       try {
-        // Run both searches in parallel
         const [globalResults, noteResults] = await Promise.allSettled([
           globalSearch(trimmedQuery, activeGroupId ? { group_id: activeGroupId } : {}),
           searchNotes(trimmedQuery, 20)
         ]);
 
-        // Extract global results (other categories + possibly notes)
         const globalData = globalResults.status === 'fulfilled' ? globalResults.value : { results: [] };
         const otherResults = (globalData.results || []).filter(
           (item) => item.type !== 'note'
         );
 
-        // Map full‑text note results to expected shape
         const fullTextNotes = noteResults.status === 'fulfilled'
           ? noteResults.value.map((note) => ({
               type: 'note',
@@ -81,7 +79,6 @@ export default function SearchOverlay({ open, onClose }) {
             }))
           : [];
 
-        // Merge: other categories + full‑text notes
         const mergedResults = [...otherResults, ...fullTextNotes];
 
         setResults({ results: mergedResults });
@@ -156,7 +153,14 @@ export default function SearchOverlay({ open, onClose }) {
                         <Icon name={category.icon === 'dna' ? 'microscope' : category.icon} className="search-result-icon" />
                         <div className="search-result-content">
                           <div className="search-result-title">{item.title}</div>
-                          {item.preview && <div className="search-result-meta">{item.preview}</div>}
+                          {item.preview && (
+                            <div
+                              className="search-result-meta"
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(item.preview)
+                              }}
+                            />
+                          )}
                         </div>
                       </button>
                     ))}
