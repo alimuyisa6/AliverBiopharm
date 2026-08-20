@@ -99,7 +99,8 @@ export default function AboutPage() {
         <section
           className={`about-hero${page.hero.image_url ? ' about-hero-bg' : ''}`}
           style={page.hero.image_url ? {
-            backgroundImage: `linear-gradient(rgba(10,20,35,0.85), rgba(10,20,35,0.9)), url(${page.hero.image_url})`
+            backgroundImage: `url(${page.hero.image_url})`,
+            backgroundColor: 'var(--primary)'
           } : undefined}
         >
           <div className="about-hero-content">
