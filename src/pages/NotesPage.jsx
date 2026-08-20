@@ -1,5 +1,4 @@
- /* pages/NotesPage.jsx */
-import { useState, useEffect } from 'react';
+ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useContentAccess } from '../hooks/useContentAccess';
 import { useLevelFilter } from '../hooks/useLevelFilter';
@@ -111,8 +110,24 @@ export default function NotesPage() {
           <div className="notes-grid">
             {notes.map((note) => (
               <div key={note.id} className="card notes-card">
-                <div className="card-image-placeholder">
-                  <Icon name="book-open" className="notes-card-icon" />
+                <div className="card-image">
+                  {note.topic_image_url ? (
+                    <img
+                      src={note.topic_image_url}
+                      alt={note.title}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.style.removeProperty('display');
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className="card-image-placeholder"
+                    style={{ display: note.topic_image_url ? 'none' : 'flex' }}
+                  >
+                    <Icon name="book-open" className="notes-card-icon" />
+                  </div>
                 </div>
 
                 <div className="card-body">
