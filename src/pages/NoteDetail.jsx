@@ -17,6 +17,15 @@ import EmptyState from '../components/EmptyState/EmptyState';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
 
+// Import mermaid dynamically to avoid bundling for all users
+let mermaidPromise = null;
+function loadMermaid() {
+  if (!mermaidPromise) {
+    mermaidPromise = import('mermaid').then((module) => module.default);
+  }
+  return mermaidPromise;
+}
+
 function normalizeReactions(data) {
   return {
     counts: data?.counts || {},
@@ -44,6 +53,11 @@ export default function NoteDetail() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [isBarFloating, setIsBarFloating] = useState(false);
+  const [toc, setToc] = useState([]);
+  const [metadata, setMetadata] = useState({});
+  const [tocOpen, setTocOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
+
   const contentRef = useRef(null);
   const progressTimer = useRef(null);
   const startTime = useRef(Date.now());
@@ -72,6 +86,8 @@ export default function NoteDetail() {
       setComments([]);
       setReactions({ counts: {}, user: [] });
       setReadProgress(0);
+      setToc([]);
+      setMetadata({});
 
       try {
         const data = await getNoteDetail(noteId);
@@ -80,6 +96,8 @@ export default function NoteDetail() {
 
         setNote(data);
         setBreadcrumb(data.breadcrumb || []);
+        setToc(data.toc || []);
+        setMetadata(data.metadata || {});
 
         const [reactionResult, commentResult, linksResult] = await Promise.allSettled([
           getReactions('note', data.id),
@@ -198,6 +216,57 @@ export default function NoteDetail() {
     return enhancedHtml;
   }, []);
 
+  // Build final content with metadata images/diagrams
+  const buildContentWithMetadata = useCallback((enhancedHtml, metadata) => {
+    let html = enhancedHtml || '';
+
+    const images = metadata.images || [];
+    const diagrams = metadata.diagrams || [];
+
+    const imageHtml = (img) => {
+      const caption = img.caption ? `<figcaption class="note-image-caption">${img.caption}</figcaption>` : '';
+      return `<figure class="note-image-wrapper" data-image-src="${img.src}">
+        <img src="${img.src}" alt="${img.caption || 'Note image'}" loading="lazy" />
+        ${caption}
+      </figure>`;
+    };
+
+    const diagramHtml = (diagram) => {
+      if (diagram.type === 'mermaid') {
+        const caption = diagram.caption ? `<figcaption class="note-image-caption">${diagram.caption}</figcaption>` : '';
+        return `<figure class="note-mermaid-wrapper">
+          <div class="mermaid">${diagram.code}</div>
+          ${caption}
+        </figure>`;
+      }
+      return '';
+    };
+
+    // Position: top
+    const topItems = [...images.filter(i => i.position === 'top'), ...diagrams.filter(d => d.position === 'top')];
+    if (topItems.length) {
+      html = topItems.map(item => item.type ? diagramHtml(item) : imageHtml(item)).join('') + html;
+    }
+
+    // Position: bottom
+    const bottomItems = [...images.filter(i => i.position === 'bottom'), ...diagrams.filter(d => d.position === 'bottom')];
+    if (bottomItems.length) {
+      html += bottomItems.map(item => item.type ? diagramHtml(item) : imageHtml(item)).join('');
+    }
+
+    // Position: inline (insert after heading with matching anchor)
+    const inlineItems = [...images.filter(i => i.position === 'inline'), ...diagrams.filter(d => d.position === 'inline')];
+    for (const item of inlineItems) {
+      if (!item.anchor) continue;
+      const anchorId = item.anchor;
+      const headingRegex = new RegExp(`<h[23][^>]*id="${anchorId}"[^>]*>.*?</h[23]>`, 'i');
+      const insertHtml = item.type ? diagramHtml(item) : imageHtml(item);
+      html = html.replace(headingRegex, (match) => `${match}${insertHtml}`);
+    }
+
+    return html;
+  }, []);
+
   const handleInlineLinkClick = useCallback((event) => {
     const link = event.target.closest('.note-inline-link');
 
@@ -241,21 +310,52 @@ export default function NoteDetail() {
     setLinkPreview(null);
   }, []);
 
+  // Open lightbox for any image inside content
+  const handleContentClick = useCallback((event) => {
+    if (event.target.tagName === 'IMG') {
+      setLightboxImage(event.target.src);
+    }
+  }, []);
+
   useEffect(() => {
     const contentElement = contentRef.current;
 
     if (!contentElement) return;
 
     contentElement.addEventListener('click', handleInlineLinkClick);
+    contentElement.addEventListener('click', handleContentClick);
     contentElement.addEventListener('mouseover', handleInlineLinkHover);
     contentElement.addEventListener('mouseout', hideLinkPreview);
 
     return () => {
       contentElement.removeEventListener('click', handleInlineLinkClick);
+      contentElement.removeEventListener('click', handleContentClick);
       contentElement.removeEventListener('mouseover', handleInlineLinkHover);
       contentElement.removeEventListener('mouseout', hideLinkPreview);
     };
-  }, [handleInlineLinkClick, handleInlineLinkHover, hideLinkPreview, note, internalLinks]);
+  }, [handleInlineLinkClick, handleInlineLinkHover, hideLinkPreview, handleContentClick, note, internalLinks]);
+
+  // Initialize Mermaid after content is rendered
+  useEffect(() => {
+    if (!contentRef.current) return;
+
+    const mermaidElements = contentRef.current.querySelectorAll('.mermaid');
+    if (mermaidElements.length === 0) return;
+
+    let cancelled = false;
+
+    loadMermaid()
+      .then((mermaid) => {
+        if (cancelled) return;
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+        mermaid.run({ nodes: mermaidElements });
+      })
+      .catch((err) => console.error('Mermaid loading failed', err));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [note, metadata]); // re-run when note or metadata changes
 
   async function handleReaction(reactionType) {
     if (!user) {
@@ -294,6 +394,15 @@ export default function NoteDetail() {
     navigate(`/notes?highlight=${noteId}`);
   }
 
+  function handleTocLinkClick(e, anchor) {
+    e.preventDefault();
+    const element = document.getElementById(anchor);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTocOpen(false); // close mobile TOC
+    }
+  }
+
   if (loading) {
     return (
       <div className="fcd-loading-wrap">
@@ -320,6 +429,7 @@ export default function NoteDetail() {
   }
 
   const enhancedContent = enhanceContentWithLinks(note.content, internalLinks.inline_links);
+  const finalContent = buildContentWithMetadata(enhancedContent, metadata);
 
   return (
     <>
@@ -362,6 +472,70 @@ export default function NoteDetail() {
             <span className="note-link-preview-readtime">{linkPreview.read_time}</span>
           )}
         </div>
+      )}
+
+      {lightboxImage && createPortal(
+        <div
+          className="note-lightbox-overlay"
+          onClick={() => setLightboxImage(null)}
+        >
+          <img src={lightboxImage} className="note-lightbox-image" alt="Lightbox" />
+        </div>,
+        document.body
+      )}
+
+      {toc.length > 0 && (
+        <>
+          {/* Desktop TOC sidebar */}
+          <aside className="note-toc-sidebar">
+            <h4 className="note-toc-title">
+              <i className="fa-solid fa-list"></i> Contents
+            </h4>
+            <ul className="note-toc-list">
+              {toc.map((item, index) => (
+                <li key={index} className="note-toc-item" style={{ paddingLeft: `${(item.level - 2) * 12}px` }}>
+                  <a
+                    href={`#${item.anchor}`}
+                    className="note-toc-link"
+                    onClick={(e) => handleTocLinkClick(e, item.anchor)}
+                  >
+                    {item.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+
+          {/* Mobile TOC toggle */}
+          <button
+            className="note-toc-mobile-toggle"
+            onClick={() => setTocOpen(!tocOpen)}
+            aria-label="Toggle table of contents"
+          >
+            <i className={`fa-solid ${tocOpen ? 'fa-xmark' : 'fa-list'}`}></i>
+          </button>
+
+          {tocOpen && (
+            <div className="note-toc-mobile-overlay" onClick={() => setTocOpen(false)}>
+              <div className="note-toc-mobile-panel" onClick={(e) => e.stopPropagation()}>
+                <h4 className="note-toc-title">Contents</h4>
+                <ul className="note-toc-list">
+                  {toc.map((item, index) => (
+                    <li key={index} className="note-toc-item" style={{ paddingLeft: `${(item.level - 2) * 12}px` }}>
+                      <a
+                        href={`#${item.anchor}`}
+                        className="note-toc-link"
+                        onClick={(e) => handleTocLinkClick(e, item.anchor)}
+                      >
+                        {item.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <div className="note-detail-container">
@@ -410,7 +584,7 @@ export default function NoteDetail() {
 
           <div
             className="notes-content-container"
-            dangerouslySetInnerHTML={{ __html: enhancedContent || '<p>Content not available.</p>' }}
+            dangerouslySetInnerHTML={{ __html: finalContent || '<p>Content not available.</p>' }}
           />
         </article>
 
