@@ -1,9 +1,8 @@
- /* components/SearchOverlay/SearchOverlay.jsx */
-import { useState, useEffect, useRef, useCallback } from 'react';
+ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../Icon/Icon';
-import { globalSearch } from '../../api/client';
+import { globalSearch, searchNotes } from '../../api/client';
 import { useLayout } from '../../contexts/LayoutContext';
 
 const CATEGORIES = [
@@ -54,10 +53,38 @@ export default function SearchOverlay({ open, onClose }) {
     setLoading(true);
 
     debounceRef.current = setTimeout(async () => {
-      try {
-        const data = await globalSearch(value.trim(), activeGroupId ? { group_id: activeGroupId } : {});
+      const trimmedQuery = value.trim();
 
-        setResults(data);
+      try {
+        // Run both searches in parallel
+        const [globalResults, noteResults] = await Promise.allSettled([
+          globalSearch(trimmedQuery, activeGroupId ? { group_id: activeGroupId } : {}),
+          searchNotes(trimmedQuery, 20)
+        ]);
+
+        // Extract global results (other categories + possibly notes)
+        const globalData = globalResults.status === 'fulfilled' ? globalResults.value : { results: [] };
+        const otherResults = (globalData.results || []).filter(
+          (item) => item.type !== 'note'
+        );
+
+        // Map full‑text note results to expected shape
+        const fullTextNotes = noteResults.status === 'fulfilled'
+          ? noteResults.value.map((note) => ({
+              type: 'note',
+              id: note.id,
+              title: note.title,
+              preview: note.snippet || note.content_preview || '',
+              slug: note.slug,
+              read_time: note.read_time,
+              word_count: note.word_count
+            }))
+          : [];
+
+        // Merge: other categories + full‑text notes
+        const mergedResults = [...otherResults, ...fullTextNotes];
+
+        setResults({ results: mergedResults });
       } catch {
         setResults(null);
       } finally {
