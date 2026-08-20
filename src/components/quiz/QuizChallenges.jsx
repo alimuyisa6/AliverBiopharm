@@ -1,4 +1,4 @@
-/* features/quiz/QuizChallenges.jsx */
+ /* features/quiz/QuizChallenges.jsx */
 import { useEffect, useState } from 'react';
 import { getRequest } from '../../api/client';
 import Icon from '../../components/Icon/Icon';
@@ -23,12 +23,12 @@ export default function QuizChallenges({ user, level, class_name }) {
       <Icon name="rocket" className="quiz-challenge-icon" />
 
       <div className="quiz-challenge-body">
-        <h4 className="quiz-challenge-title">
+        <h4 className="quiz-challenge-title font-poppins">
           {challenge.title}
-          {levelName && <span className="quiz-challenge-sublabel"> — {levelName}{classLabel ? ` · ${classLabel}` : ''}</span>}
+          {levelName && <span className="quiz-challenge-sublabel font-maven-pro"> — {levelName}{classLabel ? ` · ${classLabel}` : ''}</span>}
         </h4>
 
-        <p className="quiz-challenge-reward">{challenge.reward_xp} XP reward</p>
+        <p className="quiz-challenge-reward font-comfortaa">{challenge.reward_xp} XP reward</p>
         <ProgressBar value={challenge.progress} max={challenge.target} variant="warm" />
       </div>
 
@@ -36,9 +36,9 @@ export default function QuizChallenges({ user, level, class_name }) {
         {challenge.completed ? (
           <Icon name="circle-check" className="icon-complete" />
         ) : (
-          <span className="progress-label">{challenge.progress}/{challenge.target}</span>
+          <span className="progress-label font-mono">{challenge.progress}/{challenge.target}</span>
         )}
       </div>
     </div>
   );
-} 
+}
