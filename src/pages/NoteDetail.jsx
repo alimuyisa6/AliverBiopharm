@@ -16,7 +16,6 @@ import {
 import EmptyState from '../components/EmptyState/EmptyState';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
-  
 
 function normalizeReactions(data) {
   return {
@@ -298,25 +297,21 @@ export default function NoteDetail() {
 
   return (
     <>
-      {/* Animated striped progress bar - fixed at top */}
-      <div className="note-progress-wrapper">
-        <div className="note-progress-track">
-          <div 
-            className="note-progress-fill" 
-            style={{ width: `${readProgress}%` }}
-            role="progressbar"
-            aria-valuenow={readProgress}
-            aria-valuemin="0"
-            aria-valuemax="100"
-          />
+      <div 
+        className="note-progress-bar" 
+        style={{ '--progress-width': `${readProgress}%` }}
+        role="progressbar"
+        aria-valuenow={readProgress}
+        aria-valuemin="0"
+        aria-valuemax="100"
+      />
+
+      {user && (
+        <div className="note-progress-indicator">
+          <i className={`fa-solid fa-circle-check ${progressSaved ? 'progress-saved' : 'progress-unsaved'}`}></i>
+          {readProgress}% read {progressSaved && '· saved'}
         </div>
-        {user && (
-          <div className="note-progress-indicator">
-            <i className={`fa-solid fa-circle-check ${progressSaved ? 'progress-saved' : 'progress-unsaved'}`}></i>
-            {readProgress}% read {progressSaved && '· saved'}
-          </div>
-        )}
-      </div>
+      )}
 
       {linkPreview && (
         <div
