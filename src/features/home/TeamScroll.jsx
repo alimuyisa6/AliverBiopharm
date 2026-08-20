@@ -72,11 +72,11 @@ export function TeamScroll({ members }) {
 
   return (
     <section id="team" className="section reveal">
-      <span className="sec-label">Faculty</span>
-      <h2 className="section-title">
+      <span className="sec-label font-mono">Faculty</span>
+      <h2 className="section-title font-fraunces">
         Meet the Minds<br />Behind the Platform
       </h2>
-      <p className="section-subtitle">
+      <p className="section-subtitle font-source-sans">
         Distinguished pharmacologists, molecular biologists, and clinical researchers with decades of combined teaching experience.
       </p>
 
@@ -110,9 +110,9 @@ export function TeamScroll({ members }) {
                   )}
                 </div>
 
-                <h3>{member.name}</h3>
-                <div className="team-title">{member.title || 'Faculty Member'}</div>
-                <p>{member.bio}</p>
+                <h3 className="font-poppins">{member.name}</h3>
+                <div className="team-title font-maven-pro">{member.title || 'Faculty Member'}</div>
+                <p className="font-source-sans">{member.bio}</p>
 
                 <div className="team-social">
                   {member.linkedin && (
