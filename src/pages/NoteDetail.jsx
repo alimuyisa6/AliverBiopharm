@@ -1,5 +1,4 @@
  import { useState, useEffect, useRef, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
@@ -297,18 +296,6 @@ export default function NoteDetail() {
 
   return (
     <>
-      {createPortal(
-        <div
-          className="note-progress-bar"
-          style={{ '--progress-width': `${readProgress}%` }}
-          role="progressbar"
-          aria-valuenow={readProgress}
-          aria-valuemin="0"
-          aria-valuemax="100"
-        />,
-        document.body
-      )}
-
       {user && (
         <div className="note-progress-indicator">
           <i className={`fa-solid fa-circle-check ${progressSaved ? 'progress-saved' : 'progress-unsaved'}`}></i>
@@ -359,6 +346,15 @@ export default function NoteDetail() {
 
         <article ref={contentRef} className="note-article">
           <div className="note-hero">
+            <div
+              className="note-progress-bar"
+              style={{ '--progress-width': `${readProgress}%` }}
+              role="progressbar"
+              aria-valuenow={readProgress}
+              aria-valuemin="0"
+              aria-valuemax="100"
+            />
+
             <div className="note-meta-tags">
               {note?.unit_title?.group_name && (
                 <span className="note-tag note-tag-group">{note.unit_title.group_name}</span>
