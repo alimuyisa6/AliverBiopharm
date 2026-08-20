@@ -1,28 +1,109 @@
  /* styles/note-detail.css */
 
+/* === ANIMATED STRIPED PROGRESS BAR (Fixed at top) === */
 .note-progress-bar {
   position: fixed;
   top: 0;
   left: 0;
-  height: 3px;
-  background: var(--primary);
+  right: 0;
+  height: 4px;
+  background: #ebebf2;
   z-index: var(--z-toast);
-  transition: width 0.15s ease-out;
+  overflow: hidden;
+  transition: none;
 }
 
+.note-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: var(--progress-width, 0%);
+  background: repeating-linear-gradient(
+    45deg,
+    #2b6cb0,
+    #2b6cb0 12px,
+    #3182ce 12px,
+    #3182ce 24px
+  );
+  animation: slideStripes 1s linear infinite;
+  transition: width 0.15s ease-out;
+  border-radius: 0 2px 2px 0;
+}
+
+@keyframes slideStripes {
+  0% { background-position: 0 0; }
+  100% { background-position: 28px 0; }
+}
+
+/* Optional: Add a subtle container for progress indicator */
+.note-progress-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-toast);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.note-progress-track {
+  height: 4px;
+  background: #ebebf2;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.note-progress-fill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    #2b6cb0,
+    #2b6cb0 12px,
+    #3182ce 12px,
+    #3182ce 24px
+  );
+  animation: slideStripes 1s linear infinite;
+  transition: width 0.15s ease-out;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Progress indicator (optional - shows percentage) */
+.note-progress-indicator {
+  position: fixed;
+  top: 4px;
+  right: 1rem;
+  z-index: var(--z-toast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-saved { color: var(--success); }
+.progress-unsaved { color: var(--text-muted); }
+
+/* Adjust main container to account for fixed progress bar */
 .note-detail-container {
   max-width: 820px;
   margin: 0 auto;
-  padding: var(--space-8) var(--space-6) var(--space-16);
+  padding: var(--space-12) var(--space-6) var(--space-16);
 }
 
+/* Remove old header styles since we don't need them */
 .note-detail-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
+  display: none; /* Hide the old header */
 }
 
 .note-back-btn {
@@ -46,16 +127,24 @@
   transform: translateX(-2px);
 }
 
-.note-progress-indicator {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--text-dim);
+/* Add a floating back button at bottom */
+.note-back-bottom {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: var(--z-toast);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-6);
+  border: 1.5px solid var(--border-default);
 }
 
-.progress-saved { color: var(--success); }
-.progress-unsaved { color: var(--text-muted); }
+.note-back-bottom:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
 
 .note-breadcrumb {
   margin-bottom: var(--space-6);
@@ -533,16 +622,12 @@
 }
 
 .note-detail-footer {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-10);
-  padding-top: var(--space-8);
-  border-top: 1px solid var(--border-default);
+  display: none; /* Hide the old footer */
 }
 
 @media (max-width: 640px) {
   .note-detail-container {
-    padding: var(--space-6) var(--space-4) var(--space-12);
+    padding: var(--space-10) var(--space-4) var(--space-12);
   }
   .note-hero {
     padding: var(--space-6) var(--space-5);
@@ -565,5 +650,14 @@
   .notes-content-container table thead th,
   .notes-content-container table tbody td {
     padding: var(--space-2) var(--space-3);
+  }
+  .note-back-bottom {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  .note-progress-indicator {
+    top: 4px;
+    right: 0.5rem;
+    font-size: var(--text-xs);
   }
 }
