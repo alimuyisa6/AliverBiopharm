@@ -16,7 +16,7 @@ import {
 import EmptyState from '../components/EmptyState/EmptyState';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
-import './NoteDetail.css'; // Import the CSS file
+  
 
 function normalizeReactions(data) {
   return {
