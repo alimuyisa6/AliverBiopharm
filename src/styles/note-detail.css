@@ -872,3 +872,10 @@
     font-size: 0.75rem;
   }
 }
+
+.search-result-meta mark {
+  background: #fef08a;
+  padding: 0 2px;
+  border-radius: 2px;
+  }
+
