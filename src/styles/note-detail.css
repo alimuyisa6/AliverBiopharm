@@ -5,10 +5,9 @@
   top: 0;
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
+  background: var(--primary);
   z-index: var(--z-toast);
   transition: width 0.15s ease-out;
-  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
 }
 
 .note-detail-container {
@@ -78,28 +77,13 @@
 .note-hero {
   position: relative;
   padding: var(--space-10) var(--space-8);
-  background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-2xl);
   margin-bottom: var(--space-10);
-  overflow: hidden;
-}
-
-.note-hero::before {
-  content: '';
-  position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 220px;
-  height: 220px;
-  border-radius: var(--radius-full);
-  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-  opacity: 0.25;
-  pointer-events: none;
 }
 
 .note-meta-tags {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -120,8 +104,6 @@
 .note-tag-unit { background: var(--accent); }
 
 .note-title {
-  position: relative;
-  z-index: 1;
   font-family: var(--font-heading);
   font-size: var(--text-4xl);
   font-weight: var(--weight-black);
@@ -137,7 +119,7 @@
 .notes-content-container {
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
-  color: var(--text-main);
+  color: var(--text-dim);
 }
 
 .notes-content-container h2 {
@@ -146,6 +128,7 @@
   font-weight: var(--weight-bold);
   color: var(--text-main);
   margin: var(--space-8) 0 var(--space-3);
+  line-height: var(--leading-snug);
 }
 
 .notes-content-container h3 {
@@ -154,20 +137,30 @@
   font-weight: var(--weight-bold);
   color: var(--text-main);
   margin: var(--space-6) 0 var(--space-3);
+  line-height: var(--leading-snug);
 }
 
 .notes-content-container p {
   margin-bottom: var(--space-4);
+  color: var(--text-dim);
+  font-weight: var(--weight-normal);
 }
 
 .notes-content-container ul,
 .notes-content-container ol {
   margin: 0 0 var(--space-4) var(--space-6);
   list-style: revert;
+  color: var(--text-dim);
 }
 
 .notes-content-container li {
   margin-bottom: var(--space-2);
+  color: var(--text-dim);
+}
+
+.notes-content-container li strong {
+  color: var(--text-main);
+  font-weight: var(--weight-semibold);
 }
 
 .notes-content-container img {
@@ -184,6 +177,9 @@
   margin: var(--space-6) 0;
   color: var(--text-dim);
   font-style: italic;
+  background: var(--bg-card);
+  padding: var(--space-4) var(--space-5);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
 .notes-content-container code {
@@ -192,6 +188,7 @@
   border-radius: var(--radius-xs);
   font-family: var(--font-mono);
   font-size: 0.9em;
+  color: var(--text-main);
 }
 
 .notes-content-container pre {
@@ -206,10 +203,54 @@
   color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 2px;
+  font-weight: var(--weight-medium);
 }
 
 .notes-content-container a:hover {
   color: var(--primary-hover);
+}
+
+.notes-content-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-5) 0 var(--space-6);
+  font-size: var(--text-sm);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.notes-content-container table thead th {
+  background: var(--primary);
+  color: var(--text-inverse);
+  font-weight: var(--weight-bold);
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 2px solid var(--primary-hover);
+  letter-spacing: var(--tracking-wide);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+}
+
+.notes-content-container table tbody td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-default);
+  color: var(--text-dim);
+  font-weight: var(--weight-normal);
+}
+
+.notes-content-container table tbody td:first-child {
+  font-weight: var(--weight-medium);
+  color: var(--text-main);
+}
+
+.notes-content-container table tbody tr:hover {
+  background: var(--bg-card-hover);
+}
+
+.notes-content-container table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .note-inline-link {
@@ -517,5 +558,12 @@
   }
   .note-link-preview {
     max-width: 240px;
+  }
+  .notes-content-container table {
+    font-size: var(--text-xs);
+  }
+  .notes-content-container table thead th,
+  .notes-content-container table tbody td {
+    padding: var(--space-2) var(--space-3);
   }
 }
