@@ -48,7 +48,7 @@ export default function NoteDetail() {
   const progressTimer = useRef(null);
   const startTime = useRef(Date.now());
   const previewTimer = useRef(null);
-  const progressBarRef = useRef(null);
+  const progressBarObserver = useRef(null);
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
@@ -155,10 +155,13 @@ export default function NoteDetail() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [user, note, noteId]);
 
-  useEffect(() => {
-    const barElement = progressBarRef.current;
+  const progressBarRef = useCallback((node) => {
+    if (progressBarObserver.current) {
+      progressBarObserver.current.disconnect();
+      progressBarObserver.current = null;
+    }
 
-    if (!barElement) return;
+    if (!node) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -172,10 +175,9 @@ export default function NoteDetail() {
       { threshold: 0 }
     );
 
-    observer.observe(barElement);
-
-    return () => observer.disconnect();
-  }, [note]);
+    observer.observe(node);
+    progressBarObserver.current = observer;
+  }, []);
 
   const enhanceContentWithLinks = useCallback((html, inlineLinks) => {
     if (!html || !inlineLinks.length) return html;
