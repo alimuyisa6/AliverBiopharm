@@ -1,5 +1,5 @@
-/* pages/NoteDetail.jsx */
-import { useState, useEffect, useRef, useCallback } from 'react';
+ import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
@@ -297,14 +297,17 @@ export default function NoteDetail() {
 
   return (
     <>
-      <div 
-        className="note-progress-bar" 
-        style={{ '--progress-width': `${readProgress}%` }}
-        role="progressbar"
-        aria-valuenow={readProgress}
-        aria-valuemin="0"
-        aria-valuemax="100"
-      />
+      {createPortal(
+        <div
+          className="note-progress-bar"
+          style={{ '--progress-width': `${readProgress}%` }}
+          role="progressbar"
+          aria-valuenow={readProgress}
+          aria-valuemin="0"
+          aria-valuemax="100"
+        />,
+        document.body
+      )}
 
       {user && (
         <div className="note-progress-indicator">
@@ -471,4 +474,4 @@ export default function NoteDetail() {
       </div>
     </>
   );
-} 
+}
