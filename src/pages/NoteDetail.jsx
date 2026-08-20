@@ -1,4 +1,4 @@
- /* pages/NoteDetail.jsx */
+/* pages/NoteDetail.jsx */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,6 +16,7 @@ import {
 import EmptyState from '../components/EmptyState/EmptyState';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
+import './NoteDetail.css'; // Import the CSS file
 
 function normalizeReactions(data) {
   return {
@@ -297,7 +298,25 @@ export default function NoteDetail() {
 
   return (
     <>
-      <div className="note-progress-bar" style={{ width: `${readProgress}%` }} />
+      {/* Animated striped progress bar - fixed at top */}
+      <div className="note-progress-wrapper">
+        <div className="note-progress-track">
+          <div 
+            className="note-progress-fill" 
+            style={{ width: `${readProgress}%` }}
+            role="progressbar"
+            aria-valuenow={readProgress}
+            aria-valuemin="0"
+            aria-valuemax="100"
+          />
+        </div>
+        {user && (
+          <div className="note-progress-indicator">
+            <i className={`fa-solid fa-circle-check ${progressSaved ? 'progress-saved' : 'progress-unsaved'}`}></i>
+            {readProgress}% read {progressSaved && '· saved'}
+          </div>
+        )}
+      </div>
 
       {linkPreview && (
         <div
@@ -322,19 +341,6 @@ export default function NoteDetail() {
       )}
 
       <div className="note-detail-container">
-        <div className="note-detail-header">
-          <button className="note-back-btn" onClick={handleBack}>
-            <i className="fa-solid fa-arrow-left"></i> Back to Notes
-          </button>
-
-          {user && (
-            <div className="note-progress-indicator">
-              <i className={`fa-solid fa-circle-check ${progressSaved ? 'progress-saved' : 'progress-unsaved'}`}></i>
-              {readProgress}% read {progressSaved && '· saved'}
-            </div>
-          )}
-        </div>
-
         <div className="breadcrumb note-breadcrumb">
           {breadcrumb.map((crumb, index) => (
             <span key={index}>
@@ -464,12 +470,10 @@ export default function NoteDetail() {
           </div>
         </div>
 
-        <div className="note-detail-footer">
-          <button className="note-back-btn note-back-bottom" onClick={handleBack}>
-            <i className="fa-solid fa-arrow-left"></i> Back to Notes
-          </button>
-        </div>
+        <button className="note-back-btn note-back-bottom" onClick={handleBack}>
+          <i className="fa-solid fa-arrow-left"></i> Back to Notes
+        </button>
       </div>
     </>
   );
-}
+} 
