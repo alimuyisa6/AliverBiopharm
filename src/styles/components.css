@@ -28,6 +28,7 @@
 @import './home-sections.css';
 @import './pastpapers.css';
 @import './quiz.css';
+@import './note-detail.css';
 .auth-page {
   display: flex;
   min-height: calc(100vh - var(--header-height));
