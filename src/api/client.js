@@ -633,6 +633,10 @@ export async function globalSearch(q, extraParams = {}) {
   return getRequest('search', `global?${params}`);
 }
 
+export async function searchNotes(query, limit = 20) {
+  return getRequest('notes', 'search', { q: query, limit });
+}
+
 export async function getProfile() {
   return getRequest('profile', 'get_profile');
 }
