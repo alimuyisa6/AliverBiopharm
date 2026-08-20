@@ -1,4 +1,5 @@
  import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
@@ -42,10 +43,12 @@ export default function NoteDetail() {
   const [linkPreviewPosition, setLinkPreviewPosition] = useState({ x: 0, y: 0 });
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [isBarFloating, setIsBarFloating] = useState(false);
   const contentRef = useRef(null);
   const progressTimer = useRef(null);
   const startTime = useRef(Date.now());
   const previewTimer = useRef(null);
+  const progressBarRef = useRef(null);
 
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
@@ -151,6 +154,28 @@ export default function NoteDetail() {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [user, note, noteId]);
+
+  useEffect(() => {
+    const barElement = progressBarRef.current;
+
+    if (!barElement) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsBarFloating(false);
+          return;
+        }
+
+        setIsBarFloating(entry.boundingClientRect.top < 0);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(barElement);
+
+    return () => observer.disconnect();
+  }, [note]);
 
   const enhanceContentWithLinks = useCallback((html, inlineLinks) => {
     if (!html || !inlineLinks.length) return html;
@@ -296,6 +321,18 @@ export default function NoteDetail() {
 
   return (
     <>
+      {isBarFloating && createPortal(
+        <div
+          className="note-progress-bar note-progress-bar--floating"
+          style={{ '--progress-width': `${readProgress}%` }}
+          role="progressbar"
+          aria-valuenow={readProgress}
+          aria-valuemin="0"
+          aria-valuemax="100"
+        />,
+        document.body
+      )}
+
       {user && (
         <div className="note-progress-indicator">
           <i className={`fa-solid fa-circle-check ${progressSaved ? 'progress-saved' : 'progress-unsaved'}`}></i>
@@ -347,6 +384,7 @@ export default function NoteDetail() {
         <article ref={contentRef} className="note-article">
           <div className="note-hero">
             <div
+              ref={progressBarRef}
               className="note-progress-bar"
               style={{ '--progress-width': `${readProgress}%` }}
               role="progressbar"
