@@ -16,12 +16,23 @@ import {
 import EmptyState from '../components/EmptyState/EmptyState';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
+import SearchOverlay from '../components/SearchOverlay/SearchOverlay'; // <-- NEW import
 
-// Import mermaid dynamically to avoid bundling for all users
+// Load mermaid from CDN only when needed
 let mermaidPromise = null;
 function loadMermaid() {
   if (!mermaidPromise) {
-    mermaidPromise = import('mermaid').then((module) => module.default);
+    mermaidPromise = new Promise((resolve, reject) => {
+      if (window.mermaid) {
+        resolve(window.mermaid);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+      script.onload = () => resolve(window.mermaid);
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
   }
   return mermaidPromise;
 }
@@ -57,6 +68,7 @@ export default function NoteDetail() {
   const [metadata, setMetadata] = useState({});
   const [tocOpen, setTocOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false); // <-- NEW state for search overlay
 
   const contentRef = useRef(null);
   const progressTimer = useRef(null);
@@ -67,7 +79,6 @@ export default function NoteDetail() {
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
     const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
-
     return component?.properties?.image_url || null;
   }
 
@@ -120,7 +131,6 @@ export default function NoteDetail() {
 
         if (user) {
           const progress = await getReadingProgress(noteId);
-
           if (mounted && progress?.scroll_position) {
             setTimeout(() => {
               window.scrollTo({ top: progress.scroll_position, behavior: 'smooth' });
@@ -139,7 +149,6 @@ export default function NoteDetail() {
 
     return () => {
       mounted = false;
-
       if (progressTimer.current) clearTimeout(progressTimer.current);
       if (previewTimer.current) clearTimeout(previewTimer.current);
     };
@@ -159,7 +168,6 @@ export default function NoteDetail() {
 
       progressTimer.current = setTimeout(async () => {
         const timeSpent = Math.round((Date.now() - startTime.current) / 1000);
-
         try {
           await saveReadingProgress(noteId, percentage, scrollTop, timeSpent, percentage >= 90);
           setProgressSaved(true);
@@ -169,7 +177,6 @@ export default function NoteDetail() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, [user, note, noteId]);
 
@@ -187,7 +194,6 @@ export default function NoteDetail() {
           setIsBarFloating(false);
           return;
         }
-
         setIsBarFloating(entry.boundingClientRect.top < 0);
       },
       { threshold: 0 }
@@ -216,7 +222,6 @@ export default function NoteDetail() {
     return enhancedHtml;
   }, []);
 
-  // Build final content with metadata images/diagrams
   const buildContentWithMetadata = useCallback((enhancedHtml, metadata) => {
     let html = enhancedHtml || '';
 
@@ -254,7 +259,7 @@ export default function NoteDetail() {
       html += bottomItems.map(item => item.type ? diagramHtml(item) : imageHtml(item)).join('');
     }
 
-    // Position: inline (insert after heading with matching anchor)
+    // Position: inline
     const inlineItems = [...images.filter(i => i.position === 'inline'), ...diagrams.filter(d => d.position === 'inline')];
     for (const item of inlineItems) {
       if (!item.anchor) continue;
@@ -269,22 +274,16 @@ export default function NoteDetail() {
 
   const handleInlineLinkClick = useCallback((event) => {
     const link = event.target.closest('.note-inline-link');
-
     if (!link) return;
-
     event.preventDefault();
     event.stopPropagation();
-
     const targetNoteId = link.dataset.noteId;
-
     if (!targetNoteId) return;
-
     navigate(`/notes/read?id=${targetNoteId}`);
   }, [navigate]);
 
   const handleInlineLinkHover = useCallback((event) => {
     const link = event.target.closest('.note-inline-link');
-
     if (!link) {
       hideLinkPreview();
       return;
@@ -310,7 +309,6 @@ export default function NoteDetail() {
     setLinkPreview(null);
   }, []);
 
-  // Open lightbox for any image inside content
   const handleContentClick = useCallback((event) => {
     if (event.target.tagName === 'IMG') {
       setLightboxImage(event.target.src);
@@ -319,7 +317,6 @@ export default function NoteDetail() {
 
   useEffect(() => {
     const contentElement = contentRef.current;
-
     if (!contentElement) return;
 
     contentElement.addEventListener('click', handleInlineLinkClick);
@@ -338,7 +335,6 @@ export default function NoteDetail() {
   // Initialize Mermaid after content is rendered
   useEffect(() => {
     if (!contentRef.current) return;
-
     const mermaidElements = contentRef.current.querySelectorAll('.mermaid');
     if (mermaidElements.length === 0) return;
 
@@ -355,7 +351,7 @@ export default function NoteDetail() {
     return () => {
       cancelled = true;
     };
-  }, [note, metadata]); // re-run when note or metadata changes
+  }, [note, metadata]);
 
   async function handleReaction(reactionType) {
     if (!user) {
@@ -365,9 +361,7 @@ export default function NoteDetail() {
 
     try {
       await toggleReaction('note', noteId, reactionType);
-
       const updated = await getReactions('note', noteId);
-
       setReactions(normalizeReactions(updated));
     } catch {}
   }
@@ -383,9 +377,7 @@ export default function NoteDetail() {
     try {
       await addComment('note', noteId, commentInput.trim());
       setCommentInput('');
-
       const updated = await getComments('note', noteId);
-
       setComments(updated?.comments || []);
     } catch {}
   }
@@ -399,7 +391,7 @@ export default function NoteDetail() {
     const element = document.getElementById(anchor);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setTocOpen(false); // close mobile TOC
+      setTocOpen(false);
     }
   }
 
@@ -433,6 +425,9 @@ export default function NoteDetail() {
 
   return (
     <>
+      {/* Global Search Overlay */}
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+
       {isBarFloating && createPortal(
         <div
           className="note-progress-bar note-progress-bar--floating"
@@ -486,7 +481,6 @@ export default function NoteDetail() {
 
       {toc.length > 0 && (
         <>
-          {/* Desktop TOC sidebar */}
           <aside className="note-toc-sidebar">
             <h4 className="note-toc-title">
               <i className="fa-solid fa-list"></i> Contents
@@ -506,7 +500,6 @@ export default function NoteDetail() {
             </ul>
           </aside>
 
-          {/* Mobile TOC toggle */}
           <button
             className="note-toc-mobile-toggle"
             onClick={() => setTocOpen(!tocOpen)}
@@ -539,6 +532,15 @@ export default function NoteDetail() {
       )}
 
       <div className="note-detail-container">
+        {/* Search button */}
+        <button
+          className="note-search-btn"
+          onClick={() => setSearchOpen(true)}
+          aria-label="Search notes"
+        >
+          <i className="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+
         <div className="breadcrumb note-breadcrumb">
           {breadcrumb.map((crumb, index) => (
             <span key={index}>
