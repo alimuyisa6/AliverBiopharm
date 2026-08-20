@@ -64,6 +64,13 @@ export default function NoteDetail() {
     let mounted = true;
 
     const init = async () => {
+      setLoading(true);
+      setFetchError(null);
+      setInternalLinks({ inline_links: [], related_links: [] });
+      setComments([]);
+      setReactions({ counts: {}, user: [] });
+      setReadProgress(0);
+
       try {
         const data = await getNoteDetail(noteId);
 
@@ -72,13 +79,17 @@ export default function NoteDetail() {
         setNote(data);
         setBreadcrumb(data.breadcrumb || []);
 
-        const [reactionData, commentData, linksData] = await Promise.all([
+        const [reactionResult, commentResult, linksResult] = await Promise.allSettled([
           getReactions('note', data.id),
           getComments('note', data.id),
           getNoteInternalLinks(data.id)
         ]);
 
         if (!mounted) return;
+
+        const reactionData = reactionResult.status === 'fulfilled' ? reactionResult.value : { counts: {}, user_reactions: [] };
+        const commentData = commentResult.status === 'fulfilled' ? commentResult.value : { comments: [] };
+        const linksData = linksResult.status === 'fulfilled' ? linksResult.value : { inline_links: [], related_links: [] };
 
         setReactions(normalizeReactions(reactionData));
         setComments(commentData?.comments || []);
@@ -96,7 +107,8 @@ export default function NoteDetail() {
             }, 500);
           }
         }
-      } catch {
+      } catch (error) {
+        console.error('[NOTE_DETAIL_LOAD_ERROR]', error);
         if (mounted) setFetchError('Failed to load the note. Please try again.');
       } finally {
         if (mounted) setLoading(false);
@@ -150,7 +162,7 @@ export default function NoteDetail() {
       if (!link.link_text) continue;
 
       const escapedText = link.link_text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(?<!<[^>]*)(?<!href="[^"]*)(${escapedText})(?![^<]*>)`, 'gi');
+      const regex = new RegExp(`(${escapedText})`, 'gi');
 
       enhancedHtml = enhancedHtml.replace(regex, (match) => {
         return `<a href="/notes/read?id=${link.target_note_id}" class="note-inline-link" data-note-id="${link.target_note_id}" data-note-title="${link.target_title}" data-note-preview="${link.target_content_preview || ''}" data-note-read-time="${link.target_read_time || ''}">${match}</a>`;
