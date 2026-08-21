@@ -1,5 +1,4 @@
-/* styles/chat.css */
-.chat-widget {
+ .chat-widget {
   position: fixed;
   bottom: var(--space-6);
   right: var(--space-6);
@@ -12,10 +11,12 @@
   height: 60px;
   font-size: 1.35rem;
   box-shadow: var(--shadow-lg);
+  transition: transform var(--ease-fast), box-shadow var(--ease-fast);
 }
 
 .chat-toggle-btn:hover {
   box-shadow: var(--shadow-xl);
+  transform: translateY(-3px) scale(1.05);
 }
 
 .chat-panel {
@@ -31,6 +32,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  animation: scaleIn var(--ease-bounce) forwards;
+  transform-origin: bottom right;
 }
 
 .chat-panel-header {
@@ -59,6 +62,7 @@
   justify-content: center;
   font-size: 1.1rem;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .chat-panel-title {
@@ -87,6 +91,7 @@
   display: flex;
   margin-bottom: var(--space-4);
   justify-content: flex-start;
+  animation: slideUp var(--ease-smooth) forwards;
 }
 
 .chat-message-row.is-own {
@@ -100,6 +105,11 @@
   background: var(--bg-card-hover);
   font-size: var(--text-sm);
   box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--ease-fast);
+}
+
+.chat-message-bubble:hover {
+  box-shadow: var(--shadow-md);
 }
 
 .chat-message-row.is-own .chat-message-bubble {
@@ -126,6 +136,7 @@
   margin-top: var(--space-2);
   padding: 0;
   color: var(--text-muted);
+  transition: color var(--ease-fast);
 }
 
 .chat-message-delete:hover {
@@ -147,12 +158,34 @@
   max-height: 160px;
   resize: none;
   border-radius: var(--radius-md);
+  transition: border-color var(--ease-fast), box-shadow var(--ease-fast);
+}
+
+.chat-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-ring);
 }
 
 .chat-send-btn {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-full);
+  transition: transform var(--ease-fast), box-shadow var(--ease-fast);
+}
+
+.chat-send-btn:hover:not(:disabled) {
+  transform: scale(1.08);
+  box-shadow: var(--shadow-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-panel,
+  .chat-message-row,
+  .chat-toggle-btn,
+  .chat-send-btn {
+    animation: none;
+    transition: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -167,4 +200,3 @@
     height: 320px;
   }
 }
- 
