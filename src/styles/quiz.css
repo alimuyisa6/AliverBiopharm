@@ -1,4 +1,4 @@
-.grid {
+ .grid {
   display: grid;
   gap: var(--space-4);
 }
@@ -469,11 +469,6 @@
   animation: resultPop var(--ease-bounce) forwards;
 }
 
-@keyframes resultPop {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
 .quiz-result-icon.is-pass {
   color: var(--success);
 }
@@ -723,11 +718,6 @@
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);
   animation: questionSlideIn var(--ease-smooth) forwards;
-}
-
-@keyframes questionSlideIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .quiz-question-heading {
