@@ -1,4 +1,4 @@
-/* api/server.js */
+ /* api/server.js */
 import { passGate, gatemanErrorResponse } from '../lib/gateman.js';
 import { getVagueErrorMessage } from '../lib/threat-shield.js';
 
@@ -42,6 +42,13 @@ const MODULE_MAP = {
 export default async function handler(req, res) {
   const moduleName = req.query?.module;
   const path = req.query?.path;
+
+  if (moduleName === 'ping') {
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(204).end();
+    return;
+  }
+
   const importFn = moduleName ? MODULE_MAP[moduleName] : null;
 
   if (!importFn) {
@@ -76,4 +83,4 @@ export default async function handler(req, res) {
   } catch (err) {
     await gatemanErrorResponse(res, err, moduleName, path, ctx);
   }
-} 
+}
