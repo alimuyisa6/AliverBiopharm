@@ -35,12 +35,16 @@ export default function NetworkStatus() {
   const messages = {
     offline: {
       icon: 'wifi-slash',
-      text: "You're offline. Check that mobile data or Wi-Fi is on and airplane mode is off.",
+      text: firstName
+        ? `${firstName}, you're offline — check that mobile data or Wi-Fi is on and airplane mode is off.`
+        : "You're offline. Check that mobile data or Wi-Fi is on and airplane mode is off.",
       tone: 'offline'
     },
     slow: {
       icon: 'triangle-exclamation',
-      text: 'Slow connection detected. Some content may take longer to load.',
+      text: firstName
+        ? `${firstName}, your connection looks slow. Some content may take longer to load.`
+        : 'Slow connection detected. Some content may take longer to load.',
       tone: 'slow'
     },
     good: {
