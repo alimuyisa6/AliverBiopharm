@@ -13,10 +13,6 @@ export default function Hero() {
 
   return (
     <section className="hero hero-enhanced">
-      <div className="hero-vertical-text" aria-hidden="true">
-        Welcome to AliverBiopharm
-      </div>
-
       <div className="hero-image">
         {heroImage ? (
           <img src={heroImage} alt="" />
@@ -26,6 +22,12 @@ export default function Hero() {
       </div>
 
       <div className="hero-content">
+        <div className="hero-eyebrow">Welcome to AliverBiopharm</div>
+
+        <p className="hero-tagline">
+          Everything you need, matched to your level: notes, flashcards, quizzes, past papers, and a tutor when you're stuck. Select your class or program and get study materials built for it.
+        </p>
+
         <h1 className="hero-title">
           {isAuthenticated && levelName ? (
             <>Master<br />{levelName}</>
