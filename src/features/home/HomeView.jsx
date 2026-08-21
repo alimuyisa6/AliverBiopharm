@@ -1,4 +1,4 @@
-/* features/home/HomeView.jsx */
+ /* features/home/HomeView.jsx */
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
@@ -128,18 +128,6 @@ export default function HomeView(props) {
     <div className="home-page">
       <div className="hero-block">
         <Hero />
-
-        {user && activeLevelName && (
-          <div className="home-level-banner home-level-banner--attached">
-            <span className="sec-label">Your Level</span>
-            <h2 className="section-title home-level-title">{activeLevelName}</h2>
-            {activeGroupName && (
-              <p className="section-subtitle home-level-subtitle">
-                Currently studying <strong>{activeGroupName}</strong>
-              </p>
-            )}
-          </div>
-        )}
       </div>
 
       <PlatformCards />
@@ -160,34 +148,6 @@ export default function HomeView(props) {
       <ContinueLearningSection continueLearning={continueLearning} user={user} streak={streak} />
       <ClassroomSection user={user} />
       <TutorMarketplaceSection />
-
-      <MoodCheckSection
-        moodSelected={moodSelected}
-        moodMessage={moodMessage}
-        moodSubmitted={moodSubmitted}
-        onMoodSelect={setMoodSelected}
-        onMessageChange={setMoodMessage}
-        onSubmit={handleMoodSubmit}
-      />
-
-      <CommunitySection
-        activity={communityActivity}
-        weeklyChallenge={sections?.weekly_challenge}
-        weeklyChallengeAnswer={weeklyChallengeAnswer}
-        onWeeklySubmit={handleWeeklyChallengeSubmit}
-      />
-
-      <FaqAccordion items={sections?.faq?.questions || []} />
-      <BlogGrid posts={sections?.blog?.posts || []} />
-      <TeamScroll members={sections?.team?.members || []} />
-
-      <ContactSection
-        contactForm={contactForm}
-        contactStatus={contactStatus}
-        contactInfo={sections?.contact?.info || []}
-        onChange={setContactForm}
-        onSubmit={handleContactSubmit}
-      />
 
       <NewsletterForm
         email={newsletterEmail}
@@ -210,4 +170,3 @@ export default function HomeView(props) {
     </div>
   );
 }
- 
