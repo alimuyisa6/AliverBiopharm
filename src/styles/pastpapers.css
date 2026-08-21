@@ -1,4 +1,4 @@
-.past-papers-page {
+ .past-papers-page {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -25,6 +25,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-6);
+  animation: slideUp var(--ease-slow) forwards;
 }
 
 .past-papers-hero-content {
@@ -187,14 +188,14 @@
 .paper-card {
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s var(--ease-fast), box-shadow 0.2s var(--ease-fast), border-color 0.2s var(--ease-fast);
+  transition: transform var(--ease-smooth), box-shadow var(--ease-smooth), border-color var(--ease-smooth);
   overflow: hidden;
   cursor: pointer;
 }
 
 .paper-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
   border-color: var(--border-strong);
 }
 
@@ -210,6 +211,15 @@
   background: var(--bg-card-hover);
   border-bottom: 1px solid var(--border-default);
   position: relative;
+  overflow: hidden;
+}
+
+.paper-card-icon i {
+  transition: transform var(--ease-smooth);
+}
+
+.paper-card:hover .paper-card-icon i {
+  transform: scale(1.12) rotate(-4deg);
 }
 
 .paper-premium-badge {
@@ -255,6 +265,7 @@
 .paper-bookmark-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
+  transform: scale(1.1);
 }
 
 .paper-bookmark-btn.active {
@@ -403,23 +414,26 @@
   color: var(--text-main);
   font-size: var(--text-sm);
   font-family: var(--font-body);
+  transition: border-color var(--ease-fast), box-shadow var(--ease-fast);
 }
 
 .past-papers-preset-input:focus {
   outline: none;
   border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-ring);
 }
 
 .paper-modal-overlay {
   position: fixed;
   inset: 0;
   background: var(--bg-overlay);
+  backdrop-filter: blur(3px);
   z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  animation: fadeIn var(--ease-fast);
+  animation: fadeIn var(--ease-smooth) forwards;
 }
 
 .paper-modal {
@@ -429,9 +443,10 @@
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  animation: scaleIn var(--ease-fast);
+  animation: scaleIn var(--ease-bounce) forwards;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-xl);
 }
 
 .paper-modal-header {
@@ -475,6 +490,7 @@
 .paper-modal-close:hover {
   background: var(--border-default);
   color: var(--text-main);
+  transform: rotate(90deg);
 }
 
 .paper-modal-body {
@@ -532,7 +548,7 @@
 
 .paper-star-btn:hover {
   color: var(--warm);
-  transform: scale(1.15);
+  transform: scale(1.2) rotate(-8deg);
 }
 
 .paper-star-btn.active {
@@ -549,12 +565,13 @@
   font-family: var(--font-body);
   resize: vertical;
   min-height: 80px;
-  transition: border-color var(--ease-fast);
+  transition: border-color var(--ease-fast), box-shadow var(--ease-fast);
 }
 
 .paper-review-input:focus {
   outline: none;
   border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-ring);
 }
 
 .paper-reviews-list {
@@ -568,6 +585,11 @@
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
+  transition: box-shadow var(--ease-fast);
+}
+
+.paper-review-item:hover {
+  box-shadow: var(--shadow-sm);
 }
 
 .paper-review-header {
@@ -704,6 +726,18 @@
 .past-papers-skeleton-body .skeleton {
   flex-shrink: 0;
   min-height: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .past-papers-hero-inner,
+  .paper-card,
+  .paper-card-icon i,
+  .paper-modal-overlay,
+  .paper-modal,
+  .paper-star-btn {
+    animation: none;
+    transition: none;
+  }
 }
 
 @media (max-width: 1024px) {
