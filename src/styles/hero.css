@@ -138,3 +138,15 @@
     max-width: 100%;
   }
 }
+
+.home-level-banner--attached {
+  position: relative;
+  z-index: 4;
+  margin-top: calc(-1 * var(--space-16));
+  margin-left: var(--space-10);
+  margin-right: var(--space-10);
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6) var(--space-8);
+}
