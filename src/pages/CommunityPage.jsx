@@ -1,4 +1,4 @@
-/* pages/CommunityPage.jsx */
+ /* pages/CommunityPage.jsx */
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
@@ -18,7 +18,10 @@ export default function CommunityPage() {
   const [weeklyChallengeAnswer, setWeeklyChallengeAnswer] = useState(null);
 
   useEffect(() => {
-    getSections(level?.id || 'O-Level').then(setSections).catch(() => {});
+    if (level?.id) {
+      getSections(level.id).then(setSections).catch(() => {});
+    }
+
     getCommunityActivity().then(setCommunityActivity).catch(() => {});
   }, [level]);
 
