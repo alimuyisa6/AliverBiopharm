@@ -46,9 +46,10 @@ export default function Home() {
   }, [user, groups]);
 
   useEffect(() => {
-    const levelId = level?.id || 'O-Level';
+    if (level?.id) {
+      getSections(level.id).then(setSections).catch(() => {});
+    }
 
-    getSections(levelId).then(setSections).catch(() => {});
     getPublicStats().then(setPublicStats).catch(() => {});
     checkAdminOnline().then((res) => setAdminOnline(res?.online)).catch(() => {});
 
