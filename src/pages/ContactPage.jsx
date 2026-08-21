@@ -1,4 +1,4 @@
-/* pages/ContactPage.jsx */
+ /* pages/ContactPage.jsx */
 import { useState, useEffect, useCallback } from 'react';
 import { useLayout } from '../contexts/LayoutContext';
 import { getSections } from '../api/sections';
@@ -12,7 +12,9 @@ export default function ContactPage() {
   const [contactStatus, setContactStatus] = useState(null);
 
   useEffect(() => {
-    getSections(level?.id || 'O-Level').then(setSections).catch(() => {});
+    if (level?.id) {
+      getSections(level.id).then(setSections).catch(() => {});
+    }
   }, [level]);
 
   const handleContactSubmit = useCallback(async (event) => {
