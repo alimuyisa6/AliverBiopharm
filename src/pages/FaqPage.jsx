@@ -1,4 +1,4 @@
-/* pages/FaqPage.jsx */
+ /* pages/FaqPage.jsx */
 import { useState, useEffect } from 'react';
 import { useLayout } from '../contexts/LayoutContext';
 import { getSections } from '../api/sections';
@@ -9,7 +9,9 @@ export default function FaqPage() {
   const [sections, setSections] = useState({});
 
   useEffect(() => {
-    getSections(level?.id || 'O-Level').then(setSections).catch(() => {});
+    if (level?.id) {
+      getSections(level.id).then(setSections).catch(() => {});
+    }
   }, [level]);
 
   return (
