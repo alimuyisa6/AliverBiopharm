@@ -1,13 +1,43 @@
- import { getAllSiteSections, getInfoSectionsList, getInfoSection } from './client.js';
+ import { getPlatformSections, getInfoSectionsList, getInfoSection } from './client.js';
 
-let _cache = (() => {
+const _cache = new Map();
+const _promises = new Map();
+
+export function getSections(levelId) {
+  const key = levelId || 'default';
+
+  if (_cache.has(key)) return Promise.resolve(_cache.get(key));
+  if (_promises.has(key)) return _promises.get(key);
+
+  const promise = getPlatformSections(levelId).then((data) => {
+    _cache.set(key, data);
+    _promises.delete(key);
+
+    try {
+      sessionStorage.setItem(`platformSections:${key}`, JSON.stringify(data));
+    } catch {}
+
+    return data;
+  }).catch((err) => {
+    _promises.delete(key);
+    throw err;
+  });
+
+  _promises.set(key, promise);
+
+  return promise;
+}
+
+export function clearSectionsCache() {
+  _cache.clear();
+  _promises.clear();
+
   try {
-    const s = sessionStorage.getItem('siteSections');
-    return s ? JSON.parse(s) : null;
-  } catch { return null; }
-})();
-
-let _promise = null;
+    Object.keys(sessionStorage)
+      .filter((k) => k.startsWith('platformSections:'))
+      .forEach((k) => sessionStorage.removeItem(k));
+  } catch {}
+}
 
 let _infoListCache = (() => {
   try {
@@ -17,27 +47,6 @@ let _infoListCache = (() => {
 })();
 
 let _infoListPromise = null;
-
- export async function getSections() {
-  const data = await getAllSiteSections();
-
-  _cache = data;
-
-  try {
-    sessionStorage.setItem('siteSections', JSON.stringify(data));
-  } catch {}
-
-  return data;
- }
-
-export function clearSectionsCache() {
-  _cache = null;
-  _infoListCache = null;
-  try {
-    sessionStorage.removeItem('siteSections');
-    sessionStorage.removeItem('infoSectionsList');
-  } catch {}
-}
 
 export function getInfoSectionsForNav() {
   if (_infoListCache) return Promise.resolve(_infoListCache);
