@@ -6,14 +6,8 @@ import { PlatformCards } from './PlatformCards';
 import { StatsGrid } from './StatsGrid';
 import { TestimonialSlider } from './TestimonialSlider';
 import { ContinueLearningSection } from './ContinueLearningSection';
-import { MoodCheckSection } from '../mood/MoodCheckSection';
-import { CommunitySection } from '../community/CommunitySection';
-import { ContactSection } from '../contact/ContactSection';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
-import { FaqAccordion } from './FaqAccordion';
-import { BlogGrid } from './BlogGrid';
-import { TeamScroll } from './TeamScroll';
 import { ClassroomSection } from '../classroom/ClassroomSection';
 import TutorMarketplaceSection from '../tutor-marketplace/TutorMarketplaceSection';
 import Hero from '../../components/Hero/Hero';
@@ -92,33 +86,20 @@ export default function HomeView(props) {
     activeLevelName,
     activeGroupName,
     publicStats,
-    communityActivity,
-    weeklyChallengeAnswer,
-    moodSelected,
-    setMoodSelected,
-    moodMessage,
-    setMoodMessage,
-    moodSubmitted,
     continueLearning,
     streak,
     chatOpen,
     chatMessages,
     chatInput,
     adminOnline,
-    contactForm,
-    contactStatus,
     newsletterEmail,
     newsletterStatus,
     currentYear,
-    handleWeeklyChallengeSubmit,
-    handleContactSubmit,
     handleNewsletterSubmit,
-    handleMoodSubmit,
     sendChat,
     deleteChatMsg,
     setChatOpen,
     setChatInput,
-    setContactForm,
     setNewsletterEmail,
     chatBodyRef,
     requestChatRoom
