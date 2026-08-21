@@ -1,4 +1,4 @@
- /* features/home/HomeView.jsx */
+/* features/home/HomeView.jsx */
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
@@ -126,11 +126,11 @@ export default function HomeView(props) {
 
   return (
     <div className="home-page">
-      <Hero />
+      <div className="hero-block">
+        <Hero />
 
-      {user && activeLevelName && (
-        <section className="section home-level-banner">
-          <div className="home-level-banner-inner">
+        {user && activeLevelName && (
+          <div className="home-level-banner home-level-banner--attached">
             <span className="sec-label">Your Level</span>
             <h2 className="section-title home-level-title">{activeLevelName}</h2>
             {activeGroupName && (
@@ -139,8 +139,8 @@ export default function HomeView(props) {
               </p>
             )}
           </div>
-        </section>
-      )}
+        )}
+      </div>
 
       <PlatformCards />
 
@@ -153,17 +153,13 @@ export default function HomeView(props) {
         }}
       />
 
-      <ContinueLearningSection continueLearning={continueLearning} user={user} streak={streak} />
       <ContentTypeCards navigate={navigate} user={user} sections={sections} />
+
+      <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
+
+      <ContinueLearningSection continueLearning={continueLearning} user={user} streak={streak} />
       <ClassroomSection user={user} />
       <TutorMarketplaceSection />
-
-      <CommunitySection
-        activity={communityActivity}
-        weeklyChallenge={sections?.weekly_challenge}
-        weeklyChallengeAnswer={weeklyChallengeAnswer}
-        onWeeklySubmit={handleWeeklyChallengeSubmit}
-      />
 
       <MoodCheckSection
         moodSelected={moodSelected}
@@ -174,7 +170,13 @@ export default function HomeView(props) {
         onSubmit={handleMoodSubmit}
       />
 
-      <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
+      <CommunitySection
+        activity={communityActivity}
+        weeklyChallenge={sections?.weekly_challenge}
+        weeklyChallengeAnswer={weeklyChallengeAnswer}
+        onWeeklySubmit={handleWeeklyChallengeSubmit}
+      />
+
       <FaqAccordion items={sections?.faq?.questions || []} />
       <BlogGrid posts={sections?.blog?.posts || []} />
       <TeamScroll members={sections?.team?.members || []} />
@@ -208,3 +210,4 @@ export default function HomeView(props) {
     </div>
   );
 }
+ 
