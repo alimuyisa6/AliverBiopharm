@@ -324,11 +324,6 @@
   animation: questionSlideIn var(--ease-smooth) forwards;
 }
 
-@keyframes questionSlideIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .recall-question-heading {
   font-family: var(--font-heading);
   margin-bottom: var(--space-6);
@@ -376,11 +371,6 @@
   font-size: 2.25rem;
   flex-shrink: 0;
   animation: resultPop var(--ease-bounce) forwards;
-}
-
-@keyframes resultPop {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
 }
 
 .recall-feedback-icon.is-excellent {
