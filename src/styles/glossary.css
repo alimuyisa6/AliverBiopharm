@@ -1,6 +1,4 @@
-/* styles/glossary.css */
-
-.glossary-page {
+ .glossary-page {
   padding-top: var(--space-5);
 }
 
@@ -11,7 +9,6 @@
   justify-content: center;
 }
 
-/* Loading dots */
 .pdf-loading-spinner,
 .glossary-loading-spinner {
   display: flex;
@@ -34,7 +31,6 @@
   40% { transform: translateY(-8px); opacity: 1; }
 }
 
-/* ===== Hero ===== */
 .glossary-header {
   position: relative;
   overflow: hidden;
@@ -85,6 +81,7 @@
   z-index: 1;
   max-width: 640px;
   margin: 0 auto;
+  animation: slideUp var(--ease-slow) forwards;
 }
 
 .glossary-main-title {
@@ -135,7 +132,6 @@
   font-weight: var(--weight-normal);
 }
 
-/* ===== Layout ===== */
 .glossary-main-layout {
   display: flex;
   align-items: flex-start;
@@ -159,6 +155,12 @@
   font-weight: var(--weight-medium);
   cursor: pointer;
   margin-bottom: var(--space-4);
+  transition: border-color var(--ease-fast), color var(--ease-fast);
+}
+
+.glossary-sidebar-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .glossary-sidebar {
@@ -212,12 +214,13 @@
   background: var(--bg-input);
   color: var(--text-main);
   font-size: var(--text-sm);
-  transition: border-color var(--ease-fast);
+  transition: border-color var(--ease-fast), box-shadow var(--ease-fast);
 }
 
 .glossary-search-input:focus {
   outline: none;
   border-color: var(--sidebar-accent, var(--primary));
+  box-shadow: 0 0 0 3px var(--primary-ring);
 }
 
 .glossary-search-clear {
@@ -302,11 +305,12 @@
   font-size: var(--text-sm);
   text-align: left;
   cursor: pointer;
-  transition: background var(--ease-fast);
+  transition: background var(--ease-fast), padding-left var(--ease-fast);
 }
 
 .glossary-term-btn:hover {
   background: var(--bg-card-hover);
+  padding-left: var(--space-5);
 }
 
 .glossary-term-btn.active {
@@ -319,7 +323,6 @@
   font-size: var(--text-xs);
 }
 
-/* ===== Content pane ===== */
 .glossary-content {
   flex: 1;
   min-width: 0;
@@ -396,11 +399,11 @@
   padding: var(--space-16) var(--space-6);
 }
 
-/* Term detail */
 .glossary-term-detail {
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
+  animation: slideUp var(--ease-smooth) forwards;
 }
 
 .glossary-term-hero {
@@ -495,6 +498,11 @@
   padding: var(--space-4);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-default);
+  transition: transform var(--ease-fast);
+}
+
+.glossary-meta-item:hover {
+  transform: translateY(-2px);
 }
 
 .glossary-meta-item.meta-etymology { background: var(--secondary-light); }
@@ -518,7 +526,6 @@
   line-height: var(--leading-relaxed);
 }
 
-/* Route sections */
 .glossary-routes {
   display: flex;
   flex-direction: column;
@@ -578,12 +585,13 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   text-decoration: none;
-  transition: border-color var(--ease-fast), transform var(--ease-fast);
+  transition: border-color var(--ease-fast), transform var(--ease-fast), box-shadow var(--ease-fast);
 }
 
 .glossary-route-card:hover {
   border-color: var(--primary);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 .glossary-route-card-icon {
@@ -596,6 +604,11 @@
   flex-shrink: 0;
   font-size: 1.1rem;
   color: var(--text-inverse);
+  transition: transform var(--ease-fast);
+}
+
+.glossary-route-card:hover .glossary-route-card-icon {
+  transform: scale(1.1) rotate(-4deg);
 }
 
 .glossary-route-card-icon.quiz-icon { background: var(--primary); }
@@ -629,6 +642,11 @@
   color: var(--text-muted);
   font-size: var(--text-xs);
   flex-shrink: 0;
+  transition: transform var(--ease-fast);
+}
+
+.glossary-route-card:hover .glossary-route-card-arrow {
+  transform: translateX(3px);
 }
 
 .glossary-related-terms {
@@ -654,6 +672,14 @@
 .glossary-related-term-btn:hover {
   border-color: var(--primary);
   color: var(--primary);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glossary-header-inner,
+  .glossary-term-detail {
+    animation: none;
+  }
 }
 
 @media (max-width: 900px) {
