@@ -230,11 +230,6 @@
   animation: resultPop var(--ease-bounce) forwards;
 }
 
-@keyframes resultPop {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
 .fcp-message {
   color: var(--text-dim);
   margin-top: var(--space-3);
