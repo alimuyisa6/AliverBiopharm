@@ -11,24 +11,27 @@
   min-height: 100vh;
 }
 
-.hero-vertical-text {
-  position: absolute;
-  left: var(--space-8);
-  top: 50%;
-  transform: translateY(-50%) rotate(180deg);
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  font-family: var(--font-heading);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
+.hero-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-widest);
   text-transform: uppercase;
-  color: var(--text-muted);
-  opacity: 0.6;
-  z-index: 3;
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
+  color: var(--primary);
+  margin-bottom: var(--space-3);
+  animation: slideUp var(--ease-slow) forwards;
+}
+
+.hero-tagline {
+  font-family: var(--font-fraunces);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--text-dim);
+  max-width: 480px;
+  margin-bottom: var(--space-6);
+  animation: slideUp var(--ease-slow) 60ms both;
 }
 
 .hero-image {
@@ -71,7 +74,7 @@
   letter-spacing: var(--tracking-tight);
   color: var(--text-main);
   margin-bottom: var(--space-5);
-  animation: slideUp var(--ease-slow) forwards;
+  animation: slideUp var(--ease-slow) 120ms both;
 }
 
 .hero-subtitle {
@@ -80,14 +83,14 @@
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-8);
   max-width: 420px;
-  animation: slideUp var(--ease-slow) 100ms both;
+  animation: slideUp var(--ease-slow) 180ms both;
 }
 
 .hero-actions {
   display: flex;
   gap: var(--space-4);
   flex-wrap: wrap;
-  animation: slideUp var(--ease-slow) 200ms both;
+  animation: slideUp var(--ease-slow) 240ms both;
 }
 
 .hero-border {
@@ -115,9 +118,13 @@
     min-height: 75vh;
   }
 
-  .hero-vertical-text {
-    left: var(--space-3);
-    font-size: var(--text-xs);
+  .hero-eyebrow {
+    font-size: 0.7rem;
+  }
+
+  .hero-tagline {
+    font-size: var(--text-base);
+    max-width: 100%;
   }
 
   .hero-image,
@@ -138,5 +145,3 @@
     max-width: 100%;
   }
 }
-
- 
