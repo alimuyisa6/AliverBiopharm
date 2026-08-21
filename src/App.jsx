@@ -29,6 +29,10 @@ import Auth from './pages/Auth';
 import TutorApply from './pages/TutorApply';
 import TutorDashboard from './pages/TutorDashboard';
 import TutorMarketplace from './pages/TutorMarketplace';
+import FaqPage from './pages/FaqPage';
+import BlogPage from './pages/BlogPage';
+import ContactPage from './pages/ContactPage';
+import CommunityPage from './pages/CommunityPage';
 
 function GlobalLoader() {
   return (
@@ -92,7 +96,7 @@ function AppRoutes() {
     return <GlobalLoader />;
   }
 
-  const publicPaths = ['/login', '/register', '/about', '/terms', '/privacy', '/'];
+  const publicPaths = ['/login', '/register', '/about', '/terms', '/privacy', '/faq', '/blog', '/contact', '/community', '/'];
   const needsSetup = !layoutLoading && !level && !publicPaths.some((path) => location.pathname.startsWith(path));
 
   if (needsSetup) {
@@ -125,6 +129,10 @@ function AppRoutes() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/terms" element={<LegalPage type="terms" />} />
             <Route path="/privacy" element={<LegalPage type="privacy" />} />
+            <Route path="/faq" element={<FaqPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/community" element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
             <Route path="/tutor/apply" element={<ProtectedRoute><TutorApply /></ProtectedRoute>} />
             <Route path="/tutor/dashboard" element={<ProtectedRoute><TutorDashboard /></ProtectedRoute>} />
             <Route path="/tutors" element={<TutorMarketplace />} />
