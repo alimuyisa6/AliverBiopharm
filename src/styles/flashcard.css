@@ -1,5 +1,4 @@
- /* styles/flashcard.css */
-.fcd-section {
+ .fcd-section {
   padding-top: var(--space-6);
 }
 
@@ -50,10 +49,16 @@
 .fcd-question-card {
   padding: var(--space-8);
   text-align: center;
+  transition: transform var(--ease-smooth), box-shadow var(--ease-smooth);
 }
 
 .fcd-question-card.is-flip {
   cursor: pointer;
+}
+
+.fcd-question-card.is-flip:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .fcd-question-card-static {
@@ -63,6 +68,7 @@
 
 .fcd-answer-chip {
   margin-bottom: var(--space-4);
+  animation: scaleIn var(--ease-bounce) forwards;
 }
 
 .fcd-answer-chip.is-correct {
@@ -77,16 +83,19 @@
 .fcd-card-image {
   max-width: 200px;
   margin: 0 auto;
+  border-radius: var(--radius-lg);
 }
 
 .fcd-structure-image {
   max-width: 300px;
   margin: 0 auto;
+  border-radius: var(--radius-lg);
 }
 
 .fcd-tap-hint {
   color: var(--text-muted);
   font-size: var(--text-sm);
+  animation: pulse 2.4s ease-in-out infinite;
 }
 
 .fcd-input-row {
@@ -139,6 +148,10 @@
   margin-top: var(--space-6);
 }
 
+.fcd-rate-row .btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.04);
+}
+
 .fcd-actions-row {
   display: flex;
   gap: var(--space-4);
@@ -160,7 +173,7 @@
 }
 
 .fcw-flip-container {
-  perspective: 1000px;
+  perspective: 1200px;
   max-width: 400px;
   margin: 0 auto;
 }
@@ -169,7 +182,7 @@
   position: relative;
   width: 100%;
   height: 240px;
-  transition: transform 0.6s;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
 }
 
@@ -187,6 +200,8 @@
   justify-content: center;
   padding: var(--space-8);
   text-align: center;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
 }
 
 .fcw-flip-face.is-back {
@@ -212,6 +227,12 @@
   font-size: 3rem;
   color: var(--warm);
   margin-bottom: var(--space-4);
+  animation: resultPop var(--ease-bounce) forwards;
+}
+
+@keyframes resultPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .fcp-message {
@@ -289,6 +310,11 @@
 .flashcard-deck-icon {
   font-size: 2rem;
   color: var(--primary);
+  transition: transform var(--ease-fast);
+}
+
+.flashcard-decks-grid .card-clickable:hover .flashcard-deck-icon {
+  transform: scale(1.15) rotate(-4deg);
 }
 
 .flashcard-type-row {
