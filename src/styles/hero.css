@@ -61,7 +61,7 @@
 .hero-content {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding: var(--space-16) var(--space-10) var(--space-16) var(--space-20);
   position: relative;
 }
@@ -115,11 +115,12 @@
   }
 
   .hero-enhanced {
-    min-height: 75vh;
+    min-height: auto;
   }
 
   .hero-eyebrow {
     font-size: 0.7rem;
+    margin-top: var(--space-6);
   }
 
   .hero-tagline {
@@ -129,11 +130,11 @@
 
   .hero-image,
   .hero-image-placeholder {
-    height: 50vh;
+    height: 42vh;
   }
 
   .hero-content {
-    padding: var(--space-8) var(--space-6) var(--space-8) var(--space-12);
+    padding: var(--space-4) var(--space-6) var(--space-8) var(--space-6);
   }
 
   .hero-title {
