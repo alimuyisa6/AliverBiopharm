@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import Icon from '../Icon/Icon';
 import Button from '../Button/Button';
-import './ImageStep.css';
+
 
 export default function ImageStep({ 
   image,
