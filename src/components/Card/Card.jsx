@@ -1,15 +1,16 @@
- /* components/Card/Card.jsx */
-import { forwardRef } from 'react';
+ import { forwardRef } from 'react';
 import Icon from '../Icon/Icon';
 
 const Card = forwardRef(function Card(
-  { image, icon, title, description, footer, className = '', children, onClick, ...props },
+  { image, icon, title, description, footer, className = '', scoop = null, children, onClick, ...props },
   ref
 ) {
   const isClickable = !!onClick;
   const Wrapper = isClickable ? 'button' : 'div';
 
   const safeIcon = icon === 'dna' ? 'microscope' : icon;
+
+  const imageClassName = `card-image${scoop ? ` card-image-scoop-${scoop}` : ''}`;
 
   return (
     <Wrapper
@@ -19,7 +20,7 @@ const Card = forwardRef(function Card(
       {...props}
     >
       {image ? (
-        <img src={image} alt={title || ''} className="card-image" loading="lazy" />
+        <img src={image} alt={title || ''} className={imageClassName} loading="lazy" />
       ) : (
         <div className="card-image-placeholder">
           {safeIcon && <Icon name={safeIcon} />}
