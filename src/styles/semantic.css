@@ -45,6 +45,14 @@
   --level-olevel: var(--blue-600);
   --level-alevel: var(--teal-600);
   --level-pharmacy: var(--violet-600);
+  --header-footer-bg-solid: var(--amber-50);
+  --header-footer-border: var(--amber-200);
+}
+
+body.dark-mode {
+  --header-footer-bg-solid: rgba(217, 119, 6, 0.10);
+  --header-footer-border: rgba(217, 119, 6, 0.22);
+}
 }
 
 body.dark-mode {
