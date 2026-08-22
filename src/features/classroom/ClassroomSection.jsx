@@ -1,5 +1,4 @@
-/* features/classroom/ClassroomSection.jsx */
-import { useState, useEffect } from 'react';
+ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getLiveClassroomFeed } from '../../api/cachedClient';
 import Icon from '../../components/Icon/Icon';
@@ -139,4 +138,4 @@ export function ClassroomSection({ user }) {
       </div>
     </section>
   );
-} 
+}
