@@ -1,4 +1,4 @@
-.card {
+ .card {
   position: relative;
   background: var(--bg-card-tinted);
   border: 1px solid var(--border-default);
@@ -126,6 +126,31 @@ body.dark-mode .card-emerald {
 
 .card:hover .card-image {
   transform: scale(1.05);
+}
+
+/* ---------- Deep scoop image variants ---------- */
+/* Outer .card border/radius stays completely untouched. Only the image      */
+/* inside is masked with a deep concave circular bite. Apply alongside       */
+/* .card-image, e.g. class="card-image card-image-scoop-br"                 */
+
+.card-image-scoop-br {
+  -webkit-mask: radial-gradient(circle 48px at 100% 100%, transparent 98%, #000 100%);
+  mask: radial-gradient(circle 48px at 100% 100%, transparent 98%, #000 100%);
+}
+
+.card-image-scoop-bl {
+  -webkit-mask: radial-gradient(circle 48px at 0 100%, transparent 98%, #000 100%);
+  mask: radial-gradient(circle 48px at 0 100%, transparent 98%, #000 100%);
+}
+
+.card-image-scoop-tr {
+  -webkit-mask: radial-gradient(circle 48px at 100% 0, transparent 98%, #000 100%);
+  mask: radial-gradient(circle 48px at 100% 0, transparent 98%, #000 100%);
+}
+
+.card-image-scoop-center {
+  -webkit-mask: radial-gradient(circle 40px at 50% 100%, transparent 98%, #000 100%);
+  mask: radial-gradient(circle 40px at 50% 100%, transparent 98%, #000 100%);
 }
 
 .card-image-placeholder {
@@ -438,5 +463,13 @@ body.dark-mode .stat-card {
 
   .card-image {
     height: 180px;
+  }
+
+  .card-image-scoop-br,
+  .card-image-scoop-bl,
+  .card-image-scoop-tr,
+  .card-image-scoop-center {
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
   }
 }
