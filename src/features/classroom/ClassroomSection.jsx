@@ -6,26 +6,22 @@ import Button from '../../components/Button/Button';
 import Spinner from '../../components/Spinner/Spinner';
 
 const STATUS_CLASS = {
-  live: 'classroom-status-live',
-  open_floor: 'classroom-status-open',
-  upcoming: 'classroom-status-upcoming'
-};
-
-const STATUS_BAR_CLASS = {
   live: 'status-bar-success',
   open_floor: 'status-bar-primary',
   upcoming: 'status-bar-warm'
 };
 
+const STATUS_LABEL = {
+  live: 'Live',
+  open_floor: 'Open Floor',
+  upcoming: 'Upcoming'
+};
+
 function formatDuration(seconds) {
   if (!seconds) return '0m';
-
   const mins = Math.floor(seconds / 60);
-
   if (mins < 60) return `${mins}m`;
-
   const hrs = Math.floor(mins / 60);
-
   return `${hrs}h ${mins % 60}m`;
 }
 
@@ -78,13 +74,13 @@ export function ClassroomSection({ user }) {
         ) : (
           <div className="classroom-level-grid">
             {feed.map((room) => {
-              const statusClass = STATUS_CLASS[room.status] || '';
-              const statusBarClass = STATUS_BAR_CLASS[room.status] || 'status-bar-warm';
+              const statusClass = STATUS_CLASS[room.status] || 'status-bar-warm';
+              const statusLabel = STATUS_LABEL[room.status] || 'Upcoming';
               const isPremium = room.room_type === 'premium';
               const isHard = room.room_type === 'hard_topic';
 
               return (
-                <div key={room.id} className={`classroom-level-card ${statusClass}`}>
+                <div key={room.id} className="classroom-level-card">
                   <div className="card-media">
                     {room.image_url ? (
                       <img src={room.image_url} alt={room.topic_name} loading="lazy" />
@@ -93,44 +89,30 @@ export function ClassroomSection({ user }) {
                         <Icon name="microscope" />
                       </div>
                     )}
-
+                    {/* Overlay with topic name and status */}
+                    <div className="card-media-overlay">
+                      <div className="classroom-level-title">{room.topic_name}</div>
+                      <div className="classroom-level-classes">{room.level} · {room.class_name}</div>
+                    </div>
+                    {/* Premium/Hard badges */}
                     {isHard && <span className="card-media-ribbon ribbon-hard">Hard Topic</span>}
                     {isPremium && !isHard && <span className="card-media-ribbon ribbon-premium">Premium</span>}
                   </div>
 
-                  <div className={`room-status-bar ${statusBarClass}`}>
-                    <Icon name={room.status === 'live' || room.status === 'open_floor' ? 'circle' : 'clock'} />
-                    <span>{room.status === 'open_floor' ? 'Open Floor' : room.status === 'live' ? 'Live' : 'Upcoming'}</span>
-                  </div>
-
-                  <div className="classroom-level-body">
-                    <h3 className="classroom-level-title">{room.topic_name}</h3>
-                    <p className="classroom-level-classes">{room.level} · {room.class_name}</p>
-
-                    {room.tutor_name && (
-                      <p className="room-tutor-line">
-                        {room.tutor_avatar_url ? (
-                          <img src={room.tutor_avatar_url} alt={room.tutor_name} className="room-tutor-avatar" />
-                        ) : (
-                          <Icon name="user-graduate" />
-                        )}
-                        {room.tutor_name}
-                      </p>
-                    )}
-
-                    {room.live_duration_seconds !== undefined && (
-                      <p className="room-duration-line">
-                        <Icon name="clock" />
-                        Running {formatDuration(room.live_duration_seconds)}
-                      </p>
-                    )}
-
-                    {room.starts_in_seconds !== undefined && (
-                      <p className="room-duration-line">
-                        <Icon name="clock" />
-                        Starts in {formatDuration(room.starts_in_seconds)}
-                      </p>
-                    )}
+                  <div className="card-actions">
+                    <div className={`room-status-bar ${statusClass}`}>
+                      <Icon name={room.status === 'live' || room.status === 'open_floor' ? 'circle' : 'clock'} />
+                      <span>{statusLabel}</span>
+                      {room.live_duration_seconds !== undefined && (
+                        <span className="room-duration">· {formatDuration(room.live_duration_seconds)}</span>
+                      )}
+                      {room.starts_in_seconds !== undefined && (
+                        <span className="room-duration">· Starts {formatDuration(room.starts_in_seconds)}</span>
+                      )}
+                    </div>
+                    <Button size="sm" onClick={() => navigate(`/classroom/${room.id}`)}>
+                      {user ? 'Enter' : 'Login'}
+                    </Button>
                   </div>
                 </div>
               );
