@@ -711,3 +711,254 @@ body.dark-mode .skeleton::after {
   background: var(--secondary);
   color: var(--text-inverse);
 }
+
+
+/* ---------- Classroom Card Layout (3:1) ---------- */
+.classroom-level-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-card-tinted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--ease-smooth), box-shadow var(--ease-smooth);
+}
+
+.classroom-level-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Image takes 75% of card height */
+.classroom-level-card .card-media {
+  position: relative;
+  flex: 0 0 75%;
+  min-height: 180px; /* fallback */
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.classroom-level-card .card-media img,
+.classroom-level-card .card-media .card-media-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.classroom-level-card .card-media-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: var(--text-dim);
+  background: var(--bg-surface);
+}
+
+/* Overlay on image for topic and level */
+.classroom-level-card .card-media-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  color: #fff;
+}
+
+.classroom-level-card .card-media-overlay .classroom-level-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.classroom-level-card .card-media-overlay .classroom-level-classes {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin: 0.25rem 0 0;
+}
+
+/* Ribbon badges (Premium / Hard) – positioned on the image */
+.classroom-level-card .card-media-ribbon {
+  position: absolute;
+  top: 12px;
+  right: -28px;
+  padding: 4px 36px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  transform: rotate(45deg);
+  letter-spacing: 0.5px;
+  z-index: 2;
+  color: #fff;
+}
+
+.ribbon-premium {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #7B5A00;
+}
+
+.ribbon-hard {
+  background: linear-gradient(135deg, #FF4757, #FF6B81);
+  color: #fff;
+}
+
+/* Bottom action bar – 25% of card */
+.classroom-level-card .card-actions {
+  flex: 0 0 25%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-card-tinted);
+  border-top: 1px solid var(--border-default);
+}
+
+.classroom-level-card .card-actions .room-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.classroom-level-card .card-actions .room-status-bar .icon {
+  font-size: 0.75rem;
+}
+
+/* Status colours */
+.status-bar-success { color: var(--success); }
+.status-bar-primary { color: var(--primary); }
+.status-bar-warm   { color: var(--warm); }
+
+.classroom-level-card .card-actions .btn {
+  padding: 0.4rem 1.2rem;
+  font-size: 0.85rem;
+  border-radius: 2rem;
+}
+
+/* ---------- Tutor Card Layout (3:1) ---------- */
+.tutor-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-card-tinted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--ease-smooth), box-shadow var(--ease-smooth);
+}
+
+.tutor-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Image area – 75% of card */
+.tutor-card .tutor-avatar-wrapper {
+  flex: 0 0 75%;
+  min-height: 180px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.tutor-card .tutor-avatar-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tutor-card .tutor-avatar-wrapper .icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  color: var(--text-dim);
+}
+
+/* Bottom info – 25% of card */
+.tutor-card .tutor-info {
+  flex: 0 0 25%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-card-tinted);
+  border-top: 1px solid var(--border-default);
+}
+
+.tutor-card .tutor-info .tutor-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.tutor-card .tutor-info .tutor-headline {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0.25rem 0 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tutor-card .tutor-info .tutor-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.tutor-card .tutor-info .tutor-actions .btn {
+  padding: 0.3rem 1rem;
+  font-size: 0.8rem;
+  border-radius: 2rem;
+  flex: 1;
+  text-align: center;
+}
+
+/* ---------- Section Background Overlay Fix ---------- */
+.section-with-bg {
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+}
+
+.section-overlay {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border-radius: 1rem;
+  color: #fff;
+}
+
+.section-overlay .sec-label,
+.section-overlay .section-title,
+.section-overlay .section-subtitle {
+  color: #fff !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.section-overlay .section-title {
+  text-shadow: 0 4px 8px rgba(0,0,0,0.6);
+}
+
+.section-overlay .section-subtitle {
+  color: rgba(255,255,255,0.85) !important;
+}
