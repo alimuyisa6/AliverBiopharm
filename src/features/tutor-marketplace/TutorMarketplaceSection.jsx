@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { listTutorsCached } from '../../api/cachedClient';
 import { sendContactRequest } from '../../api/client';
-import TutorCard from './TutorCard';
+import ImageStep from '../../components/ImageStep/ImageStep';
 import Spinner from '../../components/Spinner/Spinner';
 import EmptyState from '../../components/EmptyState/EmptyState';
 import { useToast } from '../../components/Toast/Toast';
+import Button from '../../components/Button/Button';
 
 export default function TutorMarketplaceSection() {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ export default function TutorMarketplaceSection() {
 
   if (loading) {
     return (
-      <section className="section section-with-bg">
+      <section className="section">
         <div className="tutor-section-loading">
           <Spinner size="lg" />
         </div>
@@ -68,7 +69,14 @@ export default function TutorMarketplaceSection() {
           <>
             <div className="grid grid-cols-3">
               {tutors.map((tutor) => (
-                <TutorCard key={tutor.id} tutor={tutor} user={user} onContact={handleContact} />
+                <ImageStep
+                  key={tutor.id}
+                  image={tutor.avatar_url || '/images/default-tutor.jpg'}
+                  title={tutor.display_name}
+                  subtitle={tutor.headline || 'Qualified Tutor'}
+                  link={`/tutor/${tutor.id}`}
+                  buttonText="View Profile"
+                />
               ))}
             </div>
             <div className="tutor-section-footer">
