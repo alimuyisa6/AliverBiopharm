@@ -1,9 +1,10 @@
-/* features/home/TestimonialSlider.jsx */
+ import Icon from '../../components/Icon/Icon';
+
 export function TestimonialSlider({ quotes = [] }) {
   if (!quotes.length) return null;
 
   return (
-    <section className="section reveal">
+    <section className="section testimonial-band reveal">
       <span className="sec-label">Testimonials</span>
       <h2 className="section-title">
         What Our<br />Students Say
@@ -12,12 +13,13 @@ export function TestimonialSlider({ quotes = [] }) {
         Real results from learners who transformed how they study.
       </p>
 
-      <div className="card" style={{ maxWidth: 600, margin: '0 auto', padding: 'var(--space-8)', textAlign: 'center' }}>
-        <p style={{ fontSize: 'var(--text-lg)', fontStyle: 'italic', color: 'var(--text-dim)', marginBottom: 'var(--space-4)' }}>
-          &ldquo;{quotes[0].text}&rdquo;
+      <div className="testimonial-card">
+        <Icon name="quote-left" className="testimonial-quote-icon" />
+        <p className="testimonial-text">
+          {quotes[0].text}
         </p>
-        <cite style={{ fontWeight: 600, color: 'var(--text-main)' }}>&mdash; {quotes[0].author}</cite>
+        <cite className="testimonial-author">{quotes[0].author}</cite>
       </div>
     </section>
   );
-} 
+}
