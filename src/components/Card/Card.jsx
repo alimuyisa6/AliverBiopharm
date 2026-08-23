@@ -2,7 +2,20 @@
 import Icon from '../Icon/Icon';
 
 const Card = forwardRef(function Card(
-  { image, icon, title, description, footer, className = '', scoop = null, children, onClick, ...props },
+  {
+    image,
+    icon,
+    title,
+    description,
+    footer,
+    className = '',
+    scoop = null,
+    variant = '',
+    imageVariant = null,
+    children,
+    onClick,
+    ...props
+  },
   ref
 ) {
   const isClickable = !!onClick;
@@ -10,12 +23,19 @@ const Card = forwardRef(function Card(
 
   const safeIcon = icon === 'dna' ? 'microscope' : icon;
 
-  const imageClassName = `card-image${scoop ? ` card-image-scoop-${scoop}` : ''}`;
+  let imageClassName = 'card-image';
+  if (scoop) imageClassName += ` card-image-scoop-${scoop}`;
+  if (imageVariant === 'original') imageClassName += ' card-image-original';
+
+  let cardClass = 'card';
+  if (variant) cardClass += ` card-${variant}`;
+  if (isClickable) cardClass += ' card-clickable';
+  if (className) cardClass += ` ${className}`;
 
   return (
     <Wrapper
       ref={ref}
-      className={`card ${isClickable ? 'card-clickable' : ''} ${className}`}
+      className={cardClass}
       onClick={onClick}
       {...props}
     >
