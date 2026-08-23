@@ -1,5 +1,4 @@
-/* features/home/StatsGrid.jsx */
-import { useState, useEffect, useRef } from 'react';
+ import { useState, useEffect, useRef } from 'react';
 import Icon from '../../components/Icon/Icon';
 
 const ITEMS = [
@@ -48,7 +47,7 @@ function AnimatedNumber({ target, label, icon }) {
 
   return (
     <div className="stat-card" ref={ref}>
-      <Icon name={icon === 'dna' ? 'microscope' : icon} className="stat-icon" style={{ color: 'var(--primary)' }} />
+      <Icon name={icon === 'dna' ? 'microscope' : icon} className="stat-icon" />
       <div className="stat-value">{format(count)}</div>
       <div className="stat-label">{label}</div>
     </div>
@@ -57,7 +56,7 @@ function AnimatedNumber({ target, label, icon }) {
 
 export function StatsGrid({ stats = {} }) {
   return (
-    <section className="section reveal">
+    <section className="section stats-band reveal">
       <span className="sec-label">Our Impact</span>
       <h2 className="section-title">
         Trusted by Learners<br />Across Levels
@@ -73,4 +72,4 @@ export function StatsGrid({ stats = {} }) {
       </div>
     </section>
   );
-} 
+}
