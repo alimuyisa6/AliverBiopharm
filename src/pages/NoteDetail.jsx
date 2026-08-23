@@ -13,6 +13,7 @@ import {
   getReadingProgress,
   getNoteInternalLinks
 } from '../api/client';
+import Card from '../components/Card/Card';
 import EmptyState from '../components/EmptyState/EmptyState';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
@@ -590,17 +591,17 @@ export default function NoteDetail() {
             </h3>
             <div className="note-related-grid">
               {internalLinks.related_links.map((link) => (
-                <button
+                <Card
                   key={link.link_id}
-                  className="note-related-card"
-                  onClick={() => navigate(`/notes/read?id=${link.target_note_id}`)}
-                >
-                  <span className="note-related-link-type font-mono">{link.link_type}</span>
-                  <strong className="note-related-link-title font-poppins">{link.target_title}</strong>
-                  {link.target_read_time && (
+                  variant="blue-strong"
+                  className="card-mixed"
+                  title={link.target_title}
+                  description={link.target_content_preview}
+                  footer={
                     <span className="note-related-link-readtime font-mono">{link.target_read_time}</span>
-                  )}
-                </button>
+                  }
+                  onClick={() => navigate(`/notes/read?id=${link.target_note_id}`)}
+                />
               ))}
             </div>
           </div>
