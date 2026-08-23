@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useContentAccess } from '../hooks/useContentAccess';
 import { useLevelFilter } from '../hooks/useLevelFilter';
 import { useLayout } from '../contexts/LayoutContext';
 import { getNotesList } from '../api/client';
+import Card from '../components/Card/Card';
 import Icon from '../components/Icon/Icon';
 import Skeleton from '../components/Skeleton/Skeleton';
 import EmptyState from '../components/EmptyState/EmptyState';
@@ -109,39 +110,21 @@ export default function NotesPage() {
         ) : (
           <div className="notes-grid">
             {notes.map((note) => (
-              <div key={note.id} className="card notes-card">
-                <div className="card-image">
-                  {note.topic_image_url ? (
-                    <img
-                      src={note.topic_image_url}
-                      alt={note.title}
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.style.removeProperty('display');
-                      }}
-                    />
-                  ) : null}
-                  <div
-                    className="card-image-placeholder"
-                    style={{ display: note.topic_image_url ? 'none' : 'flex' }}
-                  >
-                    <Icon name="book-open" className="notes-card-icon" />
-                  </div>
-                </div>
-
-                <div className="card-body">
-                  <h3 className="card-title font-poppins">{note.title}</h3>
-                  {note.content_preview && <p className="card-text font-source-sans">{note.content_preview}</p>}
-                  {note.read_time && <span className="chip font-mono">{note.read_time}</span>}
-                </div>
-
-                <div className="card-footer">
+              <Card
+                key={note.id}
+                variant="blue-strong"
+                className="card-round notes-card"
+                image={note.topic_image_url || undefined}
+                icon={note.topic_image_url ? undefined : 'book-open'}
+                title={note.title}
+                description={note.content_preview}
+                footer={
                   <Button size="sm" onClick={() => navigate(`/notes/read?id=${note.id}`)}>
                     Read Note
                   </Button>
-                </div>
-              </div>
+                }
+                onClick={() => navigate(`/notes/read?id=${note.id}`)}
+              />
             ))}
           </div>
         )}
