@@ -1,31 +1,44 @@
-// components/ImageStep/ImageStep.jsx
-import { Link } from 'react-router-dom';
-import Icon from '../Icon/Icon';
+ import { Link } from 'react-router-dom';
 import Button from '../Button/Button';
+import Icon from '../Icon/Icon';
 
-
-export default function ImageStep({ 
+export default function SplitCard({
   image,
+  fallbackImage,
   title,
   subtitle,
+  badge,
+  badgeVariant = 'primary',
   link,
   buttonText = 'View',
+  onButtonClick,
   className = ''
 }) {
   return (
-    <Link to={link} className={`image-step ${className}`}>
-      <div className="image-step-image">
-        <img src={image} alt={title} loading="lazy" />
-        <div className="image-step-overlay">
-          <div className="image-step-content">
-            {subtitle && <span className="image-step-subtitle">{subtitle}</span>}
-            <h3 className="image-step-title">{title}</h3>
-            <Button size="sm" variant="primary" className="image-step-btn">
-              {buttonText} <Icon name="arrow-right" />
-            </Button>
-          </div>
+    <div className={`split-card ${className}`}>
+      <Link to={link} className="split-card-media">
+        <img src={image || fallbackImage} alt={title} loading="lazy" />
+        {badge && (
+          <span className={`split-card-badge split-card-badge-${badgeVariant}`}>
+            {badge}
+          </span>
+        )}
+      </Link>
+      <div className="split-card-body">
+        <div className="split-card-text">
+          <h3 className="split-card-title">{title}</h3>
+          {subtitle && <p className="split-card-subtitle">{subtitle}</p>}
         </div>
+        {onButtonClick ? (
+          <Button size="sm" variant="primary" onClick={onButtonClick} className="split-card-btn">
+            {buttonText} <Icon name="arrow-right" />
+          </Button>
+        ) : (
+          <Link to={link} className="btn btn-primary btn-sm split-card-btn">
+            {buttonText} <Icon name="arrow-right" />
+          </Link>
+        )}
       </div>
-    </Link>
+    </div>
   );
 }
