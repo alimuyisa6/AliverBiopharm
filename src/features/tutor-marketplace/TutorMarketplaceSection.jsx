@@ -5,7 +5,6 @@ import { listTutorsCached } from '../../api/cachedClient';
 import { sendContactRequest } from '../../api/client';
 import SplitCard from '../../components/SplitCard/SplitCard';
 import Spinner from '../../components/Spinner/Spinner';
-import EmptyState from '../../components/EmptyState/EmptyState';
 import { useToast } from '../../components/Toast/Toast';
 
 export default function TutorMarketplaceSection() {
@@ -62,10 +61,10 @@ export default function TutorMarketplaceSection() {
       <div className={tutors.length > 0 ? 'section-overlay' : ''}>
         <span className="sec-label">Tutor Marketplace</span>
         <h2 className="section-title">
-          Find a<br />Tutor
+          Learn From Someone<br />Who Gets It
         </h2>
         <p className="section-subtitle">
-          Connect with qualified tutors for personalised learning
+          Browse verified specialists in biology and pharmacy, matched to how you learn best.
         </p>
 
         {tutors.length > 0 ? (
@@ -78,6 +77,8 @@ export default function TutorMarketplaceSection() {
                   fallbackImage="/images/default-tutor.jpg"
                   title={tutor.display_name}
                   subtitle={tutor.headline || 'Qualified Tutor'}
+                  badge={tutor.specialty || 'Tutor'}
+                  badgeVariant="success"
                   link={`/tutor/${tutor.id}`}
                   buttonText="View"
                   onButtonClick={() => handleContact(tutor)}
@@ -89,16 +90,21 @@ export default function TutorMarketplaceSection() {
             </div>
           </>
         ) : (
-          <EmptyState
-            title="No tutors available yet"
-            description="Be the first to join our marketplace and start teaching. Check back soon or apply to become a tutor."
-            action={
-              <div className="tutor-empty-actions">
-                <Link to="/tutors" className="btn btn-secondary">Browse anyway</Link>
-                <Link to="/tutor/apply" className="btn btn-primary">Apply as a Tutor</Link>
-              </div>
-            }
-          />
+          <div className="section-empty-state">
+            <img
+              src="/images/empty-tutors.svg"
+              alt=""
+              className="section-empty-image"
+            />
+            <h3 className="section-empty-title">Be the first to teach here</h3>
+            <p className="section-empty-text">
+              Our marketplace is just getting started — apply as a tutor and claim your spot before anyone else.
+            </p>
+            <div className="section-empty-actions">
+              <Link to="/tutors" className="btn btn-secondary">Browse anyway</Link>
+              <Link to="/tutor/apply" className="btn btn-primary">Apply as a Tutor</Link>
+            </div>
+          </div>
         )}
       </div>
     </section>
