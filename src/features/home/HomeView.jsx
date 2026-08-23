@@ -1,5 +1,4 @@
- /* features/home/HomeView.jsx */
-import { Link } from 'react-router-dom';
+ import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
 import { PlatformCards } from './PlatformCards';
@@ -19,7 +18,7 @@ const CONTENT_TYPES = [
   { key: 'pdfs', label: 'PDF Library', description: 'Downloadable guides and reference sheets', icon: 'file-pdf', route: '/pdfs', color: 'violet' },
   { key: 'quizzes', label: 'Quizzes', description: 'Block-by-block testing across every unit', icon: 'clipboard-check', route: '/quiz', color: 'amber' },
   { key: 'past_papers', label: 'Past Papers', description: 'Real exam papers by year and board', icon: 'file-lines', route: '/past-papers', color: 'emerald' },
-  { key: 'recall', label: 'Recall', description: 'Spaced-repetition for long-term memory', icon: 'brain', route: '/recall', color: 'blue' }
+  { key: 'recall', label: 'Recall', description: 'Spaced repetition for lasting memory', icon: 'brain', route: '/recall', color: 'blue' }
 ];
 
 function ContentTypeCards({ navigate, user, sections }) {
@@ -33,13 +32,13 @@ function ContentTypeCards({ navigate, user, sections }) {
   }
 
   return (
-    <section className="section reveal">
-      <span className="sec-label">Explore</span>
+    <section className="section section-tint reveal">
+      <span className="sec-label">Inside</span>
       <h2 className="section-title">
         {sections?.section_headings?.content_types_title || 'Everything You Need to Succeed'}
       </h2>
       <p className="section-subtitle">
-        {sections?.section_headings?.content_types_subtitle || 'Pick where you want to start — every resource is tailored to your level.'}
+        {sections?.section_headings?.content_types_subtitle || 'Six resource types, all matched to your syllabus.'}
       </p>
 
       <div className="grid grid-cols-3">
@@ -113,6 +112,8 @@ export default function HomeView(props) {
 
       <PlatformCards />
 
+      <ContentTypeCards navigate={navigate} user={user} sections={sections} />
+
       <StatsGrid
         stats={{
           resources_count: publicStats?.resources_count || 0,
@@ -121,8 +122,6 @@ export default function HomeView(props) {
           quiz_attempts: publicStats?.quiz_attempts || 0
         }}
       />
-
-      <ContentTypeCards navigate={navigate} user={user} sections={sections} />
 
       <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
 
