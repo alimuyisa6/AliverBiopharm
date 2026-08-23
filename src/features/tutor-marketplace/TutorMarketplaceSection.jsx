@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { listTutorsCached } from '../../api/cachedClient';
 import { sendContactRequest } from '../../api/client';
-import ImageStep from '../../components/ImageStep/ImageStep';
+import SplitCard from '../../components/SplitCard/SplitCard';
 import Spinner from '../../components/Spinner/Spinner';
 import EmptyState from '../../components/EmptyState/EmptyState';
 import { useToast } from '../../components/Toast/Toast';
-import Button from '../../components/Button/Button';
 
 export default function TutorMarketplaceSection() {
   const { user } = useAuth();
@@ -16,10 +15,14 @@ export default function TutorMarketplaceSection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     listTutorsCached({ limit: 6 })
-      .then(setTutors)
+      .then((data) => { if (!cancelled) setTutors(data); })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
   }, []);
 
   const handleContact = async (tutor) => {
@@ -48,15 +51,15 @@ export default function TutorMarketplaceSection() {
 
   return (
     <section
-      className="section reveal section-with-bg"
-      style={{
+      className={`section reveal ${tutors.length > 0 ? 'section-with-bg' : ''}`}
+      style={tutors.length > 0 ? {
         backgroundImage: `url(/images/tutors.jpg)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
-      }}
+      } : undefined}
     >
-      <div className="section-overlay">
+      <div className={tutors.length > 0 ? 'section-overlay' : ''}>
         <span className="sec-label">Tutor Marketplace</span>
         <h2 className="section-title">
           Find a<br />Tutor
@@ -67,15 +70,17 @@ export default function TutorMarketplaceSection() {
 
         {tutors.length > 0 ? (
           <>
-            <div className="grid grid-cols-3">
+            <div className="classroom-level-grid">
               {tutors.map((tutor) => (
-                <ImageStep
+                <SplitCard
                   key={tutor.id}
-                  image={tutor.avatar_url || '/images/default-tutor.jpg'}
+                  image={tutor.avatar_url}
+                  fallbackImage="/images/default-tutor.jpg"
                   title={tutor.display_name}
                   subtitle={tutor.headline || 'Qualified Tutor'}
                   link={`/tutor/${tutor.id}`}
-                  buttonText="View Profile"
+                  buttonText="View"
+                  onButtonClick={() => handleContact(tutor)}
                 />
               ))}
             </div>
