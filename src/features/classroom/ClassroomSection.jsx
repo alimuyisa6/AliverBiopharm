@@ -1,15 +1,21 @@
  import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getLiveClassroomFeed } from '../../api/cachedClient';
-import ImageStep from '../../components/ImageStep/ImageStep';
+import SplitCard from '../../components/SplitCard/SplitCard';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
 import Spinner from '../../components/Spinner/Spinner';
 
 const STATUS_LABEL = {
-  live: '🔴 Live Now',
-  open_floor: '💬 Open Floor',
-  upcoming: '⏰ Upcoming'
+  live: 'Live Now',
+  open_floor: 'Open Floor',
+  upcoming: 'Upcoming'
+};
+
+const STATUS_VARIANT = {
+  live: 'danger',
+  open_floor: 'primary',
+  upcoming: 'warm'
 };
 
 export function ClassroomSection({ user }) {
@@ -18,15 +24,20 @@ export function ClassroomSection({ user }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     getLiveClassroomFeed()
-      .then(setFeed)
-      .finally(() => setLoading(false));
+      .then((data) => { if (!cancelled) setFeed(data); })
+      .finally(() => { if (!cancelled) setLoading(false); });
 
     const interval = setInterval(() => {
-      getLiveClassroomFeed().then(setFeed);
+      getLiveClassroomFeed().then((data) => { if (!cancelled) setFeed(data); });
     }, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   if (loading) {
@@ -42,15 +53,15 @@ export function ClassroomSection({ user }) {
   return (
     <section
       id="classroom"
-      className="section reveal section-with-bg"
-      style={{
+      className={`section reveal ${feed.length > 0 ? 'section-with-bg' : ''}`}
+      style={feed.length > 0 ? {
         backgroundImage: `url(/images/marketplace.jpg)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
-      }}
+      } : undefined}
     >
-      <div className="section-overlay">
+      <div className={feed.length > 0 ? 'section-overlay' : ''}>
         <span className="sec-label">Live Learning</span>
         <h2 className="section-title">
           Live Classroom<br />Discussions
@@ -67,13 +78,16 @@ export function ClassroomSection({ user }) {
         ) : (
           <div className="classroom-level-grid">
             {feed.slice(0, 6).map((room) => (
-              <ImageStep
+              <SplitCard
                 key={room.id}
-                image={room.image_url || '/images/classroom-default.jpg'}
+                image={room.image_url}
+                fallbackImage="/images/classroom-default.jpg"
                 title={room.topic_name}
                 subtitle={STATUS_LABEL[room.status] || room.status}
+                badge={STATUS_LABEL[room.status] || room.status}
+                badgeVariant={STATUS_VARIANT[room.status] || 'primary'}
                 link={`/classroom/${room.id}`}
-                buttonText={user ? 'Enter Room' : 'Join'}
+                buttonText={user ? 'Enter' : 'Join'}
               />
             ))}
           </div>
