@@ -1,5 +1,4 @@
- /* features/home/PlatformCards.jsx */
-import { useLayout } from '../../contexts/LayoutContext';
+ import { useLayout } from '../../contexts/LayoutContext';
 import Icon from '../../components/Icon/Icon';
 
 const LEVEL_COLOR_MAP = {
@@ -33,12 +32,12 @@ export function PlatformCards() {
 
   return (
     <section className="section reveal">
-      <span className="sec-label">Platforms</span>
+      <span className="sec-label">Get Started</span>
       <h2 className="section-title">
-        Explore Our<br />Platforms
+        Pick Your<br />Program
       </h2>
       <p className="section-subtitle">
-        Choose your path and start learning today.
+        One click into notes, quizzes, and past papers built for your level.
       </p>
 
       <div className="grid grid-cols-3">
