@@ -1,14 +1,17 @@
  import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLayout } from '../../contexts/LayoutContext';
 import { listTutorsCached } from '../../api/cachedClient';
 import { sendContactRequest } from '../../api/client';
 import SplitCard from '../../components/SplitCard/SplitCard';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import Spinner from '../../components/Spinner/Spinner';
 import { useToast } from '../../components/Toast/Toast';
 
 export default function TutorMarketplaceSection() {
   const { user } = useAuth();
+  const { bootstrap } = useLayout();
   const addToast = useToast();
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +26,13 @@ export default function TutorMarketplaceSection() {
 
     return () => { cancelled = true; };
   }, []);
+
+  function getUiImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const component = uiComponents.find((item) => item.component_key === key);
+
+    return component?.properties?.image_url || null;
+  }
 
   const handleContact = async (tutor) => {
     if (!user) {
@@ -48,11 +58,13 @@ export default function TutorMarketplaceSection() {
     );
   }
 
+  const backgroundUrl = getUiImage('tutor_section_background') || '/images/tutors.jpg';
+
   return (
     <section
       className={`section reveal ${tutors.length > 0 ? 'section-with-bg' : ''}`}
       style={tutors.length > 0 ? {
-        backgroundImage: `url(/images/tutors.jpg)`,
+        backgroundImage: `url(${backgroundUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
@@ -74,7 +86,7 @@ export default function TutorMarketplaceSection() {
                 <SplitCard
                   key={tutor.id}
                   image={tutor.avatar_url}
-                  fallbackImage="/images/default-tutor.jpg"
+                  fallbackImage={getUiImage('default_tutor_avatar') || '/images/default-tutor.jpg'}
                   title={tutor.display_name}
                   subtitle={tutor.headline || 'Qualified Tutor'}
                   badge={tutor.specialty || 'Tutor'}
@@ -90,21 +102,17 @@ export default function TutorMarketplaceSection() {
             </div>
           </>
         ) : (
-          <div className="section-empty-state">
-            <img
-              src="/images/empty-tutors.svg"
-              alt=""
-              className="section-empty-image"
-            />
-            <h3 className="section-empty-title">Be the first to teach here</h3>
-            <p className="section-empty-text">
-              Our marketplace is just getting started — apply as a tutor and claim your spot before anyone else.
-            </p>
-            <div className="section-empty-actions">
-              <Link to="/tutors" className="btn btn-secondary">Browse anyway</Link>
-              <Link to="/tutor/apply" className="btn btn-primary">Apply as a Tutor</Link>
-            </div>
-          </div>
+          <EmptyState
+            image={getUiImage('empty_state_tutors')}
+            title="Be the first to teach here"
+            description="Our marketplace is just getting started — apply as a tutor and claim your spot before anyone else."
+            action={
+              <div className="tutor-empty-actions">
+                <Link to="/tutors" className="btn btn-secondary">Browse anyway</Link>
+                <Link to="/tutor/apply" className="btn btn-primary">Apply as a Tutor</Link>
+              </div>
+            }
+          />
         )}
       </div>
     </section>
