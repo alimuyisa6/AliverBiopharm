@@ -39,7 +39,6 @@
     linear-gradient(135deg, rgba(59, 130, 246, 0.055), rgba(255, 255, 255, 0.42)),
     var(--primary-light);
 }
-
 .card-blue::before { background: var(--primary); }
 
 .card-teal {
@@ -47,7 +46,6 @@
     linear-gradient(135deg, rgba(20, 184, 166, 0.055), rgba(255, 255, 255, 0.42)),
     var(--secondary-light);
 }
-
 .card-teal::before { background: var(--secondary); }
 
 .card-violet {
@@ -55,7 +53,6 @@
     linear-gradient(135deg, rgba(139, 92, 246, 0.055), rgba(255, 255, 255, 0.42)),
     var(--accent-light);
 }
-
 .card-violet::before { background: var(--accent); }
 
 .card-amber {
@@ -63,7 +60,6 @@
     linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(255, 255, 255, 0.42)),
     var(--warm-light);
 }
-
 .card-amber::before { background: var(--warm); }
 
 .card-emerald {
@@ -71,33 +67,157 @@
     linear-gradient(135deg, rgba(16, 185, 129, 0.055), rgba(255, 255, 255, 0.42)),
     var(--success-light);
 }
-
 .card-emerald::before { background: var(--success); }
+
+.card-blue-intense {
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(255, 255, 255, 0.25)),
+    var(--blue-100);
+}
+.card-blue-intense::before { background: var(--blue-600); }
+
+.card-teal-intense {
+  background:
+    linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(255, 255, 255, 0.25)),
+    var(--teal-100);
+}
+.card-teal-intense::before { background: var(--teal-600); }
+
+.card-violet-intense {
+  background:
+    linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(255, 255, 255, 0.25)),
+    var(--violet-100);
+}
+.card-violet-intense::before { background: var(--violet-600); }
+
+.card-amber-intense {
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(255, 255, 255, 0.25)),
+    var(--amber-100);
+}
+.card-amber-intense::before { background: var(--amber-600); }
+
+.card-emerald-intense {
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(255, 255, 255, 0.25)),
+    var(--emerald-100);
+}
+.card-emerald-intense::before { background: var(--emerald-600); }
+
+.card-blue-strong {
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(255, 255, 255, 0.12)),
+    var(--blue-200);
+}
+.card-blue-strong::before { background: var(--blue-700); }
+
+.card-teal-strong {
+  background:
+    linear-gradient(135deg, rgba(20, 184, 166, 0.28), rgba(255, 255, 255, 0.12)),
+    var(--teal-200);
+}
+.card-teal-strong::before { background: var(--teal-700); }
+
+.card-violet-strong {
+  background:
+    linear-gradient(135deg, rgba(139, 92, 246, 0.28), rgba(255, 255, 255, 0.12)),
+    var(--violet-200);
+}
+.card-violet-strong::before { background: var(--violet-700); }
+
+.card-amber-strong {
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, 0.30), rgba(255, 255, 255, 0.12)),
+    var(--amber-200);
+}
+.card-amber-strong::before { background: var(--amber-700); }
+
+.card-emerald-strong {
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(255, 255, 255, 0.12)),
+    var(--emerald-200);
+}
+.card-emerald-strong::before { background: var(--emerald-700); }
+
+.card-grad-blue-violet {
+  background: linear-gradient(145deg, var(--blue-100), var(--violet-100));
+  border-color: var(--violet-300);
+}
+.card-grad-blue-violet::before {
+  background: linear-gradient(90deg, var(--blue-500), var(--violet-500));
+}
+
+.card-grad-teal-emerald {
+  background: linear-gradient(145deg, var(--teal-100), var(--emerald-100));
+  border-color: var(--emerald-300);
+}
+.card-grad-teal-emerald::before {
+  background: linear-gradient(90deg, var(--teal-500), var(--emerald-500));
+}
+
+.card-grad-amber-red {
+  background: linear-gradient(145deg, var(--amber-100), var(--red-100));
+  border-color: var(--red-300);
+}
+.card-grad-amber-red::before {
+  background: linear-gradient(90deg, var(--amber-500), var(--red-500));
+}
+
+.card-grad-slate-teal {
+  background: linear-gradient(145deg, var(--slate-100), var(--teal-100));
+  border-color: var(--teal-300);
+}
+.card-grad-slate-teal::before {
+  background: linear-gradient(90deg, var(--slate-500), var(--teal-500));
+}
 
 body.dark-mode .card-blue,
 body.dark-mode .card-teal,
 body.dark-mode .card-violet,
 body.dark-mode .card-amber,
-body.dark-mode .card-emerald {
+body.dark-mode .card-emerald,
+body.dark-mode .card-blue-intense,
+body.dark-mode .card-teal-intense,
+body.dark-mode .card-violet-intense,
+body.dark-mode .card-amber-intense,
+body.dark-mode .card-emerald-intense,
+body.dark-mode .card-blue-strong,
+body.dark-mode .card-teal-strong,
+body.dark-mode .card-violet-strong,
+body.dark-mode .card-amber-strong,
+body.dark-mode .card-emerald-strong,
+body.dark-mode .card-grad-blue-violet,
+body.dark-mode .card-grad-teal-emerald,
+body.dark-mode .card-grad-amber-red,
+body.dark-mode .card-grad-slate-teal {
   background: var(--bg-card-tinted);
 }
 
 .card-round {
   border-radius: 50px;
 }
+.card-round .card-image {
+  border-radius: 50px 50px 0 0;
+}
 
 .card-mixed {
   border-radius: 0 30px 0 30px;
+}
+.card-mixed .card-image {
+  border-radius: 0 30px 0 0;
+}
+
+.card-curved {
+  border-radius: 100px 0 100px 0;
+}
+.card-curved .card-image {
+  border-radius: 100px 0 0 0;
 }
 
 .card-inset {
   border-radius: 12px;
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
   background: var(--bg-input);
-}
-
-.card-curved {
-  border-radius: 100px 0 100px 0;
 }
 
 .card-pattern {
@@ -128,10 +248,10 @@ body.dark-mode .card-emerald {
   transform: scale(1.05);
 }
 
-/* ---------- Deep scoop image variants ---------- */
-/* Outer .card border/radius stays completely untouched. Only the image      */
-/* inside is masked with a deep concave circular bite. Apply alongside       */
-/* .card-image, e.g. class="card-image card-image-scoop-br"                 */
+.card-image-original {
+  height: 330px;
+  border-radius: 32px 32px 72% 0 / 32px 32px 38% 0;
+}
 
 .card-image-scoop-br {
   -webkit-mask: radial-gradient(circle 48px at 100% 100%, transparent 98%, #000 100%);
@@ -205,7 +325,6 @@ body.dark-mode .card-emerald {
 .card-compact {
   padding: 0;
 }
-
 .card-compact .card-body {
   padding: var(--space-3) var(--space-4);
 }
@@ -471,5 +590,16 @@ body.dark-mode .stat-card {
   .card-image-scoop-center {
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
+  }
+
+  .card-image-original {
+    height: 270px;
+    border-radius: 27px 27px 72% 0 / 27px 27px 38% 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .card-image-original {
+    height: 220px;
   }
 }
