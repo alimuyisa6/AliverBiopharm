@@ -2,8 +2,8 @@
 import { useNavigate } from 'react-router-dom';
 import { getLiveClassroomFeed } from '../../api/cachedClient';
 import SplitCard from '../../components/SplitCard/SplitCard';
-import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
+import Icon from '../../components/Icon/Icon';
 import Spinner from '../../components/Spinner/Spinner';
 
 const STATUS_LABEL = {
@@ -64,16 +64,28 @@ export function ClassroomSection({ user }) {
       <div className={feed.length > 0 ? 'section-overlay' : ''}>
         <span className="sec-label">Live Learning</span>
         <h2 className="section-title">
-          Live Classroom<br />Discussions
+          Where Questions<br />Meet Real Answers
         </h2>
         <p className="section-subtitle">
-          Join real-time discussions led by verified tutors.
+          Step into live sessions with verified tutors — ask, discuss, and learn in real time.
         </p>
 
         {feed.length === 0 ? (
-          <div className="classroom-empty">
-            <Icon name="door-closed" style={{ fontSize: '2rem', marginBottom: 'var(--space-4)' }} />
-            <p>No sessions running right now. Check back soon.</p>
+          <div className="section-empty-state">
+            <img
+              src="/images/empty-classroom.svg"
+              alt=""
+              className="section-empty-image"
+            />
+            <h3 className="section-empty-title">The room is quiet, for now</h3>
+            <p className="section-empty-text">
+              No live discussions are running at the moment. Start one yourself or check back shortly.
+            </p>
+            <div className="section-empty-actions">
+              <Button variant="secondary" onClick={() => navigate('/tutor/apply')}>
+                <Icon name="user-pen" /> Become a Tutor
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="classroom-level-grid">
@@ -93,14 +105,16 @@ export function ClassroomSection({ user }) {
           </div>
         )}
 
-        <div className="classroom-section-actions">
-          <Button onClick={() => navigate('/classroom')}>
-            <Icon name="users" /> {user ? 'View All Rooms' : 'Login to Join'}
-          </Button>
-          <Button variant="secondary" onClick={() => navigate('/tutor/apply')}>
-            <Icon name="user-pen" /> Become a Tutor
-          </Button>
-        </div>
+        {feed.length > 0 && (
+          <div className="classroom-section-actions">
+            <Button onClick={() => navigate('/classroom')}>
+              <Icon name="users" /> {user ? 'View All Rooms' : 'Login to Join'}
+            </Button>
+            <Button variant="secondary" onClick={() => navigate('/tutor/apply')}>
+              <Icon name="user-pen" /> Become a Tutor
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );
