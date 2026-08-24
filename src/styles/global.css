@@ -452,52 +452,12 @@ body.dark-mode .split-card-badge {
   border-radius: var(--radius-full);
 }
 
-.why-choose-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-8) var(--space-10);
-  max-width: 900px;
-  margin: 0 auto;
+.title-accent {
+  color: var(--violet-600);
 }
 
-.why-choose-item {
-  display: flex;
-  gap: var(--space-4);
-  align-items: flex-start;
-}
-
-.why-choose-icon {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-lg);
-  background: var(--primary-light);
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-}
-
-.why-choose-title {
-  font-family: var(--font-heading);
-  font-size: var(--text-base);
-  font-weight: var(--weight-bold);
-  color: var(--text-main);
-  margin-bottom: var(--space-1);
-}
-
-.why-choose-text {
-  font-size: var(--text-sm);
-  color: var(--text-dim);
-  line-height: var(--leading-relaxed);
-}
-
-@media (max-width: 640px) {
-  .why-choose-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
-  }
+body.dark-mode .title-accent {
+  color: var(--violet-400);
 }
 
 .how-it-works-row {
