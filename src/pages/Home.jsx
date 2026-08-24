@@ -1,12 +1,9 @@
- /* pages/Home.jsx */
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import {
   getPublicStats,
-  getContinueReading,
-  getUserStreak,
   subscribeNewsletter,
   requestChat,
   getChatMessages,
@@ -25,8 +22,6 @@ export default function Home() {
 
   const [sections, setSections] = useState({});
   const [publicStats, setPublicStats] = useState(null);
-  const [continueLearning, setContinueLearning] = useState([]);
-  const [streak, setStreak] = useState(0);
   const [chatRoomId, setChatRoomId] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatOpen, setChatOpen] = useState(false);
@@ -52,16 +47,6 @@ export default function Home() {
 
     getPublicStats().then(setPublicStats).catch(() => {});
     checkAdminOnline().then((res) => setAdminOnline(res?.online)).catch(() => {});
-
-    if (user) {
-      getContinueReading()
-        .then((data) => setContinueLearning(Array.isArray(data) ? data : []))
-        .catch(() => {});
-
-      getUserStreak()
-        .then((res) => setStreak(res?.count || 0))
-        .catch(() => {});
-    }
   }, [user, level]);
 
   const handleNewsletterSubmit = useCallback(async (event) => {
@@ -126,8 +111,6 @@ export default function Home() {
       activeLevelName={level?.display_name || user?.profile?.track || ''}
       activeGroupName={activeGroupName}
       publicStats={publicStats}
-      continueLearning={continueLearning}
-      streak={streak}
       chatRoomId={chatRoomId}
       chatMessages={chatMessages}
       chatOpen={chatOpen}
