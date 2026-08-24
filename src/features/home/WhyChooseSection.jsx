@@ -20,7 +20,7 @@ export function WhyChooseSection() {
 
       <div className="numbered-stack">
         {REASONS.map((reason) => (
-          <div key={reason.number} className="numbered-item">
+          <div key={reason.number} className={`numbered-item numbered-item-${reason.color}`}>
             <div className={`numbered-circle numbered-circle-${reason.color}`}>
               {reason.number}
             </div>
