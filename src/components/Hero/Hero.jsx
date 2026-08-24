@@ -17,7 +17,17 @@ export default function Hero() {
     <>
       <section className="hero hero-enhanced">
         <div className="hero-image">
-          {heroImage ? (
+          {featuredVideo?.video_url ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster={featuredVideo.thumbnail_url}
+            >
+              <source src={featuredVideo.video_url} type="video/mp4" />
+            </video>
+          ) : heroImage ? (
             <img src={heroImage} alt="" />
           ) : (
             <div className="hero-image-placeholder" />
@@ -58,27 +68,6 @@ export default function Hero() {
           </div>
         </div>
       </section>
-
-      {featuredVideo && (
-        <div className="hero-preview-card">
-          <div className="hero-preview-media">
-            <img src={featuredVideo.thumbnail_url} alt={featuredVideo.title} loading="lazy" />
-          </div>
-
-          <div className="hero-preview-body">
-            <span className="hero-preview-category">Videos</span>
-            <h2 className="hero-preview-title">{featuredVideo.title}</h2>
-            <a
-              href={featuredVideo.video_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary hero-preview-btn"
-            >
-              Watch Now
-            </a>
-          </div>
-        </div>
-      )}
     </>
   );
 }
