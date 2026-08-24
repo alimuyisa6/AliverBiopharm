@@ -65,10 +65,12 @@ export function StatsGrid({ stats = {} }) {
         Every number represents a student who chose to study smarter.
       </p>
 
-      <div className="grid grid-cols-4">
-        {ITEMS.map((item) => (
-          <AnimatedNumber key={item.key} target={stats[item.key] || 0} label={item.label} icon={item.icon} />
-        ))}
+      <div className="grid-frame">
+        <div className="grid grid-cols-4">
+          {ITEMS.map((item) => (
+            <AnimatedNumber key={item.key} target={stats[item.key] || 0} label={item.label} icon={item.icon} />
+          ))}
+        </div>
       </div>
     </section>
   );
