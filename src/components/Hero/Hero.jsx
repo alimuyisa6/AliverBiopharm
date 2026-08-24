@@ -10,6 +10,9 @@ export default function Hero() {
   const levelName = level?.display_name || '';
   const groupName = groups?.length > 0 ? groups[0].name : '';
 
+  const uiComponents = bootstrap?.ui_components || [];
+  const featuredVideo = uiComponents.find((item) => item.component_key === 'featured_video')?.properties;
+
   return (
     <>
       <section className="hero hero-enhanced">
@@ -56,12 +59,26 @@ export default function Hero() {
         </div>
       </section>
 
-      <div className="hero-preview-card">
-        <span className="hero-preview-label">Free to start, built to last</span>
-        <p className="hero-preview-text">
-          Core notes, quizzes, and flashcards are free for every student — no trial period, no card required.
-        </p>
-      </div>
+      {featuredVideo && (
+        <div className="hero-preview-card">
+          <div className="hero-preview-media">
+            <img src={featuredVideo.thumbnail_url} alt={featuredVideo.title} loading="lazy" />
+          </div>
+
+          <div className="hero-preview-body">
+            <span className="hero-preview-category">Videos</span>
+            <h2 className="hero-preview-title">{featuredVideo.title}</h2>
+            <a
+              href={featuredVideo.video_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary hero-preview-btn"
+            >
+              Watch Now
+            </a>
+          </div>
+        </div>
+      )}
     </>
   );
 }
