@@ -5,7 +5,6 @@ import { WhyChooseSection } from './WhyChooseSection';
 import { HowItWorksSection } from './HowItWorksSection';
 import { StatsGrid } from './StatsGrid';
 import { TestimonialSlider } from './TestimonialSlider';
-import { ContinueLearningSection } from './ContinueLearningSection';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
 import { ClassroomSection } from '../classroom/ClassroomSection';
@@ -88,8 +87,6 @@ export default function HomeView(props) {
     activeLevelName,
     activeGroupName,
     publicStats,
-    continueLearning,
-    streak,
     chatOpen,
     chatMessages,
     chatInput,
@@ -130,7 +127,6 @@ export default function HomeView(props) {
 
       <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
 
-      <ContinueLearningSection continueLearning={continueLearning} user={user} streak={streak} />
       <ClassroomSection user={user} />
       <TutorMarketplaceSection />
 
