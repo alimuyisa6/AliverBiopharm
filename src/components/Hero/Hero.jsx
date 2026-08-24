@@ -6,7 +6,6 @@ export default function Hero() {
   const { isAuthenticated } = useAuth();
   const { level, groups, bootstrap } = useLayout();
 
-  const heroImage = bootstrap?.landing?.hero_image_url;
   const levelName = level?.display_name || '';
   const groupName = groups?.length > 0 ? groups[0].name : '';
 
@@ -18,17 +17,9 @@ export default function Hero() {
       <section className="hero hero-enhanced">
         <div className="hero-image">
           {featuredVideo?.video_url ? (
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              poster={featuredVideo.thumbnail_url}
-            >
+            <video autoPlay muted loop playsInline poster={featuredVideo.thumbnail_url}>
               <source src={featuredVideo.video_url} type="video/mp4" />
             </video>
-          ) : heroImage ? (
-            <img src={heroImage} alt="" />
           ) : (
             <div className="hero-image-placeholder" />
           )}
@@ -37,7 +28,9 @@ export default function Hero() {
         <div className="hero-scrim" />
 
         <div className="hero-content">
-          <div className="hero-eyebrow">Welcome to AliverBiopharm</div>
+          <div className="hero-eyebrow">
+            Welcome to <span className="hero-eyebrow-accent">AliverBiopharm</span>
+          </div>
 
           <h1 className="hero-title">
             {isAuthenticated && levelName ? (
@@ -49,25 +42,39 @@ export default function Hero() {
 
           <p className="hero-tagline">
             {isAuthenticated && groupName
-              ? `Your ${groupName} journey continues — notes, quizzes, flashcards, and live classrooms, all matched to your level.`
-              : 'Structured notes, adaptive quizzes, and spaced repetition flashcards — built for O-Level, A-Level, and Pharmacy.'}
+              ? `Your ${groupName} journey continues. Notes, quizzes, flashcards, and live classrooms, all matched to your level.`
+              : 'Structured notes, adaptive quizzes, and spaced repetition flashcards, built for every level you study.'}
           </p>
 
-          <div className="hero-actions">
-            {isAuthenticated ? (
-              <>
-                <Link to="/quiz" className="btn btn-primary">Continue Learning</Link>
-                <Link to="/notes" className="btn btn-secondary">Browse Notes</Link>
-              </>
-            ) : (
-              <>
-                <Link to="/register" className="btn btn-primary">Start Learning Free</Link>
-                <Link to="/login" className="btn btn-secondary">Sign In</Link>
-              </>
-            )}
-          </div>
+          {!isAuthenticated && (
+            <div className="hero-actions">
+              <Link to="/register" className="btn btn-primary">Start Learning Free</Link>
+              <Link to="/login" className="btn btn-secondary">Sign In</Link>
+            </div>
+          )}
         </div>
       </section>
+
+      {featuredVideo && (
+        <div className="hero-preview-card">
+          <div className="hero-preview-media">
+            <img src={featuredVideo.thumbnail_url} alt={featuredVideo.title} loading="lazy" />
+          </div>
+
+          <div className="hero-preview-body">
+            <span className="hero-preview-category">Videos</span>
+            <h2 className="hero-preview-title">{featuredVideo.title}</h2>
+            <a
+              href={featuredVideo.video_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary hero-preview-btn"
+            >
+              Watch Now
+            </a>
+          </div>
+        </div>
+      )}
     </>
   );
 }
