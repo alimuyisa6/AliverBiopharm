@@ -1,14 +1,46 @@
-.hero {
+ .hero {
   position: relative;
-  display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
-  min-height: 100vh;
-  background: var(--bg-hero);
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
   overflow: hidden;
 }
 
 .hero-enhanced {
-  min-height: 100vh;
+  min-height: 90vh;
+}
+
+.hero-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 6s var(--ease-slow);
+}
+
+.hero:hover .hero-image img {
+  transform: scale(1.04);
+}
+
+.hero-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-16) var(--space-8);
 }
 
 .hero-eyebrow {
@@ -17,53 +49,10 @@
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-widest);
   text-transform: uppercase;
-  color: var(--primary);
+  color: #fff;
+  opacity: 0.85;
   margin-bottom: var(--space-3);
   animation: slideUp var(--ease-slow) forwards;
-}
-
-.hero-tagline {
-  font-family: var(--font-fraunces);
-  font-style: italic;
-  font-weight: 400;
-  font-size: var(--text-lg);
-  line-height: var(--leading-relaxed);
-  color: var(--text-dim);
-  max-width: 480px;
-  margin-bottom: var(--space-6);
-  animation: slideUp var(--ease-slow) 60ms both;
-}
-
-.hero-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 6s var(--ease-slow);
-}
-
-.hero:hover .hero-image {
-  transform: scale(1.04);
-}
-
-.hero-image-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 6rem;
-  color: var(--primary);
-  opacity: 0.4;
-}
-
-.hero-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: var(--space-16) var(--space-10) var(--space-16) var(--space-20);
-  position: relative;
 }
 
 .hero-title {
@@ -72,17 +61,20 @@
   font-weight: var(--weight-black);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
-  color: var(--text-main);
+  color: #fff;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   margin-bottom: var(--space-5);
+  max-width: 640px;
   animation: slideUp var(--ease-slow) 120ms both;
 }
 
-.hero-subtitle {
-  font-size: var(--text-base);
-  color: var(--text-dim);
+.hero-tagline {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.9);
   line-height: var(--leading-relaxed);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   margin-bottom: var(--space-8);
-  max-width: 420px;
+  max-width: 480px;
   animation: slideUp var(--ease-slow) 180ms both;
 }
 
@@ -93,57 +85,31 @@
   animation: slideUp var(--ease-slow) 240ms both;
 }
 
-.hero-border {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 6px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  animation: borderProgress 1.5s var(--ease-slow) forwards;
-  z-index: 2;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .hero-image {
+  .hero-image img {
     transition: none;
   }
 }
 
 @media (max-width: 768px) {
   .hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    align-content: start;
+    min-height: 80vh;
   }
 
   .hero-enhanced {
-    min-height: auto;
-  }
-
-  .hero-eyebrow {
-    font-size: 0.7rem;
-  }
-
-  .hero-tagline {
-    font-size: var(--text-base);
-    max-width: 100%;
-  }
-
-  .hero-image,
-  .hero-image-placeholder {
-    height: 42vh;
+    min-height: 80vh;
   }
 
   .hero-content {
-    padding: var(--space-4) var(--space-6) var(--space-8) var(--space-6);
+    padding: var(--space-8) var(--space-5);
   }
 
   .hero-title {
     font-size: var(--text-4xl);
   }
 
-  .hero-subtitle {
-    font-size: var(--text-sm);
+  .hero-tagline {
+    font-size: var(--text-base);
     max-width: 100%;
   }
 }
