@@ -37,6 +37,8 @@ const MODULE_MAP = {
   tutors: () => import('../lib/tutors.js'),
   articles: () => import('../lib/articles.js'),
   'pdf-resources': () => import('../lib/pdf-resources.js')
+'pdf-resources': () => import('../lib/resume.js')
+
 };
 
 export default async function handler(req, res) {
