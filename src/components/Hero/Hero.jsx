@@ -116,22 +116,18 @@ export default function Hero() {
       </section>
 
       {featuredVideo && (
-        <div className="hero-preview-card">
-          <div className="hero-preview-media">
-            <img src={featuredVideo.thumbnail_url} alt={featuredVideo.title} loading="lazy" />
+        <div className="hero-preview-card hero-preview-card-flat">
+          <div className="hero-preview-media hero-preview-media-full">
+            <img src={featuredVideo.thumbnail_url} alt="AliverBiopharm" loading="lazy" />
           </div>
 
           <div className="hero-preview-body">
-            <span className="hero-preview-category">Videos</span>
-            <h2 className="hero-preview-title">{featuredVideo.title}</h2>
-            <a
-              href={featuredVideo.video_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary hero-preview-btn"
-            >
-              Watch Now
-            </a>
+            <h2 className="hero-preview-title">
+              From Ordinary Level to University — all in one platform.
+            </h2>
+            <p className="hero-preview-text">
+              Your success is our happiness, and we're here to give you the best support you need every step of the way.
+            </p>
           </div>
         </div>
       )}
