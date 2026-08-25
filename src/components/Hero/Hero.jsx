@@ -42,6 +42,10 @@ export default function Hero() {
     !resumeFeatureKey ||
     (features?.[resumeFeatureKey] ?? true);
 
+  /*
+   * These remain dynamic.
+   * Do NOT hardcode Form 1, A-Level, Pharmacy, etc.
+   */
   const levelName = level?.display_name || '';
   const groupName = groups?.length > 0 ? groups[0].name : '';
 
@@ -81,7 +85,11 @@ export default function Hero() {
 
   return (
     <>
+      {/* =========================================================
+          HERO
+      ========================================================= */}
       <section className="hero hero-enhanced">
+
         {/* Background media */}
         <div className="hero-image" aria-hidden="true">
           {featuredVideo?.video_url ? (
@@ -108,11 +116,16 @@ export default function Hero() {
           )}
         </div>
 
-        {/* Text readability layer */}
-        <div className="hero-scrim" aria-hidden="true" />
+        {/* Directional darkening layer */}
+        <div
+          className="hero-scrim"
+          aria-hidden="true"
+        />
 
         {/* Hero content */}
         <div className="hero-content">
+
+          {/* Brand / context */}
           <div className="hero-eyebrow">
             <span>AliverBiopharm</span>
 
@@ -128,6 +141,7 @@ export default function Hero() {
             </span>
           </div>
 
+          {/* Main hero heading */}
           <h1 className="hero-title">
             {isAuthenticated && levelName ? (
               <>
@@ -142,13 +156,16 @@ export default function Hero() {
             )}
           </h1>
 
+          {/* Supporting message */}
           <p className="hero-tagline">
             {isAuthenticated && groupName
-              ? `Your ${groupName} journey continues. Notes, quizzes, flashcards, and live classrooms, all matched to your level.`
-              : 'Structured notes, adaptive quizzes, and spaced repetition flashcards, built for every level you study.'}
+              ? `Keep progressing through ${groupName} with focused study resources, practice, revision tools, and learning support tailored to your level.`
+              : 'Learn Biology and Pharmacy with structured resources, practice, revision tools, and expert learning support — all in one place.'}
           </p>
 
-          {/* Visitor actions */}
+          {/* =====================================================
+              VISITOR ACTIONS
+          ===================================================== */}
           {!isAuthenticated && (
             <div className="hero-actions">
               <Link
@@ -167,7 +184,9 @@ export default function Hero() {
             </div>
           )}
 
-          {/* Returning learner action */}
+          {/* =====================================================
+              AUTHENTICATED USER ACTION
+          ===================================================== */}
           {isAuthenticated && resume && resumeAllowed && (
             <div className="hero-actions">
               <Link
@@ -178,15 +197,22 @@ export default function Hero() {
               </Link>
             </div>
           )}
+
         </div>
       </section>
 
-      {/* Featured educational preview */}
+      {/* =========================================================
+          FULL-BLEED HERO PREVIEW
+          No floating-card effect.
+          No radius.
+      ========================================================= */}
       {featuredVideo && (
         <section
           className="hero-preview-card hero-preview-card-flat"
           aria-labelledby="hero-preview-title"
         >
+
+          {/* Full-width media */}
           <div className="hero-preview-media hero-preview-media-full">
             {featuredVideo.thumbnail_url && (
               <img
@@ -197,7 +223,9 @@ export default function Hero() {
             )}
           </div>
 
+          {/* Constrained editorial content */}
           <div className="hero-preview-body">
+
             <h2
               id="hero-preview-title"
               className="hero-preview-title"
@@ -209,6 +237,7 @@ export default function Hero() {
               Your success is our happiness, and we're here to give you
               the best support you need every step of the way.
             </p>
+
           </div>
         </section>
       )}
