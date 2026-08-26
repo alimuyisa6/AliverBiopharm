@@ -65,6 +65,7 @@ function ContentTypeCards({ navigate, user, sections }) {
                   <Button
                     size="sm"
                     variant="secondary"
+                    className="btn-radius-sm"
                     onClick={() => navigate(user ? type.route : '/login')}
                   >
                     Browse {type.label}
