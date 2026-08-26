@@ -1,22 +1,22 @@
  .flip-section {
-  padding: 0;
+  width: 100%;
   max-width: 100%;
   margin: 0;
-  width: 100%;
+  padding: 0;
 }
 
 .flip-container {
-  perspective: 1500px;
   width: 100%;
   min-height: 100vh;
+  perspective: 1500px;
 }
 
 .flip-inner {
   position: relative;
   width: 100%;
   min-height: 100vh;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .flip-inner.flipped {
@@ -27,124 +27,183 @@
 .flip-back {
   position: absolute;
   inset: 0;
+  width: 100%;
+  min-height: 100vh;
+
   backface-visibility: hidden;
-  border-radius: 0;
+  -webkit-backface-visibility: hidden;
+
   overflow-y: auto;
-  padding: 60px 44px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+
+  padding: 60px 44px;
+
+  border-radius: 0;
 }
 
 .flip-front {
+  justify-content: center;
   background: var(--amber-50);
   text-align: center;
-  min-height: 100vh;
 }
 
 .flip-back {
-  background: var(--emerald-100);
-  transform: rotateY(180deg);
   justify-content: flex-start;
   align-items: stretch;
-  padding: 60px 44px;
-  min-height: 100vh;
+
+  background: var(--emerald-100);
+  transform: rotateY(180deg);
 }
 
+/* Introduction image */
+
 .flip-image {
-  width: 100%;
-  max-width: 600px;
-  height: auto;
   display: block;
+
+  width: min(100%, 600px);
+  height: auto;
+
+  max-height: 42vh;
+
+  object-fit: contain;
+
   margin: 0 auto 32px;
-  border-radius: 0;
+
+  flex-shrink: 0;
+
   border: none;
+  border-radius: 0;
   box-shadow: none;
 }
 
+/* Introduction title */
+
 .flip-title {
+  margin: 0 0 var(--space-4);
+
   font-family: var(--font-heading);
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: var(--weight-black);
-  color: var(--text-main);
-  margin-bottom: var(--space-4);
+
+  line-height: 1.05;
   letter-spacing: -0.02em;
+
+  color: var(--text-main);
 }
+
+/* Introduction description */
 
 .flip-description {
-  font-size: clamp(1rem, 1.2vw, 1.15rem);
-  color: var(--text-muted);
   max-width: 560px;
+
   margin: 0 auto var(--space-10);
-  line-height: var(--leading-relaxed);
+
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
   font-weight: var(--weight-normal);
+
+  line-height: var(--leading-relaxed);
+
+  color: var(--text-muted);
 }
 
-.flip-back .grid-frame {
-  background: var(--amber-50);
-  border: 1px solid var(--amber-200);
-  box-shadow: var(--shadow-md);
-  width: 100%;
-  padding: var(--space-8);
-  border-radius: 0;
-  margin: 0;
-}
-
-.flip-back .grid-cols-3 {
-  margin: 0;
-}
+/* Back button */
 
 .back-btn {
   align-self: flex-start;
-  margin-bottom: var(--space-6);
-  background: transparent;
-  border: none;
-  color: var(--text-dim);
-  font-family: var(--font-button);
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-sm);
-  cursor: pointer;
+
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  transition: color var(--ease-fast);
+
+  margin: 0 0 var(--space-6);
   padding: var(--space-2) var(--space-3);
+
+  background: transparent;
+  border: none;
+
+  color: var(--text-dim);
+
+  font-family: var(--font-button);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+
+  cursor: pointer;
+
+  transition: color var(--ease-fast);
 }
 
 .back-btn:hover {
   color: var(--text-main);
 }
 
+/* Content grid container */
+
+.flip-back .grid-frame {
+  width: 100%;
+
+  margin: 0;
+  padding: var(--space-8);
+
+  background: var(--amber-50);
+
+  border: 1px solid var(--amber-200);
+  border-radius: 0;
+
+  box-shadow: var(--shadow-md);
+}
+
+.flip-back .grid-cols-3 {
+  margin: 0;
+}
+
+/* Tablet */
+
 @media (max-width: 768px) {
   .flip-front,
   .flip-back {
     padding: 40px 24px;
   }
+
   .flip-title {
     font-size: clamp(2rem, 5vw, 2.8rem);
   }
+
   .flip-description {
     font-size: 1rem;
   }
+
+  .flip-image {
+    max-height: 38vh;
+  }
+
   .flip-back .grid-frame {
     padding: var(--space-4);
   }
 }
+
+/* Mobile */
 
 @media (max-width: 640px) {
   .flip-front,
   .flip-back {
     padding: 30px 16px;
   }
+
   .flip-title {
     font-size: 1.8rem;
   }
+
   .flip-description {
     font-size: 0.95rem;
   }
+
   .flip-image {
+    width: 100%;
     max-width: 100%;
+    max-height: 32vh;
     margin-bottom: 20px;
   }
 }
