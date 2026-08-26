@@ -51,8 +51,8 @@ function SetupRequired() {
           Your level is set during account creation. Please sign in with an existing account or create a new one to continue.
         </p>
         <div className="setup-required-actions">
-          <a href="/register" className="btn btn-primary btn-lg">Create Account</a>
-          <a href="/login" className="btn btn-secondary btn-lg">Sign In</a>
+          <a href="/register" className="btn btn-primary btn-lg btn-radius-pill">Create Account</a>
+          <a href="/login" className="btn btn-secondary btn-lg btn-radius-pill">Sign In</a>
         </div>
       </div>
     </div>
