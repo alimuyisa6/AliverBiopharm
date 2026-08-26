@@ -1,4 +1,4 @@
-// components/ContentFlipSection/ContentFlipSection.jsx
+ // src/components/ContentFlipSection/ContentFlipSection.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
@@ -30,11 +30,11 @@ export default function ContentFlipSection({ sections, navigate, user }) {
   }
 
   const introImage = getIntroImage();
-  const title = sections?.flip?.title || 'Your Learning Hub';
-  const description = sections?.flip?.description || 'Explore six powerful tools to master your subjects.';
+  const title = sections?.flip?.title || 'Master Your Subjects';
+  const description = sections?.flip?.description || 'Click Start to explore six powerful learning tools designed to help you excel.';
 
   return (
-    <section className="flip-section reveal">
+    <section className="flip-section">
       <div className="flip-container">
         <div className={`flip-inner ${flipped ? 'flipped' : ''}`}>
           <div className="flip-front">
@@ -43,7 +43,7 @@ export default function ContentFlipSection({ sections, navigate, user }) {
             )}
             <h2 className="flip-title">{title}</h2>
             <p className="flip-description">{description}</p>
-            <Button variant="primary" onClick={() => setFlipped(true)}>
+            <Button variant="primary" size="lg" onClick={() => setFlipped(true)}>
               Start
             </Button>
           </div>
