@@ -103,11 +103,11 @@ export default function ContentFlipSection({ sections, navigate, user }) {
   const introImage = getIntroImage();
 
   const title =
-    sections?.flip?.title || 'Master Your Subjects';
+    sections?.flip?.title || 'Learn. Practise. Remember.';
 
   const description =
     sections?.flip?.description ||
-    'Click Start to explore six powerful learning tools designed to help you excel.';
+    'Learning becomes more effective when you have the right tools at the right time. Explore clear, structured notes to build your understanding, use flashcards and Recall to strengthen long-term memory, test yourself with quizzes, practise with past papers, and keep useful guides and reference materials within reach. Whether you are learning something for the first time, revising a familiar concept, preparing for an assessment, or working towards an examination, these tools give you different ways to engage with what you are learning. Understand the material, put your knowledge into practice, identify what needs more attention, and return to it until you can recall it with confidence.';
 
   return (
     <section className="flip-section">
@@ -116,19 +116,20 @@ export default function ContentFlipSection({ sections, navigate, user }) {
 
           {/* FRONT */}
           <div className="flip-front">
+
+            <h2 className="flip-title">
+              {title}
+            </h2>
+
             {introImage && (
               <img
                 src={introImage}
-                alt="Introduction to learning tools"
+                alt="Learning tools"
                 className="flip-image"
                 loading="eager"
                 decoding="async"
               />
             )}
-
-            <h2 className="flip-title">
-              {title}
-            </h2>
 
             <p className="flip-description">
               {description}
@@ -137,18 +138,22 @@ export default function ContentFlipSection({ sections, navigate, user }) {
             <Button
               variant="primary"
               size="lg"
+              className="flip-start-button"
               onClick={() => setFlipped(true)}
             >
-              Start
+              Start Your Learning Journey
             </Button>
+
           </div>
 
           {/* BACK */}
           <div className="flip-back">
+
             <button
               type="button"
               className="back-btn"
               onClick={() => setFlipped(false)}
+              aria-label="Return to introduction"
             >
               <span aria-hidden="true">←</span>
               <span>Back</span>
@@ -156,6 +161,7 @@ export default function ContentFlipSection({ sections, navigate, user }) {
 
             <div className="grid-frame">
               <div className="grid grid-cols-3">
+
                 {CONTENT_TYPES.map((type) => {
                   const imageUrl = getCardImage(type.key);
 
@@ -211,10 +217,11 @@ export default function ContentFlipSection({ sections, navigate, user }) {
                     </div>
                   );
                 })}
+
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
       </div>
     </section>
