@@ -1,4 +1,4 @@
-/* components/Layout/Layout.jsx */
+ /* components/Layout/Layout.jsx */
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -223,14 +223,14 @@ export default function Layout({ children, showFooter = true }) {
                 <>
                   <Link
                     to="/login"
-                    className={`btn btn-${mapVariant(loginButton.variant)} btn-sm`}
+                    className={`btn btn-${mapVariant(loginButton.variant)} btn-sm btn-radius-sm`}
                   >
                     {loginButton.icon && <Icon name={loginButton.icon} />}
                     {loginButton.label}
                   </Link>
                   <Link
                     to="/register"
-                    className={`btn btn-${mapVariant(signupButton.variant)} btn-sm`}
+                    className={`btn btn-${mapVariant(signupButton.variant)} btn-sm btn-radius-sm`}
                   >
                     {signupButton.icon && <Icon name={signupButton.icon} />}
                     {signupButton.label}
