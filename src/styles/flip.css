@@ -35,42 +35,60 @@
 
   overflow-y: auto;
 
+  border-radius: 0;
+}
+
+/* =========================================================
+   FRONT
+   ========================================================= */
+
+.flip-front {
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  padding: 60px 44px;
+  padding: clamp(32px, 5vw, 64px) clamp(20px, 6vw, 80px);
 
-  border-radius: 0;
-}
-
-.flip-front {
-  justify-content: center;
   background: var(--amber-50);
   text-align: center;
-}
 
-.flip-back {
   justify-content: flex-start;
-  align-items: stretch;
-
-  background: var(--emerald-100);
-  transform: rotateY(180deg);
 }
 
-/* Introduction image */
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.flip-title {
+  width: 100%;
+  max-width: 1100px;
+
+  margin: 0 0 clamp(14px, 2vw, 24px);
+
+  font-family: var(--font-heading);
+  font-size: clamp(2.2rem, 5vw, 4.8rem);
+  font-weight: var(--weight-black);
+
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+
+  color: var(--text-main);
+}
+
+/* =========================================================
+   INTRO IMAGE
+   ========================================================= */
 
 .flip-image {
   display: block;
 
-  width: min(100%, 600px);
-  height: auto;
+  width: min(100%, 850px);
 
-  max-height: 42vh;
+  height: clamp(220px, 38vh, 420px);
 
   object-fit: contain;
 
-  margin: 0 auto 32px;
+  margin: 0 auto clamp(16px, 2.5vw, 28px);
 
   flex-shrink: 0;
 
@@ -79,37 +97,55 @@
   box-shadow: none;
 }
 
-/* Introduction title */
-
-.flip-title {
-  margin: 0 0 var(--space-4);
-
-  font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: var(--weight-black);
-
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-
-  color: var(--text-main);
-}
-
-/* Introduction description */
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
 
 .flip-description {
-  max-width: 560px;
+  width: 100%;
+  max-width: 1050px;
 
-  margin: 0 auto var(--space-10);
+  margin: 0 auto clamp(24px, 3vw, 36px);
 
-  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.25vw, 1.08rem);
   font-weight: var(--weight-normal);
 
-  line-height: var(--leading-relaxed);
+  line-height: 1.8;
+  letter-spacing: 0.005em;
 
   color: var(--text-muted);
+
+  text-align: center;
 }
 
-/* Back button */
+/* =========================================================
+   FRONT BUTTON
+   ========================================================= */
+
+.flip-front > .btn {
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   BACK
+   ========================================================= */
+
+.flip-back {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  padding: 40px clamp(20px, 5vw, 64px);
+
+  background: var(--emerald-100);
+
+  transform: rotateY(180deg);
+}
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
 
 .back-btn {
   align-self: flex-start;
@@ -139,7 +175,9 @@
   color: var(--text-main);
 }
 
-/* Content grid container */
+/* =========================================================
+   CONTENT GRID
+   ========================================================= */
 
 .flip-back .grid-frame {
   width: 100%;
@@ -159,24 +197,35 @@
   margin: 0;
 }
 
-/* Tablet */
+/* =========================================================
+   TABLET
+   ========================================================= */
 
 @media (max-width: 768px) {
-  .flip-front,
-  .flip-back {
-    padding: 40px 24px;
+  .flip-front {
+    padding: 36px 24px 48px;
   }
 
   .flip-title {
-    font-size: clamp(2rem, 5vw, 2.8rem);
-  }
-
-  .flip-description {
-    font-size: 1rem;
+    font-size: clamp(2rem, 7vw, 3rem);
+    margin-bottom: 16px;
   }
 
   .flip-image {
-    max-height: 38vh;
+    width: min(100%, 650px);
+    height: clamp(190px, 32vh, 320px);
+    margin-bottom: 18px;
+  }
+
+  .flip-description {
+    max-width: 720px;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 28px;
+  }
+
+  .flip-back {
+    padding: 32px 24px;
   }
 
   .flip-back .grid-frame {
@@ -184,26 +233,34 @@
   }
 }
 
-/* Mobile */
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media (max-width: 640px) {
-  .flip-front,
-  .flip-back {
-    padding: 30px 16px;
+  .flip-front {
+    padding: 28px 16px 40px;
   }
 
   .flip-title {
-    font-size: 1.8rem;
-  }
-
-  .flip-description {
-    font-size: 0.95rem;
+    font-size: 1.85rem;
+    line-height: 1.08;
+    margin-bottom: 14px;
   }
 
   .flip-image {
     width: 100%;
-    max-width: 100%;
-    max-height: 32vh;
-    margin-bottom: 20px;
+    height: 220px;
+    margin-bottom: 14px;
+  }
+
+  .flip-description {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .flip-back {
+    padding: 24px 16px;
   }
 }
