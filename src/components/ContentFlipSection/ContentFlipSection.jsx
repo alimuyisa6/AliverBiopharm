@@ -1,5 +1,4 @@
- // src/components/ContentFlipSection/ContentFlipSection.jsx
-import { useState } from 'react';
+ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
@@ -29,7 +28,7 @@ export default function ContentFlipSection({ sections, navigate, user }) {
     return component?.properties?.image_url || null;
   }
 
-  const introImage = getIntroImage();
+  const introImage = getIntroImage() || 'https://raw.githubusercontent.com/alimuyisa6/AliverBiopharma/main/public/images/flip-intro.png';
   const title = sections?.flip?.title || 'Master Your Subjects';
   const description = sections?.flip?.description || 'Click Start to explore six powerful learning tools designed to help you excel.';
 
