@@ -1,8 +1,10 @@
- const REASONS = [
+ import { Link } from 'react-router-dom';
+
+const REASONS = [
   { number: '1', title: 'Syllabus-Aligned Content', text: 'Every note and quiz matches your official curriculum, not generic material.', color: 'blue' },
   { number: '2', title: 'Built to Stick', text: 'Flashcards and spaced repetition designed for retention, not just re-reading.', color: 'amber' },
   { number: '3', title: 'Real Exam Practice', text: 'Past papers and block quizzes modeled on the actual exam structure.', color: 'teal' },
-  { number: '4', title: 'Never Stuck Alone', text: 'Live classrooms and tutors are there when a note alone is not enough.', color: 'violet' }
+  { number: '4', title: 'Never Stuck Alone', text: 'Live classrooms and tutors are there when a note alone is not enough.', color: 'grey' }
 ];
 
 export function WhyChooseSection() {
