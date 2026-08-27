@@ -1,4 +1,5 @@
- .card {
+/* styles/card.css */
+.card {
   position: relative;
   background: var(--bg-card-tinted);
   border: 1px solid var(--border-default);
@@ -48,12 +49,12 @@
 }
 .card-teal::before { background: var(--secondary); }
 
-.card-violet {
+.card-grey {
   background:
-    linear-gradient(135deg, rgba(139, 92, 246, 0.055), rgba(255, 255, 255, 0.42)),
+    linear-gradient(135deg, rgba(107, 114, 128, 0.055), rgba(255, 255, 255, 0.42)),
     var(--accent-light);
 }
-.card-violet::before { background: var(--accent); }
+.card-grey::before { background: var(--accent); }
 
 .card-amber {
   background:
@@ -83,12 +84,12 @@
 }
 .card-teal-intense::before { background: var(--teal-600); }
 
-.card-violet-intense {
+.card-grey-intense {
   background:
-    linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(255, 255, 255, 0.25)),
-    var(--violet-100);
+    linear-gradient(135deg, rgba(107, 114, 128, 0.15), rgba(255, 255, 255, 0.25)),
+    var(--grey-100);
 }
-.card-violet-intense::before { background: var(--violet-600); }
+.card-grey-intense::before { background: var(--grey-600); }
 
 .card-amber-intense {
   background:
@@ -118,12 +119,12 @@
 }
 .card-teal-strong::before { background: var(--teal-700); }
 
-.card-violet-strong {
+.card-grey-strong {
   background:
-    linear-gradient(135deg, rgba(139, 92, 246, 0.28), rgba(255, 255, 255, 0.12)),
-    var(--violet-200);
+    linear-gradient(135deg, rgba(107, 114, 128, 0.28), rgba(255, 255, 255, 0.12)),
+    var(--grey-200);
 }
-.card-violet-strong::before { background: var(--violet-700); }
+.card-grey-strong::before { background: var(--grey-700); }
 
 .card-amber-strong {
   background:
@@ -139,12 +140,12 @@
 }
 .card-emerald-strong::before { background: var(--emerald-700); }
 
-.card-grad-blue-violet {
-  background: linear-gradient(145deg, var(--blue-100), var(--violet-100));
-  border-color: var(--violet-300);
+.card-grad-blue-grey {
+  background: linear-gradient(145deg, var(--blue-100), var(--grey-100));
+  border-color: var(--grey-300);
 }
-.card-grad-blue-violet::before {
-  background: linear-gradient(90deg, var(--blue-500), var(--violet-500));
+.card-grad-blue-grey::before {
+  background: linear-gradient(90deg, var(--blue-500), var(--grey-500));
 }
 
 .card-grad-teal-emerald {
@@ -173,20 +174,20 @@
 
 body.dark-mode .card-blue,
 body.dark-mode .card-teal,
-body.dark-mode .card-violet,
+body.dark-mode .card-grey,
 body.dark-mode .card-amber,
 body.dark-mode .card-emerald,
 body.dark-mode .card-blue-intense,
 body.dark-mode .card-teal-intense,
-body.dark-mode .card-violet-intense,
+body.dark-mode .card-grey-intense,
 body.dark-mode .card-amber-intense,
 body.dark-mode .card-emerald-intense,
 body.dark-mode .card-blue-strong,
 body.dark-mode .card-teal-strong,
-body.dark-mode .card-violet-strong,
+body.dark-mode .card-grey-strong,
 body.dark-mode .card-amber-strong,
 body.dark-mode .card-emerald-strong,
-body.dark-mode .card-grad-blue-violet,
+body.dark-mode .card-grad-blue-grey,
 body.dark-mode .card-grad-teal-emerald,
 body.dark-mode .card-grad-amber-red,
 body.dark-mode .card-grad-slate-teal {
