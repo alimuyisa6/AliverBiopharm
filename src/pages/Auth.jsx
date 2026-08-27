@@ -1,4 +1,5 @@
-/* pages/Auth.jsx */
+ /* pages/Auth.jsx */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -93,8 +94,11 @@ export default function Auth() {
         },
         'expired-callback': () => {
           widgetReadyRef.current = false;
+
           if (window.turnstile && widgetIdRef.current) {
-            try { window.turnstile.reset(widgetIdRef.current); } catch {}
+            try {
+              window.turnstile.reset(widgetIdRef.current);
+            } catch {}
           }
         },
         'error-callback': () => {
@@ -118,6 +122,7 @@ export default function Auth() {
       script.async = true;
       script.defer = true;
       script.crossOrigin = 'anonymous';
+
       document.head.appendChild(script);
     }
 
@@ -144,7 +149,9 @@ export default function Auth() {
       clearInterval(interval);
 
       if (window.turnstile && widgetIdRef.current) {
-        try { window.turnstile.remove(widgetIdRef.current); } catch {}
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {}
       }
 
       widgetIdRef.current = null;
@@ -153,7 +160,9 @@ export default function Auth() {
   }, [captchaSlot, renderWidget]);
 
   function getTurnstileToken() {
-    if (!window.turnstile || !widgetIdRef.current || !widgetReadyRef.current) return '';
+    if (!window.turnstile || !widgetIdRef.current || !widgetReadyRef.current) {
+      return '';
+    }
 
     try {
       return window.turnstile.getResponse(widgetIdRef.current) || '';
@@ -170,7 +179,10 @@ export default function Auth() {
     } catch {
       widgetIdRef.current = null;
       widgetReadyRef.current = false;
-      if (captchaSlot) renderWidget(captchaSlot);
+
+      if (captchaSlot) {
+        renderWidget(captchaSlot);
+      }
     }
   }
 
@@ -224,7 +236,12 @@ export default function Auth() {
     setSubmitting(true);
 
     try {
-      const result = await login(email, password, token, mfaCode.trim());
+      const result = await login(
+        email,
+        password,
+        token,
+        mfaCode.trim()
+      );
 
       if (result?.mfa_required) {
         setMfaError('Incorrect code. Please try again.');
@@ -299,9 +316,16 @@ export default function Auth() {
       if (result?.user) {
         await refresh();
         setSuccess(true);
-        setTimeout(() => navigate(redirectTo, { replace: true }), 1500);
+
+        setTimeout(() => {
+          navigate(redirectTo, { replace: true });
+        }, 1500);
       } else {
-        setConfirmationMessage(result?.message || 'If this email is valid, please check your inbox to confirm your account.');
+        setConfirmationMessage(
+          result?.message ||
+          'If this email is valid, please check your inbox to confirm your account.'
+        );
+
         setPendingConfirmation(true);
       }
     } catch (err) {
@@ -319,10 +343,13 @@ export default function Auth() {
   }
 
   function switchMode(nextMode) {
-    navigate(nextMode === 'register' ? '/register' : '/login', {
-      state: location.state,
-      replace: true
-    });
+    navigate(
+      nextMode === 'register' ? '/register' : '/login',
+      {
+        state: location.state,
+        replace: true
+      }
+    );
   }
 
   return (
@@ -331,28 +358,60 @@ export default function Auth() {
         <div className="auth-form-container">
           {pendingConfirmation ? (
             <div className="auth-state">
-              <Icon name="envelope-circle-check" className="auth-state-icon" />
-              <h2 className="auth-state-title font-fraunces">Check Your Inbox</h2>
-              <p className="auth-state-text font-source-sans">{confirmationMessage}</p>
-              <Button variant="ghost" onClick={() => switchMode('login')}>
-                <Icon name="arrow-left" /> Back to sign in
+              <Icon
+                name="envelope-circle-check"
+                className="auth-state-icon"
+              />
+
+              <h2 className="auth-state-title font-fraunces">
+                Check Your Inbox
+              </h2>
+
+              <p className="auth-state-text font-source-sans">
+                {confirmationMessage}
+              </p>
+
+              <Button
+                variant="ghost"
+                onClick={() => switchMode('login')}
+              >
+                <Icon name="arrow-left" />
+                Back to sign in
               </Button>
             </div>
           ) : success ? (
             <div className="auth-state">
-              <Icon name="circle-check" className="auth-state-icon auth-state-icon-success" />
-              <h2 className="auth-state-title font-fraunces">Account Created</h2>
-              <p className="auth-state-text font-source-sans">Welcome to AliverBiopharm. Redirecting...</p>
+              <Icon
+                name="circle-check"
+                className="auth-state-icon auth-state-icon-success"
+              />
+
+              <h2 className="auth-state-title font-fraunces">
+                Account Created
+              </h2>
+
+              <p className="auth-state-text font-source-sans">
+                Welcome to AliverBiopharm. Redirecting...
+              </p>
+
               <Spinner context="brand" />
             </div>
           ) : mfaStep ? (
             <div className="auth-form-block">
-              <h2 className="auth-heading font-fraunces">Two-Factor Verification</h2>
-              <p className="auth-subheading font-source-sans">Enter the 6-digit code from your authenticator app</p>
+              <h2 className="auth-heading font-fraunces">
+                Two-Factor Verification
+              </h2>
+
+              <p className="auth-subheading font-source-sans">
+                Enter the 6-digit code from your authenticator app
+              </p>
 
               {mfaError && (
                 <div className="alert alert-error">
-                  <Icon name="exclamation-triangle" /> <span className="font-open-sans">{mfaError}</span>
+                  <Icon name="exclamation-triangle" />
+                  <span className="font-open-sans">
+                    {mfaError}
+                  </span>
                 </div>
               )}
 
@@ -364,45 +423,92 @@ export default function Auth() {
                   maxLength={6}
                   placeholder="000000"
                   value={mfaCode}
-                  onChange={(event) => setMfaCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={(event) =>
+                    setMfaCode(
+                      event.target.value
+                        .replace(/\D/g, '')
+                        .slice(0, 6)
+                    )
+                  }
                   disabled={submitting}
                 />
-                <div ref={setCaptchaSlot} className="auth-captcha" />
-                <Button type="submit" loading={submitting} loadingContext="brand" className="auth-submit">
+
+                <div
+                  ref={setCaptchaSlot}
+                  className="auth-captcha"
+                />
+
+                <Button
+                  type="submit"
+                  loading={submitting}
+                  loadingContext="brand"
+                  className="auth-submit"
+                >
                   Verify and Sign In
                 </Button>
               </form>
             </div>
           ) : onboardingStep > 0 ? (
             <div className="auth-form-block">
-              <h2 className="auth-heading font-fraunces">Complete Your Profile</h2>
-              <p className="auth-subheading font-source-sans">Help us personalise your learning experience</p>
+              <h2 className="auth-heading font-fraunces">
+                Complete Your Profile
+              </h2>
+
+              <p className="auth-subheading font-source-sans">
+                Help us personalise your learning experience
+              </p>
 
               <div className="progress-track auth-progress">
-                <div className="progress-fill progress-gradient" style={{ width: `${progressPct()}%` }} />
+                <div
+                  className="progress-fill progress-gradient"
+                  style={{ width: `${progressPct()}%` }}
+                />
               </div>
 
               {error && (
                 <div className="alert alert-error">
-                  <Icon name="exclamation-triangle" /> <span className="font-open-sans">{error}</span>
+                  <Icon name="exclamation-triangle" />
+                  <span className="font-open-sans">
+                    {error}
+                  </span>
                 </div>
               )}
 
               {onboardingStep === 1 && (
                 <div className="auth-onboarding-step">
-                  <h3 className="auth-step-title font-poppins">I am a...</h3>
+                  <h3 className="auth-step-title font-poppins">
+                    I am a...
+                  </h3>
+
                   <div className="auth-options">
                     <Button
-                      variant={role === 'student' ? 'primary' : 'secondary'}
-                      onClick={() => { setRole('student'); setOnboardingStep(2); }}
+                      variant={
+                        role === 'student'
+                          ? 'primary'
+                          : 'secondary'
+                      }
+                      onClick={() => {
+                        setRole('student');
+                        setOnboardingStep(2);
+                      }}
                     >
-                      <Icon name="user-graduate" /> Student
+                      <Icon name="user-graduate" />
+                      Student
                     </Button>
+
                     <Button
-                      variant={role === 'teacher' ? 'primary' : 'secondary'}
-                      onClick={() => { setRole('teacher'); setOnboardingStep(2); }}
+                      variant={
+                        role === 'teacher'
+                          ? 'primary'
+                          : 'secondary'
+                      }
+                      onClick={() => {
+                        setRole('teacher');
+                        setOnboardingStep(2);
+                      }}
                     >
-                      <Icon name="user-pen" /> Teacher
+                      <Icon name="user-pen" />
+                      Teacher
                     </Button>
                   </div>
                 </div>
@@ -410,27 +516,63 @@ export default function Auth() {
 
               {onboardingStep === 2 && (
                 <div className="auth-onboarding-step">
-                  <h3 className="auth-step-title font-poppins">Select your level</h3>
+                  <h3 className="auth-step-title font-poppins">
+                    Select your level
+                  </h3>
 
-                  {levelsLoading && <Spinner context="data" size="sm" />}
-                  {levelsError && <p className="form-error font-open-sans">{levelsError}</p>}
+                  {levelsLoading && (
+                    <Spinner
+                      context="data"
+                      size="sm"
+                    />
+                  )}
+
+                  {levelsError && (
+                    <p className="form-error font-open-sans">
+                      {levelsError}
+                    </p>
+                  )}
 
                   {!levelsLoading && !levelsError && (
                     <div className="auth-options">
                       {levels.map((lvl) => {
                         const value = lvl.display_name;
-                        const rowKey = lvl.key || lvl.id || value;
+                        const rowKey =
+                          lvl.key ||
+                          lvl.id ||
+                          value;
 
                         return (
                           <Button
                             key={rowKey}
-                            variant={track === value ? 'pill' : 'curved'}
-                            onClick={() => { setTrack(value); handleOnboardingFinish(role, value); }}
-                            loading={submitting && track === value}
+                            variant={
+                              track === value
+                                ? 'primary'
+                                : 'secondary'
+                            }
+                            onClick={() => {
+                              setTrack(value);
+                              handleOnboardingFinish(
+                                role,
+                                value
+                              );
+                            }}
+                            loading={
+                              submitting &&
+                              track === value
+                            }
                             loadingContext="conic"
                             disabled={submitting}
                           >
-                            <Icon name={lvl.icon === 'dna' ? 'microscope' : lvl.icon || 'graduation-cap'} />
+                            <Icon
+                              name={
+                                lvl.icon === 'dna'
+                                  ? 'microscope'
+                                  : lvl.icon ||
+                                    'graduation-cap'
+                              }
+                            />
+
                             {lvl.display_name}
                           </Button>
                         );
@@ -443,25 +585,41 @@ export default function Auth() {
           ) : (
             <div className="auth-form-block">
               <h2 className="auth-heading font-fraunces">
-                {mode === 'login' ? 'Sign In' : 'Create Account'}
+                {mode === 'login'
+                  ? 'Sign In'
+                  : 'Create Account'}
               </h2>
+
               <p className="auth-subheading font-source-sans">
-                {mode === 'login' ? 'Access your account securely' : 'Join thousands of learners worldwide'}
+                {mode === 'login'
+                  ? 'Access your account securely'
+                  : 'Join thousands of learners worldwide'}
               </p>
 
               {error && (
                 <div className="alert alert-error">
-                  <Icon name="exclamation-triangle" /> <span className="font-open-sans">{error}</span>
+                  <Icon name="exclamation-triangle" />
+                  <span className="font-open-sans">
+                    {error}
+                  </span>
                 </div>
               )}
 
-              <form onSubmit={mode === 'login' ? handleLogin : handleRegister}>
+              <form
+                onSubmit={
+                  mode === 'login'
+                    ? handleLogin
+                    : handleRegister
+                }
+              >
                 {mode === 'register' && (
                   <Input
                     label="Full Name"
                     placeholder="Enter your full name"
                     value={fullName}
-                    onChange={(event) => setFullName(event.target.value)}
+                    onChange={(event) =>
+                      setFullName(event.target.value)
+                    }
                     required
                     disabled={submitting}
                     icon="user"
@@ -473,7 +631,9 @@ export default function Auth() {
                   type="email"
                   placeholder="Enter your email"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) =>
+                    setEmail(event.target.value)
+                  }
                   required
                   disabled={submitting}
                   icon="envelope"
@@ -482,12 +642,22 @@ export default function Auth() {
                 <Input
                   label="Password"
                   type="password"
-                  placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
+                  placeholder={
+                    mode === 'register'
+                      ? 'Create a password'
+                      : 'Enter your password'
+                  }
                   value={password}
-                  onChange={(event) => setPassword(event.target.value)}
+                  onChange={(event) =>
+                    setPassword(event.target.value)
+                  }
                   required
                   disabled={submitting}
-                  hint={mode === 'register' ? 'Minimum 10 characters, with at least 3 of: uppercase, lowercase, number, symbol' : undefined}
+                  hint={
+                    mode === 'register'
+                      ? 'Minimum 10 characters, with at least 3 of: uppercase, lowercase, number, symbol'
+                      : undefined
+                  }
                 />
 
                 {mode === 'register' && (
@@ -496,30 +666,57 @@ export default function Auth() {
                     type="password"
                     placeholder="Confirm your password"
                     value={confirm}
-                    onChange={(event) => setConfirm(event.target.value)}
+                    onChange={(event) =>
+                      setConfirm(event.target.value)
+                    }
                     required
                     disabled={submitting}
                   />
                 )}
 
-                <div ref={setCaptchaSlot} className="auth-captcha" />
+                <div
+                  ref={setCaptchaSlot}
+                  className="auth-captcha"
+                />
 
-                <Button 
-                  type="submit" 
-                  loading={submitting} 
+                <Button
+                  type="submit"
+                  loading={submitting}
                   loadingContext="brand"
-                  variant="pill"
+                  variant="primary"
                   className="auth-submit"
                 >
-                  {mode === 'login' ? <><Icon name="right-to-bracket" /> Sign In</> : <><Icon name="user-plus" /> Create Account</>}
+                  {mode === 'login' ? (
+                    <>
+                      <Icon name="right-to-bracket" />
+                      Sign In
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="user-plus" />
+                      Create Account
+                    </>
+                  )}
                 </Button>
               </form>
 
               <div className="auth-switch">
                 {mode === 'login' ? (
-                  <Button variant="ghost" size="sm" onClick={() => switchMode('register')}>Sign Up</Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => switchMode('register')}
+                  >
+                    Sign Up
+                  </Button>
                 ) : (
-                  <Button variant="ghost" size="sm" onClick={() => switchMode('login')}>Sign In</Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => switchMode('login')}
+                  >
+                    Sign In
+                  </Button>
                 )}
               </div>
             </div>
