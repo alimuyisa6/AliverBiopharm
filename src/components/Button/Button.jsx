@@ -54,6 +54,7 @@ const Button = forwardRef(function Button(
       type={type}
       className={classes}
       disabled={loading || disabled}
+      aria-busy={loading || undefined}
       {...props}
     >
       {loading ? (
