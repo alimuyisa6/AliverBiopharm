@@ -1,4 +1,4 @@
-/* styles/semantic.css */
+ /* styles/semantic.css */
 :root {
   --primary: var(--blue-600);
   --primary-hover: var(--blue-700);
@@ -7,9 +7,9 @@
   --secondary: var(--teal-600);
   --secondary-hover: var(--teal-700);
   --secondary-light: var(--teal-50);
-  --accent: var(--violet-600);
-  --accent-hover: var(--violet-700);
-  --accent-light: var(--violet-50);
+  --accent: var(--grey-600);
+  --accent-hover: var(--grey-700);
+  --accent-light: var(--grey-50);
   --warm: var(--amber-600);
   --warm-hover: var(--amber-700);
   --warm-light: var(--amber-50);
@@ -44,7 +44,7 @@
   --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.10), 0 8px 10px -6px rgba(0,0,0,0.04);
   --level-olevel: var(--blue-600);
   --level-alevel: var(--teal-600);
-  --level-pharmacy: var(--violet-600);
+  --level-pharmacy: var(--grey-600);
   --header-footer-bg-solid: var(--amber-50);
   --header-footer-border: var(--amber-200);
 }
@@ -54,15 +54,14 @@ body.dark-mode {
   --header-footer-border: rgba(217, 119, 6, 0.22);
 }
 
-
 body.dark-mode {
   --primary: var(--blue-500);
   --primary-hover: var(--blue-400);
   --primary-light: rgba(59, 130, 246, 0.12);
   --secondary: var(--teal-500);
   --secondary-hover: var(--teal-400);
-  --accent: var(--violet-500);
-  --accent-hover: var(--violet-400);
+  --accent: var(--grey-500);
+  --accent-hover: var(--grey-400);
   --warm: var(--amber-500);
   --warm-hover: var(--amber-400);
   --success: var(--emerald-500);
