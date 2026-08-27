@@ -79,14 +79,17 @@ export default function Hero() {
 
         <div className="hero-scrim" />
 
-        <div className="hero-content">
-          <div className="hero-eyebrow">
+        <div className="hero-content" style={{ paddingTop: 'var(--space-10)' }}>
+          <div className="hero-eyebrow" style={{ fontSize: 'var(--text-sm)' }}>
             Welcome to <span className="hero-eyebrow-accent">AliverBiopharm</span>
           </div>
 
           <h1 className="hero-title">
             {isAuthenticated && levelName ? (
-              <>Master<br />{levelName}</>
+              <>
+                Master
+                <span className="hero-eyebrow-accent" style={{ marginTop: 'var(--space-2)' }}>{levelName}</span>
+              </>
             ) : (
               <>Master Biology<br />and Pharmacy</>
             )}
