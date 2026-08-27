@@ -1,4 +1,5 @@
- :root {
+ /* styles/animation.css */
+:root {
   --ease-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --ease-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --ease-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -52,6 +53,46 @@
 @keyframes resultPop {
   0% { transform: scale(0.5); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+.anim-fade-in {
+  animation: fadeIn var(--ease-smooth) both;
+}
+
+.anim-slide-up {
+  animation: slideUp var(--ease-smooth) both;
+}
+
+.anim-slide-down {
+  animation: slideDown var(--ease-smooth) both;
+}
+
+.anim-scale-in {
+  animation: scaleIn var(--ease-bounce) both;
+}
+
+.anim-pop {
+  animation: resultPop var(--ease-bounce) both;
+}
+
+.anim-fast {
+  animation-duration: 150ms;
+}
+
+.anim-slow {
+  animation-duration: 400ms;
+}
+
+.anim-delay-1 {
+  animation-delay: 80ms;
+}
+
+.anim-delay-2 {
+  animation-delay: 160ms;
+}
+
+.anim-delay-3 {
+  animation-delay: 240ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
