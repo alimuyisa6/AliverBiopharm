@@ -1273,6 +1273,7 @@ export async function switchClass(group_id) {
 
 export async function requestLevelChange(
   track,
+  className,
   reason
 ) {
   return apiCall(
@@ -1280,6 +1281,7 @@ export async function requestLevelChange(
     'request_level_change',
     {
       requested_track: track,
+      requested_class: className,
       reason
     }
   );
@@ -1342,6 +1344,40 @@ export async function adminUpdateProfile(
       user_id,
       track,
       class_name
+    }
+  );
+}
+
+export async function getDevices() {
+  return getRequest(
+    'profile',
+    'devices'
+  );
+}
+
+export async function revokeSession(session_id) {
+  return apiCall(
+    'profile',
+    'revoke_session',
+    {
+      session_id
+    }
+  );
+}
+
+export async function getNotificationSettings() {
+  return getRequest(
+    'profile',
+    'notifications'
+  );
+}
+
+export async function saveNotificationSettings(preferences) {
+  return apiCall(
+    'profile',
+    'save_notifications',
+    {
+      preferences
     }
   );
 }
