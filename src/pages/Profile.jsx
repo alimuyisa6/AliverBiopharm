@@ -2,17 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import { updateProfile, changePassword, requestLevelChange, getProfile, getCurriculumLevels, updateDisplayName } from '../api/client';
-import {
-  getSettingsBundle, updateBio, updatePreferences,
-  getReferralStats, getCertificates,
-  getDevices, revokeDevice,
-  getBillingSummary,
-  getApiKeys, createApiKey, revokeApiKey,
-  getWebhooks, createWebhook, deleteWebhook,
-  getNotificationPreferences, updateNotificationPreference,
-  saveParentGuardian,
-  requestDataExport, requestAccountDeletion
-} from '../api/profileSettingsClient';
+ 
 import PageHeader from '../components/PageHeader/PageHeader';
 import Container from '../components/Container/Container';
 import Input from '../components/Input/Input';
@@ -23,7 +13,7 @@ import Skeleton from '../components/Skeleton/Skeleton';
 import Card from '../components/Card/Card';
 import Icon from '../components/Icon/Icon';
 import { useToast } from '../components/Toast/Toast';
-import '../styles/profile-page.css';
+
 
 const SECTIONS = [
   { id: 'overview', label: 'Profile Overview' },
