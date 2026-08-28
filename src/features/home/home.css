@@ -1,0 +1,193 @@
+/* ==========================================================
+   home.css
+   --------------------------------------------------------
+   Tokens below use var(--token, fallback) so this works even
+   before semantic.css defines them, and adopts automatically
+   once it does. Reconcile these names with your actual
+   semantic.css tokens (--header-footer-bg etc.) rather than
+   keeping both — these are named to slot into that system:
+
+     --color-primary        → your existing --blue equivalent
+     --color-primary-dark
+     --color-success        → emerald / "on track" state
+     --color-warning        → amber / "needs attention" state
+     --color-ink / --color-muted / --color-line / --color-soft
+
+   Only ONE new pairing is genuinely new vs your CSS today:
+   --color-primary-soft / --color-success-soft, used as tinted
+   backgrounds behind badges and locked states.
+   ========================================================== */
+
+.section-head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.text-link {
+  color: var(--color-primary, #2563eb);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.progress-track {
+  height: 5px;
+  background: var(--color-line, #e9edf1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+.progress-track.dark { background: #30465e; }
+.progress-fill { display: block; height: 100%; }
+.progress-blue    { background: var(--color-primary, #2563eb); }
+.progress-emerald { background: var(--color-success, #059669); }
+.progress-amber   { background: var(--color-warning, #d97706); }
+
+/* ---------- Level scope bar ---------- */
+.level-scope-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  margin: 24px auto 0;
+  border: 1px solid var(--color-line, #dfe4ea);
+  background: #fff;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--color-ink, #172033);
+  cursor: pointer;
+}
+.level-scope-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-success, #059669); }
+.level-scope-sep { color: var(--color-line, #dfe4ea); }
+
+/* ---------- Snapshot stats strip ---------- */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--color-line, #dfe4ea);
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.stats-strip-item { padding: 22px; border-right: 1px solid var(--color-line, #dfe4ea); }
+.stats-strip-item:last-child { border-right: 0; }
+.stats-strip-value { font-family: var(--font-display, 'Fraunces', serif); font-size: 30px; font-weight: 600; }
+.stats-strip-label { margin-top: 5px; font-size: 12px; color: var(--color-muted, #667085); }
+.stats-strip-meta { margin-top: 12px; font-size: 11px; font-family: var(--font-mono, 'IBM Plex Mono', monospace); }
+.stats-strip-meta.positive { color: var(--color-success, #059669); }
+
+@media (max-width: 900px) {
+  .stats-strip { grid-template-columns: 1fr 1fr; }
+  .stats-strip-item:nth-child(2) { border-right: 0; }
+  .stats-strip-item:nth-child(-n+2) { border-bottom: 1px solid var(--color-line, #dfe4ea); }
+}
+
+/* ---------- Continue learning + content-type cards ----------
+   Reuses your existing .card / .card-image / .card-image-placeholder
+   / .card-body / .card-title / .card-text / .card-footer classes —
+   only adding what those didn't already need: a slot with a fixed
+   aspect ratio (content cards had no image before), a tag row, and
+   a two-sided footer for progress cards. */
+.card-image-slot { aspect-ratio: 16 / 9; overflow: hidden; }
+.card-image-slot .card-image,
+.card-image-slot .card-image-placeholder { width: 100%; height: 100%; }
+
+.continue-card .card-tag {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--color-primary, #2563eb);
+  margin-bottom: 8px;
+}
+.card-footer.between { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--color-muted, #667085); }
+
+/* ---------- Curriculum grid ---------- */
+.curriculum-section { background: var(--color-soft, #f6f8fa); border-radius: 14px; padding: 44px; }
+.curriculum-grid { gap: 11px; }
+.topic-tile {
+  background: #fff;
+  border: 1px solid var(--color-line, #dfe4ea);
+  border-radius: 10px;
+  padding: 14px;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  position: relative;
+}
+.topic-tile-image { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; margin-bottom: 10px; }
+.topic-tile-icon {
+  width: 100%; aspect-ratio: 16/9; border-radius: 6px; margin-bottom: 10px;
+  background: var(--color-primary-soft, #eaf1ff); display: grid; place-items: center; color: var(--color-primary, #2563eb);
+}
+.topic-tile-top { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; }
+.topic-tile-percent { font-family: var(--font-mono, 'IBM Plex Mono', monospace); font-size: 11px; color: var(--color-primary, #2563eb); }
+.topic-tile-flag {
+  position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 600;
+  background: var(--color-warning-soft, #fdf3e4); color: var(--color-warning, #d97706);
+  padding: 2px 7px; border-radius: 999px;
+}
+.topic-tile.locked { opacity: .6; }
+.topic-tile.locked .topic-tile-percent { color: var(--color-muted, #667085); }
+
+/* ---------- Daily recall ---------- */
+.daily-recall-panel {
+  background: var(--color-ink, #12243a);
+  color: #fff;
+  border-radius: 14px;
+  padding: 44px;
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 30px;
+  align-items: center;
+}
+.recall-eyebrow { color: #7dd3fc; }
+.recall-question {
+  font-family: var(--font-display, 'Fraunces', serif);
+  font-size: clamp(23px, 2.6vw, 34px);
+  line-height: 1.15;
+  margin: 14px 0 22px;
+}
+.recall-meta { font-family: var(--font-mono, 'IBM Plex Mono', monospace); font-size: 11px; color: #aab8c8; }
+.recall-actions { display: flex; gap: 10px; margin-top: 22px; }
+.recall-score-card { border: 1px solid #314860; background: #172d46; border-radius: 8px; padding: 24px; }
+.recall-score-card strong { display: block; font-family: var(--font-display, 'Fraunces', serif); font-size: 36px; margin: 5px 0; }
+.recall-score-card span { color: #b6c4d2; font-size: 12px; }
+
+@media (max-width: 900px) {
+  .daily-recall-panel { grid-template-columns: 1fr; padding: 30px; }
+}
+
+/* ---------- Past papers ---------- */
+.paper-list { border-top: 1px solid var(--color-line, #dfe4ea); }
+.paper-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 90px 100px auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-line, #dfe4ea);
+  font-size: 13px;
+}
+.paper-badge {
+  width: 40px; height: 40px; border-radius: 8px;
+  background: var(--color-primary-soft, #eaf1ff); color: var(--color-primary, #2563eb);
+  display: grid; place-items: center;
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace); font-size: 11px; font-weight: 600;
+}
+.paper-info strong { font-weight: 600; }
+.paper-info small { display: block; color: var(--color-muted, #667085); margin-top: 3px; }
+.paper-year, .paper-type { color: var(--color-muted, #667085); font-size: 12px; }
+
+@media (max-width: 600px) {
+  .paper-row { grid-template-columns: 36px 1fr auto; }
+  .paper-year, .paper-type { display: none; }
+}
