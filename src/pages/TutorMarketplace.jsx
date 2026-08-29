@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import { listTutorsCached } from '../api/cachedClient';
 import { sendContactRequest } from '../api/client';
-import TutorCard from '../components/tutor-marketplace/TutorCard';
+import TutorCard from '../features/tutor-marketplace/TutorCard';
 import Spinner from '../components/Spinner/Spinner';
 import EmptyState from '../components/EmptyState/EmptyState';
 import { useToast } from '../components/Toast/Toast';
