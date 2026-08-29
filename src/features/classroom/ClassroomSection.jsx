@@ -1,4 +1,5 @@
- import { useState, useEffect } from 'react';
+ // pages/ClassroomSection.jsx
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '../../contexts/LayoutContext';
 import { getLiveClassroomFeed } from '../../api/cachedClient';
@@ -7,6 +8,7 @@ import EmptyState from '../../components/EmptyState/EmptyState';
 import Button from '../../components/Button/Button';
 import Icon from '../../components/Icon/Icon';
 import Spinner from '../../components/Spinner/Spinner';
+import './ClassroomSection.css';
 
 const STATUS_LABEL = {
   live: 'Live Now',
@@ -46,7 +48,6 @@ export function ClassroomSection({ user }) {
   function getUiImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
     const component = uiComponents.find((item) => item.component_key === key);
-
     return component?.properties?.image_url || null;
   }
 
