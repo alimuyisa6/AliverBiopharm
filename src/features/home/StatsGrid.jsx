@@ -10,7 +10,35 @@ const ITEMS = [
 ];
 
 function AnimatedNumber({ target, label, icon }) {
-  // ... all existing logic unchanged ...
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          const duration = 2000;
+          const startTime = performance.now();
+          const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.floor(eased * target));
+            if (progress < 1) requestAnimationFrame(animate);
+          };
+          requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target]);
+
+  const format = (num) => (num >= 1000 ? (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k+' : num);
+
   return (
     <div className="stat-item" ref={ref}>
       <Icon name={icon} className="stat-icon" style={{ color: 'var(--primary)' }} />
