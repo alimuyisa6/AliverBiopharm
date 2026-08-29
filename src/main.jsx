@@ -5,12 +5,9 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './styles/global.css';
 import './styles/components.css';
+import './styles/class.css';
 
-// Import classroom styles from their actual locations
-import './pages/Classroom.css';
-import './pages/ClassroomRoom.css';
-import './features/classroom/ClassroomOnboarding.css';
-import './features/classroom/ClassroomSection.css';
+  
 
 function showFatalError(title, message, stack) {
   const root = document.getElementById('root') || document.body;
