@@ -13,7 +13,6 @@ import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
 import EmptyState from '../components/EmptyState/EmptyState';
-import './Classroom.css';
 
 const STATUS_ICONS = {
   live: 'circle',
