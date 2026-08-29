@@ -1,7 +1,7 @@
  // pages/ClassroomOnboarding.jsx
 import React, { useState, useEffect } from 'react';
 import { getClassroomLevels, getClassroomTopics } from '../../api/cachedClient';
-import './ClassroomOnboarding.css';
+
 
 const CARD_COLOR_CLASS = [
   'level-card-blue',
