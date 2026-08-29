@@ -48,7 +48,7 @@ function AnimatedNumber({ target, label, icon }) {
   );
 }
 
-export default function StatsGrid({ stats = {} }) {
+export function StatsGrid({ stats = {} }) {
   return (
     <section className="section">
       <div className="section-head">
