@@ -1,57 +1,34 @@
- /* pages/TutorMarketplace.jsx */
+ /* components/tutor-marketplace/TutorMarketplaceSection.jsx */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useLevelFilter } from '../hooks/useLevelFilter';
-import { listTutorsCached } from '../api/cachedClient';
-import { sendContactRequest } from '../api/client';
-import TutorCard from '../features/tutor-marketplace/TutorCard';
-import Icon from '../components/Icon/Icon';
-import Spinner from '../components/Spinner/Spinner';
-import Button from '../components/Button/Button';
-import EmptyState from '../components/EmptyState/EmptyState';
-import { useToast } from '../components/Toast/Toast';
-import { useLayout } from '../contexts/LayoutContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useLayout } from '../../contexts/LayoutContext';
+import { listTutorsCached } from '../../api/cachedClient';
+import { sendContactRequest } from '../../api/client';
+import EmptyState from '../../components/EmptyState/EmptyState';
+import Spinner from '../../components/Spinner/Spinner';
+import { useToast } from '../../components/Toast/Toast';
 
-export default function TutorMarketplace() {
+export default function TutorMarketplaceSection() {
   const { user } = useAuth();
   const { bootstrap } = useLayout();
   const addToast = useToast();
-  const { level, showAll, class_name } = useLevelFilter();
-
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    setPage(1);
-  }, [level, showAll, class_name, search]);
+    let cancelled = false;
+    listTutorsCached({ limit: 6 })
+      .then((data) => { if (!cancelled) setTutors(data); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
-  useEffect(() => {
-    loadTutors();
-  }, [page, level, showAll, class_name, search]);
-
-  async function loadTutors() {
-    setLoading(true);
-
-    try {
-      const params = { limit: 12, offset: (page - 1) * 12 };
-
-      if (search) params.search = search;
-
-      const data = await listTutorsCached(params);
-
-      setTutors(data);
-      setTotal(data.length);
-      setTotalPages(Math.ceil(data.length / 12) || 1);
-    } catch {
-      addToast('Failed to load tutors', 'error');
-    } finally {
-      setLoading(false);
-    }
+  function getUiImage(key) {
+    const uiComponents = bootstrap?.ui_components || [];
+    const component = uiComponents.find((item) => item.component_key === key);
+    return component?.properties?.image_url || null;
   }
 
   const handleContact = async (tutor) => {
@@ -59,7 +36,6 @@ export default function TutorMarketplace() {
       addToast('Please sign in to contact a tutor', 'warning');
       return;
     }
-
     try {
       await sendContactRequest(tutor.user_id, '');
       addToast('Request sent!', 'success');
@@ -68,85 +44,57 @@ export default function TutorMarketplace() {
     }
   };
 
-  const levelName = showAll ? null : level;
-  const classLabel = class_name || '';
+  if (loading) {
+    return (
+      <section className="section">
+        <div className="tutor-section-loading">
+          <Spinner size="lg" />
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <div className="tutor-marketplace-page">
-      <div className="section tutor-page-section">
-        <span className="sec-label">Tutor Marketplace</span>
-        <h1 className="section-title tutor-page-title">
-          Find a Tutor<br />{levelName ? `– ${levelName}` : ''}
-        </h1>
-
-        {classLabel && <p className="tutor-class-label">{classLabel}</p>}
-
-        <nav className="breadcrumb">
-          <Link to="/"><Icon name="home" className="breadcrumb-icon" /> Home</Link>
-          <Icon name="chevron-right" className="breadcrumb-sep" />
-          <span>Tutors</span>
-        </nav>
-
-        <div className="tutor-controls-row">
-          <div className="tutor-search-wrap">
-            <input
-              type="text"
-              placeholder="Search by name, subject..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              className="input"
-            />
-            <Icon name="magnifying-glass" className="tutor-search-icon" />
-          </div>
-
-          <p className="tutor-results-count">
-            {loading ? 'Loading...' : `${total} tutor${total !== 1 ? 's' : ''} found`}
-          </p>
+    <section className="section">
+      <div className="section-head">
+        <div className="section-head-left">
+          <span className="eyebrow">Tutor Marketplace</span>
+          <h2>Learn from someone who gets it</h2>
         </div>
-
-        {loading ? (
-          <div className="tutor-loading-wrap">
-            <Spinner size="lg" />
-          </div>
-        ) : tutors.length === 0 ? (
-          <EmptyState
-            title="No Tutors Found"
-            description="No tutors match your search criteria."
-            action={<Button variant="secondary" onClick={() => setSearch('')}>Clear Search</Button>}
-          />
-        ) : (
-          <div className="grid grid-cols-3">
+      </div>
+      {tutors.length > 0 ? (
+        <>
+          <div className="tutor-grid-flat">
             {tutors.map((tutor) => (
-              <TutorCard key={tutor.id} tutor={tutor} user={user} onContact={handleContact} />
+              <div key={tutor.id} className="tutor-card-flat">
+                <div className="tutor-avatar">
+                  {tutor.avatar_url ? <img src={tutor.avatar_url} alt={tutor.display_name} /> : <span>{tutor.display_name?.[0]}</span>}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div className="tutor-name">{tutor.display_name}</div>
+                  <div className="tutor-headline">{tutor.headline || 'Qualified Tutor'}</div>
+                </div>
+                <Link to={`/tutor/${tutor.id}`} className="btn btn-secondary btn-sm">View</Link>
+              </div>
             ))}
           </div>
-        )}
-
-        {totalPages > 1 && (
-          <div className="tutor-pagination">
-            <Button variant="secondary" size="sm" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1}>
-              <Icon name="chevron-left" />
-            </Button>
-
-            {Array.from({ length: totalPages }, (_, index) => index + 1)
-              .filter((item) => item === 1 || item === totalPages || Math.abs(item - page) <= 2)
-              .map((item) => (
-                <Button
-                  key={item}
-                  variant={item === page ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setPage(item)}
-                >
-                  {item}
-                </Button>
-              ))}
-
-            <Button variant="secondary" size="sm" onClick={() => setPage((current) => Math.min(totalPages, current + 1))} disabled={page === totalPages}>
-              <Icon name="chevron-right" />
-            </Button>
+          <div className="tutor-section-footer">
+            <Link to="/tutors" className="btn btn-primary">Browse All Tutors</Link>
           </div>
-        )}
-      </div>
-    </div>
+        </>
+      ) : (
+        <EmptyState
+          image={getUiImage('empty_state_tutors')}
+          title="Be the first to teach here"
+          description="Our marketplace is just getting started — apply as a tutor and claim your spot before anyone else."
+          action={
+            <div className="tutor-empty-actions">
+              <Link to="/tutors" className="btn btn-secondary">Browse anyway</Link>
+              <Link to="/tutor/apply" className="btn btn-primary">Apply as a Tutor</Link>
+            </div>
+          }
+        />
+      )}
+    </section>
   );
 }
