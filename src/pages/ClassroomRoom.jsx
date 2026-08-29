@@ -17,7 +17,7 @@ import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
 import EmptyState from '../components/EmptyState/EmptyState';
 import { useLayout } from '../contexts/LayoutContext';
-import './ClassroomRoom.css';
+
 
 export default function ClassroomRoom() {
   const { roomId } = useParams();
