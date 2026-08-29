@@ -42,12 +42,14 @@ function ContentTypeCards({ navigate, user, sections }) {
           <h2>{sections?.section_headings?.content_types_title || 'Everything You Need to Succeed'}</h2>
         </div>
       </div>
-      <div className="row-list">
+      {/* small tinted rows, not lifted cards — background color signals
+          the content type at a glance, matching the mock's row rhythm */}
+      <div className="row-list row-list-tight">
         {CONTENT_TYPES.map((type) => {
           const imageUrl = getImage(type.key);
           return (
-            <div key={type.key} className="content-type-row">
-              <div className="content-type-thumb">
+            <div key={type.key} className={`content-type-row content-type-row-${type.color}`}>
+              <div className={`content-type-thumb content-type-thumb-${type.color}`}>
                 {imageUrl ? <img src={imageUrl} alt={type.label} loading="lazy" /> : <Icon name={type.icon === 'dna' ? 'microscope' : type.icon} />}
               </div>
               <div className="content-type-info">
@@ -163,24 +165,26 @@ function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccess
         </div>
         <Link to="/curriculum" className="text-link">Full curriculum →</Link>
       </div>
+      {/* curriculum keeps the lifted card treatment — this is the section
+          people scan visually to pick a topic, so it earns the elevation */}
       <div className="grid grid-cols-4">
         {units.map((unit) => {
           const locked = unit.is_premium && !canAccessPremium;
           return (
-            <Link to={locked ? '/upgrade' : `/units/${unit.id}`} key={unit.id} className="stat-item">
+            <Link to={locked ? '/upgrade' : `/units/${unit.id}`} key={unit.id} className="card card-lifted topic-card">
               {unit.topic_image_url ? (
-                <img src={unit.topic_image_url} alt="" style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 5 }} />
+                <img src={unit.topic_image_url} alt="" className="topic-card-image" />
               ) : (
-                <div className="row-thumb" style={{ width: '100%', height: 120 }}><Icon name={unit.icon || 'flask'} /></div>
+                <div className="row-thumb topic-card-image-placeholder"><Icon name={unit.icon || 'flask'} /></div>
               )}
-              <div style={{ marginTop: 8 }}>
+              <div className="topic-card-row">
                 <strong>{unit.name}</strong>
-                <span style={{ marginLeft: 8 }}>{locked ? <Icon name="lock" /> : `${unit.progress_percent || 0}%`}</span>
+                <span>{locked ? <Icon name="lock" /> : `${unit.progress_percent || 0}%`}</span>
               </div>
               <div className="progress-track" style={{ marginTop: 8 }}>
                 <span className={`progress-fill progress-${unit.progress_color || 'blue'}`} style={{ width: `${unit.progress_percent || 0}%` }} />
               </div>
-              {unit.is_hard_topic && <span className="tag tag-amber" style={{ marginTop: 6 }}>Hard topic</span>}
+              {unit.is_hard_topic && <span className="tag tag-amber" style={{ marginTop: 8 }}>Hard topic</span>}
             </Link>
           );
         })}
@@ -201,7 +205,8 @@ function DailyRecallCard({ recall, onReveal, onStart }) {
           <p className="section-subtitle">{meta}</p>
         </div>
       </div>
-      <div className="row">
+      {/* recall panel is lifted too — it's a single focal action, not a list */}
+      <div className="card card-lifted row">
         <div className="row-body">
           {score && (
             <div>
