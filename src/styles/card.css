@@ -1,7 +1,6 @@
- /* styles/card.css */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+ .card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 16px;
   box-shadow: none;
@@ -10,6 +9,18 @@
 .card:hover {
   border-color: var(--border-strong);
 }
+/* Use sparingly — for the handful of sections where content needs to
+   stand off the page (curriculum tiles, the daily recall panel).
+   Everything else should stay flat (.row / .content-type-row) so the
+   lift actually means something when it's used. */
+.card-lifted {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+.card-lifted:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-default);
+}
 .card-body {
   padding: 0;
 }
@@ -17,11 +28,11 @@
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 4px;
-  color: var(--text);
+  color: var(--text-main);
 }
 .card-text {
   font-size: 12.5px;
-  color: var(--text-secondary);
+  color: var(--text-dim);
   line-height: 1.5;
 }
 .card-footer {
@@ -41,13 +52,13 @@
   align-items: center;
   gap: 16px;
   padding: 16px 18px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-default);
   border-top: none;
-  background: var(--surface);
+  background: var(--bg-card);
   min-width: 0;
 }
 .row-list .row:first-child {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-default);
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
 }
@@ -56,14 +67,14 @@
   border-bottom-right-radius: 6px;
 }
 .row:hover {
-  background: var(--surface-alt);
+  background: var(--bg-card-hover);
 }
 .row-thumb {
   width: 44px;
   height: 44px;
   border-radius: 5px;
   flex-shrink: 0;
-  background: var(--surface-sunken);
+  background: var(--bg-card-tinted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,14 +111,14 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
+  background: var(--border-default);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   overflow: hidden;
   margin-bottom: 32px;
 }
 .dash-cell {
-  background: var(--surface);
+  background: var(--bg-card);
   padding: 18px 20px;
   min-width: 0;
 }
@@ -122,15 +133,15 @@
   font-weight: 500;
 }
 .dc-value.green {
-  color: var(--green-600);
+  color: var(--emerald-600);
 }
 .dc-value.amber {
   color: var(--amber-600);
 }
 /* Generic flat stat card / item */
 .stat-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 16px;
   text-align: center;
@@ -166,7 +177,7 @@
 }
 .section-head-left p {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--text-dim);
 }
 .eyebrow {
   font-family: 'IBM Plex Mono', monospace;
@@ -201,14 +212,14 @@
 .tag-blue { background: var(--blue-100); color: var(--blue-700); }
 .tag-emerald { background: var(--emerald-100); color: var(--emerald-700); }
 .tag-amber { background: var(--amber-100); color: var(--amber-700); }
-.tag-green { background: var(--green-100); color: var(--green-700); }
-.tag-grey { background: var(--surface-sunken); color: var(--text-secondary); }
+.tag-green { background: var(--emerald-100); color: var(--emerald-700); }
+.tag-grey { background: var(--bg-card-tinted); color: var(--text-dim); }
 .tag-red { background: var(--red-100); color: var(--red-700); }
 /* Progress */
 .progress-track {
   width: 100%;
   height: 4px;
-  background: var(--surface-sunken);
+  background: var(--bg-card-tinted);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -219,3 +230,9 @@
 }
 .progress-fill.emerald { background: var(--emerald-600); }
 .progress-fill.amber { background: var(--amber-600); }
+
+/* Curriculum topic tiles (lifted cards) */
+.topic-card { display: block; text-decoration: none; color: inherit; }
+.topic-card-image { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 5px; margin-bottom: 10px; }
+.topic-card-image-placeholder { width: 100%; height: auto; aspect-ratio: 16/9; }
+.topic-card-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text-main); }
