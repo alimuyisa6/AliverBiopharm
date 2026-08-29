@@ -1,4 +1,4 @@
-/* pages/Classroom.jsx */
+ // pages/Classroom.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +13,7 @@ import Icon from '../components/Icon/Icon';
 import Spinner from '../components/Spinner/Spinner';
 import Button from '../components/Button/Button';
 import EmptyState from '../components/EmptyState/EmptyState';
+import './Classroom.css';
 
 const STATUS_ICONS = {
   live: 'circle',
@@ -42,14 +43,12 @@ export default function Classroom() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeUnitId, setActiveUnitId] = useState(null);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
   useEffect(() => {
     if (!groups?.length || !user) return;
-
     const groupId = user?.profile?.active_group_id || groups[0]?.id;
-
     if (!groupId) return;
-
     getUnits({ group_id: groupId })
       .then((units) => {
         if (units?.length) setActiveUnitId(units[0].id);
@@ -59,17 +58,14 @@ export default function Classroom() {
 
   useEffect(() => {
     if (!isReady || !access.canAccess || access.isPending || !activeUnitId) return;
-
     fetchRooms();
   }, [isReady, access.canAccess, access.isPending, activeUnitId]);
 
   async function fetchRooms() {
     setLoading(true);
     setError(null);
-
     try {
       const data = await listClassrooms(activeUnitId, null);
-
       setRooms(data || []);
     } catch {
       setError('Failed to load classrooms');
@@ -81,7 +77,6 @@ export default function Classroom() {
   function getEmptyStateImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
     const component = uiComponents.find((item) => item.component_key === `empty_state_${key}`);
-
     return component?.properties?.image_url || null;
   }
 
@@ -122,6 +117,21 @@ export default function Classroom() {
           </div>
         )}
 
+        <div className="classroom-view-toggle">
+          <button
+            className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+            onClick={() => setViewMode('grid')}
+          >
+            <Icon name="grid" /> Grid
+          </button>
+          <button
+            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => setViewMode('list')}
+          >
+            <Icon name="list" /> List
+          </button>
+        </div>
+
         {error && (
           <div className="alert alert-error classroom-error-alert">
             <Icon name="exclamation-triangle" /> {error}
@@ -142,11 +152,10 @@ export default function Classroom() {
           />
         )}
 
-        {!loading && !error && rooms.length > 0 && (
+        {!loading && !error && rooms.length > 0 && viewMode === 'grid' && (
           <div className="grid grid-cols-3">
             {rooms.map((room) => {
               const statusKey = STATUS_LABELS[room.status] ? room.status : 'offline';
-
               return (
                 <div key={room.id} className={`card classroom-room-card status-${statusKey}`}>
                   <div className="card-image-placeholder">
@@ -156,29 +165,24 @@ export default function Classroom() {
                       <Icon name="users" className="classroom-room-status-icon" />
                     )}
                   </div>
-
                   <div className="classroom-room-status-bar">
                     <Icon name={STATUS_ICONS[room.status] || 'circle'} />
                     <span>{STATUS_LABELS[room.status] || room.status}</span>
                   </div>
-
                   <div className="card-body">
                     <h3 className="card-title">{room.title}</h3>
                     <p className="card-text">{room.topic_name} · {room.class_name}</p>
-
                     {room.tutor_name && (
                       <p className="card-text classroom-room-meta">
                         <Icon name="user" /> {room.tutor_name}
                       </p>
                     )}
-
                     {room.participant_count > 0 && (
                       <p className="card-text classroom-room-meta">
                         <Icon name="users" /> {room.participant_count} participants
                       </p>
                     )}
                   </div>
-
                   <div className="card-footer">
                     {room.status === 'live' || room.status === 'open_floor' ? (
                       <Button size="sm" onClick={() => navigate(`/classroom/${room.id}`)}>
@@ -200,7 +204,65 @@ export default function Classroom() {
             })}
           </div>
         )}
+
+        {!loading && !error && rooms.length > 0 && viewMode === 'list' && (
+          <div className="classroom-list-table-wrap">
+            <table className="classroom-list-table">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Classroom / Topic</th>
+                  <th>Class</th>
+                  <th>Tutor</th>
+                  <th>Participants</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rooms.map((room) => {
+                  const statusKey = STATUS_LABELS[room.status] ? room.status : 'offline';
+                  return (
+                    <tr key={room.id}>
+                      <td data-label="Status">
+                        <span className={`status-badge status-badge-${statusKey}`}>
+                          <span className="dot"></span> {STATUS_LABELS[room.status] || room.status}
+                        </span>
+                      </td>
+                      <td data-label="Classroom">
+                        <div className="room-title">{room.title}</div>
+                        <div className="room-topic">{room.topic_name}</div>
+                      </td>
+                      <td data-label="Class">{room.class_name}</td>
+                      <td data-label="Tutor">
+                        <div className="room-meta"><Icon name="user" /> {room.tutor_name}</div>
+                      </td>
+                      <td data-label="Participants">
+                        <div className="room-meta"><Icon name="users" /> {room.participant_count}</div>
+                      </td>
+                      <td data-label="Action">
+                        {room.status === 'live' || room.status === 'open_floor' ? (
+                          <Button size="xs" onClick={() => navigate(`/classroom/${room.id}`)}>
+                            <Icon name="door-open" /> Join
+                          </Button>
+                        ) : room.status === 'upcoming' ? (
+                          <Button size="xs" variant="secondary" disabled>
+                            <Icon name="clock" />
+                            {new Date(room.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Button>
+                        ) : (
+                          <Button size="xs" variant="ghost" disabled>
+                            <Icon name="circle" /> {STATUS_LABELS[room.status] || 'Offline'}
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
-} 
+}
