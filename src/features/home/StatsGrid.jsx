@@ -1,6 +1,6 @@
  /* components/StatsGrid/StatsGrid.jsx */
 import { useState, useEffect, useRef } from 'react';
-import Icon from '../Icon/Icon';
+import Icon from '../../components/Icon/Icon';
 
 const ITEMS = [
   { key: 'resources_count', label: 'Resources', icon: 'book-open' },
