@@ -1,4 +1,4 @@
-/* features/home/NewsletterForm.jsx */
+ /* features/home/NewsletterForm.jsx */
 import Button from '../../components/Button/Button';
 import Input from '../../components/Input/Input';
 
@@ -28,4 +28,4 @@ export function NewsletterForm({ email, status, onChange, onSubmit }) {
       )}
     </section>
   );
-} 
+}
