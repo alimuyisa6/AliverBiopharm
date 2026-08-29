@@ -1,0 +1,433 @@
+/* pages/ClassroomOnboarding.css */
+
+:root {
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+
+  --emerald-50: #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+
+  --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-300: #5eead4;
+  --teal-400: #2dd4bf;
+  --teal-500: #14b8a6;
+  --teal-600: #0d9488;
+  --teal-700: #0f766e;
+
+  --violet-50: #f5f3ff;
+  --violet-100: #ede9fe;
+  --violet-200: #ddd6fe;
+  --violet-300: #c4b5fd;
+  --violet-400: #a78bfa;
+  --violet-500: #8b5cf6;
+  --violet-600: #7c3aed;
+  --violet-700: #6d28d9;
+
+  --grey-50: #f8fafc;
+  --grey-100: #f1f5f9;
+  --grey-200: #e2e8f0;
+  --grey-300: #cbd5e1;
+  --grey-400: #94a3b8;
+  --grey-500: #64748b;
+  --grey-600: #475569;
+  --grey-700: #334155;
+  --grey-800: #1e293b;
+  --grey-900: #0f172a;
+
+  --bg-card: #ffffff;
+  --border-light: var(--grey-200);
+  --text-primary: var(--grey-900);
+  --text-secondary: var(--grey-600);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-full: 9999px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --font: 'Inter', -apple-system, system-ui, sans-serif;
+}
+
+.classroom-onboarding {
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: var(--font);
+}
+
+/* Steps */
+.onboarding-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  gap: 0;
+}
+
+.onboarding-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.4;
+  transition: var(--transition);
+}
+
+.onboarding-step.active {
+  opacity: 1;
+}
+
+.onboarding-step .step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--grey-200);
+  color: var(--grey-600);
+  font-weight: 700;
+  font-size: 14px;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.onboarding-step.active .step-number {
+  background: var(--amber-500);
+  color: #fff;
+}
+
+.onboarding-step .step-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.onboarding-step.active .step-label {
+  color: var(--text-primary);
+}
+
+.step-line {
+  width: 40px;
+  height: 2px;
+  background: var(--grey-200);
+  margin: 0 8px;
+  flex-shrink: 0;
+}
+
+/* Body */
+.onboarding-body {
+  background: var(--grey-50);
+  border-radius: var(--radius);
+  padding: 24px;
+  border: 1px solid var(--border-light);
+  margin-bottom: 20px;
+}
+
+.onboarding-body h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.onboarding-back {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+
+.onboarding-back:hover {
+  color: var(--text-primary);
+}
+
+/* Grid */
+.onboarding-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+/* Cards */
+.onboarding-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 120px;
+  font-family: var(--font);
+}
+
+.onboarding-card:hover {
+  border-color: var(--grey-300);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.onboarding-card.selected {
+  border-color: var(--amber-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.onboarding-card .onboarding-card-media {
+  width: 100%;
+  height: 80px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--grey-100);
+}
+
+.onboarding-card .onboarding-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.onboarding-card .onboarding-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.onboarding-card .onboarding-card-body i {
+  font-size: 24px;
+  color: var(--grey-500);
+}
+
+.onboarding-card .onboarding-card-body span {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* Card color variants */
+.level-card-blue .onboarding-card-body i {
+  color: var(--blue-500);
+}
+.level-card-blue.selected {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.level-card-teal .onboarding-card-body i {
+  color: var(--teal-500);
+}
+.level-card-teal.selected {
+  border-color: var(--teal-500);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+}
+
+.level-card-violet .onboarding-card-body i {
+  color: var(--violet-500);
+}
+.level-card-violet.selected {
+  border-color: var(--violet-500);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.level-card-amber .onboarding-card-body i {
+  color: var(--amber-500);
+}
+.level-card-amber.selected {
+  border-color: var(--amber-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.level-card-emerald .onboarding-card-body i {
+  color: var(--emerald-500);
+}
+.level-card-emerald.selected {
+  border-color: var(--emerald-500);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* Topic list */
+.onboarding-topic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.onboarding-topic-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font);
+  width: 100%;
+}
+
+.onboarding-topic-card:hover {
+  border-color: var(--grey-300);
+  background: var(--grey-50);
+}
+
+.onboarding-topic-card.selected {
+  border-color: var(--amber-500);
+  background: var(--amber-50);
+}
+
+.onboarding-topic-card .topic-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.onboarding-topic-card .topic-icon-hard {
+  color: #ef4444;
+  font-size: 18px;
+}
+
+.onboarding-topic-card .topic-icon-normal {
+  color: var(--blue-500);
+  font-size: 18px;
+}
+
+.onboarding-topic-card .topic-name {
+  font-weight: 500;
+  font-size: 15px;
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.onboarding-topic-card .topic-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 12px;
+  border-radius: var(--radius-full);
+  background: var(--grey-200);
+  color: var(--grey-600);
+}
+
+.onboarding-topic-card .topic-badge.hard {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* Footer */
+.onboarding-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.onboarding-footer .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+  background: var(--amber-500);
+  color: #fff;
+}
+
+.onboarding-footer .btn-primary:hover {
+  background: var(--amber-600);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+}
+
+/* Loading */
+.classroom-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  font-size: 24px;
+  color: var(--grey-400);
+}
+
+.classroom-loading i {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.onboarding-empty {
+  padding: 30px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .onboarding-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .onboarding-body h3 {
+    font-size: 18px;
+  }
+
+  .onboarding-steps {
+    gap: 4px;
+  }
+
+  .onboarding-step .step-label {
+    font-size: 12px;
+  }
+
+  .step-line {
+    width: 20px;
+  }
+}
