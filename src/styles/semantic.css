@@ -1,5 +1,4 @@
- /* styles/semantic.css */
-:root {
+ :root {
   --primary: var(--blue-600);
   --primary-hover: var(--blue-700);
   --primary-light: var(--blue-50);
@@ -28,7 +27,7 @@
   --bg-overlay: rgba(15, 23, 42, 0.55);
   --bg-input: #FFFFFF;
   --bg-input-disabled: var(--slate-100);
-  --bg-hero: #EEF2FF;
+  --bg-hero: var(--slate-50);
   --text-main: var(--slate-900);
   --text-dim: var(--slate-600);
   --text-muted: var(--slate-400);
@@ -45,13 +44,28 @@
   --level-olevel: var(--blue-600);
   --level-alevel: var(--teal-600);
   --level-pharmacy: var(--grey-600);
-  --header-footer-bg-solid: var(--amber-50);
-  --header-footer-border: var(--amber-200);
+
+  /* header/footer — was amber-50/amber-200, which is the yellow
+     you're seeing on the header/footer band. Header/footer now
+     read as a clean white-on-line pairing, matching the mockup's
+     cream/ink system instead of the old warm-tint identity. */
+  --header-footer-bg-solid: #FFFFFF;
+  --header-footer-border: var(--slate-200);
+
+  /* section-tint was also amber-100 — this is the second amber
+     source (used by HowItWorksSection via .section-tint). Now a
+     neutral soft grey matching the mockup's --soft background. */
+  --section-tint-bg: var(--slate-100);
+}
+
+.section-tint {
+  background: var(--section-tint-bg);
 }
 
 body.dark-mode {
-  --header-footer-bg-solid: rgba(217, 119, 6, 0.10);
-  --header-footer-border: rgba(217, 119, 6, 0.22);
+  --header-footer-bg-solid: var(--slate-800);
+  --header-footer-border: var(--slate-700);
+  --section-tint-bg: var(--slate-800);
 }
 
 body.dark-mode {
