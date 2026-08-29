@@ -1,5 +1,4 @@
- import { Link } from 'react-router-dom';
-
+ /* features/home/WhyChooseSection.jsx */
 const REASONS = [
   { number: '1', title: 'Syllabus-Aligned Content', text: 'Every note and quiz matches your official curriculum, not generic material.', color: 'blue' },
   { number: '2', title: 'Built to Stick', text: 'Flashcards and spaced repetition designed for retention, not just re-reading.', color: 'amber' },
@@ -9,25 +8,19 @@ const REASONS = [
 
 export function WhyChooseSection() {
   return (
-    <section className="section reveal">
-      <span className="sec-label">Why AliverBiopharm</span>
-      <h2 className="section-title">
-        Not Just Another<br />
-        <span className="title-accent">Study Platform</span><br />
-        Built With Purpose
-      </h2>
-      <p className="section-subtitle">
-        A system designed around how students actually learn, not just another resource dump.
-      </p>
-
-      <div className="numbered-stack">
+    <section className="section">
+      <div className="section-head">
+        <div className="section-head-left">
+          <span className="eyebrow">Why Aliver</span>
+          <h2>Built with purpose</h2>
+        </div>
+      </div>
+      <div className="why-choose-row">
         {REASONS.map((reason) => (
-          <div key={reason.number} className={`numbered-item numbered-item-${reason.color}`}>
-            <div className={`numbered-circle numbered-circle-${reason.color}`}>
-              {reason.number}
-            </div>
-            <h3 className="numbered-title">{reason.title}</h3>
-            <p className="numbered-text">{reason.text}</p>
+          <div key={reason.number} className="why-choose-item">
+            <div className="num">{reason.number}</div>
+            <h3>{reason.title}</h3>
+            <p>{reason.text}</p>
           </div>
         ))}
       </div>
