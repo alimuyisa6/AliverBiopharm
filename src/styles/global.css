@@ -179,11 +179,7 @@ h4 {
   overflow-x: hidden;
 }
 
-.section-tint {
-  background: var(--amber-100);
-}
-
-.sec-label {
+ .sec-label {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: var(--weight-semibold);
