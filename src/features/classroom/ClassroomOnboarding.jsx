@@ -1,5 +1,7 @@
- import React, { useState, useEffect } from 'react';
+ // pages/ClassroomOnboarding.jsx
+import React, { useState, useEffect } from 'react';
 import { getClassroomLevels, getClassroomTopics } from '../../api/cachedClient';
+import './ClassroomOnboarding.css';
 
 const CARD_COLOR_CLASS = [
   'level-card-blue',
@@ -45,8 +47,17 @@ export function ClassroomOnboarding({ onComplete }) {
   };
 
   const handleBack = () => {
-    if (step === 3) { setSelectedClass(null); setSelectedTopic(null); setTopics([]); setStep(2); }
-    else if (step === 2) { setSelectedLevel(null); setSelectedClass(null); setSelectedTopic(null); setStep(1); }
+    if (step === 3) {
+      setSelectedClass(null);
+      setSelectedTopic(null);
+      setTopics([]);
+      setStep(2);
+    } else if (step === 2) {
+      setSelectedLevel(null);
+      setSelectedClass(null);
+      setSelectedTopic(null);
+      setStep(1);
+    }
   };
 
   const handleJoin = () => {
