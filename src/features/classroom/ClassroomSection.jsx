@@ -8,7 +8,7 @@ import EmptyState from '../../components/EmptyState/EmptyState';
 import Button from '../../components/Button/Button';
 import Icon from '../../components/Icon/Icon';
 import Spinner from '../../components/Spinner/Spinner';
-import './ClassroomSection.css';
+
 
 const STATUS_LABEL = {
   live: 'Live Now',
