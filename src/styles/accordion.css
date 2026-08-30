@@ -1,4 +1,4 @@
-/* styles/accordion.css */
+ /* src/styles/accordion.css */
 .accordion {
   display: flex;
   flex-direction: column;
@@ -7,10 +7,10 @@
 
 .accordion-item {
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--bg-card);
-  transition: border-color var(--ease-fast);
+  transition: border-color 0.2s ease;
 }
 
 .accordion-item.active {
@@ -30,7 +30,7 @@
   border: none;
   cursor: pointer;
   text-align: left;
-  transition: color var(--ease-fast);
+  transition: color 0.2s ease;
 }
 
 .accordion-trigger:hover {
@@ -39,7 +39,7 @@
 
 .accordion-icon {
   font-size: var(--text-lg);
-  transition: transform var(--ease-smooth);
+  transition: transform 0.25s ease;
   flex-shrink: 0;
 }
 
@@ -50,7 +50,7 @@
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height var(--ease-smooth);
+  transition: max-height 0.3s ease;
 }
 
 .accordion-item.active .accordion-content {
