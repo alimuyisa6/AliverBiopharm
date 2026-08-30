@@ -2,6 +2,8 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLayout } from '../../contexts/LayoutContext';
+import Icon from '../../components/Icon/Icon';
+import Button from '../../components/Button/Button';
 
 const MODULE_LABELS = {
   quiz: 'Quiz',
@@ -84,8 +86,8 @@ export default function Hero() {
 
         <div className="hero-scrim" />
 
-        <div className="hero-content" style={{ paddingTop: 'var(--space-10)' }}>
-          <div className="hero-eyebrow" style={{ fontSize: 'var(--text-sm)' }}>
+        <div className="hero-content">
+          <div className="hero-eyebrow">
             Welcome to <span className="hero-eyebrow-accent">AliverBiopharm</span>
           </div>
 
@@ -93,7 +95,7 @@ export default function Hero() {
             {isAuthenticated && levelName ? (
               <>
                 Master
-                <span className="hero-eyebrow-accent" style={{ marginTop: 'var(--space-2)' }}>{levelName}</span>
+                <span className="hero-eyebrow-accent">{levelName}</span>
               </>
             ) : (
               <>Master Biology<br />and Pharmacy</>
