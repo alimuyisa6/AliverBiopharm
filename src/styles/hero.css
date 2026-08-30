@@ -1,4 +1,5 @@
- .hero {
+ /* src/styles/hero.css */
+.hero {
   position: relative;
   min-height: 90vh;
   display: flex;
@@ -26,39 +27,20 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 6s var(--ease-slow);
-}
-
-.hero:hover .hero-image img,
-.hero:hover .hero-image video {
-  transform: scale(1.04);
 }
 
 .hero-image-placeholder {
   width: 100%;
   height: 100%;
-  background:
-    linear-gradient(
-      135deg,
-      var(--primary-light),
-      var(--accent-light)
-    );
+  background: var(--primary-light);
 }
 
-/* Directional overlay:
-   stronger behind text, lighter over the visual */
+/* Directional overlay — solid color, no gradient */
 .hero-scrim {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(15, 23, 42, 0.82) 0%,
-      rgba(15, 23, 42, 0.58) 42%,
-      rgba(15, 23, 42, 0.18) 75%,
-      rgba(15, 23, 42, 0.28) 100%
-    );
+  background: var(--bg-overlay);
 }
 
 /* Hero content */
@@ -78,7 +60,7 @@
   flex-wrap: wrap;
   gap: 0.45rem;
 
-  font-family: var(--font-body);
+  font-family: var(--font-primary);
   font-size: 0.78rem;
   font-weight: var(--weight-bold);
   line-height: 1.2;
@@ -88,8 +70,6 @@
   color: rgba(255, 255, 255, 0.92);
 
   margin-bottom: var(--space-5);
-
-  animation: slideUp var(--ease-slow) forwards;
 }
 
 .hero-eyebrow-accent {
@@ -107,7 +87,7 @@
 
 /* Main editorial heading */
 .hero-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-primary);
   font-size: clamp(3.5rem, 7vw, 6.5rem);
   font-weight: var(--weight-black);
 
@@ -117,16 +97,11 @@
 
   color: #fff;
 
-  text-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.4);
-
   margin: 0 0 var(--space-6);
 
   max-width: 720px;
 
   text-wrap: balance;
-
-  animation: slideUp var(--ease-slow) 120ms both;
 }
 
 .hero-title > span {
@@ -135,7 +110,7 @@
 
 /* Supporting copy */
 .hero-tagline {
-  font-family: var(--font-body);
+  font-family: var(--font-primary);
   font-size: var(--text-lg);
   font-weight: var(--weight-normal);
 
@@ -143,14 +118,9 @@
 
   line-height: var(--leading-relaxed);
 
-  text-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.35);
-
   margin-bottom: var(--space-8);
 
   max-width: 520px;
-
-  animation: slideUp var(--ease-slow) 180ms both;
 }
 
 /* CTA area */
@@ -158,8 +128,6 @@
   display: flex;
   gap: var(--space-4);
   flex-wrap: wrap;
-
-  animation: slideUp var(--ease-slow) 240ms both;
 }
 
 /* Accessibility */
@@ -185,13 +153,7 @@
   }
 
   .hero-scrim {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(15, 23, 42, 0.25) 0%,
-        rgba(15, 23, 42, 0.55) 55%,
-        rgba(15, 23, 42, 0.82) 100%
-      );
+    background: var(--bg-overlay);
   }
 
   .hero-title {
@@ -229,5 +191,6 @@
 
   .hero-actions .btn {
     width: 100%;
+    justify-content: center;
   }
 }
