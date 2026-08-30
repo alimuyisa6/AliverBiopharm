@@ -1,4 +1,4 @@
- /* styles/spacing.css */
+ /* src/styles/spacing.css */
 :root {
   --space-0: 0;
   --space-1: 0.25rem;
@@ -16,6 +16,8 @@
   --space-24: 6rem;
   --space-28: 7rem;
   --space-32: 8rem;
+
+  /* Use --radius-sm or --radius-md for buttons and cards — NOT --radius-full */
   --radius-xs: 0.25rem;
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -23,16 +25,22 @@
   --radius-xl: 1.25rem;
   --radius-2xl: 1.75rem;
   --radius-full: 9999px;
+
+  /* Z-Index Layers */
   --z-dropdown: 50;
   --z-sticky: 100;
   --z-overlay: 150;
   --z-modal: 200;
   --z-toast: 300;
   --z-tooltip: 400;
+
+  /* Breakpoints */
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
+
+  /* Layout */
   --max-width: 1200px;
   --header-height: 64px;
 }
