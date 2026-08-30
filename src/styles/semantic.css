@@ -1,102 +1,215 @@
- :root {
-  --primary: var(--blue-600);
-  --primary-hover: var(--blue-700);
-  --primary-light: var(--blue-50);
-  --primary-ring: rgba(37, 99, 235, 0.40);
-  --secondary: var(--teal-600);
-  --secondary-hover: var(--teal-700);
-  --secondary-light: var(--teal-50);
+ /* src/styles/colors.css */
+:root {
+  /* ============================================================
+     Amber (Primary)
+     ============================================================ */
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+
+  /* ============================================================
+     Emerald (Secondary)
+     ============================================================ */
+  --emerald-50: #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
+
+  /* ============================================================
+     Blue (Tertiary / Info)
+     ============================================================ */
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+
+  /* ============================================================
+     Green (Success / Downloaded)
+     ============================================================ */
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+
+  /* ============================================================
+     Grey (Neutral)
+     ============================================================ */
+  --grey-50: #f8fafc;
+  --grey-100: #f1f5f9;
+  --grey-200: #e2e8f0;
+  --grey-300: #cbd5e1;
+  --grey-400: #94a3b8;
+  --grey-500: #64748b;
+  --grey-600: #475569;
+  --grey-700: #334155;
+  --grey-800: #1e293b;
+  --grey-900: #0f172a;
+  --grey-950: #020617;
+
+  /* ============================================================
+     Semantic Colors
+     ============================================================ */
+  --primary: var(--amber-500);
+  --primary-hover: var(--amber-600);
+  --primary-light: var(--amber-50);
+  --primary-ring: rgba(245, 158, 11, 0.35);
+
+  --secondary: var(--emerald-500);
+  --secondary-hover: var(--emerald-600);
+  --secondary-light: var(--emerald-50);
+
   --accent: var(--grey-600);
   --accent-hover: var(--grey-700);
   --accent-light: var(--grey-50);
-  --warm: var(--amber-600);
-  --warm-hover: var(--amber-700);
+
+  --warm: var(--amber-500);
+  --warm-hover: var(--amber-600);
   --warm-light: var(--amber-50);
-  --success: var(--emerald-600);
-  --success-light: var(--emerald-50);
-  --error: var(--red-600);
-  --error-light: var(--red-50);
-  --warning: var(--amber-600);
+
+  --success: var(--green-500);
+  --success-light: var(--green-50);
+
+  --error: #ef4444;
+  --error-light: #fef2f2;
+
+  --warning: var(--amber-500);
   --warning-light: var(--amber-50);
-  --info: var(--blue-600);
+
+  --info: var(--blue-500);
   --info-light: var(--blue-50);
-  --bg-page: var(--slate-50);
-  --bg-card: #FFFFFF;
-  --bg-card-hover: var(--slate-100);
-  --bg-card-tinted: #F8FAFF;
+
+  /* ============================================================
+     Backgrounds
+     ============================================================ */
+  --bg-page: var(--grey-50);
+  --bg-card: #ffffff;
+  --bg-card-hover: var(--grey-100);
+  --bg-card-tinted: #fafcff;
   --bg-overlay: rgba(15, 23, 42, 0.55);
-  --bg-input: #FFFFFF;
-  --bg-input-disabled: var(--slate-100);
-  --bg-hero: var(--slate-50);
-  --text-main: var(--slate-900);
-  --text-dim: var(--slate-600);
-  --text-muted: var(--slate-400);
-  --text-inverse: #FFFFFF;
+  --bg-input: #ffffff;
+  --bg-input-disabled: var(--grey-100);
+  --bg-hero: var(--grey-50);
+  --bg-section-tint: var(--grey-100);
+
+  /* ============================================================
+     Text
+     ============================================================ */
+  --text-main: var(--grey-900);
+  --text-dim: var(--grey-600);
+  --text-muted: var(--grey-400);
+  --text-inverse: #ffffff;
   --text-link: var(--blue-600);
   --text-link-hover: var(--blue-700);
-  --border-default: var(--slate-200);
-  --border-strong: var(--slate-300);
-  --border-focus: var(--blue-500);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.10), 0 8px 10px -6px rgba(0,0,0,0.04);
+
+  /* ============================================================
+     Borders
+     ============================================================ */
+  --border-default: var(--grey-200);
+  --border-strong: var(--grey-300);
+  --border-focus: var(--amber-500);
+
+  /* ============================================================
+     Shadows — used sparingly, not on cards
+     ============================================================ */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.10);
+
+  /* ============================================================
+     Level Colors
+     ============================================================ */
   --level-olevel: var(--blue-600);
-  --level-alevel: var(--teal-600);
+  --level-alevel: var(--emerald-600);
   --level-pharmacy: var(--grey-600);
 
-  /* header/footer — was amber-50/amber-200, which is the yellow
-     you're seeing on the header/footer band. Header/footer now
-     read as a clean white-on-line pairing, matching the mockup's
-     cream/ink system instead of the old warm-tint identity. */
-  --header-footer-bg-solid: #FFFFFF;
-  --header-footer-border: var(--slate-200);
-
-  /* section-tint was also amber-100 — this is the second amber
-     source (used by HowItWorksSection via .section-tint). Now a
-     neutral soft grey matching the mockup's --soft background. */
-  --section-tint-bg: var(--slate-100);
+  /* ============================================================
+     Header / Footer
+     ============================================================ */
+  --header-footer-bg-solid: #ffffff;
+  --header-footer-border: var(--grey-200);
 }
 
-.section-tint {
-  background: var(--section-tint-bg);
-}
-
+/* ============================================================
+   Dark Mode
+   ============================================================ */
 body.dark-mode {
-  --header-footer-bg-solid: var(--slate-800);
-  --header-footer-border: var(--slate-700);
-  --section-tint-bg: var(--slate-800);
-}
+  --primary: var(--amber-400);
+  --primary-hover: var(--amber-300);
+  --primary-light: rgba(245, 158, 11, 0.15);
+  --primary-ring: rgba(245, 158, 11, 0.30);
 
-body.dark-mode {
-  --primary: var(--blue-500);
-  --primary-hover: var(--blue-400);
-  --primary-light: rgba(59, 130, 246, 0.12);
-  --secondary: var(--teal-500);
-  --secondary-hover: var(--teal-400);
+  --secondary: var(--emerald-400);
+  --secondary-hover: var(--emerald-300);
+  --secondary-light: rgba(16, 185, 129, 0.15);
+
   --accent: var(--grey-500);
   --accent-hover: var(--grey-400);
-  --warm: var(--amber-500);
-  --warm-hover: var(--amber-400);
-  --success: var(--emerald-500);
-  --error: var(--red-500);
-  --bg-page: var(--slate-950);
-  --bg-card: var(--slate-800);
-  --bg-card-hover: var(--slate-700);
-  --bg-card-tinted: var(--slate-800);
+
+  --warm: var(--amber-400);
+  --warm-hover: var(--amber-300);
+
+  --success: var(--green-400);
+  --error: #f87171;
+  --info: var(--blue-400);
+
+  --bg-page: var(--grey-950);
+  --bg-card: var(--grey-800);
+  --bg-card-hover: var(--grey-700);
+  --bg-card-tinted: var(--grey-800);
   --bg-overlay: rgba(0, 0, 0, 0.70);
-  --bg-input: var(--slate-800);
-  --bg-input-disabled: var(--slate-700);
-  --bg-hero: var(--slate-900);
-  --text-main: var(--slate-100);
-  --text-dim: var(--slate-400);
-  --text-muted: var(--slate-500);
+  --bg-input: var(--grey-800);
+  --bg-input-disabled: var(--grey-700);
+  --bg-hero: var(--grey-900);
+  --bg-section-tint: var(--grey-800);
+
+  --text-main: var(--grey-100);
+  --text-dim: var(--grey-400);
+  --text-muted: var(--grey-500);
   --text-link: var(--blue-400);
   --text-link-hover: var(--blue-300);
-  --border-default: var(--slate-700);
-  --border-strong: var(--slate-600);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.20);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.30);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.40);
-  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.50);
+
+  --border-default: var(--grey-700);
+  --border-strong: var(--grey-600);
+  --border-focus: var(--amber-400);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.30);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.40);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.50);
+
+  --header-footer-bg-solid: var(--grey-800);
+  --header-footer-border: var(--grey-700);
+}
+
+/* ============================================================
+   Utility Class
+   ============================================================ */
+.section-tint {
+  background: var(--bg-section-tint);
 }
