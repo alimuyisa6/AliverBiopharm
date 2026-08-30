@@ -41,6 +41,11 @@ export default function Hero() {
 
   const uiComponents = bootstrap?.ui_components || [];
   const featuredVideo = uiComponents.find((item) => item.component_key === 'featured_video')?.properties;
+  const heroGallery = uiComponents.find((item) => item.component_key === 'hero_gallery')?.properties;
+  const galleryImages = heroGallery?.images || [];
+  const galleryTitle = heroGallery?.title || 'Major Learning Materials Tailored For You';
+  const galleryRowOne = galleryImages.slice(0, 3);
+  const galleryRowTwo = galleryImages.slice(3, 6);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -118,19 +123,24 @@ export default function Hero() {
         </div>
       </section>
 
-      {featuredVideo && (
-        <div className="hero-preview-card hero-preview-card-flat">
-          <div className="hero-preview-media hero-preview-media-full">
-            <img src={featuredVideo.thumbnail_url} alt="AliverBiopharm" loading="lazy" />
+      {galleryImages.length > 0 && (
+        <div className="hero-gallery-section">
+          <h2 className="hero-gallery-title">{galleryTitle}</h2>
+
+          <div className="hero-gallery-row">
+            {galleryRowOne.map((image, index) => (
+              <div className="hero-gallery-item" key={image.url || index}>
+                <img src={image.url} alt={image.alt || galleryTitle} loading="lazy" />
+              </div>
+            ))}
           </div>
 
-          <div className="hero-preview-body">
-            <h2 className="hero-preview-title">
-              From Ordinary Level to University — all in one platform.
-            </h2>
-            <p className="hero-preview-text">
-              Your success is our happiness, and we're here to give you the best support you need every step of the way.
-            </p>
+          <div className="hero-gallery-row">
+            {galleryRowTwo.map((image, index) => (
+              <div className="hero-gallery-item" key={image.url || index}>
+                <img src={image.url} alt={image.alt || galleryTitle} loading="lazy" />
+              </div>
+            ))}
           </div>
         </div>
       )}
