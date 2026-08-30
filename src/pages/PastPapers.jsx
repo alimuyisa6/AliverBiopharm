@@ -829,7 +829,7 @@ export default function PastPapers() {
                     {paper.level && <span className="pp-chip">{paper.level}</span>}
                     {paper.year && <span className="pp-chip pp-chip-accent">{paper.year}</span>}
                     {paper.paper_type && <span className="pp-chip pp-chip-primary">{paper.paper_type}</span>}
-                    {paper.class_name && <span className="pp-chip">{paper.class_name}</span>}
+                    {paper.class_name && <span className="pp-chip pp-chip-emerald">{paper.class_name}</span>}
                     {downloadedIds.has(paper.id) && (
                       <span className="pp-chip pp-chip-success">
                         <Icon name="check" /> Downloaded
@@ -920,7 +920,7 @@ export default function PastPapers() {
                 {selectedPaper.year && <span className="pp-chip pp-chip-accent">{selectedPaper.year}</span>}
                 {selectedPaper.paper_type && <span className="pp-chip pp-chip-primary">{selectedPaper.paper_type}</span>}
                 {selectedPaper.exam_board && <span className="pp-chip">{selectedPaper.exam_board}</span>}
-                {selectedPaper.class_name && <span className="pp-chip">{selectedPaper.class_name}</span>}
+                {selectedPaper.class_name && <span className="pp-chip pp-chip-emerald">{selectedPaper.class_name}</span>}
               </div>
 
               <div className="pp-modal-actions">
@@ -1000,8 +1000,8 @@ export default function PastPapers() {
                                   style={{
                                     color:
                                       star <= review.rating
-                                        ? 'var(--warm)'
-                                        : 'var(--border-default)'
+                                        ? 'var(--amber-400)'
+                                        : 'var(--grey-300)'
                                   }}
                                 >
                                   <Icon name="star" />
