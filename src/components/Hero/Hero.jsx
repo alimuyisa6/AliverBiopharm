@@ -108,14 +108,14 @@ export default function Hero() {
 
           {!isAuthenticated && (
             <div className="hero-actions">
-              <Link to="/register" className="btn btn-primary btn-radius-pill">Start Learning Free</Link>
-              <Link to="/login" className="btn btn-secondary btn-radius-pill">Sign In</Link>
+              <Link to="/register" className="btn btn-primary">Start Learning Free</Link>
+              <Link to="/login" className="btn btn-secondary">Sign In</Link>
             </div>
           )}
 
           {isAuthenticated && resume && resumeAllowed && (
             <div className="hero-actions">
-              <Link to={resumeHref(resume)} className="btn btn-primary btn-radius-pill">
+              <Link to={resumeHref(resume)} className="btn btn-primary">
                 Continue {MODULE_LABELS[resume.module] || 'Learning'}
               </Link>
             </div>
