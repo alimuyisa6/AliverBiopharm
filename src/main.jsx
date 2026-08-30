@@ -5,7 +5,6 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './styles/global.css';
 import './styles/components.css';
-import './styles/class.css';
 import './styles/pastpapers.css';
   
 
