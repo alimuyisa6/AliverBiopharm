@@ -1,16 +1,12 @@
- @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800;900&family=Outfit:wght@500;600;700&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&family=Comfortaa:wght@400;700&family=Maven+Pro:wght@400;700&display=swap');
+ /* src/styles/fonts.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --font-heading: 'Fraunces', serif;
-  --font-body: 'Inter', sans-serif;
-  --font-button: 'Outfit', sans-serif;
+  /* Font Families */
+  --font-primary: 'Inter', -apple-system, system-ui, sans-serif;
   --font-mono: 'DM Mono', monospace;
-  --font-fraunces: 'Fraunces', serif;
-  --font-source-sans: 'Source Sans 3', sans-serif;
-  --font-open-sans: 'Open Sans', sans-serif;
-  --font-comfortaa: 'Comfortaa', sans-serif;
-  --font-maven-pro: 'Maven Pro', sans-serif;
 
+  /* Font Sizes */
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
   --text-base: 0.9375rem;
@@ -20,44 +16,36 @@
   --text-2xl: 1.625rem;
   --text-3xl: 2rem;
   --text-4xl: 2.5rem;
-  --text-5xl: 3.25rem;
-  --text-6xl: 4rem;
 
-  --leading-tight: 1.05;
-  --leading-snug: 1.15;
+  /* Font Weights */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+  --weight-black: 900;
+
+  /* Line Heights */
+  --leading-tight: 1.1;
+  --leading-snug: 1.2;
   --leading-normal: 1.6;
   --leading-relaxed: 1.75;
 
-  --tracking-tight: -0.035em;
+  /* Letter Spacing */
+  --tracking-tight: -0.03em;
   --tracking-normal: -0.02em;
   --tracking-wide: 0.02em;
   --tracking-wider: 0.06em;
   --tracking-widest: 0.12em;
-
-  --weight-normal: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --weight-bold: 600;
-  --weight-extrabold: 600;
-  --weight-black: 700;
 }
 
-.font-fraunces {
-  font-family: var(--font-fraunces);
+body {
+  font-family: var(--font-primary);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
 }
 
-.font-source-sans {
-  font-family: var(--font-source-sans);
-}
-
-.font-open-sans {
-  font-family: var(--font-open-sans);
-}
-
-.font-comfortaa {
-  font-family: var(--font-comfortaa);
-}
-
-.font-maven-pro {
-  font-family: var(--font-maven-pro);
+.font-mono {
+  font-family: var(--font-mono);
 }
