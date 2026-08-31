@@ -1,3 +1,5 @@
+// src/api/client.js
+
 let csrfToken = null;
 
 const API_BASE = '/api/server';
@@ -917,19 +919,19 @@ export async function dismissNotification(id) {
 
 export async function getNotificationPreferences() {
   return getRequest(
-    'recall',
-    'notification_prefs'
+    'profile',
+    'notification_preferences'
   );
 }
 
-export async function updateNotificationPreferences(prefs) {
-  return apiCall(
-    'recall',
-    'notification_prefs_update',
-    {
-      preferences: prefs
-    }
-  );
+export async function updateNotificationPreference(
+  module,
+  fields
+) {
+  return apiCall('profile', 'update_notification_preferences', {
+    module,
+    ...fields
+  });
 }
 
 export async function getClassroomLevels() {
@@ -1355,10 +1357,10 @@ export async function getDevices() {
   );
 }
 
-export async function revokeSession(session_id) {
+export async function revokeDevice(session_id) {
   return apiCall(
     'profile',
-    'revoke_session',
+    'revoke_device',
     {
       session_id
     }
@@ -1380,6 +1382,105 @@ export async function saveNotificationSettings(preferences) {
       preferences
     }
   );
+}
+
+export async function getSettingsBundle() {
+  return getRequest(
+    'profile',
+    'settings_bundle'
+  );
+}
+
+export async function getReferralStats() {
+  return getRequest(
+    'profile',
+    'referral_stats'
+  );
+}
+
+export async function getCertificates() {
+  return getRequest(
+    'profile',
+    'certificates'
+  );
+}
+
+export async function getBillingSummary() {
+  return getRequest(
+    'profile',
+    'billing_summary'
+  );
+}
+
+export async function getApiKeys() {
+  return getRequest(
+    'profile',
+    'api_keys'
+  );
+}
+
+export async function getWebhooks() {
+  return getRequest(
+    'profile',
+    'webhooks'
+  );
+}
+
+export async function updateBio(bio) {
+  return apiCall('profile', 'update_bio', {
+    bio
+  });
+}
+
+export async function updatePreferences(updates) {
+  return apiCall('profile', 'update_preferences', updates);
+}
+
+export async function createApiKey(name) {
+  return apiCall('profile', 'create_api_key', {
+    name
+  });
+}
+
+export async function revokeApiKey(key_id) {
+  return apiCall('profile', 'revoke_api_key', {
+    key_id
+  });
+}
+
+export async function createWebhook(url, events) {
+  return apiCall('profile', 'create_webhook', {
+    url,
+    events
+  });
+}
+
+export async function updateWebhook(
+  webhook_id,
+  updates
+) {
+  return apiCall('profile', 'update_webhook', {
+    webhook_id,
+    ...updates
+  });
+}
+
+export async function deleteWebhook(webhook_id) {
+  return apiCall('profile', 'delete_webhook', {
+    webhook_id
+  });
+}
+
+export async function saveParentGuardian(payload) {
+  return apiCall('profile', 'save_parent_guardian', payload);
+}
+
+export async function requestDataExport() {
+  return apiCall('profile', 'request_data_export', {});
+}
+
+export async function requestAccountDeletion() {
+  return apiCall('profile', 'request_account_deletion', {});
 }
 
 export async function getCurriculumLevels() {
