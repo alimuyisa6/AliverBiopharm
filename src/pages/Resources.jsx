@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
 import { getSections } from '../api/sections';
-import ResourcesView from '../features/home/ResourcesView';
+import ResourcesView from '../features/resources/ResourcesView';
 
 export default function Resources() {
   const { user } = useAuth();
