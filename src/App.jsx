@@ -33,6 +33,7 @@ import FaqPage from './pages/FaqPage';
 import BlogPage from './pages/BlogPage';
 import ContactPage from './pages/ContactPage';
 import CommunityPage from './pages/CommunityPage';
+import Resources from './pages/Resources';
 
 function GlobalLoader() {
   return (
@@ -115,6 +116,7 @@ function AppRoutes() {
             <Route path="/register" element={<Auth />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/resources" element={<Resources />} />
             <Route path="/quiz" element={<ProtectedRoute><FeatureRoute feature="quizzes"><Quiz /></FeatureRoute></ProtectedRoute>} />
             <Route path="/recall" element={<ProtectedRoute><FeatureRoute feature="recall"><Recall /></FeatureRoute></ProtectedRoute>} />
             <Route path="/flashcards" element={<ProtectedRoute><FeatureRoute feature="flashcards"><FlashcardsPage /></FeatureRoute></ProtectedRoute>} />
