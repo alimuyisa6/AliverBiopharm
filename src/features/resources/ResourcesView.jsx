@@ -25,7 +25,10 @@ export default function ResourcesView({ navigate, user, sections }) {
     <div className="resources-page">
       <section className="section resources-hero">
         <span className="eyebrow">Resources</span>
-        <h1>Choose The Best Of You and <br /><br />Start Learning.</h1>
+        <h1>
+          Choose The Best Of You and <br />
+          <span style={{ display: 'inline-block', marginTop: '8px' }}>Start Learning.</span>
+        </h1>
         <p className="section-subtitle">{sections?.section_headings?.content_types_subtitle || 'Notes, flashcards, quizzes, past papers and recall — everything you need, all in one place.'}</p>
       </section>
 
