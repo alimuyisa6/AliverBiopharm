@@ -1,5 +1,4 @@
-  
-import { memo } from 'react';
+ import { memo } from 'react';
 
 const ICON_DATA = {
   'arrow-left': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 8v8M8 12l4 4 4-4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
@@ -142,8 +141,8 @@ const Icon = memo(function Icon({ name, size, className, style, ...props }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      width={size || undefined}
-      height={size || undefined}
+      width={size || '1em'}
+      height={size || '1em'}
       className={className || undefined}
       style={style}
       xmlns="http://www.w3.org/2000/svg"
