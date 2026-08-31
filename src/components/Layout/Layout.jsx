@@ -376,7 +376,7 @@ export default function Layout({ children, showFooter = true }) {
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,0 L0,0 Z"
+                d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,120 L0,120 Z"
                 className="footer-wave-path"
               />
             </svg>
