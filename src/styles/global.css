@@ -1,3 +1,4 @@
+ /* src/styles/global.css */
 @import './colors.css';
 @import './spacing.css';
 @import './typography.css';
@@ -183,6 +184,30 @@ h6 {
   }
 }
 
+/* ============================================================
+   SECTION — Full width with horizontal padding
+   ============================================================ */
+.section {
+  width: 100%;
+  padding: var(--space-20) var(--space-6);
+  margin: 0;
+}
+
+/* Optional inner container for centered content */
+.section-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* For sections that need a different background or full bleed */
+.section-full-bleed {
+  padding: var(--space-20) 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
@@ -203,5 +228,14 @@ h6 {
   }
   h4 {
     font-size: var(--text-lg);
+  }
+  .section {
+    padding: var(--space-12) var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: var(--space-8) var(--space-3);
   }
 }
