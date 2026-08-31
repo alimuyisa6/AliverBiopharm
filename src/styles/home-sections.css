@@ -60,7 +60,10 @@
   border-radius: var(--radius-md);
   background: var(--bg-card);
   overflow: hidden;
-  transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
+  transition:
+    border-color var(--ease),
+    box-shadow var(--ease),
+    transform var(--ease);
   box-shadow: var(--shadow-sm);
 }
 
@@ -738,7 +741,13 @@
     flex-direction: column;
   }
 }
-/* ----- Section Teaser (Tutor Marketplace / Classroom) ----- */
+
+/* ============================================================
+   HOMEPAGE SECTION TEASERS
+   (Tutor Marketplace / Classroom "find your tutor" and
+   "find a live room" split-image teaser sections)
+   ============================================================ */
+
 .section-teaser-inner {
   display: flex;
   align-items: center;
@@ -754,22 +763,24 @@
 }
 
 .section-teaser-image-wrap {
-  flex: 0 0 42%;
+  flex: 0 0 46%;
   display: flex;
   justify-content: center;
 }
 
 .section-teaser-image {
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
+  height: 340px;
+  object-fit: cover;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  transform: rotate(-4deg);
+  box-shadow: var(--shadow-lg, var(--shadow-md));
+  transform: rotate(-8deg);
   display: block;
 }
 
 .teaser-image-right .section-teaser-image {
-  transform: rotate(4deg);
+  transform: rotate(8deg);
 }
 
 .section-teaser-content {
@@ -807,12 +818,49 @@
 
   .section-teaser-image,
   .teaser-image-right .section-teaser-image {
-    max-width: 280px;
-    transform: rotate(-3deg);
+    max-width: 300px;
+    height: 220px;
+    transform: rotate(-6deg);
   }
 
   .section-teaser-content .section-subtitle {
     margin-left: auto;
     margin-right: auto;
+  }
+}
+
+/* ============================================================
+   HOMEPAGE SECTION PANELS
+   Wraps each direct .section child of .home-page in a bordered,
+   softly-shadowed panel so sections read as distinct blocks.
+   Scoped to .home-page so this does not affect .section usage
+   on other pages (Resources, Classroom, TutorMarketplace, etc).
+   ============================================================ */
+
+.home-page > .section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-8) var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.home-page > .section:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Sections carrying their own background image (e.g. a teaser
+   with a photographic backdrop) keep a deeper shadow than the
+   flat default, so the elevation still reads correctly. */
+.home-page > .section.section-with-bg {
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 768px) {
+  .home-page > .section {
+    padding: var(--space-6) var(--space-4);
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius-md);
   }
 }
