@@ -1,4 +1,4 @@
-/* features/home/HomeView.jsx */
+ /* features/home/HomeView.jsx */
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
