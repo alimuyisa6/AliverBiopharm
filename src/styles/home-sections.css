@@ -505,6 +505,22 @@
   flex-shrink: 0;
 }
 
+/* ----- Newsletter Form Status ----- */
+.form-status {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-align: center;
+}
+
+.form-status.success {
+  color: var(--success);
+}
+
+.form-status.error {
+  color: var(--error);
+}
+
 /* ----- Team Scroll ----- */
 .team-scroll-wrap {
   position: relative;
