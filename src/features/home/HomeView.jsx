@@ -8,8 +8,8 @@ import { StatsGrid } from './StatsGrid';
 import { TestimonialSlider } from './TestimonialSlider';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
-import { ClassroomSection } from '../classroom/ClassroomSection';
-import TutorMarketplaceSection from '../tutor-marketplace/TutorMarketplaceSection';
+import ClassroomTeaser from '../classroom/ClassroomTeaser';
+import TutorMarketplaceTeaser from '../tutor-marketplace/TutorMarketplaceTeaser';
 import Hero from '../../components/Hero/Hero';
 import { useLayout } from '../../contexts/LayoutContext';
 import './home.css';
@@ -310,8 +310,8 @@ export default function HomeView(props) {
       {user && <PastPapersList papers={pastPapers} navigate={navigate} />}
 
       <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
-      <ClassroomSection user={user} />
-      <TutorMarketplaceSection />
+      <ClassroomTeaser />
+      <TutorMarketplaceTeaser />
 
       <NewsletterForm email={newsletterEmail} status={newsletterStatus} onChange={(event) => setNewsletterEmail(event.target.value)} onSubmit={handleNewsletterSubmit} />
 
