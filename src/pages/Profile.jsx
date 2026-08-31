@@ -1,8 +1,36 @@
+ // src/pages/Profile.jsx
+
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLayout } from '../contexts/LayoutContext';
-import { updateProfile, changePassword, requestLevelChange, getProfile, getCurriculumLevels, updateDisplayName } from '../api/client';
- 
+import {
+  updateProfile,
+  changePassword,
+  requestLevelChange,
+  getProfile,
+  getCurriculumLevels,
+  updateDisplayName,
+  getSettingsBundle,
+  getProfileNotificationPreferences,
+  updateProfileNotificationPreference,
+  getDevices,
+  revokeDevice,
+  getBillingSummary,
+  getReferralStats,
+  getCertificates,
+  getApiKeys,
+  createApiKey,
+  revokeApiKey,
+  getWebhooks,
+  createWebhook,
+  deleteWebhook,
+  updateBio,
+  updatePreferences,
+  saveParentGuardian,
+  requestDataExport,
+  requestAccountDeletion
+} from '../api/client';
+
 import PageHeader from '../components/PageHeader/PageHeader';
 import Container from '../components/Container/Container';
 import Input from '../components/Input/Input';
@@ -13,7 +41,6 @@ import Skeleton from '../components/Skeleton/Skeleton';
 import Card from '../components/Card/Card';
 import Icon from '../components/Icon/Icon';
 import { useToast } from '../components/Toast/Toast';
-
 
 const SECTIONS = [
   { id: 'overview', label: 'Profile Overview' },
@@ -120,7 +147,7 @@ export default function Profile() {
     setSectionLoading(true);
     const done = () => setSectionLoading(false);
 
-    if (id === 'notifications') return getNotificationPreferences().then(setNotifPrefs).catch(() => {}).finally(done);
+    if (id === 'notifications') return getProfileNotificationPreferences().then(setNotifPrefs).catch(() => {}).finally(done);
     if (id === 'devices') return getDevices().then(setDevices).catch(() => {}).finally(done);
     if (id === 'billing') return getBillingSummary().then(setBilling).catch(() => {}).finally(done);
     if (id === 'referral') return getReferralStats().then(setReferral).catch(() => {}).finally(done);
@@ -248,7 +275,7 @@ export default function Profile() {
       prev.map((p) => (p.module === module ? { ...p, [field]: !current } : p))
     );
     try {
-      await updateNotificationPreference(module, { [field]: !current });
+      await updateProfileNotificationPreference(module, { [field]: !current });
     } catch (err) {
       addToast(err.message || 'Failed to update notification setting', 'error');
       loadSection('notifications');
