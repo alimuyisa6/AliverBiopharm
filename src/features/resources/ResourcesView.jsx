@@ -1,8 +1,8 @@
-/* features/resources/ResourcesView.jsx */
+ // src/features/resources/ResourcesView.jsx
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
 import { useLayout } from '../../contexts/LayoutContext';
-
+import './Resources.css';
 
 const CONTENT_TYPES = [
   { key: 'notes', label: 'Notes', description: 'Structured topic notes with diagrams and summaries', icon: 'book-open', route: '/notes', color: 'blue' },
@@ -26,24 +26,24 @@ export default function ResourcesView({ navigate, user, sections }) {
     <div className="resources-page">
       <section className="section resources-hero">
         <span className="eyebrow">Resources</span>
-        <h1>{sections?.section_headings?.content_types_title || 'Everything You Need to Succeed'}</h1>
+        <h1>Choose The Best Of You and Start<br />Learning.</h1>
         <p className="section-subtitle">{sections?.section_headings?.content_types_subtitle || 'Notes, flashcards, quizzes, past papers and recall — everything you need, all in one place.'}</p>
       </section>
 
-      <section className="section">
-        <div className="row-list row-list-tight">
+      <section className="section resources-grid-section">
+        <div className="resources-grid">
           {CONTENT_TYPES.map((type) => {
             const imageUrl = getImage(type.key);
             return (
-              <div key={type.key} className={`content-type-row content-type-row-${type.color}`}>
-                <div className={`content-type-thumb content-type-thumb-${type.color}`}>
+              <div key={type.key} className={`resource-card resource-card-${type.color}`}>
+                <div className="resource-card-image">
                   {imageUrl ? <img src={imageUrl} alt={type.label} loading="lazy" /> : <Icon name={type.icon} />}
                 </div>
-                <div className="content-type-info">
-                  <div className="content-type-title">{type.label}</div>
-                  <div className="content-type-desc">{type.description}</div>
+                <div className="resource-card-body">
+                  <div className="resource-card-title">{type.label}</div>
+                  <div className="resource-card-desc">{type.description}</div>
                 </div>
-                <div className="row-actions">
+                <div className="resource-card-actions">
                   <Button size="sm" variant="secondary" onClick={() => navigate(user ? type.route : '/login')}>Browse</Button>
                 </div>
               </div>
