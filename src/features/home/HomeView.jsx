@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
+import ClassSwitcher from '../../components/ClassSwitcher/ClassSwitcher';
 import { WhyChooseSection } from './WhyChooseSection';
 import { HowItWorksSection } from './HowItWorksSection';
 import { StatsGrid } from './StatsGrid';
@@ -48,18 +49,6 @@ function LearningJourneySection({ navigate, sections }) {
         <Button variant="primary" onClick={() => navigate('/resources')}>Browse resources</Button>
       </div>
     </section>
-  );
-}
-
-function LevelScopeBar({ activeLevelName, activeGroupName, onSwitchScope }) {
-  if (!activeLevelName) return null;
-  return (
-    <button className="level-scope-bar" onClick={onSwitchScope} type="button">
-      <span className="level-scope-dot" />
-      <span>{activeLevelName}</span>
-      {activeGroupName ? (<><span className="level-scope-sep">·</span><span>{activeGroupName}</span></>) : null}
-      <Icon name="chevron-down" />
-    </button>
   );
 }
 
@@ -209,35 +198,6 @@ function DailyRecallCard({ recall, onReveal, onStart }) {
   );
 }
 
-function PastPapersList({ papers, navigate }) {
-  if (!papers?.length) return null;
-  return (
-    <section className="section">
-      <div className="section-head">
-        <div className="section-head-left">
-          <span className="eyebrow">Practice</span>
-          <h2>Past papers</h2>
-        </div>
-        <Link to="/past-papers" className="text-link">Browse all papers →</Link>
-      </div>
-      <div className="row-list">
-        {papers.map((paper) => (
-          <div className="row" key={paper.id}>
-            <div className="row-thumb">{paper.paper_type_short}</div>
-            <div className="row-body">
-              <div className="row-title">{paper.title}</div>
-              <div className="row-meta">{paper.exam_board} · {paper.subject}</div>
-            </div>
-            <span className="tag tag-grey">{paper.year}</span>
-            <span className="tag tag-grey">{paper.paper_type}</span>
-            <Button size="sm" variant="secondary" onClick={() => navigate(`/past-papers/${paper.id}`)}>Open</Button>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export default function HomeView(props) {
   const {
     sections,
@@ -266,8 +226,6 @@ export default function HomeView(props) {
     curriculumUnits,
     canAccessPremium,
     dailyRecall,
-    pastPapers,
-    onSwitchScope,
     onRevealRecall,
     onStartRecall
   } = props;
@@ -280,11 +238,7 @@ export default function HomeView(props) {
 
       {user && (
         <>
-          <LevelScopeBar
-            activeLevelName={activeLevelName}
-            activeGroupName={activeGroupName}
-            onSwitchScope={onSwitchScope}
-          />
+          <ClassSwitcher className="home-scope-switcher" />
           <SnapshotStats userStats={userStats} />
           <ContinueLearningRail items={continueLearning} navigate={navigate} />
         </>
@@ -306,8 +260,6 @@ export default function HomeView(props) {
 
       <HowItWorksSection />
       <StatsGrid stats={{ resources_count: publicStats?.resources_count || 0, users_count: publicStats?.users_count || 0, downloads_count: publicStats?.downloads_count || 0, quiz_attempts: publicStats?.quiz_attempts || 0 }} />
-
-      {user && <PastPapersList papers={pastPapers} navigate={navigate} />}
 
       <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
       <ClassroomTeaser />
