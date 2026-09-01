@@ -1,9 +1,9 @@
  import { memo } from 'react';
 
 const ICON_DATA = {
-  'arrow-left': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 8v8M8 12l4 4 4-4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
-  'arrow-right': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 8v8M8 12l4 4 4-4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
-  'arrow-up': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 8v8M8 12l4 4 4-4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
+  'arrow-left': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M16 12H8M12 8l-4 4 4 4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
+  'arrow-right': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M8 12h8M12 8l4 4-4 4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
+  'arrow-up': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 16V8M8 12l4-4 4 4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
   'atom': { badge: 'circle', bg: '#06b6d4', r: 0, bgPath: "", glyph: "<ellipse cx=\"12\" cy=\"12\" rx=\"8\" ry=\"3\" stroke=\"#fff\" stroke-width=\"1.5\" fill=\"none\"/><ellipse cx=\"12\" cy=\"12\" rx=\"8\" ry=\"3\" stroke=\"#fff\" stroke-width=\"1.5\" fill=\"none\" transform=\"rotate(60 12 12)\"/><ellipse cx=\"12\" cy=\"12\" rx=\"8\" ry=\"3\" stroke=\"#fff\" stroke-width=\"1.5\" fill=\"none\" transform=\"rotate(120 12 12)\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"#fff\"/>" },
   'bars': { badge: 'rect', bg: '#64748b', r: 4, bgPath: "", glyph: "<path d=\"M6 8h12M6 12h12M6 16h12\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\"/>" },
   'bell': { badge: 'none', bg: '#4caf50', r: 2, bgPath: "<rect x=\"3\" y=\"2\" width=\"18\" height=\"20\" rx=\"2\" stroke=\"#4caf50\" stroke-width=\"2\" fill=\"none\"/>", glyph: "<path d=\"M7 7h10\" stroke=\"#4caf50\" stroke-width=\"2\"/><path d=\"M7 11h10\" stroke=\"#4caf50\" stroke-width=\"2\"/><path d=\"M7 15h6\" stroke=\"#4caf50\" stroke-width=\"2\"/><circle cx=\"18\" cy=\"18\" r=\"3\" fill=\"#8bc34a\"/>" },
@@ -33,7 +33,7 @@ const ICON_DATA = {
   'discord': { badge: 'rect', bg: '#5865F2', r: 6, bgPath: "", glyph: "<circle cx=\"9\" cy=\"13\" r=\"1.6\" fill=\"#fff\"/><circle cx=\"15\" cy=\"13\" r=\"1.6\" fill=\"#fff\"/><path d=\"M8 8.5C10.5 7.5 13.5 7.5 16 8.5\" stroke=\"#fff\" stroke-width=\"1.4\" fill=\"none\" stroke-linecap=\"round\"/>" },
   'door-closed': { badge: 'rect', bg: '#78716c', r: 4, bgPath: "", glyph: "<rect x=\"8\" y=\"4\" width=\"8\" height=\"16\" rx=\"1\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\"/><circle cx=\"13.3\" cy=\"12\" r=\"0.9\" fill=\"#fff\"/>" },
   'door-open': { badge: 'rect', bg: '#22c55e', r: 4, bgPath: "", glyph: "<path d=\"M9 4h6v16H9z\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\"/><path d=\"M9 4L4 6v14l5-1\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\" stroke-linejoin=\"round\"/><circle cx=\"7\" cy=\"12\" r=\"0.8\" fill=\"#fff\"/>" },
-  'download': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 8v8M8 12l4 4 4-4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
+  'download': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 4v10M8 10l4 4 4-4M6 18h12\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
   'ellipsis': { badge: 'rect', bg: '#64748b', r: 12, bgPath: "", glyph: "<circle cx=\"7\" cy=\"12\" r=\"1.6\" fill=\"#fff\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"#fff\"/><circle cx=\"17\" cy=\"12\" r=\"1.6\" fill=\"#fff\"/>" },
   'envelope': { badge: 'none', bg: '', r: 0, bgPath: "", glyph: "<path d=\"M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z\" fill=\"#2ecc71\"/><polyline points=\"8 9 12 13 16 9\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
   'envelope-circle-check': { badge: 'none', bg: '', r: 0, bgPath: "", glyph: "<path d=\"M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z\" fill=\"#2ecc71\"/><polyline points=\"8 9 12 13 16 9\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
@@ -87,12 +87,12 @@ const ICON_DATA = {
   'right-from-bracket': { badge: 'circle', bg: '#ef4444', r: 0, bgPath: "", glyph: "<path d=\"M9 4H6a1 1 0 00-1 1v14a1 1 0 001 1h3M15 12h6m0 0l-3-3m3 3l-3 3\" stroke=\"#fff\" stroke-width=\"1.8\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>" },
   'right-to-bracket': { badge: 'circle', bg: '#22c55e', r: 0, bgPath: "", glyph: "<path d=\"M15 4h3a1 1 0 011 1v14a1 1 0 01-1 1h-3M4 12h11m0 0l-3-3m3 3l-3 3\" stroke=\"#fff\" stroke-width=\"1.8\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>" },
   'rocket': { badge: 'none', bg: '#f39c12', r: 0, bgPath: "", glyph: "<path d=\"M12 2L2 7l10 5 10-5-10-5z\" fill=\"#f39c12\"/><path d=\"M2 17l10 5 10-5\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\"/><path d=\"M2 12l10 5 10-5\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\"/>" },
-  'rotate': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 8v8M8 12l4 4 4-4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
+  'rotate': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M17 8a6.5 6.5 0 10.9 6.5\" stroke=\"#fff\" stroke-width=\"1.8\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M17 4.5V8h-3.5\" stroke=\"#fff\" stroke-width=\"1.8\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>" },
   'route': { badge: 'none', bg: '#f39c12', r: 0, bgPath: "", glyph: "<path d=\"M12 2L2 7l10 5 10-5-10-5z\" fill=\"#f39c12\"/><path d=\"M2 17l10 5 10-5\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\"/><path d=\"M2 12l10 5 10-5\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\"/>" },
   'screwdriver-wrench': { badge: 'circle', bg: '#64748b', r: 0, bgPath: "", glyph: "<path d=\"M14 4l-3 3 6 6 3-3a4 4 0 01-6-6z\" fill=\"#fff\"/><path d=\"M11 10L5 16v3h3l6-6\" fill=\"#fff\"/>" },
   'search': { badge: 'circle', bg: '#64748b', r: 0, bgPath: "", glyph: "<circle cx=\"10.5\" cy=\"10.5\" r=\"5\" stroke=\"#fff\" stroke-width=\"2\" fill=\"none\"/><line x1=\"14.5\" y1=\"14.5\" x2=\"19\" y2=\"19\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\"/>" },
   'seedling': { badge: 'circle', bg: '#22c55e', r: 0, bgPath: "", glyph: "<path d=\"M12 20v-6M12 14c0-4 3-6 6-6 0 4-3 6-6 6zM12 14c0-3-2.5-5-5.5-5 0 3.5 2.5 5.5 5.5 5.5z\" fill=\"#fff\"/>" },
-  'share': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 8v8M8 12l4 4 4-4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
+  'share': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<circle cx=\"18\" cy=\"6\" r=\"2.2\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\"/><circle cx=\"6\" cy=\"12\" r=\"2.2\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\"/><circle cx=\"18\" cy=\"18\" r=\"2.2\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\"/><path d=\"M8 10.8l8-3.6M8 13.2l8 3.6\" stroke=\"#fff\" stroke-width=\"1.4\"/>" },
   'shield-halved': { badge: 'none', bg: '', r: 0, bgPath: "", glyph: "<path d=\"M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z\" fill=\"#3b82f6\"/><path d=\"M12 2v20c-4.5-2.5-8-6-8-11V5l8-3z\" fill=\"#1d4ed8\"/>" },
   'spell-check': { badge: 'rect', bg: '#e63946', r: 4, bgPath: "", glyph: "<path d=\"M8 7h8M8 11h8M8 15h5\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\"/>" },
   'spinner': { badge: 'circle', bg: '#f39c12', r: 0, bgPath: "", glyph: "<path d=\"M12 6v6l4 2\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"/>" },
@@ -108,7 +108,7 @@ const ICON_DATA = {
   'tiktok': { badge: 'rect', bg: '#000000', r: 6, bgPath: "", glyph: "<path d=\"M13 4v10.2a2.3 2.3 0 11-2-2.28V9.8a4.4 4.4 0 103.8 4.4V9.4a5.6 5.6 0 003.2 1V8.2a3.6 3.6 0 01-2.9-2.6 3.7 3.7 0 01-.1-.9V4h-2z\" fill=\"#fff\"/>" },
   'trash': { badge: 'circle', bg: '#ef4444', r: 0, bgPath: "", glyph: "<path d=\"M6 8h12l-1 11a1 1 0 01-1 1H8a1 1 0 01-1-1L6 8zM9 8V6a1 1 0 011-1h4a1 1 0 011 1v2M5 8h14\" stroke=\"#fff\" stroke-width=\"1.6\" stroke-linecap=\"round\" fill=\"none\"/>" },
   'trophy': { badge: 'none', bg: '', r: 0, bgPath: "", glyph: "<path d=\"M12 2l3 6 6.5 1-4.5 4.5L18 20l-6-3-6 3 1-6.5L2.5 9 9 8z\" fill=\"#f1c40f\"/><path d=\"M12 2l3 6 6.5 1-4.5 4.5L18 20l-6-3V2z\" fill=\"#e67e22\"/>" },
-  'unlock': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<path d=\"M12 8v8M8 12l4 4 4-4\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
+  'unlock': { badge: 'circle', bg: '#9b59b6', r: 0, bgPath: "", glyph: "<rect x=\"7.5\" y=\"11\" width=\"9\" height=\"7\" rx=\"1.5\" fill=\"#fff\"/><path d=\"M9 11V8.5a3 3 0 015.7-1.3\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\" stroke-linecap=\"round\"/>" },
   'user': { badge: 'none', bg: '', r: 0, bgPath: "", glyph: "<circle cx=\"9\" cy=\"7\" r=\"4\" fill=\"#ff9800\"/><circle cx=\"17\" cy=\"9\" r=\"3\" fill=\"#ffc107\"/><path d=\"M1 20v-1a6 6 0 016-6h4a6 6 0 016 6v1\" stroke=\"#ff9800\" stroke-width=\"2\" fill=\"none\"/><path d=\"M15 17v-1a4 4 0 014-4h2a4 4 0 014 4v1\" stroke=\"#ffc107\" stroke-width=\"2\" fill=\"none\"/>" },
   'user-check': { badge: 'rect', bg: '#0ab5b5', r: 4, bgPath: "", glyph: "<path d=\"M7 12l3 3 6-6\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"/>" },
   'user-graduate': { badge: 'none', bg: '', r: 0, bgPath: "", glyph: "<circle cx=\"9\" cy=\"7\" r=\"4\" fill=\"#ff9800\"/><circle cx=\"17\" cy=\"9\" r=\"3\" fill=\"#ffc107\"/><path d=\"M1 20v-1a6 6 0 016-6h4a6 6 0 016 6v1\" stroke=\"#ff9800\" stroke-width=\"2\" fill=\"none\"/><path d=\"M15 17v-1a4 4 0 014-4h2a4 4 0 014 4v1\" stroke=\"#ffc107\" stroke-width=\"2\" fill=\"none\"/>" },
@@ -141,8 +141,8 @@ const Icon = memo(function Icon({ name, size, className, style, ...props }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      width={size || '1em'}
-      height={size || '1em'}
+      width={size || '1.25em'}
+      height={size || '1.25em'}
       className={className || undefined}
       style={style}
       xmlns="http://www.w3.org/2000/svg"
