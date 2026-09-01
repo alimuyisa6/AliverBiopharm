@@ -5,7 +5,7 @@ import Icon from '../Icon/Icon';
 
 const COLORS = ['primary', 'secondary', 'accent'];
 
-export default function ClassSwitcher() {
+export default function ClassSwitcher({ className = '' }) {
   const { groups, level, switchClass, switching, activeGroupId } = useLayout();
   const [open, setOpen] = useState(false);
 
@@ -25,7 +25,7 @@ export default function ClassSwitcher() {
   };
 
   return (
-    <div className="class-switcher">
+    <div className={`class-switcher ${className}`.trim()}>
       <button
         className="btn btn-ghost btn-sm"
         onClick={() => setOpen((value) => !value)}
