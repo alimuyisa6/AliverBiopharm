@@ -214,31 +214,6 @@ export default function Layout({ children, showFooter = true }) {
                 <Icon name={searchIcon.icon} />
               </button>
 
-              {isAuthenticated ? (
-                <div className="dropdown">
-                  <button className="btn btn-ghost btn-sm" onClick={() => navigate('/profile')}>
-                    <Icon name="user" />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className={`btn btn-${mapVariant(loginButton.variant)} btn-sm btn-radius-sm`}
-                  >
-                    {loginButton.icon && <Icon name={loginButton.icon} />}
-                    {loginButton.label}
-                  </Link>
-                  <Link
-                    to="/register"
-                    className={`btn btn-${mapVariant(signupButton.variant)} btn-sm btn-radius-sm`}
-                  >
-                    {signupButton.icon && <Icon name={signupButton.icon} />}
-                    {signupButton.label}
-                  </Link>
-                </>
-              )}
-
               <button className="btn btn-ghost btn-sm btn-icon" onClick={toggleTheme} aria-label="Toggle theme">
                 <Icon name={themeIcon} />
               </button>
