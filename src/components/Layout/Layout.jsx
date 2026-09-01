@@ -1,13 +1,12 @@
  import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Icon from '../Icon/Icon';
+import Icon, { ICON_DATA } from '../Icon/Icon';
 import { useLayout } from '../../contexts/LayoutContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { signout } from '../../api/client';
 import { getRequest } from '../../api/client';
 import SearchOverlay from '../SearchOverlay/SearchOverlay';
-import ClassSwitcher from '../ClassSwitcher/ClassSwitcher';
 import AdminLauncher from '../AdminLauncher';
 import NetworkStatus from '../NetworkStatus/NetworkStatus';
 
@@ -168,7 +167,9 @@ export default function Layout({ children, showFooter = true }) {
 
   const loginButton = uiMap.login_button || { label: 'Sign In', variant: 'outline', color: 'primary', icon: 'right-to-bracket' };
   const signupButton = uiMap.signup_button || { label: 'Sign Up', variant: 'solid', color: 'primary', icon: 'user-plus' };
-  const searchIcon = uiMap.search_icon || { icon: 'magnifying-glass', size: 'sm' };
+  const searchIcon = uiMap.search_icon?.icon && ICON_DATA[uiMap.search_icon.icon]
+    ? uiMap.search_icon
+    : { icon: 'magnifying-glass', size: 'sm' };
   const themeIcon = theme === 'dark' ? 'sun' : 'moon';
 
   const mapVariant = (variant) => {
@@ -204,12 +205,6 @@ export default function Layout({ children, showFooter = true }) {
             </nav>
 
             <div className="nav-actions">
-              {isAuthenticated && (
-                <span className="class-switcher-wrap">
-                  <ClassSwitcher />
-                </span>
-              )}
-
               <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setSearchOpen(true)} aria-label="Search">
                 <Icon name={searchIcon.icon} />
               </button>
