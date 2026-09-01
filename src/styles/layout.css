@@ -257,11 +257,11 @@ body.dark-mode .site-header.scrolled {
 .footer {
   position: relative;
   flex-shrink: 0;
-  background: var(--amber-50);
+  background: var(--amber-100);
   padding: var(--space-16) var(--space-6) var(--space-8);
   margin-top: 0;
   border-top: none;
-  --footer-wave-fill: var(--amber-50);
+  --footer-wave-fill: var(--amber-100);
 }
 
 body.dark-mode .footer {
