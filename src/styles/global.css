@@ -14,11 +14,7 @@
 
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
   scroll-behavior: smooth;
@@ -39,7 +35,7 @@ body {
   font-family: var(--font-primary);
   font-size: var(--text-base);
   font-weight: var(--weight-normal);
-  line-height: var(--leading-normal);
+  line-height: var(--leading-relaxed);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -63,70 +59,26 @@ main {
   padding-top: var(--header-height);
 }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--text-link); text-decoration: none; transition: color 0.15s ease; }
+a:hover { color: var(--text-link-hover); }
+button { cursor: pointer; font-family: inherit; }
+input, textarea, select { font-family: inherit; font-size: inherit; }
+ul, ol { list-style: none; }
 
-a {
-  color: var(--text-link);
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-a:hover {
-  color: var(--text-link-hover);
-}
-
-button {
-  cursor: pointer;
-  font-family: inherit;
-}
-
-input,
-textarea,
-select {
-  font-family: inherit;
-  font-size: inherit;
-}
-
-ul,
-ol {
-  list-style: none;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-primary);
   font-weight: var(--weight-extrabold);
   line-height: var(--leading-snug);
   letter-spacing: var(--tracking-normal);
   color: var(--text-main);
 }
-
-h1 {
-  font-size: var(--text-5xl);
-}
-h2 {
-  font-size: var(--text-3xl);
-}
-h3 {
-  font-size: var(--text-2xl);
-}
-h4 {
-  font-size: var(--text-xl);
-}
-h5 {
-  font-size: var(--text-lg);
-}
-h6 {
-  font-size: var(--text-md);
-}
+h1 { font-size: var(--text-5xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+h5 { font-size: var(--text-lg); }
+h6 { font-size: var(--text-md); }
 
 .sr-only {
   position: absolute;
@@ -153,89 +105,43 @@ h6 {
   font-size: var(--text-sm);
   transition: top 0.2s ease;
 }
+.skip-link:focus { top: var(--space-3); }
 
-.skip-link:focus {
-  top: var(--space-3);
-}
-
-.section-tint {
-  background: var(--bg-section-tint);
-}
+.section-tint { background: var(--bg-section-tint); }
 
 .reveal {
   opacity: 0;
   transform: translateY(36px);
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
-
-.reveal.in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal:not(.in) {
-  animation: forceVisible 1s ease 1s forwards;
-}
-
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal:not(.in) { animation: forceVisible 1s ease 1s forwards; }
 @keyframes forceVisible {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================================
-   SECTION — Full width with horizontal padding
-   ============================================================ */
 .section {
   width: 100%;
   padding: var(--space-20) var(--space-6);
   margin: 0;
 }
-
-/* Optional inner container for centered content */
 .section-inner {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0;
 }
+.section-full-bleed { padding: var(--space-20) 0; }
 
-/* For sections that need a different background or full bleed */
-.section-full-bleed {
-  padding: var(--space-20) 0;
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    animation: none;
-  }
+  .reveal { opacity: 1; transform: none; animation: none; }
 }
-
 @media (max-width: 768px) {
-  h1 {
-    font-size: var(--text-4xl);
-  }
-  h2 {
-    font-size: var(--text-2xl);
-  }
-  h3 {
-    font-size: var(--text-xl);
-  }
-  h4 {
-    font-size: var(--text-lg);
-  }
-  .section {
-    padding: var(--space-12) var(--space-4);
-  }
+  h1 { font-size: var(--text-4xl); }
+  h2 { font-size: var(--text-2xl); }
+  h3 { font-size: var(--text-xl); }
+  h4 { font-size: var(--text-lg); }
+  .section { padding: var(--space-12) var(--space-4); }
 }
-
 @media (max-width: 480px) {
-  .section {
-    padding: var(--space-8) var(--space-3);
-  }
+  .section { padding: var(--space-8) var(--space-3); }
 }
