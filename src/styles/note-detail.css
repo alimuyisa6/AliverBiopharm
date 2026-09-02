@@ -1,4 +1,5 @@
- .fcd-loading-wrap {
+ /* src/styles/note-detail.css */
+.fcd-loading-wrap {
   display: flex;
   justify-content: center;
   align-items: center;
