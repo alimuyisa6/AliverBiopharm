@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getInfoSection, getAllSiteSections } from '../api/client';
@@ -157,66 +157,6 @@ export default function InfoPage() {
     </>
   );
 
-  const footer = (
-    <footer className="footer-fat">
-      <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
-        <div style={{ maxWidth: '260px' }}>
-          <Link to="/" className="logo-link" style={{ marginBottom: '14px', display: 'inline-flex' }}>
-            {siteSections?.site_config?.logo_url ? (
-              <img src={siteSections.site_config.logo_url} alt="AliverBiopharm" style={{ height: '50px' }} />
-            ) : (
-              'AliverBiopharm'
-            )}
-          </Link>
-          <p style={{ fontSize: '.85rem', lineHeight: 1.7, color: 'var(--clr-text-dim)' }}>
-            Advancing biology and pharmacy education for every learner.
-          </p>
-          <div className="footer-social">
-            {(siteSections?.footer?.social_links || []).filter(Boolean).map(s => (
-              <a key={s.platform} href={s.url} target="_blank" rel="noreferrer">
-                <i className={s.icon}></i>
-              </a>
-            ))}
-          </div>
-        </div>
-        <div className="footer-grid">
-          {(siteSections?.footer?.columns || []).filter(Boolean).map(col => (
-            <div key={col.heading}>
-              <h4 style={{ fontWeight: 700, color: 'var(--clr-white)', fontSize: '0.9rem', marginBottom: '16px' }}>
-                {col.heading}
-              </h4>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {(col.items || []).filter(Boolean).map(item => (
-                  <li key={item.label}>
-                    {item.href.startsWith('#') || item.href.startsWith('http') ? (
-                      <a href={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
-                        {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
-                        {item.label}
-                      </a>
-                    ) : (
-                      <Link to={item.href} style={{ fontSize: '0.875rem', color: 'var(--clr-text-dim)' }}>
-                        {item.icon && <i className={item.icon} style={{ marginRight: '0.5rem' }}></i>}
-                        {item.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div style={{ maxWidth: 'var(--max-width)', margin: '2rem auto 0', paddingTop: '1.5rem', borderTop: '1px solid var(--clr-border-glow)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-        <p style={{ fontSize: '.75rem', color: 'var(--clr-text-muted)' }}>&copy; {currentYear} AliverBiopharm. All rights reserved.</p>
-        <nav style={{ display: 'flex', gap: '22px' }}>
-          <Link to="/privacy" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Privacy Policy</Link>
-          <Link to="/terms" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>Terms of Use</Link>
-          <Link to="/about" style={{ fontSize: '.875rem', color: 'var(--clr-text-dim)' }}>About Us</Link>
-        </nav>
-      </div>
-    </footer>
-  );
-
   if (loading) {
     return (
       <motion.div
@@ -231,7 +171,6 @@ export default function InfoPage() {
           <div className="info-page-spinner" />
           <p>Loading content...</p>
         </div>
-        {footer}
       </motion.div>
     );
   }
@@ -254,7 +193,6 @@ export default function InfoPage() {
           <p>This page doesn't exist or has been moved.</p>
           <Link to="/" className="btn-primary"><i className="fa-solid fa-house" aria-hidden="true" /> Back to Home</Link>
         </div>
-        {footer}
       </motion.div>
     );
   }
@@ -277,7 +215,6 @@ export default function InfoPage() {
           <p>Please try refreshing the page or come back later.</p>
           <Link to="/" className="btn-primary"><i className="fa-solid fa-rotate-right" aria-hidden="true" /> Try Again</Link>
         </div>
-        {footer}
       </motion.div>
     );
   }
@@ -320,7 +257,6 @@ export default function InfoPage() {
           </nav>
         </div>
       </article>
-      {footer}
     </motion.div>
   );
 }
