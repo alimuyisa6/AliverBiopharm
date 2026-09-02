@@ -1,132 +1,4 @@
- /* Quiz.css */
-
-/* ----- Grid ----- */
-.grid {
-  display: grid;
-  gap: var(--space-4);
-}
-.grid-cols-3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-.grid-cols-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* ----- Loading ----- */
-.fcd-loading-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  width: 100%;
-}
-
-/* ----- Card (overrides for Quiz) ----- */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-  transition: border-color 0.15s ease;
-}
-
-.card-clickable {
-  cursor: pointer;
-}
-.card-clickable:hover {
-  border-color: var(--primary);
-}
-
-.card-amber {
-  background: var(--amber-50);
-  border-color: var(--amber-100);
-}
-.card-violet {
-  background: var(--accent-light);
-  border-color: var(--accent-light);
-}
-
-.card-body {
-  padding: var(--space-4) 0;
-}
-.card-title {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
-  color: var(--text-main);
-  margin-bottom: var(--space-2);
-}
-.card-text {
-  color: var(--text-dim);
-  font-size: var(--text-base);
-}
-.card-footer {
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border-default);
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-2);
-}
-
-.card-compact {
-  padding: var(--space-3);
-}
-
-/* ----- Badges ----- */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-}
-.badge-warm {
-  background: var(--warm-light);
-  color: var(--warm);
-}
-.badge-success {
-  background: var(--success-light);
-  color: var(--success);
-}
-.badge-error {
-  background: var(--error-light);
-  color: var(--error);
-}
-.badge-info {
-  background: var(--info-light);
-  color: var(--info);
-}
-
-/* ----- Breadcrumb ----- */
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--text-dim);
-  margin: var(--space-4) 0;
-}
-.breadcrumb a {
-  color: var(--text-dim);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-.breadcrumb a:hover {
-  color: var(--primary);
-}
-.breadcrumb-sep {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-}
-.breadcrumb-icon {
-  font-size: var(--text-sm);
-}
-
-/* ----- Quiz Page ----- */
+ /* src/styles/quiz.css */
 .quiz-page {
   width: 100%;
 }
@@ -150,7 +22,6 @@
   margin-bottom: var(--space-6);
 }
 
-/* ----- Topic Cards ----- */
 .quiz-topic-image-wrapper {
   width: 100%;
   height: 160px;
@@ -166,6 +37,10 @@
 .quiz-topic-card {
   padding: 0;
   overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s ease;
 }
 .quiz-topic-card .card-body {
   padding: var(--space-5) var(--space-6);
@@ -175,7 +50,6 @@
   background: var(--bg-card);
 }
 
-/* ----- Hero ----- */
 .quiz-hero-loading {
   padding: var(--space-8) 0;
 }
@@ -254,7 +128,6 @@
   color: var(--text-dim);
 }
 
-/* ----- Section Headings ----- */
 .quiz-section-heading {
   display: flex;
   align-items: center;
@@ -278,7 +151,6 @@
   margin-bottom: var(--space-8);
 }
 
-/* ----- Challenge Card ----- */
 .quiz-challenge-card {
   display: flex;
   align-items: center;
@@ -327,7 +199,6 @@
   color: var(--text-dim);
 }
 
-/* ----- Learning Path ----- */
 .quiz-learning-path {
   margin-bottom: var(--space-8);
 }
@@ -337,7 +208,6 @@
   line-height: var(--leading-snug);
 }
 
-/* ----- Weak Areas ----- */
 .quiz-weakareas-card {
   margin-bottom: var(--space-8);
   margin-left: var(--space-4);
@@ -377,7 +247,6 @@
   max-width: 180px;
 }
 
-/* ----- Skeleton ----- */
 .quiz-skeleton-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -400,7 +269,6 @@
   gap: var(--space-3);
 }
 
-/* ----- Result ----- */
 .quiz-result-container {
   display: flex;
   flex-direction: column;
@@ -443,7 +311,6 @@
   margin-top: var(--space-3);
 }
 
-/* ----- Review ----- */
 .quiz-review-section {
   width: 100%;
 }
@@ -494,7 +361,6 @@
   margin-top: var(--space-4);
 }
 
-/* ----- Blocks ----- */
 .quiz-blocks-page {
   text-align: center;
 }
@@ -541,7 +407,7 @@
 }
 .quiz-blocks-grid .btn-success:hover:not(:disabled) {
   background: var(--success);
-  color: #fff;
+  color: var(--text-inverse);
   border-color: var(--success);
 }
 .quiz-blocks-grid .btn-ghost {
@@ -552,7 +418,6 @@
   margin-top: var(--space-4);
 }
 
-/* ----- Navigation pills (question numbers) ----- */
 .quiz-nav-pills {
   display: flex;
   flex-wrap: wrap;
@@ -568,7 +433,6 @@
   color: var(--primary);
 }
 
-/* ----- Timer ----- */
 .quiz-timer-row {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -614,7 +478,6 @@
   font-size: var(--text-sm);
 }
 
-/* ----- Answering indicator ----- */
 .quiz-answering-indicator {
   display: flex;
   align-items: center;
@@ -627,7 +490,6 @@
   font-size: var(--text-sm);
 }
 
-/* ----- Question Card ----- */
 .quiz-question-card {
   padding: 0;
   margin-bottom: var(--space-6);
@@ -692,7 +554,6 @@
   flex-shrink: 0;
 }
 
-/* ----- Confidence (optional) ----- */
 .quiz-confidence-row {
   margin-top: var(--space-4);
   display: flex;
@@ -706,7 +567,6 @@
   font-weight: var(--weight-medium);
 }
 
-/* ----- Navigation buttons ----- */
 .quiz-nav-buttons {
   display: flex;
   justify-content: space-between;
@@ -714,7 +574,6 @@
   gap: var(--space-3);
 }
 
-/* ----- Rules Modal ----- */
 .quiz-rules-list {
   list-style: none;
   padding: 0;
@@ -746,7 +605,6 @@
   width: 100%;
 }
 
-/* ----- Integrity Overlay ----- */
 .quiz-integrity-overlay {
   position: fixed;
   inset: 0;
@@ -767,7 +625,6 @@
   max-width: 480px;
 }
 
-/* ----- Responsive ----- */
 @media (max-width: 1024px) {
   .quiz-skeleton-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -775,10 +632,6 @@
 }
 
 @media (max-width: 768px) {
-  .grid-cols-3,
-  .grid-cols-4 {
-    grid-template-columns: 1fr;
-  }
   .quiz-skeleton-grid {
     grid-template-columns: 1fr;
   }
@@ -839,4 +692,4 @@
   .quiz-question-image {
     height: 180px;
   }
- }
+}
