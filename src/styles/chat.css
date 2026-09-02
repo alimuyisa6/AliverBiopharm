@@ -1,4 +1,5 @@
- .chat-widget {
+ /* src/styles/chat.css */
+.chat-widget {
   position: fixed;
   bottom: var(--space-6);
   right: var(--space-6);
@@ -20,20 +21,24 @@
 }
 
 .chat-panel {
-  position: absolute;
-  bottom: 76px;
+  position: fixed;
+  top: 0;
+  left: 0;
   right: 0;
-  width: 400px;
-  max-width: calc(100vw - var(--space-8));
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  border-radius: 0;
   background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-2xl);
+  border: none;
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   animation: scaleIn var(--ease-bounce) forwards;
-  transform-origin: bottom right;
+  transform-origin: center;
+  z-index: var(--z-modal);
 }
 
 .chat-panel-header {
@@ -82,7 +87,7 @@
 }
 
 .chat-body {
-  height: 380px;
+  flex: 1;
   overflow-y: auto;
   padding: var(--space-5) var(--space-6);
 }
@@ -193,10 +198,13 @@
     bottom: var(--space-4);
     right: var(--space-4);
   }
-  .chat-panel {
-    width: calc(100vw - var(--space-8));
-  }
   .chat-body {
-    height: 320px;
+    padding: var(--space-4);
+  }
+  .chat-panel-header {
+    padding: var(--space-4);
+  }
+  .chat-input-row {
+    padding: var(--space-3);
   }
 }
