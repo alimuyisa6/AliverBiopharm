@@ -1,0 +1,28 @@
+:root {
+  --card-padding: var(--space-4);
+}
+
+.emerald-card {
+  background: var(--emerald-100);
+  color: var(--emerald-800);
+  padding: var(--card-padding);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.card-shadow-sm { box-shadow: var(--shadow-sm) !important; }
+.card-shadow-md { box-shadow: var(--shadow-md) !important; }
+.card-shadow-lg { box-shadow: var(--shadow-lg) !important; }
+
+.pricing-card { box-shadow: var(--shadow-md); }
+.tutor-card-flat { box-shadow: var(--shadow-sm); }
+
+.page-transition {
+  transition: opacity var(--transition), transform var(--transition);
+  will-change: opacity, transform;
+}
+
+.nav-link,
+.main-nav .main-nav-link {
+  transition: color var(--transition), background var(--transition);
+}
