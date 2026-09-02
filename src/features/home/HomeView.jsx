@@ -176,7 +176,7 @@ function DailyRecallCard({ recall, onReveal, onStart }) {
           <p className="section-subtitle">{meta}</p>
         </div>
       </div>
-      <div className="card card-lifted row">
+      <div className="emerald-card row">
         <div className="row-body">
           {score && (
             <div>
