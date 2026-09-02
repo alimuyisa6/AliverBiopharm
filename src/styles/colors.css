@@ -88,14 +88,14 @@
   /* ============================================================
      Semantic Colors (Light Mode)
      ============================================================ */
-  --primary: var(--amber-500);
-  --primary-hover: var(--amber-600);
-  --primary-light: var(--amber-50);
-  --primary-ring: rgba(245, 158, 11, 0.35);
+  --primary: var(--emerald-500);
+  --primary-hover: var(--emerald-600);
+  --primary-light: var(--emerald-50);
+  --primary-ring: rgba(16, 185, 129, 0.35);
 
-  --secondary: var(--emerald-500);
-  --secondary-hover: var(--emerald-600);
-  --secondary-light: var(--emerald-50);
+  --secondary: var(--amber-500);
+  --secondary-hover: var(--amber-600);
+  --secondary-light: var(--amber-50);
 
   --accent: var(--grey-600);
   --accent-hover: var(--grey-700);
@@ -145,7 +145,7 @@
      ============================================================ */
   --border-default: var(--grey-200);
   --border-strong: var(--grey-300);
-  --border-focus: var(--amber-500);
+  --border-focus: var(--emerald-500);
 
   /* ============================================================
      Shadows — used sparingly, not on cards
@@ -166,14 +166,14 @@
    Dark Mode
    ============================================================ */
 body.dark-mode {
-  --primary: var(--amber-400);
-  --primary-hover: var(--amber-300);
-  --primary-light: rgba(245, 158, 11, 0.15);
-  --primary-ring: rgba(245, 158, 11, 0.30);
+  --primary: var(--emerald-400);
+  --primary-hover: var(--emerald-300);
+  --primary-light: rgba(16, 185, 129, 0.15);
+  --primary-ring: rgba(16, 185, 129, 0.30);
 
-  --secondary: var(--emerald-400);
-  --secondary-hover: var(--emerald-300);
-  --secondary-light: rgba(16, 185, 129, 0.15);
+  --secondary: var(--amber-400);
+  --secondary-hover: var(--amber-300);
+  --secondary-light: rgba(245, 158, 11, 0.15);
 
   --accent: var(--grey-500);
   --accent-hover: var(--grey-400);
@@ -203,7 +203,7 @@ body.dark-mode {
 
   --border-default: var(--grey-700);
   --border-strong: var(--grey-600);
-  --border-focus: var(--amber-400);
+  --border-focus: var(--emerald-400);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.30);
