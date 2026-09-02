@@ -38,7 +38,7 @@ export default function ClassSwitcher({ className = '' }) {
 
       {open && (
         <>
-          <div className="mobile-nav-overlay" onClick={() => setOpen(false)} />
+          <div className="dropdown-backdrop" onClick={() => setOpen(false)} />
           <div className="dropdown-menu">
             <div className="dropdown-item" style={{ fontWeight: 600, pointerEvents: 'none' }}>
               Switch {label}
