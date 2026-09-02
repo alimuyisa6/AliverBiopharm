@@ -1,4 +1,5 @@
- .form-group {
+ /* src/styles/input.css */
+.form-group {
   margin-bottom: var(--space-5);
 }
 
