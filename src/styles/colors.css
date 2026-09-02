@@ -220,3 +220,30 @@ body.dark-mode {
 .section-tint {
   background: var(--bg-section-tint);
 }
+
+/* ============================================================
+   Full-bleed emerald section — use on <section> wrappers to make
+   the whole section stand out, not the cards inside it. Cards
+   inside should stay plain/white so they pop against the color.
+   ============================================================ */
+.section-emerald {
+  background: var(--emerald-700);
+  color: var(--text-inverse);
+}
+
+.section-emerald .eyebrow {
+  color: var(--emerald-100);
+}
+
+.section-emerald .eyebrow::before {
+  background: var(--emerald-100);
+}
+
+.section-emerald h2 {
+  color: var(--text-inverse);
+}
+
+.section-emerald .section-subtitle,
+.section-emerald .section-head-left p {
+  color: var(--emerald-50);
+}
