@@ -7,139 +7,155 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes borderProgress {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
+  from { width: 0%; }
+  to { width: 100%; }
 }
 
 @keyframes questionSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes resultPop {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
+/* ===== Modern Page Entrance ===== */
+
+/* 1. Write-in: reveal from top to bottom like writing */
+@keyframes writeIn {
+  0% { clip-path: inset(0 0 100% 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+
+/* 2. Zoom pulse: scale in and out smoothly */
+@keyframes zoomPulse {
+  0% { transform: scale(0.92); opacity: 0.7; }
+  50% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 3. Swipe left: slide in from right */
+@keyframes swipeInLeft {
+  from { transform: translateX(60px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* 4. Swipe right: slide in from left */
+@keyframes swipeInRight {
+  from { transform: translateX(-60px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* 5. Combined entrance – runs in sequence */
+/* We'll rely on multiple classes with delays to sequence, but we can also provide a single class that applies all steps using animation-delay on sub-elements via CSS custom properties. */
+/* For simplicity, we provide individual utility classes for each step, plus a master class that chains them using nested elements. */
+
+/* Utility classes for each effect */
+.anim-write-in {
+  animation: writeIn 1.2s var(--ease-smooth) both;
+  will-change: clip-path;
+}
+
+.anim-zoom-pulse {
+  animation: zoomPulse 0.9s var(--ease-bounce) both;
+  will-change: transform, opacity;
+}
+
+.anim-swipe-left {
+  animation: swipeInLeft 0.7s var(--ease-smooth) both;
+  will-change: transform, opacity;
+}
+
+.anim-swipe-right {
+  animation: swipeInRight 0.7s var(--ease-smooth) both;
+  will-change: transform, opacity;
+}
+
+/* Full page entrance: apply to a container and its children will sequence using delays */
+.page-entrance > * {
+  opacity: 0;
+  animation: fadeIn 0.4s var(--ease-smooth) forwards;
+}
+
+/* Step-by-step entrance for a single element using multiple keyframes via combined animation or sequential classes */
+/* To achieve the described "writing, zoom, swipe" on a single element, we use a multi-step keyframe: */
+@keyframes modernEntrance {
+  0% { clip-path: inset(0 0 100% 0); opacity: 0; transform: scale(0.92); }
+  30% { clip-path: inset(0 0 0 0); opacity: 0.9; transform: scale(0.92); }
+  60% { transform: scale(1.06); opacity: 1; }
+  80% { transform: translateX(40px); }
+  100% { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+.anim-modern-entrance {
+  animation: modernEntrance 1.8s var(--ease-bounce) both;
+  will-change: clip-path, transform, opacity;
+}
+
+/* Existing classes */
 .anim-fade-in {
   animation: fadeIn var(--ease-smooth) both;
 }
-
 .anim-slide-up {
   animation: slideUp var(--ease-smooth) both;
 }
-
 .anim-slide-down {
   animation: slideDown var(--ease-smooth) both;
 }
-
 .anim-scale-in {
   animation: scaleIn var(--ease-bounce) both;
 }
-
 .anim-pop {
   animation: resultPop var(--ease-bounce) both;
 }
-
 .anim-fast {
   animation-duration: 150ms;
 }
-
 .anim-slow {
   animation-duration: 400ms;
 }
-
 .anim-delay-1 {
   animation-delay: 80ms;
 }
-
 .anim-delay-2 {
   animation-delay: 160ms;
 }
-
 .anim-delay-3 {
   animation-delay: 240ms;
 }
