@@ -391,10 +391,22 @@ export default function Quiz() {
   return (
     <div className="quiz-page">
       <div className="section quiz-page-section">
-        <span className="sec-label">Assessments</span>
+        <span className="eyebrow">Assessments</span>
         <h1 className="section-title quiz-page-title">
           Knowledge Quizzes<br />{displayName ? `– ${displayName}` : ''}
         </h1>
+
+        <h2
+          style={{
+            fontSize: 'var(--text-base)',
+            fontWeight: 'var(--weight-normal)',
+            color: 'var(--text-dim)',
+            lineHeight: 'var(--leading-relaxed)',
+            marginBottom: 'var(--space-4)'
+          }}
+        >
+          Test your understanding with subject‑specific quizzes. Each block contains 10 questions – answer them all and aim for 70% to pass. Review your answers and track your progress as you go.
+        </h2>
 
         {class_name && <p className="quiz-group-label">Current group: {class_name}</p>}
 
@@ -423,49 +435,68 @@ export default function Quiz() {
         )}
 
         {!currentTopic ? (
-          <div className="grid grid-cols-3">
-            {topicsLoading ? (
-              Array.from({ length: 6 }).map((_, index) => (
-                <Card key={index} variant="round" loading={true} loadingLines={2} />
-              ))
-            ) : allTopics.length === 0 ? (
-              <div className="quiz-empty-topics">
-                <Icon name="layer-group" className="quiz-empty-icon" />
-                <p>No topics available.</p>
-              </div>
-            ) : (
-              allTopics.map((topic) => {
-                const hasQuestions = (topic.question_count || 0) > 0 && (topic.total_blocks || 0) > 0;
-                const allDone = topic.all_done ?? (hasQuestions && topic.completed_blocks?.length === topic.total_blocks);
+          <>
+            <div className="quiz-section-heading" style={{ marginTop: 'var(--space-8)' }}>
+              <Icon name="layer-group" />
+              <span>Available Topics</span>
+            </div>
 
-                if (hasQuestions && !allDone) {
+            <h2
+              style={{
+                fontSize: 'var(--text-base)',
+                fontWeight: 'var(--weight-normal)',
+                color: 'var(--text-dim)',
+                lineHeight: 'var(--leading-relaxed)',
+                marginBottom: 'var(--space-5)'
+              }}
+            >
+              Choose a topic to start a quiz block. Completed blocks are marked with a check.
+            </h2>
+
+            <div className="grid grid-cols-3">
+              {topicsLoading ? (
+                Array.from({ length: 6 }).map((_, index) => (
+                  <Card key={index} variant="round" loading={true} loadingLines={2} />
+                ))
+              ) : allTopics.length === 0 ? (
+                <div className="quiz-empty-topics" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--space-8)' }}>
+                  <Icon name="layer-group" style={{ fontSize: '2rem', color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }} />
+                  <p style={{ color: 'var(--text-muted)' }}>No topics available at the moment.</p>
+                </div>
+              ) : (
+                allTopics.map((topic) => {
+                  const hasQuestions = (topic.question_count || 0) > 0 && (topic.total_blocks || 0) > 0;
+                  const allDone = topic.all_done ?? (hasQuestions && topic.completed_blocks?.length === topic.total_blocks);
+
+                  if (hasQuestions && !allDone) {
+                    return (
+                      <Card
+                        key={topic.unit_id}
+                        image={topic.topic_image_url}
+                        title={topic.topic_name}
+                        description={`${topic.question_count} questions • ${topic.total_blocks} blocks`}
+                        footer={
+                          <Button variant="primary" size="sm" onClick={() => openTopicBlocks(topic)} disabled={locked}>
+                            Start
+                          </Button>
+                        }
+                      />
+                    );
+                  }
+
                   return (
                     <Card
                       key={topic.unit_id}
                       image={topic.topic_image_url}
                       title={topic.topic_name}
-                      description={`${topic.question_count} questions • ${topic.total_blocks} blocks`}
-                      footer={
-                        <Button variant="primary" size="sm" onClick={() => openTopicBlocks(topic)} disabled={locked}>
-                          Start
-                        </Button>
-                      }
+                      description={`${topic.question_count} questions`}
+                      className="card-compact"
                     />
                   );
-                }
-
-                return (
-                  <Card
-                    key={topic.unit_id}
-                    image={topic.topic_image_url}
-                    title={topic.topic_name}
-                    description={`${topic.question_count} questions`}
-                    className="card-compact"
-                  />
-                );
-              })
-            )}
-          </div>
+                })
+              )}
+            </div>
+          </>
         ) : resultData ? (
           <div className="quiz-result-container">
             <Card variant="flat" className="quiz-result-card">
