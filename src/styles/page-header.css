@@ -105,24 +105,19 @@
   background: var(--border-default);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .page-header {
     padding: var(--space-6) 0;
   }
-
   .page-header-inner {
     padding: 0 var(--space-4);
   }
-
   .page-header-title {
     font-size: var(--text-2xl);
   }
-
   .page-header-meta {
     gap: var(--space-3);
   }
-
   .page-header-meta-item {
     font-size: var(--text-xs);
   }
@@ -132,21 +127,17 @@
   .page-header {
     padding: var(--space-4) 0;
   }
-
   .page-header-title {
     font-size: var(--text-xl);
   }
-
   .page-header-subtitle {
     font-size: var(--text-sm);
   }
-
   .page-header-meta {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1);
   }
-
   .page-header-meta-divider {
     display: none;
   }
