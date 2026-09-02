@@ -1,4 +1,4 @@
-/* styles/toast.css */
+ /* src/styles/toast.css */
 .toast-container {
   position: fixed;
   bottom: var(--space-6);
@@ -24,7 +24,16 @@
   animation: slideUp var(--ease-smooth) forwards;
 }
 
-.toast-success { background: var(--success); }
-.toast-error { background: var(--error); }
-.toast-warning { background: var(--warning); color: var(--slate-900); }
-.toast-info { background: var(--info); }
+.toast-success {
+  background: var(--success);
+}
+.toast-error {
+  background: var(--error);
+}
+.toast-warning {
+  background: var(--warning);
+  color: var(--text-main);
+}
+.toast-info {
+  background: var(--info);
+}
