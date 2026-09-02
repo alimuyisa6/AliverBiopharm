@@ -1,3 +1,4 @@
+ /* src/styles/home-sections.css */
 .home-faq-list {
   display: flex;
   flex-direction: column;
@@ -19,39 +20,39 @@
   border-color: var(--border-strong);
 }
 
-.home-faq-blue    { border-left-color: var(--primary); }
-.home-faq-teal     { border-left-color: var(--secondary); }
-.home-faq-violet   { border-left-color: var(--accent); }
-.home-faq-amber    { border-left-color: var(--warm); }
-.home-faq-emerald  { border-left-color: var(--success); }
+.home-faq-blue { border-left-color: var(--primary); }
+.home-faq-teal { border-left-color: var(--secondary); }
+.home-faq-violet { border-left-color: var(--accent); }
+.home-faq-amber { border-left-color: var(--warm); }
+.home-faq-emerald { border-left-color: var(--success); }
 
-.home-faq-blue .home-faq-icon    { background: var(--primary-light); color: var(--primary); }
-.home-faq-teal .home-faq-icon     { background: var(--secondary-light); color: var(--secondary); }
-.home-faq-violet .home-faq-icon   { background: var(--accent-light); color: var(--accent); }
-.home-faq-amber .home-faq-icon    { background: var(--warm-light); color: var(--warm); }
-.home-faq-emerald .home-faq-icon  { background: var(--success-light); color: var(--success); }
+.home-faq-blue .home-faq-icon { background: var(--primary-light); color: var(--primary); }
+.home-faq-teal .home-faq-icon { background: var(--secondary-light); color: var(--secondary); }
+.home-faq-violet .home-faq-icon { background: var(--accent-light); color: var(--accent); }
+.home-faq-amber .home-faq-icon { background: var(--warm-light); color: var(--warm); }
+.home-faq-emerald .home-faq-icon { background: var(--success-light); color: var(--success); }
 
-.home-faq-blue .home-faq-plus    { color: var(--primary); border-color: var(--primary); }
-.home-faq-teal .home-faq-plus     { color: var(--secondary); border-color: var(--secondary); }
-.home-faq-violet .home-faq-plus   { color: var(--accent); border-color: var(--accent); }
-.home-faq-amber .home-faq-plus    { color: var(--warm); border-color: var(--warm); }
-.home-faq-emerald .home-faq-plus  { color: var(--success); border-color: var(--success); }
+.home-faq-blue .home-faq-plus { color: var(--primary); border-color: var(--primary); }
+.home-faq-teal .home-faq-plus { color: var(--secondary); border-color: var(--secondary); }
+.home-faq-violet .home-faq-plus { color: var(--accent); border-color: var(--accent); }
+.home-faq-amber .home-faq-plus { color: var(--warm); border-color: var(--warm); }
+.home-faq-emerald .home-faq-plus { color: var(--success); border-color: var(--success); }
 
 .home-faq-item.active {
   box-shadow: var(--shadow-md);
 }
 
-.home-faq-blue.active    { background: var(--primary-light); }
-.home-faq-teal.active     { background: var(--secondary-light); }
-.home-faq-violet.active   { background: var(--accent-light); }
-.home-faq-amber.active    { background: var(--warm-light); }
-.home-faq-emerald.active  { background: var(--success-light); }
+.home-faq-blue.active { background: var(--primary-light); }
+.home-faq-teal.active { background: var(--secondary-light); }
+.home-faq-violet.active { background: var(--accent-light); }
+.home-faq-amber.active { background: var(--warm-light); }
+.home-faq-emerald.active { background: var(--success-light); }
 
-.home-faq-blue.active .home-faq-plus    { background: var(--primary); color: var(--text-inverse); }
-.home-faq-teal.active .home-faq-plus     { background: var(--secondary); color: var(--text-inverse); }
-.home-faq-violet.active .home-faq-plus   { background: var(--accent); color: var(--text-inverse); }
-.home-faq-amber.active .home-faq-plus    { background: var(--warm); color: var(--text-inverse); }
-.home-faq-emerald.active .home-faq-plus  { background: var(--success); color: var(--text-inverse); }
+.home-faq-blue.active .home-faq-plus { background: var(--primary); color: var(--text-inverse); }
+.home-faq-teal.active .home-faq-plus { background: var(--secondary); color: var(--text-inverse); }
+.home-faq-violet.active .home-faq-plus { background: var(--accent); color: var(--text-inverse); }
+.home-faq-amber.active .home-faq-plus { background: var(--warm); color: var(--text-inverse); }
+.home-faq-emerald.active .home-faq-plus { background: var(--success); color: var(--text-inverse); }
 
 .home-faq-question {
   width: 100%;
@@ -141,7 +142,6 @@
   }
 }
 
-/* ===== Team scroll ===== */
 .team-scroll-wrap {
   position: relative;
   display: flex;
@@ -221,17 +221,17 @@
   opacity: 0.12;
 }
 
-.team-card-blue    { border-top-color: var(--primary); }
-.team-card-teal     { border-top-color: var(--secondary); }
-.team-card-violet   { border-top-color: var(--accent); }
-.team-card-amber    { border-top-color: var(--warm); }
-.team-card-emerald  { border-top-color: var(--success); }
+.team-card-blue { border-top-color: var(--primary); }
+.team-card-teal { border-top-color: var(--secondary); }
+.team-card-violet { border-top-color: var(--accent); }
+.team-card-amber { border-top-color: var(--warm); }
+.team-card-emerald { border-top-color: var(--success); }
 
-.team-card-blue .team-card-quote    { color: var(--primary); }
-.team-card-teal .team-card-quote     { color: var(--secondary); }
-.team-card-violet .team-card-quote   { color: var(--accent); }
-.team-card-amber .team-card-quote    { color: var(--warm); }
-.team-card-emerald .team-card-quote  { color: var(--success); }
+.team-card-blue .team-card-quote { color: var(--primary); }
+.team-card-teal .team-card-quote { color: var(--secondary); }
+.team-card-violet .team-card-quote { color: var(--accent); }
+.team-card-amber .team-card-quote { color: var(--warm); }
+.team-card-emerald .team-card-quote { color: var(--success); }
 
 .team-avatar {
   width: 96px;
@@ -246,11 +246,11 @@
   border: 3px solid var(--border-default);
 }
 
-.team-card-blue .team-avatar    { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
-.team-card-teal .team-avatar     { background: var(--secondary-light); color: var(--secondary); border-color: var(--secondary); }
-.team-card-violet .team-avatar   { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
-.team-card-amber .team-avatar    { background: var(--warm-light); color: var(--warm); border-color: var(--warm); }
-.team-card-emerald .team-avatar  { background: var(--success-light); color: var(--success); border-color: var(--success); }
+.team-card-blue .team-avatar { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.team-card-teal .team-avatar { background: var(--secondary-light); color: var(--secondary); border-color: var(--secondary); }
+.team-card-violet .team-avatar { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+.team-card-amber .team-avatar { background: var(--warm-light); color: var(--warm); border-color: var(--warm); }
+.team-card-emerald .team-avatar { background: var(--success-light); color: var(--success); border-color: var(--success); }
 
 .team-avatar img {
   width: 100%;
@@ -280,11 +280,11 @@
   border-radius: var(--radius-full);
 }
 
-.team-card-blue .team-title    { background: var(--primary-light); color: var(--primary); }
-.team-card-teal .team-title     { background: var(--secondary-light); color: var(--secondary); }
-.team-card-violet .team-title   { background: var(--accent-light); color: var(--accent); }
-.team-card-amber .team-title    { background: var(--warm-light); color: var(--warm); }
-.team-card-emerald .team-title  { background: var(--success-light); color: var(--success); }
+.team-card-blue .team-title { background: var(--primary-light); color: var(--primary); }
+.team-card-teal .team-title { background: var(--secondary-light); color: var(--secondary); }
+.team-card-violet .team-title { background: var(--accent-light); color: var(--accent); }
+.team-card-amber .team-title { background: var(--warm-light); color: var(--warm); }
+.team-card-emerald .team-title { background: var(--success-light); color: var(--success); }
 
 .team-card p {
   position: relative;
