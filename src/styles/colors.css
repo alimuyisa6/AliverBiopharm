@@ -1,97 +1,65 @@
  /* src/styles/colors.css */
 :root {
-  /* ============================================================
-     Amber (Primary)
-     ============================================================ */
-  --amber-50: #FFFBEB;
-  --amber-100: #FEF3C7;
-  --amber-200: #FDE68A;
-  --amber-300: #FCD34D;
-  --amber-400: #FBBF24;
-  --amber-500: #F59E0B;
-  --amber-600: #D97706;
-  --amber-700: #B45309;
-  --amber-800: #92400E;
-  --amber-900: #78350F;
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
 
-  /* ============================================================
-     Emerald (Secondary)
-     ============================================================ */
-  --emerald-50: #ECFDF5;
-  --emerald-100: #D1FAE5;
-  --emerald-200: #A7F3D0;
-  --emerald-300: #6EE7B7;
-  --emerald-400: #34D399;
-  --emerald-500: #10B981;
+  --emerald-50: #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
   --emerald-600: #059669;
   --emerald-700: #047857;
-  --emerald-800: #065F46;
-  --emerald-900: #064E3B;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
 
-  /* ============================================================
-     Blue (Tertiary / Info)
-     ============================================================ */
-  --blue-50: #EFF6FF;
-  --blue-100: #DBEAFE;
-  --blue-200: #BFDBFE;
-  --blue-300: #93C5FD;
-  --blue-400: #60A5FA;
-  --blue-500: #3B82F6;
-  --blue-600: #2563EB;
-  --blue-700: #1D4ED8;
-  --blue-800: #1E40AF;
-  --blue-900: #1E3A8A;
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
 
-  /* ============================================================
-     Green (Success)
-     ============================================================ */
-  --green-50: #F0FDF4;
-  --green-100: #DCFCE7;
-  --green-200: #BBF7D0;
-  --green-300: #86EFAC;
-  --green-400: #4ADE80;
-  --green-500: #22C55E;
-  --green-600: #16A34A;
-  --green-700: #15803D;
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
   --green-800: #166534;
-  --green-900: #14532D;
+  --green-900: #14532d;
 
-  /* ============================================================
-     Red (Error)
-     ============================================================ */
-  --red-50: #FEF2F2;
-  --red-100: #FEE2E2;
-  --red-200: #FECACA;
-  --red-300: #FCA5A5;
-  --red-400: #F87171;
-  --red-500: #EF4444;
-  --red-600: #DC2626;
-  --red-700: #B91C1C;
-  --red-800: #991B1B;
-  --red-900: #7F1D1D;
+  --grey-50: #f8fafc;
+  --grey-100: #f1f5f9;
+  --grey-200: #e2e8f0;
+  --grey-300: #cbd5e1;
+  --grey-400: #94a3b8;
+  --grey-500: #64748b;
+  --grey-600: #475569;
+  --grey-700: #334155;
+  --grey-800: #1e293b;
+  --grey-900: #0f172a;
+  --grey-950: #020617;
 
-  /* ============================================================
-     Grey (Neutral)
-     ============================================================ */
-  --grey-50: #F9FAFB;
-  --grey-100: #F3F4F6;
-  --grey-200: #E5E7EB;
-  --grey-300: #D1D5DB;
-  --grey-400: #9CA3AF;
-  --grey-500: #6B7280;
-  --grey-600: #4B5563;
-  --grey-700: #374151;
-  --grey-800: #1F2937;
-  --grey-900: #111827;
-  --grey-950: #0A0F1A;
-
-  /* ============================================================
-     Semantic Colors (Light Mode)
-     ============================================================ */
-  --primary: var(--amber-500);
-  --primary-hover: var(--amber-600);
-  --primary-light: var(--amber-50);
-  --primary-ring: rgba(245, 158, 11, 0.35);
+  --primary: #d1a432;
+  --primary-hover: #b88e22;
+  --primary-light: #fbf4e3;
+  --primary-ring: rgba(209, 164, 50, 0.35);
 
   --secondary: var(--emerald-500);
   --secondary-hover: var(--emerald-600);
@@ -101,15 +69,15 @@
   --accent-hover: var(--grey-700);
   --accent-light: var(--grey-50);
 
-  --warm: var(--amber-500);
-  --warm-hover: var(--amber-600);
-  --warm-light: var(--amber-50);
+  --warm: var(--primary);
+  --warm-hover: var(--primary-hover);
+  --warm-light: var(--primary-light);
 
   --success: var(--green-500);
   --success-light: var(--green-50);
 
-  --error: var(--red-500);
-  --error-light: var(--red-50);
+  --error: #ef4444;
+  --error-light: #fef2f2;
 
   --warning: var(--amber-500);
   --warning-light: var(--amber-50);
@@ -117,59 +85,45 @@
   --info: var(--blue-500);
   --info-light: var(--blue-50);
 
-  /* ============================================================
-     Backgrounds
-     ============================================================ */
   --bg-page: var(--grey-50);
-  --bg-card: #FFFFFF;
+  --bg-card: #ffffff;
   --bg-card-hover: var(--grey-100);
-  --bg-card-tinted: #FAFCFF;
+  --bg-card-tinted: #fafcff;
   --bg-overlay: rgba(15, 23, 42, 0.55);
-  --bg-input: #FFFFFF;
+  --bg-input: #ffffff;
   --bg-input-disabled: var(--grey-100);
   --bg-hero: var(--grey-50);
   --bg-section-tint: var(--grey-100);
 
-  /* ============================================================
-     Text
-     ============================================================ */
   --text-main: var(--grey-900);
   --text-dim: var(--grey-600);
   --text-muted: var(--grey-400);
-  --text-inverse: #FFFFFF;
+  --text-inverse: #ffffff;
   --text-link: var(--blue-600);
   --text-link-hover: var(--blue-700);
 
-  /* ============================================================
-     Borders
-     ============================================================ */
   --border-default: var(--grey-200);
   --border-strong: var(--grey-300);
-  --border-focus: var(--amber-500);
+  --border-focus: var(--primary);
 
-  /* ============================================================
-     Shadows — used sparingly, not on cards
-     ============================================================ */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.10);
 
-  /* ============================================================
-     Header / Footer
-     ============================================================ */
-  --header-footer-bg-solid: #FFFFFF;
+  --level-olevel: var(--blue-600);
+  --level-alevel: var(--emerald-600);
+  --level-pharmacy: var(--grey-600);
+
+  --header-footer-bg-solid: #ffffff;
   --header-footer-border: var(--grey-200);
 }
 
-/* ============================================================
-   Dark Mode
-   ============================================================ */
 body.dark-mode {
-  --primary: var(--amber-400);
-  --primary-hover: var(--amber-300);
-  --primary-light: rgba(245, 158, 11, 0.15);
-  --primary-ring: rgba(245, 158, 11, 0.30);
+  --primary: #e5bc4a;
+  --primary-hover: #f0d27a;
+  --primary-light: rgba(209, 164, 50, 0.15);
+  --primary-ring: rgba(209, 164, 50, 0.30);
 
   --secondary: var(--emerald-400);
   --secondary-hover: var(--emerald-300);
@@ -178,11 +132,11 @@ body.dark-mode {
   --accent: var(--grey-500);
   --accent-hover: var(--grey-400);
 
-  --warm: var(--amber-400);
-  --warm-hover: var(--amber-300);
+  --warm: var(--primary);
+  --warm-hover: var(--primary-hover);
 
   --success: var(--green-400);
-  --error: var(--red-400);
+  --error: #f87171;
   --info: var(--blue-400);
 
   --bg-page: var(--grey-950);
@@ -203,7 +157,7 @@ body.dark-mode {
 
   --border-default: var(--grey-700);
   --border-strong: var(--grey-600);
-  --border-focus: var(--amber-400);
+  --border-focus: var(--primary);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.30);
@@ -214,36 +168,6 @@ body.dark-mode {
   --header-footer-border: var(--grey-700);
 }
 
-/* ============================================================
-   Utility
-   ============================================================ */
 .section-tint {
   background: var(--bg-section-tint);
-}
-
-/* ============================================================
-   Full-bleed emerald section — use on <section> wrappers to make
-   the whole section stand out, not the cards inside it. Cards
-   inside should stay plain/white so they pop against the color.
-   ============================================================ */
-.section-emerald {
-  background: var(--emerald-700);
-  color: var(--text-inverse);
-}
-
-.section-emerald .eyebrow {
-  color: var(--emerald-100);
-}
-
-.section-emerald .eyebrow::before {
-  background: var(--emerald-100);
-}
-
-.section-emerald h2 {
-  color: var(--text-inverse);
-}
-
-.section-emerald .section-subtitle,
-.section-emerald .section-head-left p {
-  color: var(--emerald-50);
 }
