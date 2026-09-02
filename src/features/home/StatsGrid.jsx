@@ -50,7 +50,7 @@ function AnimatedNumber({ target, label, icon }) {
 
 export function StatsGrid({ stats = {} }) {
   return (
-    <section className="section">
+    <section className="section section-emerald">
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Our Impact</span>
