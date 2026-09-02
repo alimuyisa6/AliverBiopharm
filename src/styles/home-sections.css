@@ -857,6 +857,16 @@
   box-shadow: var(--shadow-md);
 }
 
+/* section-emerald sections need to override the panel's white
+   background above — .home-page > .section alone is more specific
+   than .section-emerald on its own, so the white panel background
+   always won until this rule matched all three classes to
+   outrank it. */
+.home-page > .section.section-emerald {
+  background: var(--emerald-700);
+  border-color: var(--emerald-700);
+}
+
 @media (max-width: 768px) {
   .home-page > .section {
     padding: var(--space-6) var(--space-4);
