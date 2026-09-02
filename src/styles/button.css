@@ -1,4 +1,4 @@
-  /* src/styles/button.css */
+ /* src/styles/button.css */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -17,18 +17,15 @@
   line-height: 1.5;
   text-decoration: none;
 }
-
 .btn:focus-visible {
   outline: 2px solid var(--primary-ring);
   outline-offset: 2px;
 }
-
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* ----- Primary — Amber ----- */
 .btn-primary {
   background: var(--primary);
   color: var(--text-inverse);
@@ -39,7 +36,6 @@
   border-color: var(--primary-hover);
 }
 
-/* ----- Secondary — Border only ----- */
 .btn-secondary {
   background: transparent;
   color: var(--text-main);
@@ -50,7 +46,6 @@
   color: var(--primary);
 }
 
-/* ----- Ghost — Transparent ----- */
 .btn-ghost {
   background: transparent;
   color: var(--text-dim);
@@ -61,7 +56,6 @@
   color: var(--text-main);
 }
 
-/* ----- Warm — Amber light background ----- */
 .btn-warm {
   background: var(--warm-light);
   color: var(--warm);
@@ -72,7 +66,6 @@
   border-color: var(--amber-300);
 }
 
-/* ----- Danger ----- */
 .btn-danger {
   background: var(--error-light);
   color: var(--error);
@@ -83,7 +76,6 @@
   border-color: var(--red-300);
 }
 
-/* ----- Success ----- */
 .btn-success {
   background: var(--success-light);
   color: var(--success);
@@ -94,7 +86,6 @@
   border-color: var(--green-300);
 }
 
-/* ----- Sizes ----- */
 .btn-sm {
   padding: var(--space-1) var(--space-4);
   font-size: var(--text-xs);
@@ -104,7 +95,6 @@
   font-size: var(--text-base);
 }
 
-/* ----- Icon Button ----- */
 .btn-icon {
   width: 36px;
   height: 36px;
@@ -131,7 +121,6 @@
   height: 44px;
 }
 
-/* ----- Icons inside buttons ----- */
 .btn svg,
 .btn i {
   width: 16px;
@@ -152,7 +141,6 @@
   font-size: 16px;
 }
 
-/* ----- Loading state ----- */
 .btn-loading {
   position: relative;
   color: transparent !important;
@@ -175,7 +163,5 @@
 }
 
 @keyframes btn-spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
