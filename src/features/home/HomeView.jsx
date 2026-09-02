@@ -13,7 +13,7 @@ import ClassroomTeaser from '../classroom/ClassroomTeaser';
 import TutorMarketplaceTeaser from '../tutor-marketplace/TutorMarketplaceTeaser';
 import Hero from '../../components/Hero/Hero';
 import { useLayout } from '../../contexts/LayoutContext';
-import './home.css';
+
 
 const CONTINUE_ICON = { note: 'book-open', video: 'play', quiz: 'clipboard-check' };
 
