@@ -1,5 +1,4 @@
-/* styles/about.css */
-
+ /* src/styles/about.css */
 .about-hero {
   display: flex;
   align-items: center;
@@ -107,7 +106,6 @@
   color: var(--primary-hover);
 }
 
-/* Team */
 .team-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -194,7 +192,6 @@
   transform: translateY(-2px);
 }
 
-/* Contributors */
 .contributors-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -232,7 +229,6 @@
   color: var(--text-dim);
 }
 
-/* FAQ */
 .faq-list {
   display: flex;
   flex-direction: column;
@@ -288,7 +284,6 @@
   padding-bottom: var(--space-4);
 }
 
-/* Contact */
 .about-contact {
   background: var(--secondary-light);
   padding: var(--space-10);
@@ -346,7 +341,6 @@ a.about-contact-item:hover {
   transform: translateY(-2px);
 }
 
-/* CTA */
 .about-cta {
   text-align: center;
   padding: var(--space-12);
