@@ -168,7 +168,7 @@ function DailyRecallCard({ recall, onReveal, onStart }) {
   if (!recall) return null;
   const { question_text, meta, score } = recall;
   return (
-    <section className="section">
+    <section className="section section-emerald">
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Daily active recall</span>
@@ -176,7 +176,7 @@ function DailyRecallCard({ recall, onReveal, onStart }) {
           <p className="section-subtitle">{meta}</p>
         </div>
       </div>
-      <div className="emerald-card row">
+      <div className="card card-lifted row">
         <div className="row-body">
           {score && (
             <div>
