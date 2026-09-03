@@ -595,3 +595,155 @@
     border-radius: var(--radius-md);
   }
 }
+
+
+.curriculum-rail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.curriculum-rail::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .curriculum-rail {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    overflow-x: visible;
+  }
+}
+
+.curriculum-card {
+  flex: 0 0 220px;
+  scroll-snap-align: start;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  .curriculum-card {
+    flex: initial;
+  }
+}
+
+.curriculum-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16);
+}
+
+.curriculum-card:active {
+  transform: translateY(0);
+}
+
+.curriculum-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+}
+
+.curriculum-card-image,
+.curriculum-card-image-blurred {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.curriculum-card-image-blurred {
+  filter: blur(6px) brightness(0.7);
+  transform: scale(1.08);
+}
+
+.curriculum-card-image-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 28px;
+}
+
+.curriculum-card-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.curriculum-card-ring {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.progress-ring-label {
+  font-size: 11px;
+  font-weight: 600;
+  fill: #ffffff;
+}
+
+.curriculum-card-lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.curriculum-card-pill {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.55);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.curriculum-card-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.curriculum-card-caption strong {
+  color: #ffffff;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.curriculum-card-caption span {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+}
+
+.curriculum-card-locked .curriculum-card-caption span {
+  color: rgba(255, 255, 255, 0.75);
+}
+
