@@ -17,6 +17,33 @@ import { useLayout } from '../../contexts/LayoutContext';
 
 const CONTINUE_ICON = { note: 'book-open', video: 'play', quiz: 'clipboard-check' };
 
+const SUBJECT_ACCENT = { biology: '#2F8F5B', pharmacology: '#2F6FED', chemistry: '#2F6FED', clinical: '#C7861B' };
+
+function ProgressRing({ percent = 0, color = '#2F8F5B', size = 44 }) {
+  const stroke = 4;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
+  return (
+    <svg width={size} height={size} className="progress-ring">
+      <circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.35)" strokeWidth={stroke} fill="none" />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={color}
+        strokeWidth={stroke}
+        fill="none"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+      <text x="50%" y="52%" textAnchor="middle" dominantBaseline="middle" className="progress-ring-label">{percent}%</text>
+    </svg>
+  );
+}
+
 function LearningJourneySection({ navigate, sections }) {
   const { bootstrap } = useLayout();
   const uiComponents = bootstrap?.ui_components || [];
@@ -127,7 +154,50 @@ function ContinueLearningRail({ items, navigate }) {
   );
 }
 
-function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccessPremium }) {
+function CurriculumUnitCard({ unit, locked, navigate }) {
+  const accent = SUBJECT_ACCENT[unit.subject_key] || SUBJECT_ACCENT.biology;
+  const percent = unit.progress_percent || 0;
+  const totalLessons = unit.lessons_total || 0;
+  const doneLessons = unit.lessons_completed || 0;
+
+  return (
+    <button
+      type="button"
+      className={`curriculum-card${locked ? ' curriculum-card-locked' : ''}`}
+      onClick={() => navigate(locked ? '/upgrade' : `/units/${unit.id}`)}
+    >
+      <div className="curriculum-card-media">
+        {unit.topic_image_url ? (
+          <img src={unit.topic_image_url} alt="" className={locked ? 'curriculum-card-image-blurred' : 'curriculum-card-image'} loading="lazy" />
+        ) : (
+          <div className="curriculum-card-image-fallback" style={{ background: accent }}>
+            <Icon name={unit.icon || 'flask'} />
+          </div>
+        )}
+        <div className="curriculum-card-scrim" style={{ background: `linear-gradient(180deg, transparent 40%, ${accent}CC 100%)` }} />
+
+        {locked ? (
+          <div className="curriculum-card-lock">
+            <Icon name="lock" />
+          </div>
+        ) : (
+          <div className="curriculum-card-ring">
+            <ProgressRing percent={percent} color={accent} />
+          </div>
+        )}
+
+        {unit.is_hard_topic && !locked && <span className="curriculum-card-pill">Hard topic</span>}
+
+        <div className="curriculum-card-caption">
+          <strong>{unit.name}</strong>
+          <span>{locked ? 'Premium · Upgrade to unlock' : `${doneLessons}/${totalLessons} lessons`}</span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccessPremium, navigate }) {
   if (!units?.length) return null;
   return (
     <section className="section">
@@ -138,27 +208,15 @@ function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccess
         </div>
         <Link to="/curriculum" className="text-link">Full curriculum →</Link>
       </div>
-      <div className="grid grid-cols-4">
-        {units.map((unit) => {
-          const locked = unit.is_premium && !canAccessPremium;
-          return (
-            <Link to={locked ? '/upgrade' : `/units/${unit.id}`} key={unit.id} className="card card-lifted topic-card">
-              {unit.topic_image_url ? (
-                <img src={unit.topic_image_url} alt="" className="topic-card-image" />
-              ) : (
-                <div className="row-thumb topic-card-image-placeholder"><Icon name={unit.icon || 'flask'} /></div>
-              )}
-              <div className="topic-card-row">
-                <strong>{unit.name}</strong>
-                <span>{locked ? <Icon name="lock" /> : `${unit.progress_percent || 0}%`}</span>
-              </div>
-              <div className="progress-track" style={{ marginTop: 8 }}>
-                <span className={`progress-fill progress-${unit.progress_color || 'blue'}`} style={{ width: `${unit.progress_percent || 0}%` }} />
-              </div>
-              {unit.is_hard_topic && <span className="tag tag-amber" style={{ marginTop: 8 }}>Hard topic</span>}
-            </Link>
-          );
-        })}
+      <div className="curriculum-rail">
+        {units.map((unit) => (
+          <CurriculumUnitCard
+            key={unit.id}
+            unit={unit}
+            locked={unit.is_premium && !canAccessPremium}
+            navigate={navigate}
+          />
+        ))}
       </div>
     </section>
   );
@@ -253,6 +311,7 @@ export default function HomeView(props) {
           activeLevelName={activeLevelName}
           activeGroupName={activeGroupName}
           canAccessPremium={canAccessPremium}
+          navigate={navigate}
         />
       )}
 
