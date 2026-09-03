@@ -23,11 +23,13 @@
 @import './glossary.css';
 @import './note-detail.css';
 @import './team-faq.css';
-@import './tutor.css';
 @import './home-sections.css';
 @import './pastpapers.css';
-@import './quiz.css';
-@import './flip.css';
+ @import './quiz.css';
+@import './tutor-apply.css';
+@import './tutor-dashboard.css';
+@import './tutor-marketplace.css';
+@import './profile.css';
 
 .auth-page {
   display: flex;
