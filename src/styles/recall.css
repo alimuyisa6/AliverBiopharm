@@ -1,4 +1,37 @@
  /* src/styles/recall.css */
+
+/* ====== Parent Recall Page ====== */
+.recall-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-6) var(--space-12);
+}
+
+.recall-page-header {
+  margin-bottom: var(--space-10);
+}
+
+.recall-main-title {
+  font-size: var(--text-5xl);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  color: var(--text-main);
+  margin-bottom: var(--space-3);
+}
+
+.recall-main-intro {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-normal);
+  color: var(--text-dim);
+  line-height: var(--leading-relaxed);
+  max-width: 720px;
+}
+
+.recall-tab-content {
+  padding: var(--space-4) 0;
+}
+
 .recall-loading-wrap {
   display: flex;
   justify-content: center;
