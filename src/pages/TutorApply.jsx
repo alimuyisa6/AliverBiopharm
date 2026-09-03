@@ -1,4 +1,4 @@
-/* pages/TutorApply.jsx */
+ /* pages/TutorApply.jsx */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -93,11 +93,11 @@ export default function TutorApply() {
   }
 
   function toggleTopic(topicName) {
-    setSelectedTopics((prev) => (
+    setSelectedTopics((prev) =>
       prev.includes(topicName)
         ? prev.filter((topic) => topic !== topicName)
         : [...prev, topicName]
-    ));
+    );
   }
 
   async function handleSubmit() {
@@ -154,10 +154,19 @@ export default function TutorApply() {
 
     return (
       <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
-        <span className="sec-label">Teaching</span>
-        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-4)' }}>
+        <span className="eyebrow">Teaching</span>
+        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
           Tutor Application<br />Status
         </h1>
+        <h2 style={{
+          fontSize: 'var(--text-base)',
+          fontWeight: 'var(--weight-normal)',
+          color: 'var(--text-dim)',
+          lineHeight: 'var(--leading-relaxed)',
+          marginBottom: 'var(--space-6)'
+        }}>
+          View the current status of your tutor application.
+        </h2>
 
         <Card style={{ padding: 'var(--space-8)', textAlign: 'center', maxWidth: 500, margin: '0 auto' }}>
           <Icon name="circle-check" style={{ fontSize: '3rem', color: status.color, marginBottom: 'var(--space-4)' }} />
@@ -186,9 +195,15 @@ export default function TutorApply() {
         <h1 className="section-title">
           Application<br />Submitted
         </h1>
-        <p className="section-subtitle">
-          Your tutor application has been received.
-        </p>
+        <h2 style={{
+          fontSize: 'var(--text-lg)',
+          fontWeight: 'var(--weight-normal)',
+          color: 'var(--text-dim)',
+          lineHeight: 'var(--leading-relaxed)',
+          marginBottom: 'var(--space-4)'
+        }}>
+          Your tutor application has been received. We will review it shortly.
+        </h2>
 
         <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center', marginTop: 'var(--space-6)' }}>
           <Button onClick={() => navigate('/tutor/dashboard')} icon="gauge-high">Go to Tutor Dashboard</Button>
@@ -201,13 +216,19 @@ export default function TutorApply() {
   return (
     <div className="tutor-apply-page">
       <div className="section" style={{ paddingTop: 'var(--space-6)' }}>
-        <span className="sec-label">Teaching</span>
-        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-4)' }}>
+        <span className="eyebrow">Teaching</span>
+        <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
           Become a<br />Tutor
         </h1>
-        <p className="section-subtitle" style={{ textAlign: 'left', marginBottom: 'var(--space-6)' }}>
-          Share your knowledge with students.
-        </p>
+        <h2 style={{
+          fontSize: 'var(--text-base)',
+          fontWeight: 'var(--weight-normal)',
+          color: 'var(--text-dim)',
+          lineHeight: 'var(--leading-relaxed)',
+          marginBottom: 'var(--space-6)'
+        }}>
+          Share your knowledge with students by becoming a tutor. Complete the steps below to apply.
+        </h2>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-8)', marginBottom: 'var(--space-8)' }}>
           {[1, 2, 3].map((number) => (
@@ -224,7 +245,7 @@ export default function TutorApply() {
 
         {step === 1 && !user?.profile?.track && (
           <div>
-            <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your level to teach</h3>
+            <h3 style={{ marginBottom: 'var(--space-6)' }}>Choose the level you wish to teach</h3>
 
             <div className="grid grid-cols-3">
               {levels.map((level, index) => (
@@ -247,7 +268,7 @@ export default function TutorApply() {
         {step === 2 && selectedLevel && (
           <div>
             <Button variant="ghost" onClick={() => setStep(1)} icon="arrow-left" style={{ marginBottom: 'var(--space-6)' }}>Back</Button>
-            <h3 style={{ marginBottom: 'var(--space-6)' }}>Select your class in {selectedLevel.key}</h3>
+            <h3 style={{ marginBottom: 'var(--space-6)' }}>Select the class you want to teach in {selectedLevel.key}</h3>
 
             <div className="grid grid-cols-3">
               {(selectedLevel.classes || []).map((cls, index) => {
@@ -323,4 +344,4 @@ export default function TutorApply() {
       </div>
     </div>
   );
-} 
+}
