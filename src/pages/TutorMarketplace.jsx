@@ -112,9 +112,18 @@ export default function TutorMarketplace() {
           <div className="section-head-left">
             <span className="eyebrow">Tutor Marketplace</span>
             <h2>Find a qualified tutor</h2>
-            <p className="section-subtitle">
+            <h3
+              style={{
+                fontSize: 'var(--text-base)',
+                fontWeight: 'var(--weight-normal)',
+                color: 'var(--text-dim)',
+                lineHeight: 'var(--leading-relaxed)',
+                marginTop: 'var(--space-2)',
+                marginBottom: 0
+              }}
+            >
               For individual learners, schools and institutions — filter by subject, level and availability.
-            </p>
+            </h3>
           </div>
         </div>
 
