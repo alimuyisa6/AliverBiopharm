@@ -447,6 +447,9 @@ export default function Profile() {
               <form onSubmit={handleProfileSubmit}>
                 <Card variant="inset" style={{ padding: 'var(--space-8)', marginBottom: 'var(--space-6)' }}>
                   <h3 className="profile-section-title"><Icon name="id-card" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />Personal Info</h3>
+                  <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                    Update your name and display name. Your display name appears publicly on reviews and comments.
+                  </p>
                   <Input label="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} required disabled={savingProfile} />
                   <Input label="Display Name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} disabled={savingProfile} hint="Shown publicly on reviews and comments" />
                   <Input label="Email" value={profileMeta?.email || user?.email || ''} disabled />
@@ -456,6 +459,9 @@ export default function Profile() {
               <form onSubmit={handleBioSubmit}>
                 <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
                   <h3 className="profile-section-title"><Icon name="pen" style={{ marginRight: 'var(--space-3)', color: 'var(--secondary)' }} />Bio</h3>
+                  <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                    Tell others a little about yourself – your interests, goals, or what you're studying.
+                  </p>
                   <textarea
                     className="form-textarea font-source-sans"
                     rows={3}
@@ -501,6 +507,9 @@ export default function Profile() {
           {activeSection === 'notifications' && (
             <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="bell" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />Notifications</h3>
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                Choose how you want to receive updates – in‑app, via email, or push notifications.
+              </p>
               {sectionLoading ? (
                 <Spinner context="data" size="sm" />
               ) : (
@@ -528,6 +537,9 @@ export default function Profile() {
             <form onSubmit={handlePasswordSubmit}>
               <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
                 <h3 className="profile-section-title"><Icon name="key" style={{ marginRight: 'var(--space-3)', color: 'var(--accent)' }} />Security</h3>
+                <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                  Change your password regularly to keep your account secure. Use a strong, unique password.
+                </p>
                 <Input label="Current Password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required disabled={savingPassword} />
                 <Input label="New Password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} hint="Minimum 10 characters" required disabled={savingPassword} />
                 {newPassword && (
@@ -547,6 +559,9 @@ export default function Profile() {
           {activeSection === 'devices' && (
             <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="laptop" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />Connected Devices</h3>
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                View and manage devices that have access to your account. Revoke any device you don't recognise.
+              </p>
               {sectionLoading ? (
                 <Spinner context="data" size="sm" />
               ) : (
@@ -570,6 +585,9 @@ export default function Profile() {
           {activeSection === 'preferences' && (
             <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="sliders" style={{ marginRight: 'var(--space-3)', color: 'var(--secondary)' }} />Preferences & Theme</h3>
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                Customise your experience by choosing an accent colour and adjusting accessibility settings.
+              </p>
 
               <div className="form-group">
                 <label className="form-label font-poppins">Accent Color</label>
@@ -617,6 +635,9 @@ export default function Profile() {
           {activeSection === 'referral' && (
             <Card variant="curved" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="gift" style={{ marginRight: 'var(--space-3)', color: 'var(--warm)' }} />Referral Program</h3>
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                Share your referral code with friends and earn XP when they join. Every new member helps grow the community.
+              </p>
               {sectionLoading ? (
                 <Spinner context="data" size="sm" />
               ) : referral ? (
@@ -644,6 +665,9 @@ export default function Profile() {
             <form onSubmit={handleSaveGuardian}>
               <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
                 <h3 className="profile-section-title"><Icon name="user-group" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />Parent / Guardian Information</h3>
+                <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                  Provide contact details for a parent or guardian. This information is used for emergency contact and consent.
+                </p>
                 <Input label="Guardian Name" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} required disabled={savingGuardian} />
                 <Input label="Guardian Email" type="email" value={guardianEmail} onChange={(e) => setGuardianEmail(e.target.value)} required disabled={savingGuardian} />
                 <div className="form-group">
@@ -662,6 +686,9 @@ export default function Profile() {
           {activeSection === 'billing' && (
             <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="credit-card" style={{ marginRight: 'var(--space-3)', color: 'var(--success)' }} />Billing & Payments</h3>
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                View your current subscription plan and available upgrade options.
+              </p>
               {sectionLoading ? (
                 <Spinner context="data" size="sm" />
               ) : (
@@ -686,6 +713,9 @@ export default function Profile() {
           {activeSection === 'certificates' && (
             <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="award" style={{ marginRight: 'var(--space-3)', color: 'var(--warm)' }} />Certificates Earned</h3>
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                View and verify certificates you've earned for completing courses and assessments.
+              </p>
               {sectionLoading ? (
                 <Spinner context="data" size="sm" />
               ) : (
@@ -714,8 +744,8 @@ export default function Profile() {
           {activeSection === 'api' && (
             <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="terminal" style={{ marginRight: 'var(--space-3)', color: 'var(--primary)' }} />API Access</h3>
-              <p className="font-source-sans text-muted" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
-                Generate API keys to integrate AliverBiopharm with external tools.
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                Generate API keys to integrate AliverBiopharm with external tools and applications.
               </p>
               {revealedKey && (
                 <div className="notification-row" style={{ border: '1px solid var(--warning)', borderRadius: 8, padding: 'var(--space-4)' }}>
@@ -749,6 +779,9 @@ export default function Profile() {
           {activeSection === 'webhooks' && (
             <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="webhook" style={{ marginRight: 'var(--space-3)', color: 'var(--secondary)' }} />Webhooks</h3>
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                Configure webhooks to receive real‑time event notifications from the platform.
+              </p>
               <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-5)', flexWrap: 'wrap' }}>
                 <Input
                   value={newWebhookUrl}
@@ -777,6 +810,9 @@ export default function Profile() {
           {activeSection === 'account' && (
             <Card variant="inset" style={{ padding: 'var(--space-8)' }}>
               <h3 className="profile-section-title"><Icon name="shield" style={{ marginRight: 'var(--space-3)', color: 'var(--error)' }} />Account & Data</h3>
+              <p className="section-subtitle" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+                Manage your account status, export your data, or request account deletion.
+              </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
                 <span className={`status-indicator-dot ${profileMeta?.is_active === false ? 'status-inactive' : 'status-active'}`} />
                 <span className="font-source-sans">{profileMeta?.is_active === false ? 'Inactive' : 'Active'} account</span>
