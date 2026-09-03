@@ -1,0 +1,47 @@
+/* src/styles/tutor-apply.css */
+
+/* Page container */
+.tutor-apply-page .section {
+  padding-top: var(--space-6);
+}
+
+/* Intro and status descriptions */
+.tutor-apply-page .page-intro {
+  font-size: var(--text-base);
+  font-weight: var(--weight-normal);
+  color: var(--text-dim);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-6);
+}
+.tutor-apply-page .status-description {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-normal);
+  color: var(--text-dim);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-4);
+}
+
+/* Step indicator (already styled inline, but we keep for safety) */
+.tutor-apply-page .step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-8);
+}
+.tutor-apply-page .step-indicator .badge {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tutor-apply-page .step-indicator .step-label {
+  font-size: var(--text-sm);
+}
+.tutor-apply-page .step-indicator .step-label.active {
+  color: var(--text-main);
+}
+.tutor-apply-page .step-indicator .step-label.inactive {
+  color: var(--text-muted);
+}
