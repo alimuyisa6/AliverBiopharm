@@ -1,5 +1,4 @@
- /* features/home/HomeView.jsx */
-import { useState } from 'react';
+ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
@@ -14,7 +13,6 @@ import ClassroomTeaser from '../classroom/ClassroomTeaser';
 import TutorMarketplaceTeaser from '../tutor-marketplace/TutorMarketplaceTeaser';
 import Hero from '../../components/Hero/Hero';
 import { useLayout } from '../../contexts/LayoutContext';
-
 
 const CONTINUE_ICON = { note: 'book-open', video: 'play', quiz: 'clipboard-check' };
 
@@ -58,14 +56,14 @@ function LearningJourneySection({ navigate, sections }) {
     <section className="section learning-journey-section">
       <div className="learning-journey-content">
         <span className="eyebrow">Get started</span>
-        <h1 className="learning-journey-title">Your learning journey starts from here</h1>
+        <h2 className="learning-journey-title">Your learning journey starts from here</h2>
         <img
           src={primaryImage}
           alt="Happy students learning together"
           className="learning-journey-image"
           loading="lazy"
         />
-        <h6 className="section-subtitle">{subtitle}</h6>
+        <p className="section-subtitle">{subtitle}</p>
         <img
           src={secondaryImage}
           alt="Students studying and collaborating"
@@ -212,8 +210,8 @@ function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccess
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">{activeLevelName}{activeGroupName ? ` · ${activeGroupName}` : ''}</span>
-          <h1>Your curriculum</h1>
-          <h6 className="section-subtitle">{description}</h6>
+          <h2>Your curriculum</h2>
+          <p className="section-subtitle">{description}</p>
         </div>
         <Link to="/curriculum" className="text-link">Full curriculum →</Link>
       </div>
