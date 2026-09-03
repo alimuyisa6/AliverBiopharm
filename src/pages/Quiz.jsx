@@ -653,19 +653,48 @@ export default function Quiz() {
               )}
             </Card>
 
-            <div className="quiz-nav-buttons">
-              <Button variant="secondary" onClick={() => { if (currentIndex > 0) navigateTo(currentIndex - 1); }} disabled={currentIndex === 0}>
-                <Icon name="arrow-left" /> Prev
+            {/* Navigation buttons: Previous << and Next >> / Submit */}
+            <div className="quiz-nav-buttons" style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: 'var(--space-4)',
+              marginTop: 'var(--space-6)'
+            }}>
+              <Button 
+                variant="secondary" 
+                onClick={() => { if (currentIndex > 0) navigateTo(currentIndex - 1); }} 
+                disabled={currentIndex === 0}
+                style={{ minWidth: '140px' }}
+              >
+                <Icon name="arrow-left" /> Previous
               </Button>
 
-              {userAnswers[currentIndex] !== null && (
-                firstUnanswered !== -1 && firstUnanswered !== currentIndex ? (
-                  <Button variant="primary" onClick={() => navigateTo(firstUnanswered)}>Next <Icon name="arrow-right" /></Button>
-                ) : currentIndex < quizQuestions.length - 1 ? (
-                  <Button variant="primary" onClick={() => navigateTo(currentIndex + 1)}>Next <Icon name="arrow-right" /></Button>
-                ) : allAnswered ? (
-                  <Button variant="primary" onClick={submitBlock} disabled={locked}>Submit Block</Button>
-                ) : null
+              {allAnswered ? (
+                <Button 
+                  variant="primary" 
+                  onClick={submitBlock} 
+                  disabled={locked || loading}
+                  loading={loading}
+                  loadingContext="brand"
+                  style={{ minWidth: '140px' }}
+                >
+                  Submit Block <Icon name="check" />
+                </Button>
+              ) : (
+                <Button 
+                  variant="primary" 
+                  onClick={() => {
+                    if (firstUnanswered !== -1 && firstUnanswered !== currentIndex) {
+                      navigateTo(firstUnanswered);
+                    } else if (currentIndex < quizQuestions.length - 1) {
+                      navigateTo(currentIndex + 1);
+                    }
+                  }}
+                  disabled={userAnswers[currentIndex] === null || currentIndex === quizQuestions.length - 1}
+                  style={{ minWidth: '140px' }}
+                >
+                  Next <Icon name="arrow-right" />
+                </Button>
               )}
             </div>
           </div>
