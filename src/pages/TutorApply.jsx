@@ -158,13 +158,7 @@ export default function TutorApply() {
         <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
           Tutor Application<br />Status
         </h1>
-        <h2 style={{
-          fontSize: 'var(--text-base)',
-          fontWeight: 'var(--weight-normal)',
-          color: 'var(--text-dim)',
-          lineHeight: 'var(--leading-relaxed)',
-          marginBottom: 'var(--space-6)'
-        }}>
+        <h2 className="page-intro">
           View the current status of your tutor application.
         </h2>
 
@@ -195,13 +189,7 @@ export default function TutorApply() {
         <h1 className="section-title">
           Application<br />Submitted
         </h1>
-        <h2 style={{
-          fontSize: 'var(--text-lg)',
-          fontWeight: 'var(--weight-normal)',
-          color: 'var(--text-dim)',
-          lineHeight: 'var(--leading-relaxed)',
-          marginBottom: 'var(--space-4)'
-        }}>
+        <h2 className="status-description">
           Your tutor application has been received. We will review it shortly.
         </h2>
 
@@ -220,13 +208,7 @@ export default function TutorApply() {
         <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
           Become a<br />Tutor
         </h1>
-        <h2 style={{
-          fontSize: 'var(--text-base)',
-          fontWeight: 'var(--weight-normal)',
-          color: 'var(--text-dim)',
-          lineHeight: 'var(--leading-relaxed)',
-          marginBottom: 'var(--space-6)'
-        }}>
+        <h2 className="page-intro">
           Share your knowledge with students by becoming a tutor. Complete the steps below to apply.
         </h2>
 
