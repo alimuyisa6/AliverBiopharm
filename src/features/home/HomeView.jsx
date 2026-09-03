@@ -1,4 +1,5 @@
  /* features/home/HomeView.jsx */
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
@@ -56,17 +57,14 @@ function LearningJourneySection({ navigate, sections }) {
     <section className="section learning-journey-section">
       <div className="learning-journey-content">
         <span className="eyebrow">Get started</span>
-        <h2 className="learning-journey-title">
-          Your learning journey starts<br />
-          from here
-        </h2>
+        <h1 className="learning-journey-title">Your learning journey starts from here</h1>
         <img
           src={primaryImage}
           alt="Happy students learning together"
           className="learning-journey-image"
           loading="lazy"
         />
-        <p className="section-subtitle">{subtitle}</p>
+        <h6 className="section-subtitle">{subtitle}</h6>
         <img
           src={secondaryImage}
           alt="Students studying and collaborating"
@@ -155,10 +153,12 @@ function ContinueLearningRail({ items, navigate }) {
 }
 
 function CurriculumUnitCard({ unit, locked, navigate }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const accent = SUBJECT_ACCENT[unit.subject_key] || SUBJECT_ACCENT.biology;
   const percent = unit.progress_percent || 0;
   const totalLessons = unit.lessons_total || 0;
   const doneLessons = unit.lessons_completed || 0;
+  const showImage = unit.topic_image_url && !imageFailed;
 
   return (
     <button
@@ -167,8 +167,14 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
       onClick={() => navigate(locked ? '/upgrade' : `/units/${unit.id}`)}
     >
       <div className="curriculum-card-media">
-        {unit.topic_image_url ? (
-          <img src={unit.topic_image_url} alt="" className={locked ? 'curriculum-card-image-blurred' : 'curriculum-card-image'} loading="lazy" />
+        {showImage ? (
+          <img
+            src={unit.topic_image_url}
+            alt=""
+            className={locked ? 'curriculum-card-image-blurred' : 'curriculum-card-image'}
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
         ) : (
           <div className="curriculum-card-image-fallback" style={{ background: accent }}>
             <Icon name={unit.icon || 'flask'} />
@@ -197,14 +203,16 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
   );
 }
 
-function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccessPremium, navigate }) {
+function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccessPremium, navigate, sections }) {
   if (!units?.length) return null;
+  const description = sections?.section_headings?.curriculum_subtitle || 'Every unit in your syllabus, tracked to how far you\'ve actually gotten.';
   return (
     <section className="section">
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">{activeLevelName}{activeGroupName ? ` · ${activeGroupName}` : ''}</span>
-          <h2>Your curriculum</h2>
+          <h1>Your curriculum</h1>
+          <h6 className="section-subtitle">{description}</h6>
         </div>
         <Link to="/curriculum" className="text-link">Full curriculum →</Link>
       </div>
@@ -312,6 +320,7 @@ export default function HomeView(props) {
           activeGroupName={activeGroupName}
           canAccessPremium={canAccessPremium}
           navigate={navigate}
+          sections={sections}
         />
       )}
 
