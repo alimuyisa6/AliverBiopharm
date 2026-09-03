@@ -201,13 +201,7 @@ export default function TutorDashboard() {
         <h1 className="section-title" style={{ textAlign: 'left', margin: '0 0 var(--space-2)' }}>
           Tutor Dashboard<br />{levelName ? `– ${levelName}` : ''}
         </h1>
-        <h2 style={{
-          fontSize: 'var(--text-base)',
-          fontWeight: 'var(--weight-normal)',
-          color: 'var(--text-dim)',
-          lineHeight: 'var(--leading-relaxed)',
-          marginBottom: 'var(--space-6)'
-        }}>
+        <h2 className="page-intro">
           Manage your teaching sessions, create new classrooms, and track your tutoring activity.
         </h2>
 
