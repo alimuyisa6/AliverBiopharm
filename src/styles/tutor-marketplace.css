@@ -1,0 +1,36 @@
+/* src/styles/tutor-marketplace.css */
+
+/* Page container */
+.tutor-marketplace-page .section-head {
+  margin-bottom: var(--space-6);
+}
+
+/* Section description */
+.tutor-marketplace-page .section-description {
+  font-size: var(--text-base);
+  font-weight: var(--weight-normal);
+  color: var(--text-dim);
+  line-height: var(--leading-relaxed);
+  margin-top: var(--space-2);
+  margin-bottom: 0;
+}
+
+/* Search and filters (already styled in global, but keep) */
+.tutor-marketplace-page .tutor-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+.tutor-marketplace-page .tutor-search-input {
+  flex: 1;
+  min-width: 200px;
+}
+.tutor-marketplace-page .filter-select {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  font-size: var(--text-sm);
+  color: var(--text-main);
+}
