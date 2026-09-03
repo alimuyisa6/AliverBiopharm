@@ -1,0 +1,129 @@
+/* src/styles/profile.css */
+.profile-loading-skeleton {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-10);
+}
+.profile-skeleton-grid {
+  gap: var(--space-10);
+}
+.profile-avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-6);
+}
+.profile-card-main {
+  padding: var(--space-8);
+  margin-bottom: var(--space-6);
+}
+.profile-card-centered {
+  padding: var(--space-8);
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.profile-card-status {
+  padding: var(--space-8);
+  max-width: 600px;
+  margin: 0 auto;
+}
+.profile-p-8 {
+  padding: var(--space-8);
+}
+.profile-mt-4 {
+  margin-top: var(--space-4);
+}
+.profile-mb-3 {
+  margin-bottom: var(--space-3);
+}
+.profile-mb-4 {
+  margin-bottom: var(--space-4);
+}
+.profile-mb-5 {
+  margin-bottom: var(--space-5);
+}
+.profile-icon-primary {
+  margin-right: var(--space-3);
+  color: var(--primary);
+}
+.profile-icon-secondary {
+  margin-right: var(--space-3);
+  color: var(--secondary);
+}
+.profile-icon-warm {
+  margin-right: var(--space-3);
+  color: var(--warm);
+}
+.profile-icon-accent {
+  margin-right: var(--space-3);
+  color: var(--accent);
+}
+.profile-icon-success {
+  margin-right: var(--space-3);
+  color: var(--success);
+}
+.profile-icon-error {
+  margin-right: var(--space-3);
+  color: var(--error);
+}
+.profile-pw-strength-wrap {
+  margin-bottom: var(--space-5);
+}
+.profile-pw-strength-track {
+  height: 4px;
+}
+.profile-pw-strength-label {
+  font-size: var(--text-xs);
+}
+.profile-divider {
+  margin: var(--space-5) 0;
+}
+.profile-divider-lg {
+  margin: var(--space-6) 0;
+}
+.profile-flex-wrap {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.profile-flex-center {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.profile-text-muted {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.profile-toggle-group {
+  display: flex;
+  gap: var(--space-3);
+}
+.profile-notification-highlight {
+  border: 1px solid var(--warning);
+  border-radius: 8px;
+  padding: var(--space-4);
+}
+.profile-webhook-input-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+.profile-webhook-input {
+  flex: 1;
+  min-width: 220px;
+}
+.profile-section-subtitle {
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-5);
+  color: var(--text-dim);
+  line-height: var(--leading-relaxed);
+}
+.profile-section-title {
+  display: flex;
+  align-items: center;
+}
+.profile-align-center {
+  align-items: center;
+}
