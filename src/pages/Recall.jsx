@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRequireOnboarding } from '../hooks/useRequireOnboarding';
@@ -688,14 +688,21 @@ export default function BioRecall() {
           </span>
         </nav>
 
-        <div className="recall-header">
+        <div className="recall-page-header">
           <span className="sec-label font-mono">
             BioRecall
           </span>
 
           <h1 className="section-title recall-page-title font-fraunces">
-            {levelName}
+            {levelName || 'Master Biology with Active Recall'}
           </h1>
+
+          <p className="recall-page-intro">
+            Welcome{displayName ? `, ${displayName}` : ''}! 🧠<br />
+            Strengthen your long‑term memory through spaced repetition. 
+            Answer questions, earn XP, and track your mastery across every topic.
+            <span className="highlight"> Consistent practice builds lasting knowledge.</span>
+          </p>
 
           {levelName && (
             <div className="recall-chips-row">
