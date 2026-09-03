@@ -18,7 +18,8 @@ import { useLayout } from '../../contexts/LayoutContext';
 
 const CONTINUE_ICON = { note: 'book-open', video: 'play', quiz: 'clipboard-check' };
 
-const SUBJECT_ACCENT = { biology: '#2F8F5B', pharmacology: '#2F6FED', chemistry: '#2F6FED', clinical: '#C7861B' };
+const SUBJECT_VARIANT = { biology: 'emerald', pharmacology: 'blue', chemistry: 'teal', clinical: 'amber' };
+const VARIANT_RING_COLOR = { emerald: 'var(--emerald-600)', blue: 'var(--blue-600)', teal: 'var(--teal-600)', amber: 'var(--amber-600)', grey: 'var(--grey-500)' };
 
 function ProgressRing({ percent = 0, color = '#2F8F5B', size = 44 }) {
   const stroke = 4;
@@ -154,7 +155,8 @@ function ContinueLearningRail({ items, navigate }) {
 
 function CurriculumUnitCard({ unit, locked, navigate }) {
   const [imageFailed, setImageFailed] = useState(false);
-  const accent = SUBJECT_ACCENT[unit.subject_key] || SUBJECT_ACCENT.biology;
+  const variant = SUBJECT_VARIANT[unit.subject_key] || 'grey';
+  const ringColor = VARIANT_RING_COLOR[variant];
   const percent = unit.progress_percent || 0;
   const totalLessons = unit.lessons_total || 0;
   const doneLessons = unit.lessons_completed || 0;
@@ -163,7 +165,7 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
   return (
     <button
       type="button"
-      className={`curriculum-card${locked ? ' curriculum-card-locked' : ''}`}
+      className={`curriculum-card curriculum-card-${variant}${locked ? ' curriculum-card-locked' : ''}`}
       onClick={() => navigate(locked ? '/upgrade' : `/units/${unit.id}`)}
     >
       <div className="curriculum-card-media">
@@ -176,11 +178,11 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
             onError={() => setImageFailed(true)}
           />
         ) : (
-          <div className="curriculum-card-image-fallback" style={{ background: accent }}>
+          <div className="curriculum-card-image-fallback">
             <Icon name={unit.icon || 'flask'} />
           </div>
         )}
-        <div className="curriculum-card-scrim" style={{ background: `linear-gradient(180deg, transparent 40%, ${accent}CC 100%)` }} />
+        <div className="curriculum-card-scrim" />
 
         {locked ? (
           <div className="curriculum-card-lock">
@@ -188,15 +190,14 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
           </div>
         ) : (
           <div className="curriculum-card-ring">
-            <ProgressRing percent={percent} color={accent} />
+            <ProgressRing percent={percent} color={ringColor} />
           </div>
         )}
-
-        {unit.is_hard_topic && !locked && <span className="curriculum-card-pill">Hard topic</span>}
 
         <div className="curriculum-card-caption">
           <strong>{unit.name}</strong>
           <span>{locked ? 'Premium · Upgrade to unlock' : `${doneLessons}/${totalLessons} lessons`}</span>
+          {unit.is_hard_topic && !locked && <span className="curriculum-card-pill">Hard topic</span>}
         </div>
       </div>
     </button>
