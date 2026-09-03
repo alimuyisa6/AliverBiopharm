@@ -599,10 +599,10 @@
 
 .curriculum-rail {
   display: flex;
-  gap: 16px;
+  gap: var(--space-3);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding-bottom: 8px;
+  padding-bottom: var(--space-1);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -621,14 +621,14 @@
 .curriculum-card {
   flex: 0 0 220px;
   scroll-snap-align: start;
-  border: none;
-  background: none;
+  border: 1px solid var(--border-default);
+  background: var(--bg-card);
   padding: 0;
   cursor: pointer;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
   text-align: left;
 }
 
@@ -639,8 +639,9 @@
 }
 
 .curriculum-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .curriculum-card:active {
@@ -651,6 +652,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 5;
+  background: var(--grey-100);
 }
 
 .curriculum-card-image,
@@ -672,25 +674,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-size: 28px;
+  font-size: 1.75rem;
 }
+
+.curriculum-card-emerald .curriculum-card-image-fallback { background: var(--emerald-50); color: var(--emerald-600); }
+.curriculum-card-blue .curriculum-card-image-fallback { background: var(--blue-50); color: var(--blue-500); }
+.curriculum-card-teal .curriculum-card-image-fallback { background: var(--teal-50); color: var(--teal-500); }
+.curriculum-card-amber .curriculum-card-image-fallback { background: var(--amber-50); color: var(--amber-500); }
+.curriculum-card-grey .curriculum-card-image-fallback { background: var(--grey-100); color: var(--grey-500); }
 
 .curriculum-card-scrim {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  background: linear-gradient(180deg, transparent 35%, rgba(15, 23, 42, 0.75) 100%);
 }
 
 .curriculum-card-ring {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: var(--space-2);
+  right: var(--space-2);
 }
 
 .progress-ring-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   fill: #ffffff;
 }
 
@@ -711,14 +719,14 @@
 
 .curriculum-card-pill {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: var(--space-2);
+  left: var(--space-2);
   background: rgba(15, 23, 42, 0.55);
   color: #ffffff;
   font-size: 11px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 999px;
+  font-weight: var(--weight-semibold);
+  padding: 4px var(--space-2);
+  border-radius: var(--radius-full);
 }
 
 .curriculum-card-caption {
@@ -726,7 +734,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 14px;
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -734,13 +742,13 @@
 
 .curriculum-card-caption strong {
   color: #ffffff;
-  font-size: 15px;
-  line-height: 1.3;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
 }
 
 .curriculum-card-caption span {
   color: rgba(255, 255, 255, 0.85);
-  font-size: 12px;
+  font-size: var(--text-xs);
 }
 
 .curriculum-card-locked .curriculum-card-caption span {
