@@ -1,4 +1,4 @@
-// src/pages/Quiz.jsx
+ // src/pages/Quiz.jsx
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -392,11 +392,11 @@ export default function Quiz() {
       <div className="section quiz-page-section">
         <span className="eyebrow">Assessments</span>
         <h1 className="section-title quiz-page-title">
-          Knowledge Quizzes<br />{displayName ? `– ${displayName}` : ''}
+          Knowledge Quizzes<br />{displayName ? `for ${displayName}` : ''}
         </h1>
 
         <h2 className="quiz-intro-description">
-          Test your understanding with subject‑specific quizzes. Each block contains 10 questions – answer them all and aim for 70% to pass. Review your answers and track your progress as you go.
+          Test your understanding with subject‑specific quizzes. Each block contains 10 questions, so answer them all and aim for 70% to pass. Review your answers and track your progress as you go.
         </h2>
 
         {class_name && <p className="quiz-group-label">Current group: {class_name}</p>}
@@ -501,7 +501,7 @@ export default function Quiz() {
             </Card>
 
             <div className="quiz-review-section">
-              <h3 className="quiz-review-heading">Block {currentBlock + 1} Review – {currentTopic}</h3>
+              <h3 className="quiz-review-heading">Block {currentBlock + 1} Review for {currentTopic}</h3>
 
               {(resultData.answers || []).map((answer, idx) => (
                 <Card key={idx} variant="flat" className="quiz-review-card">
@@ -584,7 +584,7 @@ export default function Quiz() {
 
             <ProgressBar value={currentIndex + 1} max={quizQuestions.length} variant="gradient" />
             <p className="quiz-progress-label">
-              Block {currentBlock + 1} • Q {currentIndex + 1}/{quizQuestions.length} – {currentTopic}
+              Block {currentBlock + 1} • Q {currentIndex + 1}/{quizQuestions.length} • {currentTopic}
             </p>
 
             {answerSubmitting && (
@@ -675,7 +675,7 @@ export default function Quiz() {
         ) : (
           <div className="quiz-blocks-page">
             <h2 className="quiz-blocks-heading">{currentTopic}</h2>
-            <p className="quiz-blocks-sub">{class_name ? `${class_name} – ` : ''}Select a block to start</p>
+            <p className="quiz-blocks-sub">{class_name ? `${class_name}: ` : ''}Select a block to start</p>
 
             {totalBlocks === 0 ? (
               <p className="quiz-blocks-empty">No blocks available.</p>
