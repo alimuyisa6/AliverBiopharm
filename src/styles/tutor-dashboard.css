@@ -1,0 +1,36 @@
+/* src/styles/tutor-dashboard.css */
+
+/* Page container */
+.tutor-dashboard-page .section {
+  padding-top: var(--space-6);
+}
+
+/* Intro description */
+.tutor-dashboard-page .page-intro {
+  font-size: var(--text-base);
+  font-weight: var(--weight-normal);
+  color: var(--text-dim);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-6);
+}
+
+/* Alert override (already defined globally, but kept for safety) */
+.tutor-dashboard-page .alert-success {
+  margin-bottom: var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tutor-dashboard-page .alert-success .btn {
+  flex-shrink: 0;
+}
+
+/* Grid override */
+.tutor-dashboard-page .grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 768px) {
+  .tutor-dashboard-page .grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
