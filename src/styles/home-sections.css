@@ -1,4 +1,4 @@
-/* Resources.css */
+ /* Resources.css */
 .resources-page {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -556,7 +556,7 @@
 }
 
 @media (max-width: 768px) {
-   .section-teaser-inner,
+  .section-teaser-inner,
   .teaser-image-left .section-teaser-inner,
   .teaser-image-right .section-teaser-inner {
     flex-direction: column;
@@ -595,7 +595,6 @@
     border-radius: var(--radius-md);
   }
 }
-
 
 .curriculum-rail {
   display: flex;
