@@ -15,7 +15,9 @@ const NO_CHROME_PATHS = ['/recall', '/quiz', '/profile', '/notes', '/past-papers
 
 function loadScrollMap() {
   try {
-    return new Map(JSON.parse(sessionStorage.getItem(SCROLL_STORAGE_KEY) || '[]'));
+    return new Map(
+      JSON.parse(sessionStorage.getItem(SCROLL_STORAGE_KEY) || '[]')
+    );
   } catch {
     return new Map();
   }
@@ -23,7 +25,10 @@ function loadScrollMap() {
 
 function persistScrollMap(map) {
   try {
-    sessionStorage.setItem(SCROLL_STORAGE_KEY, JSON.stringify([...map.entries()]));
+    sessionStorage.setItem(
+      SCROLL_STORAGE_KEY,
+      JSON.stringify([...map.entries()])
+    );
   } catch {}
 }
 
@@ -59,8 +64,14 @@ export default function Layout({ children, showFooter = true }) {
     location.pathname.startsWith(path)
   );
 
-  const hideHeader = isAuthPage || isNoteDetailPage || isNoChromePage;
-  const hideFooter = isAuthPage || isRoomPage || isNoteDetailPage || isNoChromePage;
+  const hideHeader =
+    isAuthPage || isNoteDetailPage || isNoChromePage;
+
+  const hideFooter =
+    isAuthPage ||
+    isRoomPage ||
+    isNoteDetailPage ||
+    isNoChromePage;
 
   const scrollPositions = useRef(loadScrollMap());
   const persistTimeout = useRef(null);
@@ -75,15 +86,22 @@ export default function Layout({ children, showFooter = true }) {
   useEffect(() => {
     const handler = () => {
       setScrolled(window.scrollY > 10);
-      scrollPositions.current.set(routeKey, window.scrollY);
+
+      scrollPositions.current.set(
+        routeKey,
+        window.scrollY
+      );
 
       clearTimeout(persistTimeout.current);
+
       persistTimeout.current = setTimeout(() => {
         persistScrollMap(scrollPositions.current);
       }, 200);
     };
 
-    window.addEventListener('scroll', handler, { passive: true });
+    window.addEventListener('scroll', handler, {
+      passive: true
+    });
 
     return () => {
       window.removeEventListener('scroll', handler);
@@ -97,7 +115,10 @@ export default function Layout({ children, showFooter = true }) {
         navigationType === 'POP' &&
         scrollPositions.current.has(routeKey)
       ) {
-        window.scrollTo(0, scrollPositions.current.get(routeKey));
+        window.scrollTo(
+          0,
+          scrollPositions.current.get(routeKey)
+        );
       } else {
         window.scrollTo(0, 0);
       }
@@ -121,6 +142,8 @@ export default function Layout({ children, showFooter = true }) {
     try {
       await signout();
       await refreshUser();
+
+      // After signing out, return to the public Home page.
       navigate('/');
     } catch {
       navigate('/');
@@ -130,60 +153,83 @@ export default function Layout({ children, showFooter = true }) {
   };
 
   /*
-   * Header navigation is intentionally restricted here.
+   * Navigation policy
+   * -----------------
    *
-   * Curriculum resources such as:
+   * The curriculum is already exposed through dedicated
+   * content-type cards on the platform.
+   *
+   * Therefore curriculum resources should NOT be duplicated
+   * in the global header or footer.
+   *
+   * The following are intentionally excluded:
+   *
+   * - About from the header
+   * - Classroom from the header
+   * - Blog from the header
+   * - Contact from the header
    * - Notes
    * - Quizzes
    * - Flashcards
    * - Past Papers
    * - Recall
+   * - PDFs
+   * - Glossary
    *
-   * are exposed through their dedicated content-type cards.
-   *
-   * Classroom and About are also intentionally excluded from
-   * the main header navigation.
-   *
-   * This filtering is kept at the component level so that even
-   * if an old/stale configuration contains these links, they
-   * cannot reappear in the rendered header.
+   * About is retained only in the bottom footer navigation.
    */
+
+  const blockedHeaderPaths = [
+    '/about',
+    '/classroom',
+    '/blog',
+    '/contact',
+    '/notes',
+    '/quiz',
+    '/flashcards',
+    '/past-papers',
+    '/recall',
+    '/pdfs',
+    '/glossary'
+  ];
+
   const filteredNavigation = navigation.filter((link) => {
-    const blockedPaths = [
-      '/about',
-      '/classroom',
-      '/blog',
-      '/contact',
-      '/notes',
-      '/quiz',
-      '/flashcards',
-      '/past-papers',
-      '/recall',
-      '/pdfs',
-      '/glossary'
-    ];
-
-    if (blockedPaths.includes(link.href)) {
+    if (blockedHeaderPaths.includes(link.href)) {
       return false;
     }
 
-    if (link.href === '/quiz' && features.quizzes === false) {
+    if (
+      link.href === '/quiz' &&
+      features.quizzes === false
+    ) {
       return false;
     }
 
-    if (link.href === '/flashcards' && features.flashcards === false) {
+    if (
+      link.href === '/flashcards' &&
+      features.flashcards === false
+    ) {
       return false;
     }
 
-    if (link.href === '/past-papers' && features.past_papers === false) {
+    if (
+      link.href === '/past-papers' &&
+      features.past_papers === false
+    ) {
       return false;
     }
 
-    if (link.href === '/recall' && features.recall === false) {
+    if (
+      link.href === '/recall' &&
+      features.recall === false
+    ) {
       return false;
     }
 
-    if (link.href === '/classroom' && features.classrooms === false) {
+    if (
+      link.href === '/classroom' &&
+      features.classrooms === false
+    ) {
       return false;
     }
 
@@ -212,22 +258,38 @@ export default function Layout({ children, showFooter = true }) {
       size: 'sm'
     };
 
-  const themeIcon = theme === 'dark' ? 'sun' : 'moon';
+  const themeIcon =
+    theme === 'dark'
+      ? 'sun'
+      : 'moon';
 
   return (
     <div className="app-layout">
-      <a href="#main-content" className="skip-link">
+      <a
+        href="#main-content"
+        className="skip-link"
+      >
         Skip to content
       </a>
 
       <NetworkStatus />
 
       {!hideHeader && (
-        <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
+        <header
+          className={`site-header${
+            scrolled ? ' scrolled' : ''
+          }`}
+        >
           <div className="header-container">
-            <Link to="/" className="header-logo">
+            <Link
+              to="/"
+              className="header-logo"
+            >
               {logo ? (
-                <img src={logo} alt={siteName} />
+                <img
+                  src={logo}
+                  alt={siteName}
+                />
               ) : (
                 siteName
               )}
@@ -239,10 +301,15 @@ export default function Layout({ children, showFooter = true }) {
                   key={link.href}
                   to={link.href}
                   className={`main-nav-link${
-                    location.pathname === link.href ? ' active' : ''
+                    location.pathname === link.href
+                      ? ' active'
+                      : ''
                   }`}
                 >
-                  {link.icon && <Icon name={link.icon} />}
+                  {link.icon && (
+                    <Icon name={link.icon} />
+                  )}
+
                   {link.label}
                 </Link>
               ))}
@@ -251,7 +318,9 @@ export default function Layout({ children, showFooter = true }) {
             <div className="nav-actions">
               <button
                 className="btn btn-ghost btn-sm btn-icon"
-                onClick={() => setSearchOpen(true)}
+                onClick={() =>
+                  setSearchOpen(true)
+                }
                 aria-label="Search"
               >
                 <Icon name={searchIcon.icon} />
@@ -267,7 +336,9 @@ export default function Layout({ children, showFooter = true }) {
 
               <button
                 className="hamburger-btn"
-                onClick={() => setMobileOpen(true)}
+                onClick={() =>
+                  setMobileOpen(true)
+                }
                 aria-label="Menu"
               >
                 <Icon name="bars" />
@@ -279,7 +350,9 @@ export default function Layout({ children, showFooter = true }) {
 
       <SearchOverlay
         open={searchOpen}
-        onClose={() => setSearchOpen(false)}
+        onClose={() =>
+          setSearchOpen(false)
+        }
       />
 
       <AdminLauncher />
@@ -289,7 +362,9 @@ export default function Layout({ children, showFooter = true }) {
           <>
             <div
               className="mobile-nav-overlay"
-              onClick={() => setMobileOpen(false)}
+              onClick={() =>
+                setMobileOpen(false)
+              }
             />
 
             <motion.div
@@ -297,19 +372,34 @@ export default function Layout({ children, showFooter = true }) {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ duration: 0.25 }}
+              transition={{
+                duration: 0.25
+              }}
             >
               <div className="mobile-nav-panel-inner">
 
-                {/* Only approved non-curriculum navigation appears here. */}
+                {/*
+                 * Mobile navigation uses the same filtered
+                 * navigation as the desktop header.
+                 *
+                 * This prevents old/stale configuration from
+                 * reintroducing curriculum links, About, or
+                 * Classroom into the mobile menu.
+                 */}
+
                 {filteredNavigation.map((link) => (
                   <Link
                     key={link.href}
                     to={link.href}
                     className="mobile-nav-link"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() =>
+                      setMobileOpen(false)
+                    }
                   >
-                    {link.icon && <Icon name={link.icon} />}
+                    {link.icon && (
+                      <Icon name={link.icon} />
+                    )}
+
                     {link.label}
                   </Link>
                 ))}
@@ -319,9 +409,22 @@ export default function Layout({ children, showFooter = true }) {
                 {isAuthenticated ? (
                   <>
                     <Link
+                      to="/"
+                      className="mobile-nav-link"
+                      onClick={() =>
+                        setMobileOpen(false)
+                      }
+                    >
+                      <Icon name="house" />
+                      Home
+                    </Link>
+
+                    <Link
                       to="/dashboard"
                       className="mobile-nav-link"
-                      onClick={() => setMobileOpen(false)}
+                      onClick={() =>
+                        setMobileOpen(false)
+                      }
                     >
                       <Icon name="gauge-high" />
                       Dashboard
@@ -330,7 +433,9 @@ export default function Layout({ children, showFooter = true }) {
                     <Link
                       to="/profile"
                       className="mobile-nav-link"
-                      onClick={() => setMobileOpen(false)}
+                      onClick={() =>
+                        setMobileOpen(false)
+                      }
                     >
                       <Icon name="gear" />
                       Profile
@@ -342,30 +447,54 @@ export default function Layout({ children, showFooter = true }) {
                       disabled={signingOut}
                     >
                       <Icon name="right-from-bracket" />
-                      {signingOut ? 'Signing out...' : 'Sign Out'}
+
+                      {signingOut
+                        ? 'Signing out...'
+                        : 'Sign Out'}
                     </button>
                   </>
                 ) : (
                   <>
                     <Link
+                      to="/"
+                      className="mobile-nav-link"
+                      onClick={() =>
+                        setMobileOpen(false)
+                      }
+                    >
+                      <Icon name="house" />
+                      Home
+                    </Link>
+
+                    <Link
                       to="/login"
                       className="mobile-nav-link"
-                      onClick={() => setMobileOpen(false)}
+                      onClick={() =>
+                        setMobileOpen(false)
+                      }
                     >
                       {loginButton.icon && (
-                        <Icon name={loginButton.icon} />
+                        <Icon
+                          name={loginButton.icon}
+                        />
                       )}
+
                       {loginButton.label}
                     </Link>
 
                     <Link
                       to="/register"
                       className="mobile-nav-link"
-                      onClick={() => setMobileOpen(false)}
+                      onClick={() =>
+                        setMobileOpen(false)
+                      }
                     >
                       {signupButton.icon && (
-                        <Icon name={signupButton.icon} />
+                        <Icon
+                          name={signupButton.icon}
+                        />
                       )}
+
                       {signupButton.label}
                     </Link>
                   </>
@@ -382,179 +511,247 @@ export default function Layout({ children, showFooter = true }) {
         initial={
           navigationType === 'POP'
             ? false
-            : { opacity: 0, y: 20 }
+            : {
+                opacity: 0,
+                y: 20
+              }
         }
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        animate={{
+          opacity: 1,
+          y: 0
+        }}
+        transition={{
+          duration: 0.3
+        }}
       >
         {children}
       </motion.main>
 
-      {!hideFooter && showFooter && (
-        <footer className="footer">
-          <div className="footer-wave" aria-hidden="true">
-            <svg
-              viewBox="0 0 1440 120"
-              preserveAspectRatio="none"
-              xmlns="http://www.w3.org/2000/svg"
+      {!hideFooter &&
+        showFooter && (
+          <footer className="footer">
+            <div
+              className="footer-wave"
+              aria-hidden="true"
             >
-              <path
-                d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,120 L0,120 Z"
-                className="footer-wave-path"
-              />
-            </svg>
-          </div>
-
-          <div className="footer-inner">
-            <div className="footer-brand">
-              <Link to="/" className="header-logo">
-                {logo ? (
-                  <img
-                    src={logo}
-                    alt={siteName}
-                    className="footer-logo"
-                  />
-                ) : (
-                  siteName
-                )}
-              </Link>
-
-              <p className="footer-tagline">
-                Advancing biology and pharmacy education for every learner.
-              </p>
-
-              {footer.social_links &&
-                Object.keys(footer.social_links).length > 0 && (
-                  <div className="footer-social">
-                    {Object.entries(footer.social_links).map(
-                      ([platform, url]) => (
-                        <a
-                          key={platform}
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="footer-social-link"
-                          data-platform={platform}
-                          aria-label={platform}
-                        >
-                          <Icon name={platform} />
-                        </a>
-                      )
-                    )}
-                  </div>
-                )}
+              <svg
+                viewBox="0 0 1440 120"
+                preserveAspectRatio="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,120 L0,120 Z"
+                  className="footer-wave-path"
+                />
+              </svg>
             </div>
 
-            {footer.quick_links?.length > 0 && (
-              <div>
-                <h4 className="footer-heading">
-                  Quick Links
-                </h4>
+            <div className="footer-inner">
+              <div className="footer-brand">
+                <Link
+                  to="/"
+                  className="header-logo"
+                >
+                  {logo ? (
+                    <img
+                      src={logo}
+                      alt={siteName}
+                      className="footer-logo"
+                    />
+                  ) : (
+                    siteName
+                  )}
+                </Link>
 
-                <div className="footer-links">
-                  {footer.quick_links
-                    .filter(
-                      (item) =>
-                        item.path !== '/about' &&
-                        item.path !== '/classroom'
-                    )
-                    .map((item, index) => (
-                      <Link
-                        key={index}
-                        to={item.path}
-                        className="footer-link"
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                </div>
+                <p className="footer-tagline">
+                  Advancing biology and pharmacy education
+                  for every learner.
+                </p>
+
+                {footer.social_links &&
+                  Object.keys(
+                    footer.social_links
+                  ).length > 0 && (
+                    <div className="footer-social">
+                      {Object.entries(
+                        footer.social_links
+                      ).map(
+                        ([platform, url]) => (
+                          <a
+                            key={platform}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="footer-social-link"
+                            data-platform={
+                              platform
+                            }
+                            aria-label={
+                              platform
+                            }
+                          >
+                            <Icon
+                              name={platform}
+                            />
+                          </a>
+                        )
+                      )}
+                    </div>
+                  )}
               </div>
-            )}
 
-            {footer.resource_links?.length > 0 && (
-              <div>
-                <h4 className="footer-heading">
-                  Resources
-                </h4>
+              {footer.quick_links?.length > 0 && (
+                <div>
+                  <h4 className="footer-heading">
+                    Quick Links
+                  </h4>
 
-                <div className="footer-links">
-                  {footer.resource_links
-                    .filter(
-                      (item) =>
-                        item.path !== '/about' &&
-                        item.path !== '/classroom' &&
-                        item.path !== '/notes' &&
-                        item.path !== '/quiz' &&
-                        item.path !== '/flashcards' &&
-                        item.path !== '/past-papers' &&
-                        item.path !== '/recall' &&
-                        item.path !== '/pdfs' &&
-                        item.path !== '/glossary'
-                    )
-                    .map((item, index) => (
-                      <Link
-                        key={index}
-                        to={item.path}
-                        className="footer-link"
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
+                  <div className="footer-links">
+                    {footer.quick_links
+                      .filter(
+                        (item) =>
+                          item.path !==
+                            '/about' &&
+                          item.path !==
+                            '/classroom' &&
+                          item.path !==
+                            '/notes' &&
+                          item.path !==
+                            '/quiz' &&
+                          item.path !==
+                            '/flashcards' &&
+                          item.path !==
+                            '/past-papers' &&
+                          item.path !==
+                            '/recall' &&
+                          item.path !==
+                            '/pdfs' &&
+                          item.path !==
+                            '/glossary'
+                      )
+                      .map(
+                        (item, index) => (
+                          <Link
+                            key={index}
+                            to={item.path}
+                            className="footer-link"
+                          >
+                            {item.label}
+                          </Link>
+                        )
+                      )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {footer.community_links?.length > 0 && (
-              <div>
-                <h4 className="footer-heading">
-                  Community
-                </h4>
+              {footer.resource_links?.length > 0 && (
+                <div>
+                  <h4 className="footer-heading">
+                    Resources
+                  </h4>
 
-                <div className="footer-links">
-                  {footer.community_links
-                    .filter(
-                      (item) =>
-                        item.path !== '/about' &&
-                        item.path !== '/classroom'
-                    )
-                    .map((item, index) => (
-                      <Link
-                        key={index}
-                        to={item.path}
-                        className="footer-link"
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
+                  <div className="footer-links">
+                    {footer.resource_links
+                      .filter(
+                        (item) =>
+                          item.path !==
+                            '/about' &&
+                          item.path !==
+                            '/classroom' &&
+                          item.path !==
+                            '/notes' &&
+                          item.path !==
+                            '/quiz' &&
+                          item.path !==
+                            '/flashcards' &&
+                          item.path !==
+                            '/past-papers' &&
+                          item.path !==
+                            '/recall' &&
+                          item.path !==
+                            '/pdfs' &&
+                          item.path !==
+                            '/glossary'
+                      )
+                      .map(
+                        (item, index) => (
+                          <Link
+                            key={index}
+                            to={item.path}
+                            className="footer-link"
+                          >
+                            {item.label}
+                          </Link>
+                        )
+                      )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
 
-          <div className="footer-bottom">
-            <p>
-              &copy; {new Date().getFullYear()} {siteName}. All rights
-              reserved.
-            </p>
+              {footer.community_links?.length > 0 && (
+                <div>
+                  <h4 className="footer-heading">
+                    Community
+                  </h4>
 
-            <nav className="footer-bottom-nav">
-              <Link
-                to="/privacy"
-                className="footer-link"
-              >
-                Privacy
-              </Link>
+                  <div className="footer-links">
+                    {footer.community_links
+                      .filter(
+                        (item) =>
+                          item.path !==
+                            '/about' &&
+                          item.path !==
+                            '/classroom'
+                      )
+                      .map(
+                        (item, index) => (
+                          <Link
+                            key={index}
+                            to={item.path}
+                            className="footer-link"
+                          >
+                            {item.label}
+                          </Link>
+                        )
+                      )}
+                  </div>
+                </div>
+              )}
+            </div>
 
-              <Link
-                to="/terms"
-                className="footer-link"
-              >
-                Terms
-              </Link>
-            </nav>
-          </div>
-        </footer>
-      )}
+            <div className="footer-bottom">
+              <p>
+                &copy;{' '}
+                {new Date().getFullYear()}{' '}
+                {siteName}. All rights reserved.
+              </p>
+
+              <nav className="footer-bottom-nav">
+                <Link
+                  to="/privacy"
+                  className="footer-link"
+                >
+                  Privacy
+                </Link>
+
+                <Link
+                  to="/terms"
+                  className="footer-link"
+                >
+                  Terms
+                </Link>
+
+                {/* About intentionally remains here only. */}
+                <Link
+                  to="/about"
+                  className="footer-link"
+                >
+                  About
+                </Link>
+              </nav>
+            </div>
+          </footer>
+        )}
     </div>
   );
 }
