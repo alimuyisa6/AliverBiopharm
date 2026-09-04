@@ -1,4 +1,4 @@
- /* Resources.css */
+  /* Resources.css */
 .resources-page {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -585,10 +585,10 @@
 }
 .home-page > .section:last-of-type { margin-bottom: 0; }
 .home-page > .section.section-with-bg { box-shadow: var(--shadow-md); }
-/* Modified: light green background for the StatsGrid section */
+/* Green background for StatsGrid section (increased intensity) */
 .home-page > .section.section-emerald {
-  background: var(--emerald-100);
-  border-color: var(--emerald-200);
+  background: var(--emerald-200);
+  border-color: var(--emerald-300);
 }
 
 @media (max-width: 768px) {
