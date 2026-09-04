@@ -2,11 +2,11 @@
   --card-padding: var(--space-4);
 }
 
-.amber-card {
-  background: var(--amber-100);
-  color: var(--amber-800);
+.emerald-card {
+  background: var(--secondary-light);
+  color: var(--secondary-hover);
   padding: var(--card-padding);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   box-shadow: var(--shadow-md);
 }
 
