@@ -16,17 +16,17 @@ import { useLayout } from '../../contexts/LayoutContext';
 
 const CONTINUE_ICON = { note: 'book-open', video: 'play', quiz: 'clipboard-check' };
 
-const SUBJECT_VARIANT = { biology: 'emerald', pharmacology: 'blue', chemistry: 'teal', clinical: 'amber' };
-const VARIANT_RING_COLOR = { emerald: 'var(--emerald-600)', blue: 'var(--blue-600)', teal: 'var(--teal-600)', amber: 'var(--amber-600)', grey: 'var(--grey-500)' };
+const SUBJECT_VARIANT = { biology: 'emerald', pharmacology: 'blue', chemistry: 'green', clinical: 'amber' };
+const VARIANT_RING_COLOR = { emerald: 'var(--emerald-600)', blue: 'var(--blue-600)', green: 'var(--green-600)', amber: 'var(--amber-600)', grey: 'var(--grey-500)' };
 
-function ProgressRing({ percent = 0, color = '#2F8F5B', size = 44 }) {
+function ProgressRing({ percent = 0, color = 'var(--emerald-600)', size = 40 }) {
   const stroke = 4;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
   return (
     <svg width={size} height={size} className="progress-ring">
-      <circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.35)" strokeWidth={stroke} fill="none" />
+      <circle cx={size / 2} cy={size / 2} r={radius} stroke="var(--grey-200)" strokeWidth={stroke} fill="none" />
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -56,14 +56,14 @@ function LearningJourneySection({ navigate, sections }) {
     <section className="section learning-journey-section">
       <div className="learning-journey-content">
         <span className="eyebrow">Get started</span>
-        <h2 className="learning-journey-title">Your learning journey starts from here</h2>
+        <h1 className="learning-journey-title">Your learning journey starts from here</h1>
         <img
           src={primaryImage}
           alt="Happy students learning together"
           className="learning-journey-image"
           loading="lazy"
         />
-        <p className="section-subtitle">{subtitle}</p>
+        <h6 className="section-subtitle">{subtitle}</h6>
         <img
           src={secondaryImage}
           alt="Students studying and collaborating"
@@ -166,21 +166,22 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
       className={`curriculum-card curriculum-card-${variant}${locked ? ' curriculum-card-locked' : ''}`}
       onClick={() => navigate(locked ? '/upgrade' : `/units/${unit.id}`)}
     >
-      <div className="curriculum-card-media">
-        {showImage ? (
-          <img
-            src={unit.topic_image_url}
-            alt=""
-            className={locked ? 'curriculum-card-image-blurred' : 'curriculum-card-image'}
-            loading="lazy"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <div className="curriculum-card-image-fallback">
-            <Icon name={unit.icon || 'flask'} />
-          </div>
-        )}
-        <div className="curriculum-card-scrim" />
+      <div className="curriculum-card-frame">
+        <div className="curriculum-card-media">
+          {showImage ? (
+            <img
+              src={unit.topic_image_url}
+              alt=""
+              className={locked ? 'curriculum-card-image-blurred' : 'curriculum-card-image'}
+              loading="lazy"
+              onError={() => setImageFailed(true)}
+            />
+          ) : (
+            <div className="curriculum-card-image-fallback">
+              <Icon name={unit.icon || 'flask'} />
+            </div>
+          )}
+        </div>
 
         {locked ? (
           <div className="curriculum-card-lock">
@@ -191,12 +192,12 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
             <ProgressRing percent={percent} color={ringColor} />
           </div>
         )}
+      </div>
 
-        <div className="curriculum-card-caption">
-          <strong>{unit.name}</strong>
-          <span>{locked ? 'Premium · Upgrade to unlock' : `${doneLessons}/${totalLessons} lessons`}</span>
-          {unit.is_hard_topic && !locked && <span className="curriculum-card-pill">Hard topic</span>}
-        </div>
+      <div className="curriculum-card-caption">
+        <strong>{unit.name}</strong>
+        <span>{locked ? 'Premium · Upgrade to unlock' : `${doneLessons}/${totalLessons} lessons`}</span>
+        {unit.is_hard_topic && !locked && <span className="curriculum-card-pill">Hard topic</span>}
       </div>
     </button>
   );
@@ -210,8 +211,8 @@ function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccess
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">{activeLevelName}{activeGroupName ? ` · ${activeGroupName}` : ''}</span>
-          <h2>Your curriculum</h2>
-          <p className="section-subtitle">{description}</p>
+          <h1>Your curriculum</h1>
+          <h6 className="section-subtitle">{description}</h6>
         </div>
         <Link to="/curriculum" className="text-link">Full curriculum →</Link>
       </div>
