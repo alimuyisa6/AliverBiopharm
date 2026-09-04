@@ -1,7 +1,25 @@
  /* contexts/AuthContext.jsx */
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { getUser, signin, signout } from '../api/client';
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef
+} from 'react';
+
+import {
+  useLocation,
+  useNavigate
+} from 'react-router-dom';
+
+import {
+  getUser,
+  signin,
+  signout
+} from '../api/client';
+
 import Spinner from '../components/Spinner/Spinner';
 
 export const AuthContext = createContext(null);
@@ -21,10 +39,17 @@ const DEFAULT_PROFILE = {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const refreshRef = useRef(null);
   const inactivityRef = useRef(null);
   const lastActivityRef = useRef(Date.now());
 
+  const navigate = useNavigate();
+
+  /*
+   * Check the current authenticated session and
+   * retrieve the current user profile.
+   */
   const checkAuth = useCallback(async () => {
     try {
       const data = await getUser();
@@ -32,8 +57,10 @@ export function AuthProvider({ children }) {
       if (data?.user) {
         setUser({
           ...data.user,
-          profile: data.user.profile || DEFAULT_PROFILE
+          profile:
+            data.user.profile || DEFAULT_PROFILE
         });
+
         lastActivityRef.current = Date.now();
       } else {
         setUser(null);
@@ -45,10 +72,17 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  /*
+   * Check authentication when the application starts.
+   */
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
+  /*
+   * Keep the authenticated session refreshed while
+   * the user is active.
+   */
   useEffect(() => {
     if (!user) {
       clearInterval(refreshRef.current);
@@ -57,44 +91,115 @@ export function AuthProvider({ children }) {
     }
 
     refreshRef.current = setInterval(() => {
-      if (Date.now() - lastActivityRef.current < INACTIVITY_TIMEOUT) {
+      if (
+        Date.now() - lastActivityRef.current <
+        INACTIVITY_TIMEOUT
+      ) {
         checkAuth();
       }
     }, REFRESH_INTERVAL);
 
     const resetTimer = () => {
       lastActivityRef.current = Date.now();
+
       clearTimeout(inactivityRef.current);
 
       inactivityRef.current = setTimeout(() => {
         signout().catch(() => {});
         setUser(null);
+
+        /*
+         * When the session expires because of inactivity,
+         * return the user to the public Home page.
+         */
+        navigate('/', { replace: true });
       }, INACTIVITY_TIMEOUT);
     };
 
-    ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((event) => {
-      window.addEventListener(event, resetTimer, { passive: true });
+    const activityEvents = [
+      'mousedown',
+      'keydown',
+      'touchstart',
+      'mousemove'
+    ];
+
+    activityEvents.forEach((event) => {
+      window.addEventListener(
+        event,
+        resetTimer,
+        { passive: true }
+      );
     });
 
     resetTimer();
 
     return () => {
-      ['mousedown', 'keydown', 'touchstart', 'mousemove'].forEach((event) => {
-        window.removeEventListener(event, resetTimer);
+      clearInterval(refreshRef.current);
+      clearTimeout(inactivityRef.current);
+
+      activityEvents.forEach((event) => {
+        window.removeEventListener(
+          event,
+          resetTimer
+        );
       });
     };
-  }, [user, checkAuth]);
+  }, [user, checkAuth, navigate]);
 
-  const login = useCallback(async (email, password, turnstileToken, mfaCode) => {
-    const result = await signin(email, password, turnstileToken, mfaCode);
+  /*
+   * Sign in.
+   *
+   * Successful authentication now lands on the
+   * public Home page rather than Dashboard.
+   *
+   * MFA/passkey-required responses are returned first
+   * so that the login page can complete those flows
+   * before any navigation takes place.
+   */
+  const login = useCallback(
+    async (
+      email,
+      password,
+      turnstileToken,
+      mfaCode
+    ) => {
+      const result = await signin(
+        email,
+        password,
+        turnstileToken,
+        mfaCode
+      );
 
-    if (result?.mfa_required || result?.passkey_required) return result;
+      /*
+       * Do not redirect when another authentication
+       * step is still required.
+       */
+      if (
+        result?.mfa_required ||
+        result?.passkey_required
+      ) {
+        return result;
+      }
 
-    await checkAuth();
+      /*
+       * Load the authenticated user before navigating.
+       */
+      await checkAuth();
 
-    return result;
-  }, [checkAuth]);
+      /*
+       * Default authenticated landing page:
+       * Home, not Dashboard.
+       */
+      navigate('/', { replace: true });
 
+      return result;
+    },
+    [checkAuth, navigate]
+  );
+
+  /*
+   * Sign out and return to the public Home page.
+   */
   const logout = useCallback(async () => {
     clearInterval(refreshRef.current);
     clearTimeout(inactivityRef.current);
@@ -104,9 +209,17 @@ export function AuthProvider({ children }) {
     } catch {}
 
     setUser(null);
-  }, []);
 
-  const refresh = useCallback(() => checkAuth(), [checkAuth]);
+    navigate('/', { replace: true });
+  }, [navigate]);
+
+  /*
+   * Manually refresh the current authentication state.
+   */
+  const refresh = useCallback(
+    () => checkAuth(),
+    [checkAuth]
+  );
 
   return (
     <AuthContext.Provider
@@ -127,13 +240,21 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const ctx = useContext(AuthContext);
 
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) {
+    throw new Error(
+      'useAuth must be used within AuthProvider'
+    );
+  }
 
   return ctx;
 }
 
+/*
+ * Protect authenticated routes.
+ */
 export function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -141,9 +262,19 @@ export function ProtectedRoute({ children }) {
     if (loading) return;
 
     if (!user) {
-      navigate('/login', { replace: true, state: { from: location } });
+      navigate('/login', {
+        replace: true,
+        state: {
+          from: location
+        }
+      });
     }
-  }, [user, loading, location.pathname, navigate]);
+  }, [
+    user,
+    loading,
+    location,
+    navigate
+  ]);
 
   if (loading) {
     return (
@@ -153,7 +284,9 @@ export function ProtectedRoute({ children }) {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   return children;
 }
