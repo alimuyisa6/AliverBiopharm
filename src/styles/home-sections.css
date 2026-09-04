@@ -1,4 +1,4 @@
-/* Resources.css */
+ /* Resources.css */
 .resources-page {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -270,31 +270,32 @@
   color: var(--text-dim);
 }
 
+/* Stats grid - Modified for smaller cards */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
+  gap: var(--space-2); /* Reduced gap for tighter layout */
 }
 .stats-grid .stat-item {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  padding: var(--space-4);
+  padding: var(--space-2) var(--space-3); /* Reduced padding */
   text-align: center;
 }
 .stats-grid .stat-item .stat-icon {
-  font-size: var(--text-xl);
-  margin-bottom: var(--space-2);
+  font-size: var(--text-lg); /* Smaller icon */
+  margin-bottom: var(--space-1);
   color: var(--blue-600);
 }
 .stats-grid .stat-item .stat-value {
   font-family: var(--font-mono);
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl); /* Smaller number */
   font-weight: var(--weight-medium);
   color: var(--text-main);
 }
 .stats-grid .stat-item .stat-label {
-  font-size: var(--text-xs);
+  font-size: 0.7rem; /* Smaller label */
   color: var(--text-muted);
 }
 
@@ -573,6 +574,7 @@
   .section-teaser-content .section-subtitle { margin-left: auto; margin-right: auto; }
 }
 
+/* Home page section styles - modified for green-amber background on StatsGrid */
 .home-page > .section {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -584,8 +586,8 @@
 .home-page > .section:last-of-type { margin-bottom: 0; }
 .home-page > .section.section-with-bg { box-shadow: var(--shadow-md); }
 .home-page > .section.section-emerald {
-  background: var(--emerald-700);
-  border-color: var(--emerald-700);
+  background: linear-gradient(135deg, var(--emerald-700), var(--amber-600)); /* Green-amber gradient */
+  border-color: transparent;
 }
 
 @media (max-width: 768px) {
