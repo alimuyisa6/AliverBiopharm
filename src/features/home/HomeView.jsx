@@ -56,7 +56,7 @@ function LearningJourneySection({ navigate, sections }) {
     <section className="section learning-journey-section">
       <div className="learning-journey-content">
         <span className="eyebrow">Get started</span>
-        <h1 className="learning-journey-title">Your learning journey starts from here</h1>
+        <h2 className="section-title learning-journey-title">Your learning journey starts from here</h2>
         <img
           src={primaryImage}
           alt="Happy students learning together"
@@ -84,7 +84,7 @@ function SnapshotStats({ userStats }) {
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Your learning</span>
-          <h2>Learning snapshot</h2>
+          <h2 className="section-title">Learning snapshot</h2>
         </div>
         <Link to="/progress" className="text-link">View progress →</Link>
       </div>
@@ -121,7 +121,7 @@ function ContinueLearningRail({ items, navigate }) {
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Pick up where you stopped</span>
-          <h2>Continue learning</h2>
+          <h2 className="section-title">Continue learning</h2>
         </div>
         <Link to="/activity" className="text-link">See all activity →</Link>
       </div>
@@ -211,7 +211,7 @@ function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccess
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">{activeLevelName}{activeGroupName ? ` · ${activeGroupName}` : ''}</span>
-          <h1>Your curriculum</h1>
+          <h2 className="section-title">Your curriculum</h2>
           <h6 className="section-subtitle">{description}</h6>
         </div>
         <Link to="/curriculum" className="text-link">Full curriculum →</Link>
@@ -238,7 +238,7 @@ function DailyRecallCard({ recall, onReveal, onStart }) {
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Daily active recall</span>
-          <h2>{question_text}</h2>
+          <h2 className="section-title">{question_text}</h2>
           <p className="section-subtitle">{meta}</p>
         </div>
       </div>
