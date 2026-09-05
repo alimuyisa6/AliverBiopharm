@@ -1,4 +1,4 @@
- /* src/styles/colors.css */
+/* src/styles/colors.css - Design Tokens */
 :root {
   --amber-50: #fffbeb;
   --amber-100: #fef3c7;
@@ -44,6 +44,15 @@
   --green-800: #166534;
   --green-900: #14532d;
 
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-200: #fecaca;
+  --red-300: #fca5a5;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+
   --grey-50: #f8fafc;
   --grey-100: #f1f5f9;
   --grey-200: #e2e8f0;
@@ -56,23 +65,23 @@
   --grey-900: #0f172a;
   --grey-950: #020617;
 
-  --primary: #d1a432;
-  --primary-hover: #b88e22;
-  --primary-light: #fbf4e3;
-  --primary-ring: rgba(209, 164, 50, 0.35);
+  /* PRIMARY - Green */
+  --primary: #22c55e;
+  --primary-hover: #16a34a;
+  --primary-light: #f0fdf4;
+  --primary-ring: rgba(34, 197, 94, 0.35);
 
+  /* SECONDARY - Emerald */
   --secondary: var(--emerald-500);
   --secondary-hover: var(--emerald-600);
   --secondary-light: var(--emerald-50);
 
+  /* ACCENT - Grey */
   --accent: var(--grey-600);
   --accent-hover: var(--grey-700);
   --accent-light: var(--grey-50);
 
-  --warm: var(--primary);
-  --warm-hover: var(--primary-hover);
-  --warm-light: var(--primary-light);
-
+  /* SEMANTIC - Status Colors */
   --success: var(--green-500);
   --success-light: var(--green-50);
 
@@ -85,6 +94,7 @@
   --info: var(--blue-500);
   --info-light: var(--blue-50);
 
+  /* BACKGROUNDS */
   --bg-page: var(--grey-50);
   --bg-card: #ffffff;
   --bg-card-hover: var(--grey-100);
@@ -95,6 +105,7 @@
   --bg-hero: var(--grey-50);
   --bg-section-tint: var(--grey-100);
 
+  /* TEXT */
   --text-main: var(--grey-900);
   --text-dim: var(--grey-600);
   --text-muted: var(--grey-400);
@@ -102,43 +113,49 @@
   --text-link: var(--blue-600);
   --text-link-hover: var(--blue-700);
 
+  /* BORDERS */
   --border-default: var(--grey-200);
   --border-strong: var(--grey-300);
   --border-focus: var(--primary);
 
+  /* SHADOWS */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.10);
 
+  /* SEMANTIC LEVELS */
   --level-olevel: var(--blue-600);
   --level-alevel: var(--emerald-600);
   --level-pharmacy: var(--grey-600);
 
+  /* HEADER & FOOTER */
   --header-footer-bg-solid: #ffffff;
   --header-footer-border: var(--grey-200);
 }
 
 body.dark-mode {
-  --primary: #e5bc4a;
-  --primary-hover: #f0d27a;
-  --primary-light: rgba(209, 164, 50, 0.15);
-  --primary-ring: rgba(209, 164, 50, 0.30);
+  /* PRIMARY - Green (Dark) */
+  --primary: #4ade80;
+  --primary-hover: #22c55e;
+  --primary-light: rgba(34, 197, 94, 0.15);
+  --primary-ring: rgba(34, 197, 94, 0.30);
 
+  /* SECONDARY - Emerald (Dark) */
   --secondary: var(--emerald-400);
   --secondary-hover: var(--emerald-300);
   --secondary-light: rgba(16, 185, 129, 0.15);
 
+  /* ACCENT - Grey (Dark) */
   --accent: var(--grey-500);
   --accent-hover: var(--grey-400);
 
-  --warm: var(--primary);
-  --warm-hover: var(--primary-hover);
-
+  /* SEMANTIC - Status Colors (Dark) */
   --success: var(--green-400);
   --error: #f87171;
   --info: var(--blue-400);
 
+  /* BACKGROUNDS (Dark) */
   --bg-page: var(--grey-950);
   --bg-card: var(--grey-800);
   --bg-card-hover: var(--grey-700);
@@ -149,21 +166,25 @@ body.dark-mode {
   --bg-hero: var(--grey-900);
   --bg-section-tint: var(--grey-800);
 
+  /* TEXT (Dark) */
   --text-main: var(--grey-100);
   --text-dim: var(--grey-400);
   --text-muted: var(--grey-500);
   --text-link: var(--blue-400);
   --text-link-hover: var(--blue-300);
 
+  /* BORDERS (Dark) */
   --border-default: var(--grey-700);
   --border-strong: var(--grey-600);
   --border-focus: var(--primary);
 
+  /* SHADOWS (Dark) */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.30);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.40);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.50);
 
+  /* HEADER & FOOTER (Dark) */
   --header-footer-bg-solid: var(--grey-800);
   --header-footer-border: var(--grey-700);
 }
