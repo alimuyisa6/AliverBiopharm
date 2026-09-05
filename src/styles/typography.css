@@ -6,17 +6,17 @@
   --font-primary: 'Inter', -apple-system, system-ui, sans-serif;
   --font-mono: 'DM Mono', monospace;
 
-  /* Font Sizes */
-  --text-xs: 0.75rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-md: 1.0625rem;
-  --text-lg: 1.1875rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.625rem;
-  --text-3xl: 2rem;
-  --text-4xl: 2.75rem;
-  --text-5xl: 3.5rem;
+  /* Font Sizes — wider contrast: body sizes trimmed down, heading sizes pushed up */
+  --text-xs: 0.75rem;    /* 12px — unchanged */
+  --text-sm: 0.8125rem;  /* 13px — unchanged */
+  --text-base: 0.875rem; /* 14px — was 15px */
+  --text-md: 0.9375rem;  /* 15px — was 17px */
+  --text-lg: 1.125rem;   /* 18px — was 19px */
+  --text-xl: 1.5rem;     /* 24px — was 22px */
+  --text-2xl: 2rem;      /* 32px — was 26px */
+  --text-3xl: 2.5rem;    /* 40px — was 32px */
+  --text-4xl: 3.5rem;    /* 56px — was 44px */
+  --text-5xl: 4.5rem;    /* 72px — was 56px */
 
   /* Font Weights */
   --weight-normal: 400;
@@ -27,8 +27,8 @@
   --weight-black: 900;
 
   /* Line Heights */
-  --leading-tight: 1.1;
-  --leading-snug: 1.2;
+  --leading-tight: 1.05;
+  --leading-snug: 1.15;
   --leading-normal: 1.6;
   --leading-relaxed: 1.75;
 
