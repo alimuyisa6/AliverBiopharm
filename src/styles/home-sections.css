@@ -1,4 +1,4 @@
-  /* Resources.css */
+ /* Resources.css */
 .resources-page {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -286,7 +286,6 @@
 .stats-grid .stat-item .stat-icon {
   font-size: var(--text-lg);
   margin-bottom: var(--space-1);
-  color: var(--blue-600);
 }
 .stats-grid .stat-item .stat-value {
   font-family: var(--font-mono);
@@ -295,7 +294,7 @@
   color: var(--text-main);
 }
 .stats-grid .stat-item .stat-label {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 
