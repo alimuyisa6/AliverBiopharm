@@ -4,6 +4,7 @@
 :root {
   /* Font Families */
   --font-primary: 'Inter', -apple-system, system-ui, sans-serif;
+  --font-heading: var(--font-primary); /* was referenced in components.css (.auth-heading) but never defined — pointed at body font until a distinct heading face is chosen */
   --font-mono: 'DM Mono', monospace;
 
   /* Font Sizes — wider contrast: body sizes trimmed down, heading sizes pushed up */
