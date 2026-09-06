@@ -52,7 +52,10 @@
 }
 
 .tutor-card-avatar i {
-  font-size: 2rem;
+  /* fixed: was hardcoded 2rem — now coincides exactly with --text-2xl
+     after the type scale update, so it references the token instead of
+     duplicating its value */
+  font-size: var(--text-2xl);
 }
 
 .tutor-chip-row {
