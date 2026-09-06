@@ -18,7 +18,7 @@ export function WhyChooseSection() {
       <div className="why-choose-row">
         {REASONS.map((reason) => (
           <div key={reason.number} className="why-choose-item">
-            <div className="num">{reason.number}</div>
+            <div className={`num num-${reason.color}`}>{reason.number}</div>
             <h3>{reason.title}</h3>
             <p>{reason.text}</p>
           </div>
