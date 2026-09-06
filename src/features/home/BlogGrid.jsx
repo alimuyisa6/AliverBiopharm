@@ -6,12 +6,12 @@ export function BlogGrid({ posts }) {
 
   return (
     <section id="blog" className="section alt-bg reveal">
-      <span className="sec-label">Insights</span>
+      <span className="sec-label">Worth a read</span>
       <h2 className="section-title">
-        From the World of<br />Science & Pharmacy
+        What Our Writers Have<br />Been Digging Into
       </h2>
       <p className="section-subtitle">
-        The latest developments in Biology, Pharmacy, and Life Sciences from our expert contributors.
+        Short reads on biology, pharmacy, and the occasional science story that caught our attention.
       </p>
 
       <div className="grid-3">
@@ -28,11 +28,11 @@ export function BlogGrid({ posts }) {
             <p className="blog-excerpt">{post.excerpt}</p>
 
             <a href="#" className="card-link-arrow">
-              Read Article <i className="fa-solid fa-arrow-right" />
+              Keep reading <i className="fa-solid fa-arrow-right" />
             </a>
           </article>
         ))}
       </div>
     </section>
   );
-} 
+}
