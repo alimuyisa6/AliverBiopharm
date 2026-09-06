@@ -1,4 +1,4 @@
- /* src/styles/card.css */
+   /* src/styles/card.css */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -211,8 +211,12 @@
   color: var(--primary);
 }
 .tag-emerald {
-  background: var(--secondary-light);
-  color: var(--secondary);
+  /* fixed: was background: var(--secondary-light); color: var(--secondary);
+     that aliased to amber after --secondary took over the amber slot.
+     "emerald" now always means the raw emerald scale, regardless of what
+     --primary/--secondary happen to point at. */
+  background: var(--emerald-100);
+  color: var(--emerald-700);
 }
 .tag-amber {
   background: var(--amber-100);
@@ -247,8 +251,11 @@
   border-radius: var(--radius-xs);
   background: var(--primary);
 }
-.progress-fill.emerald { background: var(--secondary); }
-.progress-fill.amber { background: var(--warm); }
+.progress-fill.emerald {
+  /* fixed: was background: var(--secondary); — same aliasing bug as .tag-emerald above */
+  background: var(--emerald-500);
+}
+.progress-fill.amber { background: var(--amber-500); }
 .progress-fill.blue { background: var(--info); }
 
 .topic-card {
