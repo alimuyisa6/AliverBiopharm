@@ -68,7 +68,9 @@
   line-height: 0.9;
   letter-spacing: -0.045em;
   word-spacing: 0.02em;
-  color: #fff;
+  /* fixed: was raw #fff — --text-inverse is defined as exactly #ffffff,
+     so this now tracks the token instead of duplicating its value */
+  color: var(--text-inverse);
   margin: 0 0 var(--space-6);
   max-width: 720px;
   text-wrap: balance;
@@ -120,7 +122,10 @@
 
 .hero-gallery-section {
   padding: var(--space-10) var(--space-6);
-  max-width: 1200px;
+  /* fixed: was max-width: 1200px — a hardcoded duplicate of --max-width's
+     own value (also 1200px, defined in spacing.css). Referencing the
+     token keeps this in sync if --max-width is ever tuned. */
+  max-width: var(--max-width);
   margin: 0 auto;
 }
 .hero-gallery-title {
