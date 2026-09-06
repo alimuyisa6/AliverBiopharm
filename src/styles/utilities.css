@@ -3,11 +3,21 @@
 }
 
 .emerald-card {
-  background: var(--secondary-light);
-  color: var(--secondary-hover);
+  /* fixed: was background: var(--secondary-light); color: var(--secondary-hover);
+     which aliased to whatever --secondary points to (and read dark/muddy in
+     dark mode since --secondary-light there is a translucent overlay on a
+     near-black page background). Now pinned to the raw emerald scale so it's
+     always a genuinely light green card regardless of --secondary. */
+  background: var(--emerald-50);
+  color: var(--emerald-700);
   padding: var(--card-padding);
   border-radius: 0;
   box-shadow: var(--shadow-md);
+}
+
+body.dark-mode .emerald-card {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--emerald-300);
 }
 
 .card-shadow-sm { box-shadow: var(--shadow-sm) !important; }
