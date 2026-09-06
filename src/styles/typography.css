@@ -1,10 +1,17 @@
  /* src/styles/fonts.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Maven+Pro:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap');
 
 :root {
   /* Font Families */
   --font-primary: 'Inter', -apple-system, system-ui, sans-serif;
-  --font-heading: var(--font-primary); /* was referenced in components.css (.auth-heading) but never defined — pointed at body font until a distinct heading face is chosen */
+  --font-heading: var(--font-primary);
+  /* fixed: --font-source-sans and --font-maven-pro were referenced in
+     home-sections.css (.team-card p, .home-faq-answer p, .team-title)
+     but never defined — both silently fell back to the inherited body
+     font (Inter), which is the real reason everything read at the same
+     density. Now wired to the actual fonts their names promise. */
+  --font-source-sans: 'Source Sans 3', -apple-system, system-ui, sans-serif;
+  --font-maven-pro: 'Maven Pro', -apple-system, system-ui, sans-serif;
   --font-mono: 'DM Mono', monospace;
 
   /* Font Sizes — wider contrast: body sizes trimmed down, heading sizes pushed up */
