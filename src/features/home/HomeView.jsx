@@ -1,4 +1,4 @@
- import { useState } from 'react';
+  import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
@@ -136,7 +136,12 @@ function ContinueLearningRail({ items, navigate }) {
               <div className="row-meta">
                 <span>{item.type} · {item.subject || 'Biology'}</span>
                 <span className="progress-track" style={{ width: 120 }}>
-                  <span className={`progress-fill progress-${item.progress_color || 'blue'}`} style={{ width: `${item.progress_percent}%` }} />
+                  {/* fixed: was `progress-fill progress-${...}` (e.g. "progress-blue"),
+                      which doesn't match card.css's `.progress-fill.blue` selector
+                      (two separate class names, no "progress-" prefix). The color
+                      modifier was silently never applying — every bar rendered the
+                      default --primary color regardless of progress_color. */}
+                  <span className={`progress-fill ${item.progress_color || 'blue'}`} style={{ width: `${item.progress_percent}%` }} />
                 </span>
               </div>
             </div>
