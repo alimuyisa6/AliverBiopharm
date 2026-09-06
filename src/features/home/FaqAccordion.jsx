@@ -1,4 +1,4 @@
-/* features/home/FaqAccordion.jsx */
+ /* features/home/FaqAccordion.jsx */
 import { useState } from 'react';
 
 const ACCENTS = ['blue', 'teal', 'violet', 'amber', 'emerald'];
@@ -10,12 +10,12 @@ export function FaqAccordion({ items }) {
 
   return (
     <section id="faq" className="section reveal">
-      <span className="sec-label">FAQ</span>
+      <span className="sec-label">Before you ask</span>
       <h2 className="section-title">
-        Questions We Hear<br />Most Often
+        The Questions We Get<br />All the Time
       </h2>
       <p className="section-subtitle">
-        Straightforward answers about our platform, resources, tools, and membership options.
+        Quick answers about how the platform works, what's included, and how billing is handled.
       </p>
 
       <div className="home-faq-list">
@@ -46,4 +46,4 @@ export function FaqAccordion({ items }) {
       </div>
     </section>
   );
-} 
+}
