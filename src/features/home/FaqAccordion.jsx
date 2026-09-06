@@ -1,7 +1,7 @@
  /* features/home/FaqAccordion.jsx */
 import { useState } from 'react';
 
-const ACCENTS = ['blue', 'teal', 'violet', 'amber', 'emerald'];
+const ACCENTS = ['grey', 'green', 'blue', 'amber', 'emerald'];
 
 export function FaqAccordion({ items }) {
   const [activeIndex, setActiveIndex] = useState(null);
@@ -15,7 +15,7 @@ export function FaqAccordion({ items }) {
         The Questions We Get<br />All the Time
       </h2>
       <p className="section-subtitle">
-        Quick answers about how the platform works, what's included, and how billing is handled.
+        Straightforward answers about pricing, access, and how billing works.
       </p>
 
       <div className="home-faq-list">
