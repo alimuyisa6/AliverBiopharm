@@ -1,8 +1,8 @@
- /* features/home/HowItWorksSection.jsx */
+  /* features/home/HowItWorksSection.jsx */
 const STEPS = [
-  { number: '1', title: 'Create your account', text: 'Sign up free and choose O-Level, A-Level, or Pharmacy.' },
-  { number: '2', title: 'Study your way', text: 'Work through notes, flashcards, and quizzes built for your syllabus.' },
-  { number: '3', title: 'Track your progress', text: 'Follow your streak, weak areas, and improvement as you go.' }
+  { number: '1', title: 'Create your account', text: 'Sign up free and pick O-Level, A-Level, or Pharmacy.' },
+  { number: '2', title: 'Study your way', text: 'Work through notes, flashcards, and quizzes built around your syllabus.' },
+  { number: '3', title: 'Watch it add up', text: 'Your streak, weak spots, and progress update as you go.' }
 ];
 
 export function HowItWorksSection() {
@@ -11,7 +11,7 @@ export function HowItWorksSection() {
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Getting Started</span>
-          <h2>Three steps to better grades</h2>
+          <h2>Three steps, then you're studying</h2>
         </div>
       </div>
       <div className="how-it-works">
