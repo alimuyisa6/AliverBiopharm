@@ -1,4 +1,4 @@
-/* components/dashboard/HomeDashboardCard.jsx */
+ /* components/dashboard/HomeDashboardCard.jsx */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -36,7 +36,7 @@ export default function HomeDashboardCard() {
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Your learning</span>
-          <h2 className="section-title">Learning snapshot</h2>
+          <h2>Learning snapshot</h2>
         </div>
         <Link to="/dashboard" className="text-link">View full dashboard →</Link>
       </div>
