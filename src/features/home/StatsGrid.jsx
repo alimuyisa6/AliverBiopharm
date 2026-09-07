@@ -40,24 +40,30 @@ function AnimatedNumber({ target, label, icon }) {
   const format = (num) => (num >= 1000 ? (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k+' : num);
 
   return (
-    <div className="stat-item" ref={ref}>
-      <Icon name={icon} className="stat-icon" />
-      <div className="stat-value">{format(count)}</div>
-      <div className="stat-label">{label}</div>
+    <div className="curriculum-card stats-grid-card" ref={ref}>
+      <div className="curriculum-card-top">
+        <div className="curriculum-card-badge">
+          <Icon name={icon} />
+        </div>
+      </div>
+      <div className="curriculum-card-body">
+        <span className="curriculum-card-title">{format(count)}</span>
+        <span className="curriculum-card-meta">{label}</span>
+      </div>
     </div>
   );
 }
 
 export function StatsGrid({ stats = {} }) {
   return (
-    <section className="section section-emerald">
+    <section className="section stats-grid-section">
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Our Impact</span>
-          <h2 className="section-title">Trusted by learners across levels</h2>
+          <h2>Trusted by learners across levels</h2>
         </div>
       </div>
-      <div className="stats-grid">
+      <div className="curriculum-rail">
         {ITEMS.map((item) => (
           <AnimatedNumber key={item.key} target={stats[item.key] || 0} label={item.label} icon={item.icon} />
         ))}
