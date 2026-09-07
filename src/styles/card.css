@@ -46,6 +46,66 @@
   align-items: center;
 }
 
+.folded-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.folded-card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 38px;
+  height: 38px;
+  background: var(--bg-card);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  border-left: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+  z-index: 8;
+  pointer-events: none;
+}
+
+.folded-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 38px;
+  height: 38px;
+  background: var(--bg-card-tinted);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+  box-shadow: -3px 3px 5px rgba(0, 0, 0, 0.08);
+  z-index: 7;
+  pointer-events: none;
+}
+
+.folded-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.folded-card-emerald::after {
+  background: var(--emerald-100);
+}
+
+.folded-card-blue::after {
+  background: var(--blue-100);
+}
+
+.folded-card-green::after {
+  background: var(--green-100);
+}
+
+.folded-card-amber::after {
+  background: var(--amber-100);
+}
+
+.folded-card-grey::after {
+  background: var(--bg-card-tinted);
+}
+
 .row-list {
   display: flex;
   flex-direction: column;
@@ -334,55 +394,6 @@
   color: var(--text-main);
 }
 
-.curriculum-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.curriculum-card::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 32px;
-  height: 32px;
-  background: var(--bg-card);
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
-  border-left: 1px solid var(--border-default);
-  border-bottom: 1px solid var(--border-default);
-  pointer-events: none;
-  z-index: 5;
-}
-
-.curriculum-card::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 32px;
-  height: 32px;
-  background: var(--bg-card-tinted);
-  clip-path: polygon(0 0, 0 100%, 100% 100%);
-  pointer-events: none;
-  z-index: 4;
-}
-
-.curriculum-card-emerald::after {
-  background: var(--emerald-100);
-}
-
-.curriculum-card-blue::after {
-  background: var(--blue-100);
-}
-
-.curriculum-card-green::after {
-  background: var(--green-100);
-}
-
-.curriculum-card-amber::after {
-  background: var(--amber-100);
-}
-
 @media (max-width: 768px) {
   .dash-strip {
     grid-template-columns: repeat(2, 1fr);
@@ -417,10 +428,16 @@
   .section-head-left h2 {
     font-size: var(--text-xl);
   }
-  
+
   .card {
     padding: var(--space-3);
     margin: 0 var(--space-1);
+  }
+
+  .folded-card::before,
+  .folded-card::after {
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -464,5 +481,11 @@
 
   .card {
     margin: 0 var(--space-0);
+  }
+
+  .folded-card::before,
+  .folded-card::after {
+    width: 28px;
+    height: 28px;
   }
 }
