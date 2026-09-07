@@ -1,27 +1,88 @@
  /* features/home/WhyChooseSection.jsx */
+
 const REASONS = [
-  { number: '1', title: 'Syllabus-Aligned Content', text: 'Every note and quiz matches your official curriculum, not generic material.', color: 'blue' },
-  { number: '2', title: 'Built to Stick', text: 'Flashcards and spaced repetition designed for retention, not just re-reading.', color: 'amber' },
-  { number: '3', title: 'Real Exam Practice', text: 'Past papers and block quizzes modeled on the actual exam structure.', color: 'teal' },
-  { number: '4', title: 'Never Stuck Alone', text: 'Live classrooms and tutors are there when a note alone is not enough.', color: 'grey' }
+  {
+    number: '01',
+    title: 'Content That Matches Your Curriculum',
+    text: 'Learn from notes, quizzes, flashcards, recall activities, PDFs and past papers organized around your actual syllabus and academic pathway.',
+    color: 'blue',
+    label: 'Curriculum aligned'
+  },
+  {
+    number: '02',
+    title: 'Your Level. Your Content.',
+    text: 'Choose your level and class or programme, and your learning environment stays focused on the content that belongs to you instead of mixing unrelated material.',
+    color: 'green',
+    label: 'Focused learning'
+  },
+  {
+    number: '03',
+    title: 'Everything You Need to Learn',
+    text: 'Study a topic with detailed notes, reinforce it with flashcards, strengthen recall, test yourself with quizzes and practise with past papers.',
+    color: 'amber',
+    label: 'Learn · Recall · Practise'
+  },
+  {
+    number: '04',
+    title: 'A Clear Learning Path',
+    text: 'Content is arranged logically by level, class or programme, subject and topic, so you can move through your studies without getting lost.',
+    color: 'grey',
+    label: 'Organized by design'
+  },
+  {
+    number: '05',
+    title: 'Study Beyond Reading',
+    text: 'AliverBiopharm is built around active learning. Recall what you studied, answer questions, identify gaps and return to the areas that need more work.',
+    color: 'blue',
+    label: 'Active learning'
+  },
+  {
+    number: '06',
+    title: 'Keep Learning When You Need Help',
+    text: 'When studying on your own is not enough, live classrooms and tutors give you additional ways to get guidance and keep moving forward.',
+    color: 'green',
+    label: 'Support when needed'
+  }
 ];
 
 export function WhyChooseSection() {
   return (
-    <section className="section">
+    <section className="section why-choose-section">
       <div className="section-head">
         <div className="section-head-left">
-          <span className="eyebrow">Why Aliver</span>
-          <h2>Built with purpose</h2>
+          <span className="eyebrow">Why AliverBiopharm</span>
+
+          <h2>Why Many Choose AliverBiopharm</h2>
+
+          <p>
+            A focused learning environment built to help Biology and Pharmacy
+            students learn, practise, recall and prepare with the right content
+            at the right level.
+          </p>
         </div>
       </div>
-      <div className="why-choose-row">
+
+      <div className="why-choose-grid">
         {REASONS.map((reason) => (
-          <div key={reason.number} className="why-choose-item">
-            <div className={`num num-${reason.color}`}>{reason.number}</div>
-            <h3>{reason.title}</h3>
-            <p>{reason.text}</p>
-          </div>
+          <article
+            key={reason.number}
+            className={`why-choose-card why-choose-card-${reason.color}`}
+          >
+            <div className="why-choose-card-top">
+              <span className="why-choose-number">
+                {reason.number}
+              </span>
+
+              <span className="why-choose-label">
+                {reason.label}
+              </span>
+            </div>
+
+            <div className="why-choose-card-body">
+              <h3>{reason.title}</h3>
+              <p>{reason.text}</p>
+            </div>
+          </article>
         ))}
       </div>
     </section>
