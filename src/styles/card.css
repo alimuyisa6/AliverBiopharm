@@ -1,4 +1,4 @@
-   /* src/styles/card.css */
+ /* src/styles/card.css */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -7,31 +7,38 @@
   transition: border-color 0.15s ease;
   margin: 0 var(--space-2);
 }
+
 .card:hover {
   border-color: var(--border-strong);
 }
+
 .card-lifted {
   border-color: var(--border-default);
   box-shadow: var(--shadow-sm);
 }
+
 .card-lifted:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--border-default);
 }
+
 .card-body {
   padding: 0;
 }
+
 .card-title {
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm);
   margin-bottom: var(--space-1);
   color: var(--text-main);
 }
+
 .card-text {
   font-size: var(--text-xs);
   color: var(--text-dim);
   line-height: var(--leading-relaxed);
 }
+
 .card-footer {
   margin-top: var(--space-3);
   display: flex;
@@ -44,6 +51,7 @@
   flex-direction: column;
   width: 100%;
 }
+
 .row {
   display: flex;
   align-items: center;
@@ -54,18 +62,22 @@
   background: var(--bg-card);
   min-width: 0;
 }
+
 .row-list .row:first-child {
   border-top: 1px solid var(--border-default);
   border-top-left-radius: var(--radius-sm);
   border-top-right-radius: var(--radius-sm);
 }
+
 .row-list .row:last-child {
   border-bottom-left-radius: var(--radius-sm);
   border-bottom-right-radius: var(--radius-sm);
 }
+
 .row:hover {
   background: var(--bg-card-hover);
 }
+
 .row-thumb {
   width: 44px;
   height: 44px;
@@ -77,10 +89,12 @@
   justify-content: center;
   color: var(--text-muted);
 }
+
 .row-body {
   flex: 1;
   min-width: 0;
 }
+
 .row-title {
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm);
@@ -90,6 +104,7 @@
   text-overflow: ellipsis;
   color: var(--text-main);
 }
+
 .row-meta {
   font-size: var(--text-xs);
   color: var(--text-muted);
@@ -98,6 +113,7 @@
   gap: var(--space-1) var(--space-3);
   align-items: center;
 }
+
 .row-actions {
   display: flex;
   gap: var(--space-2);
@@ -115,24 +131,36 @@
   overflow: hidden;
   margin-bottom: var(--space-8);
 }
+
 .dash-cell {
   background: var(--bg-card);
   padding: var(--space-5) var(--space-4);
   min-width: 0;
 }
+
 .dc-label {
   font-size: var(--text-xs);
   color: var(--text-muted);
   margin-bottom: var(--space-2);
 }
+
 .dc-value {
   font-family: var(--font-mono);
   font-size: var(--text-2xl);
   font-weight: var(--weight-medium);
 }
-.dc-value.green { color: var(--success); }
-.dc-value.amber { color: var(--warm); }
-.dc-value.blue { color: var(--info); }
+
+.dc-value.green {
+  color: var(--success);
+}
+
+.dc-value.amber {
+  color: var(--warm);
+}
+
+.dc-value.blue {
+  color: var(--info);
+}
 
 .stat-item {
   background: var(--bg-card);
@@ -141,17 +169,20 @@
   padding: var(--space-4);
   text-align: center;
 }
+
 .stat-icon {
   font-size: var(--text-xl);
   margin-bottom: var(--space-2);
   color: var(--primary);
 }
+
 .stat-value {
   font-family: var(--font-mono);
   font-size: var(--text-xl);
   font-weight: var(--weight-medium);
   color: var(--text-main);
 }
+
 .stat-label {
   font-size: var(--text-xs);
   color: var(--text-muted);
@@ -165,6 +196,7 @@
   margin-bottom: var(--space-6);
   flex-wrap: wrap;
 }
+
 .section-head-left h2 {
   font-family: var(--font-primary);
   font-weight: var(--weight-bold);
@@ -172,10 +204,12 @@
   margin: 0;
   color: var(--text-main);
 }
+
 .section-head-left p {
   font-size: var(--text-sm);
   color: var(--text-dim);
 }
+
 .eyebrow {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
@@ -187,6 +221,7 @@
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
+
 .eyebrow::before {
   content: "";
   width: 16px;
@@ -206,34 +241,37 @@
   font-family: var(--font-mono);
   white-space: nowrap;
 }
+
 .tag-primary {
   background: var(--primary-light);
   color: var(--primary);
 }
+
 .tag-emerald {
-  /* fixed: was background: var(--secondary-light); color: var(--secondary);
-     that aliased to amber after --secondary took over the amber slot.
-     "emerald" now always means the raw emerald scale, regardless of what
-     --primary/--secondary happen to point at. */
   background: var(--emerald-100);
   color: var(--emerald-700);
 }
+
 .tag-amber {
   background: var(--amber-100);
   color: var(--amber-700);
 }
+
 .tag-green {
   background: var(--green-100);
   color: var(--green-700);
 }
+
 .tag-grey {
   background: var(--bg-card-tinted);
   color: var(--text-dim);
 }
+
 .tag-red {
   background: var(--red-100);
   color: var(--red-700);
 }
+
 .tag-blue {
   background: var(--blue-100);
   color: var(--blue-700);
@@ -246,23 +284,31 @@
   border-radius: var(--radius-xs);
   overflow: hidden;
 }
+
 .progress-fill {
   height: 100%;
   border-radius: var(--radius-xs);
   background: var(--primary);
 }
+
 .progress-fill.emerald {
-  /* fixed: was background: var(--secondary); — same aliasing bug as .tag-emerald above */
   background: var(--emerald-500);
 }
-.progress-fill.amber { background: var(--amber-500); }
-.progress-fill.blue { background: var(--info); }
+
+.progress-fill.amber {
+  background: var(--amber-500);
+}
+
+.progress-fill.blue {
+  background: var(--info);
+}
 
 .topic-card {
   display: block;
   text-decoration: none;
   color: inherit;
 }
+
 .topic-card-image {
   width: 100%;
   aspect-ratio: 16/9;
@@ -270,6 +316,7 @@
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-3);
 }
+
 .topic-card-image-placeholder {
   width: 100%;
   height: auto;
@@ -277,6 +324,7 @@
   background: var(--bg-card-tinted);
   border-radius: var(--radius-sm);
 }
+
 .topic-card-row {
   display: flex;
   align-items: center;
@@ -286,24 +334,135 @@
   color: var(--text-main);
 }
 
-@media (max-width: 768px) {
-  .dash-strip { grid-template-columns: repeat(2, 1fr); gap: 0; }
-  .dash-cell { padding: var(--space-3); }
-  .dc-value { font-size: var(--text-xl); }
-  .row { padding: var(--space-3); gap: var(--space-3); flex-wrap: wrap; }
-  .row-actions { width: 100%; justify-content: flex-end; }
-  .section-head { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
-  .section-head-left h2 { font-size: var(--text-xl); }
-  .card { padding: var(--space-3); margin: 0 var(--space-1); }
+.curriculum-card {
+  position: relative;
+  overflow: hidden;
 }
+
+.curriculum-card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 32px;
+  height: 32px;
+  background: var(--bg-card);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  border-left: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.curriculum-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: var(--bg-card-tinted);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.curriculum-card-emerald::after {
+  background: var(--emerald-100);
+}
+
+.curriculum-card-blue::after {
+  background: var(--blue-100);
+}
+
+.curriculum-card-green::after {
+  background: var(--green-100);
+}
+
+.curriculum-card-amber::after {
+  background: var(--amber-100);
+}
+
+@media (max-width: 768px) {
+  .dash-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
+
+  .dash-cell {
+    padding: var(--space-3);
+  }
+
+  .dc-value {
+    font-size: var(--text-xl);
+  }
+
+  .row {
+    padding: var(--space-3);
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .row-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .section-head-left h2 {
+    font-size: var(--text-xl);
+  }
+  
+  .card {
+    padding: var(--space-3);
+    margin: 0 var(--space-1);
+  }
+}
+
 @media (max-width: 480px) {
-  .dash-strip { grid-template-columns: 1fr 1fr; }
-  .dash-cell { padding: var(--space-3); }
-  .dc-value { font-size: var(--text-lg); }
-  .row { padding: var(--space-3); flex-direction: column; align-items: stretch; gap: var(--space-2); }
-  .row-thumb { width: 32px; height: 32px; }
-  .row-actions { justify-content: flex-start; width: 100%; }
-  .row-title { font-size: var(--text-sm); }
-  .row-meta { font-size: var(--text-xs); }
-  .card { margin: 0 var(--space-0); }
+  .dash-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dash-cell {
+    padding: var(--space-3);
+  }
+
+  .dc-value {
+    font-size: var(--text-lg);
+  }
+
+  .row {
+    padding: var(--space-3);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .row-thumb {
+    width: 32px;
+    height: 32px;
+  }
+
+  .row-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .row-title {
+    font-size: var(--text-sm);
+  }
+
+  .row-meta {
+    font-size: var(--text-xs);
+  }
+
+  .card {
+    margin: 0 var(--space-0);
+  }
 }
