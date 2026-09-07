@@ -94,6 +94,8 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
   const variant = SUBJECT_VARIANT[unit.subject_key] || 'grey';
   const percent = unit.progress_percent || 0;
   const showImage = unit.topic_image_url && !imageFailed;
+  const isComplete = percent >= 100;
+  const progressTagColor = isComplete ? 'emerald' : percent >= 75 ? 'green' : percent >= 50 ? 'blue' : percent >= 25 ? 'amber' : 'grey';
 
   return (
     <button
@@ -133,7 +135,10 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
 
       {!locked && (
         <div className="curriculum-card-tags">
-          <span className={`tag tag-${variant}`}>{percent}% complete</span>
+          <span className={`tag tag-${progressTagColor}`}>
+            {isComplete && <Icon name="trophy" />}
+            {isComplete ? 'Complete!' : `${percent}% complete`}
+          </span>
           {unit.is_hard_topic && <span className="tag tag-amber">Hard topic</span>}
         </div>
       )}
