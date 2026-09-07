@@ -6,7 +6,7 @@ import Button from '../../components/Button/Button';
 import ClassSwitcher from '../../components/ClassSwitcher/ClassSwitcher';
 import { WhyChooseSection } from './WhyChooseSection';
 import { HowItWorksSection } from './HowItWorksSection';
-import { StatsGrid } from '../../components/StatsGrid/StatsGrid';
+import { StatsGrid } from './StatsGrid';
 import { TestimonialSlider } from './TestimonialSlider';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
