@@ -1,0 +1,166 @@
+/* src/styles/how-it-works.css */
+
+/* =========================================================
+   HOW IT WORKS
+   Home feature section
+   ========================================================= */
+
+.how-it-works-section {
+  width: 100%;
+}
+
+.how-it-works-section .section-head {
+  margin-bottom: var(--space-8);
+}
+
+.how-it-works-section .section-description {
+  max-width: 720px;
+}
+
+/* ---------------------------------------------------------
+   Grid
+   --------------------------------------------------------- */
+
+.how-it-works-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+/* ---------------------------------------------------------
+   Step
+   --------------------------------------------------------- */
+
+.how-step {
+  position: relative;
+  min-width: 0;
+  padding: var(--space-6);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.how-step-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-7);
+}
+
+.how-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+/* ---------------------------------------------------------
+   Custom icon container
+   --------------------------------------------------------- */
+
+.how-step-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.how-step-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+/* ---------------------------------------------------------
+   Content
+   --------------------------------------------------------- */
+
+.how-step-content {
+  max-width: 420px;
+}
+
+.how-step-content h3 {
+  margin: 0 0 var(--space-3);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.how-step-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+/* ---------------------------------------------------------
+   Responsive
+   --------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .how-it-works-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .how-step {
+    padding: var(--space-5);
+  }
+
+  .how-step-top {
+    margin-bottom: var(--space-5);
+  }
+
+  .how-step-content {
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .how-it-works-section .section-head {
+    margin-bottom: var(--space-6);
+  }
+
+  .how-step {
+    padding: var(--space-4);
+  }
+
+  .how-step-top {
+    margin-bottom: var(--space-4);
+  }
+
+  .how-step-number {
+    width: 40px;
+    height: 40px;
+  }
+
+  .how-step-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .how-step-content h3 {
+    font-size: 1rem;
+  }
+
+  .how-step-content p {
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+}
