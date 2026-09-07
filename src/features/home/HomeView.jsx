@@ -1,4 +1,5 @@
-  import { useState } from 'react';
+ /* features/home/HomeView.jsx */
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/Icon/Icon';
 import Button from '../../components/Button/Button';
@@ -12,6 +13,7 @@ import { NewsletterForm } from './NewsletterForm';
 import ClassroomTeaser from '../classroom/ClassroomTeaser';
 import TutorMarketplaceTeaser from '../tutor-marketplace/TutorMarketplaceTeaser';
 import Hero from '../../components/Hero/Hero';
+import HomeDashboardCard from '../../components/dashboard/HomeDashboardCard';
 import { useLayout } from '../../contexts/LayoutContext';
 
 const CONTINUE_ICON = { note: 'book-open', video: 'play', quiz: 'clipboard-check' };
@@ -76,44 +78,6 @@ function LearningJourneySection({ navigate, sections }) {
   );
 }
 
-function SnapshotStats({ userStats }) {
-  if (!userStats) return null;
-  const { totalXp = 0, xpToday = 0, streak = 0, topicsActive = 0, topicsCompleted = 0, papersTotal = 0, papersAttempted = 0 } = userStats;
-  return (
-    <section className="section">
-      <div className="section-head">
-        <div className="section-head-left">
-          <span className="eyebrow">Your learning</span>
-          <h2 className="section-title">Learning snapshot</h2>
-        </div>
-        <Link to="/progress" className="text-link">View progress →</Link>
-      </div>
-      <div className="dash-strip">
-        <div className="dash-cell">
-          <div className="dc-label">Total XP</div>
-          <div className="dc-value green">{totalXp.toLocaleString()}</div>
-          <div className="dc-sub">+{xpToday} today</div>
-        </div>
-        <div className="dash-cell">
-          <div className="dc-label">Day streak</div>
-          <div className="dc-value amber">{streak}</div>
-          <div className="dc-sub">Keep going</div>
-        </div>
-        <div className="dash-cell">
-          <div className="dc-label">Topics active</div>
-          <div className="dc-value">{topicsActive}</div>
-          <div className="dc-sub">{topicsCompleted} completed</div>
-        </div>
-        <div className="dash-cell">
-          <div className="dc-label">Past papers</div>
-          <div className="dc-value">{papersTotal}</div>
-          <div className="dc-sub">{papersAttempted} attempted</div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function ContinueLearningRail({ items, navigate }) {
   if (!items?.length) return null;
   return (
@@ -136,11 +100,6 @@ function ContinueLearningRail({ items, navigate }) {
               <div className="row-meta">
                 <span>{item.type} · {item.subject || 'Biology'}</span>
                 <span className="progress-track" style={{ width: 120 }}>
-                  {/* fixed: was `progress-fill progress-${...}` (e.g. "progress-blue"),
-                      which doesn't match card.css's `.progress-fill.blue` selector
-                      (two separate class names, no "progress-" prefix). The color
-                      modifier was silently never applying — every bar rendered the
-                      default --primary color regardless of progress_color. */}
                   <span className={`progress-fill ${item.progress_color || 'blue'}`} style={{ width: `${item.progress_percent}%` }} />
                 </span>
               </div>
@@ -292,7 +251,6 @@ export default function HomeView(props) {
     setNewsletterEmail,
     chatBodyRef,
     requestChatRoom,
-    userStats,
     continueLearning,
     curriculumUnits,
     canAccessPremium,
@@ -310,7 +268,7 @@ export default function HomeView(props) {
       {user && (
         <>
           <ClassSwitcher className="home-scope-switcher" />
-          <SnapshotStats userStats={userStats} />
+          <HomeDashboardCard />
           <ContinueLearningRail items={continueLearning} navigate={navigate} />
         </>
       )}
