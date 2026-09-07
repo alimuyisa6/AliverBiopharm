@@ -32,14 +32,14 @@ function LearningJourneySection({ navigate, sections }) {
     <section className="section learning-journey-section">
       <div className="learning-journey-content">
         <span className="eyebrow">Get started</span>
-        <h2 className="section-title learning-journey-title">Your learning journey starts from here</h2>
+        <h2 className="learning-journey-title">Your learning journey starts from here</h2>
         <img
           src={primaryImage}
           alt="Happy students learning together"
           className="learning-journey-image"
           loading="lazy"
         />
-        <h6 className="section-subtitle">{subtitle}</h6>
+        <h3 className="section-description">{subtitle}</h3>
         <img
           src={secondaryImage}
           alt="Students studying and collaborating"
@@ -59,7 +59,7 @@ function ContinueLearningRail({ items, navigate }) {
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Pick up where you stopped</span>
-          <h2 className="section-title">Continue learning</h2>
+          <h2>Continue learning</h2>
         </div>
         <Link to="/activity" className="text-link">See all activity →</Link>
       </div>
@@ -149,8 +149,8 @@ function CurriculumSnapshot({ units, activeLevelName, activeGroupName, canAccess
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">{activeLevelName}{activeGroupName ? ` · ${activeGroupName}` : ''}</span>
-          <h2 className="section-title">Your curriculum</h2>
-          <h6 className="section-subtitle">{description}</h6>
+          <h2>Your curriculum</h2>
+          <h3 className="section-description">{description}</h3>
         </div>
         <Link to="/curriculum" className="text-link">Full curriculum →</Link>
       </div>
@@ -176,8 +176,8 @@ function DailyRecallCard({ recall, onReveal, onStart }) {
       <div className="section-head">
         <div className="section-head-left">
           <span className="eyebrow">Daily active recall</span>
-          <h2 className="section-title">{question_text}</h2>
-          <p className="section-subtitle">{meta}</p>
+          <h2>{question_text}</h2>
+          <h3 className="section-description">{meta}</h3>
         </div>
       </div>
       <div className="card card-lifted row">
