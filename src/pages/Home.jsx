@@ -46,8 +46,10 @@ function mapCurriculumUnits(rawUnits) {
     topic_image_url: unit.topic_image_url,
     is_premium: !!unit.is_premium,
     is_hard_topic: !!unit.is_hard_topic,
-    progress_percent: unit.progress_percent ?? unit.completion_percent ?? 0,
-    progress_color: (unit.progress_percent ?? 0) >= 80 ? 'emerald' : (unit.progress_percent ?? 0) >= 40 ? 'blue' : 'amber'
+    quiz_question_count: unit.quiz_question_count ?? 0,
+    recall_question_count: unit.recall_question_count ?? 0,
+    pdf_count: unit.pdf_count ?? 0,
+    progress_percent: unit.progress_percent ?? 0
   }));
 }
 
