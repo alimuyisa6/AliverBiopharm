@@ -1,4 +1,4 @@
-/* src/pages/Home.jsx */
+ /* src/pages/Home.jsx */
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,7 +11,6 @@ import {
   sendChatMessage,
   deleteChatMessage,
   checkAdminOnline,
-  getUserDashboard,
   getRecentViews,
   getUnits,
   getRecallDashboard,
@@ -20,28 +19,6 @@ import {
 } from '../api/cachedClient';
 import { getSections } from '../api/sections';
 import HomeView from '../features/home/HomeView';
-
-// ------------------------------------------------------------------
-// Mappers: raw API response -> exact shape HomeView's new sections
-// expect. Field names below are best guesses from the endpoint
-// names/module conventions in cachedClient.js — adjust the right-
-// hand side (the ?? chains) once you confirm the real response
-// shape from your Vercel functions; the left-hand side (what
-// HomeView reads) should stay stable.
-// ------------------------------------------------------------------
-
-function mapUserStats(dashboard) {
-  if (!dashboard) return null;
-  return {
-    totalXp: dashboard.total_xp ?? dashboard.xp?.total ?? 0,
-    xpToday: dashboard.xp_today ?? dashboard.xp?.today ?? 0,
-    streak: dashboard.streak ?? dashboard.current_streak ?? 0,
-    topicsActive: dashboard.topics_active ?? dashboard.active_units_count ?? 0,
-    topicsCompleted: dashboard.topics_completed ?? dashboard.completed_units_count ?? 0,
-    papersTotal: dashboard.papers_total ?? dashboard.past_papers_count ?? 0,
-    papersAttempted: dashboard.papers_attempted ?? dashboard.past_papers_attempted ?? 0
-  };
-}
 
 function mapContinueLearning(rawList) {
   if (!Array.isArray(rawList)) return [];
@@ -120,7 +97,6 @@ export default function Home() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState(null);
 
-  const [userStats, setUserStats] = useState(null);
   const [continueLearning, setContinueLearning] = useState([]);
   const [curriculumUnits, setCurriculumUnits] = useState([]);
   const [dailyRecall, setDailyRecall] = useState(null);
@@ -147,10 +123,8 @@ export default function Home() {
     checkAdminOnline().then((res) => setAdminOnline(res?.online)).catch(() => {});
   }, [user, level]);
 
-  // Scoped to active_group_id — re-fetches on every level/group switch
   useEffect(() => {
     if (!user || !activeGroupId) {
-      setUserStats(null);
       setContinueLearning([]);
       setCurriculumUnits([]);
       setDailyRecall(null);
@@ -158,7 +132,6 @@ export default function Home() {
       return;
     }
 
-    getUserDashboard().then((res) => setUserStats(mapUserStats(res))).catch(() => {});
     getRecentViews(3).then((res) => setContinueLearning(mapContinueLearning(res))).catch(() => {});
     getUnits({ group_id: activeGroupId }).then((res) => setCurriculumUnits(mapCurriculumUnits(res))).catch(() => {});
     getRecallDashboard().then((res) => setDailyRecall(mapDailyRecall(res))).catch(() => {});
@@ -219,10 +192,6 @@ export default function Home() {
     } catch {}
   }, [chatRoomId]);
 
-  // Opens whatever scope-picker UI you already use elsewhere (e.g. the
-  // onboarding/class-switch modal). Swap this stub for that trigger —
-  // it should end by calling switchClass(newGroupId), which already
-  // invalidates every cache key this page depends on.
   const handleSwitchScope = useCallback(() => {
     navigate('/settings/scope');
   }, [navigate]);
@@ -259,7 +228,6 @@ export default function Home() {
       setChatInput={setChatInput}
       setNewsletterEmail={setNewsletterEmail}
       chatBodyRef={chatBodyRef}
-      userStats={userStats}
       continueLearning={continueLearning}
       curriculumUnits={curriculumUnits}
       canAccessPremium={!!user?.profile?.is_premium}
