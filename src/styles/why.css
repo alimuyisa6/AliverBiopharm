@@ -1,88 +1,154 @@
-const REASONS = [
-  {
-    number: '01',
-    title: 'Content That Matches Your Curriculum',
-    text: 'Learn from notes, quizzes, flashcards, recall activities, PDFs and past papers organized around your actual syllabus and academic pathway.',
-    color: 'blue',
-    label: 'Curriculum aligned'
-  },
-  {
-    number: '02',
-    title: 'Your Level. Your Content.',
-    text: 'Choose your level and class or programme, and your learning environment stays focused on the content that belongs to you instead of mixing unrelated material.',
-    color: 'green',
-    label: 'Focused learning'
-  },
-  {
-    number: '03',
-    title: 'Everything You Need to Learn',
-    text: 'Study a topic with detailed notes, reinforce it with flashcards, strengthen recall, test yourself with quizzes and practise with past papers.',
-    color: 'amber',
-    label: 'Learn · Recall · Practise'
-  },
-  {
-    number: '04',
-    title: 'A Clear Learning Path',
-    text: 'Content is arranged logically by level, class or programme, subject and topic, so you can move through your studies without getting lost.',
-    color: 'grey',
-    label: 'Organized by design'
-  },
-  {
-    number: '05',
-    title: 'Study Beyond Reading',
-    text: 'AliverBiopharm is built around active learning. Recall what you studied, answer questions, identify gaps and return to the areas that need more work.',
-    color: 'blue',
-    label: 'Active learning'
-  },
-  {
-    number: '06',
-    title: 'Keep Learning When You Need Help',
-    text: 'When studying on your own is not enough, live classrooms and tutors give you additional ways to get guidance and keep moving forward.',
-    color: 'green',
-    label: 'Support when needed'
+ .why-choose-section {
+  width: 100%;
+}
+
+.why-choose-section .section-head {
+  margin-bottom: var(--space-8);
+}
+
+.why-choose-section .section-head-left {
+  max-width: 760px;
+}
+
+.why-choose-section .section-head-left p {
+  max-width: 680px;
+  margin-top: var(--space-3);
+  line-height: var(--leading-relaxed);
+}
+
+.why-choose-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.why-choose-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 250px;
+  padding: var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-top: 3px solid var(--why-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.why-choose-card::after {
+  content: "";
+  position: absolute;
+  right: -32px;
+  bottom: -32px;
+  width: 110px;
+  height: 110px;
+  background: var(--why-soft);
+  border-radius: 50%;
+  opacity: 0.55;
+  z-index: -1;
+}
+
+.why-choose-card-blue {
+  --why-color: var(--blue-600, var(--info));
+  --why-soft: var(--blue-100);
+}
+
+.why-choose-card-green {
+  --why-color: var(--green-600, var(--success));
+  --why-soft: var(--green-100);
+}
+
+.why-choose-card-amber {
+  --why-color: var(--amber-600, var(--warm));
+  --why-soft: var(--amber-100);
+}
+
+.why-choose-card-grey {
+  --why-color: var(--text-muted);
+  --why-soft: var(--bg-card-tinted);
+}
+
+.why-choose-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.why-choose-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--why-color);
+  border-radius: var(--radius-xs);
+  color: var(--why-color);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+}
+
+.why-choose-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.why-choose-card-body {
+  max-width: 420px;
+}
+
+.why-choose-card h3 {
+  margin: 0 0 var(--space-3);
+  color: var(--text-main);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.why-choose-card p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+@media (max-width: 960px) {
+  .why-choose-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-];
 
-export function WhyChooseSection() {
-  return (
-    <section className="section why-choose-section">
-      <div className="section-head">
-        <div className="section-head-left">
-          <span className="eyebrow">Why AliverBiopharm</span>
+  .why-choose-card {
+    min-height: 230px;
+  }
+}
 
-          <h2>Why Many Choose AliverBiopharm</h2>
+@media (max-width: 640px) {
+  .why-choose-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
 
-          <p>
-            A focused learning environment built to help Biology and Pharmacy
-            students learn, practise, recall and prepare with the right content
-            at the right level.
-          </p>
-        </div>
-      </div>
+  .why-choose-card {
+    min-height: auto;
+    padding: var(--space-4);
+  }
 
-      <div className="why-choose-grid">
-        {REASONS.map((reason) => (
-          <article
-            key={reason.number}
-            className={`why-choose-card why-choose-card-${reason.color}`}
-          >
-            <div className="why-choose-card-top">
-              <span className="why-choose-number">
-                {reason.number}
-              </span>
+  .why-choose-card-top {
+    margin-bottom: var(--space-5);
+  }
 
-              <span className="why-choose-label">
-                {reason.label}
-              </span>
-            </div>
+  .why-choose-card h3 {
+    font-size: var(--text-base);
+  }
 
-            <div className="why-choose-card-body">
-              <h3>{reason.title}</h3>
-              <p>{reason.text}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
+  .why-choose-card p {
+    font-size: var(--text-sm);
+  }
 }
