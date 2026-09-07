@@ -100,7 +100,7 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
   return (
     <button
       type="button"
-      className={`curriculum-card curriculum-card-${variant}${locked ? ' curriculum-card-locked' : ''}`}
+      className={`curriculum-card folded-card folded-card-${variant} curriculum-card-${variant}${locked ? ' curriculum-card-locked' : ''}`}
       onClick={() => navigate(locked ? '/upgrade' : `/units/${unit.id}`)}
     >
       <div className="curriculum-card-top">
