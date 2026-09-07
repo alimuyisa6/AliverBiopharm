@@ -1,32 +1,23 @@
- /* src/styles/fonts.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Maven+Pro:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Maven+Pro:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap');
 
 :root {
-  /* Font Families */
   --font-primary: 'Inter', -apple-system, system-ui, sans-serif;
   --font-heading: var(--font-primary);
-  /* fixed: --font-source-sans and --font-maven-pro were referenced in
-     home-sections.css (.team-card p, .home-faq-answer p, .team-title)
-     but never defined — both silently fell back to the inherited body
-     font (Inter), which is the real reason everything read at the same
-     density. Now wired to the actual fonts their names promise. */
   --font-source-sans: 'Source Sans 3', -apple-system, system-ui, sans-serif;
   --font-maven-pro: 'Maven Pro', -apple-system, system-ui, sans-serif;
   --font-mono: 'DM Mono', monospace;
 
-  /* Font Sizes — wider contrast: body sizes trimmed down, heading sizes pushed up */
-  --text-xs: 0.75rem;    /* 12px — unchanged */
-  --text-sm: 0.8125rem;  /* 13px — unchanged */
-  --text-base: 0.875rem; /* 14px — was 15px */
-  --text-md: 0.9375rem;  /* 15px — was 17px */
-  --text-lg: 1.125rem;   /* 18px — was 19px */
-  --text-xl: 1.5rem;     /* 24px — was 22px */
-  --text-2xl: 2rem;      /* 32px — was 26px */
-  --text-3xl: 2.5rem;    /* 40px — was 32px */
-  --text-4xl: 3.5rem;    /* 56px — was 44px */
-  --text-5xl: 4.5rem;    /* 72px — was 56px */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.5rem;
+  --text-4xl: 3.5rem;
+  --text-5xl: 4.5rem;
 
-  /* Font Weights */
   --weight-normal: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
@@ -34,13 +25,6 @@
   --weight-extrabold: 800;
   --weight-black: 900;
 
-  /* Line Heights */
-  --leading-tight: 1.05;
-  --leading-snug: 1.15;
-  --leading-normal: 1.6;
-  --leading-relaxed: 1.75;
-
-  /* Letter Spacing */
   --tracking-tight: -0.03em;
   --tracking-normal: -0.02em;
   --tracking-wide: 0.02em;
