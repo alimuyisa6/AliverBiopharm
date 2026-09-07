@@ -31,6 +31,7 @@
 @import './tutor-marketplace.css';
 @import './profile.css';
 @import './curriculum.css';
+@import './why.css';
 
 .auth-page {
   display: flex;
