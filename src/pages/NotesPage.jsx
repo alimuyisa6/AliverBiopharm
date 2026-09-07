@@ -113,7 +113,7 @@ export default function NotesPage() {
               <Card
                 key={note.id}
                 variant="blue-strong"
-                className="card-round notes-card"
+                className="card-round notes-card folded-card folded-card-blue"
                 image={note.topic_image_url || undefined}
                 icon={note.topic_image_url ? undefined : 'book-open'}
                 title={note.title}
