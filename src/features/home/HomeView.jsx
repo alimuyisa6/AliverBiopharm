@@ -93,8 +93,6 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
   const [imageFailed, setImageFailed] = useState(false);
   const variant = SUBJECT_VARIANT[unit.subject_key] || 'grey';
   const percent = unit.progress_percent || 0;
-  const totalLessons = unit.lessons_total || 0;
-  const doneLessons = unit.lessons_completed || 0;
   const showImage = unit.topic_image_url && !imageFailed;
 
   return (
@@ -127,7 +125,9 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
       <div className="curriculum-card-body">
         <span className="curriculum-card-title">{unit.name}</span>
         <span className="curriculum-card-meta">
-          {locked ? 'Premium content' : `${doneLessons}/${totalLessons} lessons`}
+          {locked
+            ? 'Premium content'
+            : `${unit.quiz_question_count} quiz · ${unit.recall_question_count} recall · ${unit.pdf_count} PDFs`}
         </span>
       </div>
 
