@@ -19,32 +19,6 @@ import { useLayout } from '../../contexts/LayoutContext';
 const CONTINUE_ICON = { note: 'book-open', video: 'play', quiz: 'clipboard-check' };
 
 const SUBJECT_VARIANT = { biology: 'emerald', pharmacology: 'blue', chemistry: 'green', clinical: 'amber' };
-const VARIANT_RING_COLOR = { emerald: 'var(--emerald-600)', blue: 'var(--blue-600)', green: 'var(--green-600)', amber: 'var(--amber-600)', grey: 'var(--grey-500)' };
-
-function ProgressRing({ percent = 0, color = 'var(--emerald-600)', size = 40 }) {
-  const stroke = 4;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent / 100) * circumference;
-  return (
-    <svg width={size} height={size} className="progress-ring">
-      <circle cx={size / 2} cy={size / 2} r={radius} stroke="var(--grey-200)" strokeWidth={stroke} fill="none" />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        stroke={color}
-        strokeWidth={stroke}
-        fill="none"
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-      />
-      <text x="50%" y="52%" textAnchor="middle" dominantBaseline="middle" className="progress-ring-label">{percent}%</text>
-    </svg>
-  );
-}
 
 function LearningJourneySection({ navigate, sections }) {
   const { bootstrap } = useLayout();
@@ -118,7 +92,6 @@ function ContinueLearningRail({ items, navigate }) {
 function CurriculumUnitCard({ unit, locked, navigate }) {
   const [imageFailed, setImageFailed] = useState(false);
   const variant = SUBJECT_VARIANT[unit.subject_key] || 'grey';
-  const ringColor = VARIANT_RING_COLOR[variant];
   const percent = unit.progress_percent || 0;
   const totalLessons = unit.lessons_total || 0;
   const doneLessons = unit.lessons_completed || 0;
@@ -130,39 +103,40 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
       className={`curriculum-card curriculum-card-${variant}${locked ? ' curriculum-card-locked' : ''}`}
       onClick={() => navigate(locked ? '/upgrade' : `/units/${unit.id}`)}
     >
-      <div className="curriculum-card-frame">
-        <div className="curriculum-card-media">
+      <div className="curriculum-card-top">
+        <div className="curriculum-card-badge">
           {showImage ? (
             <img
               src={unit.topic_image_url}
               alt=""
-              className={locked ? 'curriculum-card-image-blurred' : 'curriculum-card-image'}
               loading="lazy"
               onError={() => setImageFailed(true)}
             />
           ) : (
-            <div className="curriculum-card-image-fallback">
-              <Icon name={unit.icon || 'flask'} />
-            </div>
+            <Icon name={unit.icon || 'flask'} />
           )}
         </div>
 
-        {locked ? (
+        {locked && (
           <div className="curriculum-card-lock">
             <Icon name="lock" />
-          </div>
-        ) : (
-          <div className="curriculum-card-ring">
-            <ProgressRing percent={percent} color={ringColor} />
           </div>
         )}
       </div>
 
-      <div className="curriculum-card-caption">
-        <strong>{unit.name}</strong>
-        <span>{locked ? 'Premium · Upgrade to unlock' : `${doneLessons}/${totalLessons} lessons`}</span>
-        {unit.is_hard_topic && !locked && <span className="curriculum-card-pill">Hard topic</span>}
+      <div className="curriculum-card-body">
+        <span className="curriculum-card-title">{unit.name}</span>
+        <span className="curriculum-card-meta">
+          {locked ? 'Premium content' : `${doneLessons}/${totalLessons} lessons`}
+        </span>
       </div>
+
+      {!locked && (
+        <div className="curriculum-card-tags">
+          <span className={`tag tag-${variant}`}>{percent}% complete</span>
+          {unit.is_hard_topic && <span className="tag tag-amber">Hard topic</span>}
+        </div>
+      )}
     </button>
   );
 }
