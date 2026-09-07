@@ -20,12 +20,6 @@
   border-color: var(--border-strong);
 }
 
-/* fixed: these five used to route through semantic aliases (--primary,
-   --secondary, --accent, --warm, --success) instead of their own named
-   color, so "blue" rendered as whatever --primary happened to be
-   (emerald), "teal"/"violet" as amber/grey, etc. Now pinned to the raw
-   scale each name actually promises, and updated to the current accent
-   set: grey, green, blue, amber, emerald. */
 .home-faq-grey { border-left-color: var(--grey-500); }
 .home-faq-green { border-left-color: var(--green-600); }
 .home-faq-blue { border-left-color: var(--blue-600); }
@@ -38,8 +32,6 @@
 .home-faq-amber .home-faq-icon { background: var(--amber-100); color: var(--amber-700); }
 .home-faq-emerald .home-faq-icon { background: var(--emerald-100); color: var(--emerald-700); }
 
-/* background ring added at rest, not just on .active — matches the
-   tinted-bubble treatment .home-faq-icon already had */
 .home-faq-plus { border-color: var(--border-default); }
 .home-faq-grey .home-faq-plus { background: var(--grey-100); color: var(--grey-600); border-color: var(--grey-200); }
 .home-faq-green .home-faq-plus { background: var(--green-100); color: var(--green-700); border-color: var(--green-200); }
@@ -230,7 +222,6 @@
   opacity: 0.12;
 }
 
-/* fixed: same alias bug as the FAQ accents above, same corrected set */
 .team-card-grey { border-top-color: var(--grey-500); }
 .team-card-green { border-top-color: var(--green-600); }
 .team-card-blue { border-top-color: var(--blue-600); }
@@ -347,3 +338,41 @@
     gap: var(--space-4);
   }
 }
+
+.stats-grid-section {
+  position: relative;
+  z-index: 3;
+  margin-top: calc(-1 * var(--space-16));
+}
+
+.stats-grid-card {
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.stats-grid-card .curriculum-card-top {
+  justify-content: center;
+}
+
+.stats-grid-card .curriculum-card-body {
+  align-items: center;
+  text-align: center;
+}
+
+.stats-grid-card .curriculum-card-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+}
+
+@media (max-width: 768px) {
+  .stats-grid-section {
+    margin-top: calc(-1 * var(--space-10));
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid-section {
+    margin-top: calc(-1 * var(--space-6));
+  }
+}</parameter>
