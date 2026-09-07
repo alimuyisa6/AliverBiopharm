@@ -6,7 +6,7 @@ import Button from '../../components/Button/Button';
 import ClassSwitcher from '../../components/ClassSwitcher/ClassSwitcher';
 import { WhyChooseSection } from './WhyChooseSection';
 import { HowItWorksSection } from './HowItWorksSection';
-import { StatsGrid } from './StatsGrid';
+import { StatsGrid } from '../../components/StatsGrid/StatsGrid';
 import { TestimonialSlider } from './TestimonialSlider';
 import { ChatWidget } from '../chat/ChatWidget';
 import { NewsletterForm } from './NewsletterForm';
@@ -126,20 +126,30 @@ function CurriculumUnitCard({ unit, locked, navigate }) {
 
       <div className="curriculum-card-body">
         <span className="curriculum-card-title">{unit.name}</span>
-        <span className="curriculum-card-meta">
-          {locked
-            ? 'Premium content'
-            : `${unit.quiz_question_count} quiz · ${unit.recall_question_count} recall · ${unit.pdf_count} PDFs`}
-        </span>
       </div>
 
       {!locked && (
-        <div className="curriculum-card-tags">
-          <span className={`tag tag-${progressTagColor}`}>
-            {isComplete && <Icon name="trophy" />}
-            {isComplete ? 'Complete!' : `${percent}% complete`}
-          </span>
-          {unit.is_hard_topic && <span className="tag tag-amber">Hard topic</span>}
+        <>
+          <div className="curriculum-card-tags">
+            <span className="tag tag-grey">{unit.quiz_question_count} Quiz</span>
+            <span className="tag tag-grey">{unit.recall_question_count} Recall</span>
+            <span className="tag tag-grey">{unit.note_count} Notes</span>
+            <span className="tag tag-grey">{unit.flashcard_deck_count} Flashcards</span>
+            <span className="tag tag-grey">{unit.pdf_count} PDFs</span>
+          </div>
+          <div className="curriculum-card-tags">
+            <span className={`tag tag-${progressTagColor}`}>
+              {isComplete && <Icon name="trophy" />}
+              {isComplete ? 'Complete!' : `${percent}% complete`}
+            </span>
+            {unit.is_hard_topic && <span className="tag tag-amber">Hard topic</span>}
+          </div>
+        </>
+      )}
+
+      {locked && (
+        <div className="curriculum-card-body">
+          <span className="curriculum-card-meta">Premium content</span>
         </div>
       )}
     </button>
@@ -244,6 +254,8 @@ export default function HomeView(props) {
         <Hero />
       </div>
 
+      <StatsGrid stats={{ resources_count: publicStats?.resources_count || 0, users_count: publicStats?.users_count || 0, downloads_count: publicStats?.downloads_count || 0, quiz_attempts: publicStats?.quiz_attempts || 0 }} />
+
       {user && (
         <>
           <ClassSwitcher className="home-scope-switcher" />
@@ -269,7 +281,6 @@ export default function HomeView(props) {
       {user && <DailyRecallCard recall={dailyRecall} onReveal={onRevealRecall} onStart={onStartRecall} />}
 
       <HowItWorksSection />
-      <StatsGrid stats={{ resources_count: publicStats?.resources_count || 0, users_count: publicStats?.users_count || 0, downloads_count: publicStats?.downloads_count || 0, quiz_attempts: publicStats?.quiz_attempts || 0 }} />
 
       <TestimonialSlider quotes={sections?.testimonials?.quotes || []} />
       <ClassroomTeaser />
