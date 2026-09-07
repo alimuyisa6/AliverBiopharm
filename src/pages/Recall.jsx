@@ -1332,7 +1332,9 @@ export default function BioRecall() {
               dueQueue.map((item) => (
                 <button
                   key={item.question_id}
-                  className="btn btn-secondary recall-topic-modal-btn font-outfit"
+                  className={`btn btn-secondary recall-topic-modal-btn recall-due-queue-btn font-outfit ${
+                    item.is_weak_concept ? 'is-weak' : 'is-strong'
+                  }`}
                   onClick={() =>
                     handleStartReview(item)
                   }
