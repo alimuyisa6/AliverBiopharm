@@ -1,7 +1,4 @@
- /* src/styles/recall.css */
-
-/* ====== Parent Recall Page ====== */
-.recall-page {
+ .recall-page {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: var(--space-6) var(--space-6) var(--space-12);
@@ -659,6 +656,29 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--text-sm);
+}
+
+.recall-due-queue-btn {
+  position: relative;
+  padding-left: calc(var(--space-5) + 4px);
+}
+
+.recall-due-queue-btn::before {
+  content: "";
+  position: absolute;
+  top: var(--space-2);
+  bottom: var(--space-2);
+  left: var(--space-2);
+  width: 4px;
+  border-radius: var(--radius-full);
+}
+
+.recall-due-queue-btn.is-weak::before {
+  background: var(--warm);
+}
+
+.recall-due-queue-btn.is-strong::before {
+  background: var(--primary);
 }
 
 .recall-quote {
