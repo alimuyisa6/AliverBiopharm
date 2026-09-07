@@ -10,13 +10,12 @@ export function FaqAccordion({ items }) {
 
   return (
     <section id="faq" className="section reveal">
-      <span className="sec-label">Before you ask</span>
-      <h2 className="section-title">
-        The Questions We Get<br />All the Time
-      </h2>
-      <p className="section-subtitle">
-        Straightforward answers about pricing, access, and how billing works.
-      </p>
+      <div className="section-head">
+        <div className="section-head-left">
+          <span className="eyebrow">Before you ask</span>
+          <h2>The questions we get all the time</h2>
+        </div>
+      </div>
 
       <div className="home-faq-list">
         {items.filter(Boolean).map((item, index) => {
