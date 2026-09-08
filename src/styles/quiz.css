@@ -340,3 +340,28 @@
     font-size: var(--text-xl);
   }
 }
+
+.quiz-question-card {
+  background: var(--bg-card-tinted);
+  border: 1px solid var(--border-default);
+}
+
+.quiz-question-heading {
+  color: var(--text-main);
+}
+
+.quiz-option-btn {
+  background: var(--bg-page);
+  border: 1px solid var(--border-default);
+  color: var(--text-main);
+}
+
+.quiz-option-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--primary);
+}
+
+.quiz-option-letter {
+  color: var(--primary);
+}
+
