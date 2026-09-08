@@ -1,4 +1,4 @@
-/* src/pages/TutorMarketplace.jsx */
+ /* src/pages/TutorMarketplace.jsx */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -58,21 +58,25 @@ export default function TutorMarketplace() {
           (tutor.specialty && tutor.specialty.toLowerCase().includes(query))
       );
     }
+
     if (subjectFilter) {
       filtered = filtered.filter(
         (tutor) => tutor.subjects && tutor.subjects.includes(subjectFilter)
       );
     }
+
     if (levelFilter) {
       filtered = filtered.filter(
         (tutor) => tutor.levels && tutor.levels.includes(levelFilter)
       );
     }
+
     if (formatFilter) {
       filtered = filtered.filter(
         (tutor) => tutor.teaching_format === formatFilter
       );
     }
+
     setTutors(filtered);
   }, [search, subjectFilter, levelFilter, formatFilter, allTutors]);
 
@@ -81,6 +85,7 @@ export default function TutorMarketplace() {
       addToast('Please sign in to contact a tutor', 'warning');
       return;
     }
+
     try {
       await sendContactRequest(tutor.user_id, '');
       addToast('Request sent!', 'success');
@@ -91,7 +96,9 @@ export default function TutorMarketplace() {
 
   function getUiImage(key) {
     const uiComponents = bootstrap?.ui_components || [];
-    const component = uiComponents.find((item) => item.component_key === key);
+    const component = uiComponents.find(
+      (item) => item.component_key === key
+    );
     return component?.properties?.image_url || null;
   }
 
@@ -108,13 +115,31 @@ export default function TutorMarketplace() {
   return (
     <div className="tutor-marketplace-page">
       <div className="section">
-        <div className="section-head">
-          <div className="section-head-left">
+        <div className="tutor-marketplace-intro">
+          <div className="tutor-marketplace-intro-content">
             <span className="eyebrow">Tutor Marketplace</span>
+
             <h2>Find a qualified tutor</h2>
+
             <h3 className="section-description">
-              For individual learners, schools and institutions — filter by subject, level and availability.
+              For individual learners, schools and institutions — filter by
+              subject, level and availability.
             </h3>
+
+            {getUiImage('tutor_marketplace_hero') && (
+              <div className="tutor-marketplace-intro-image">
+                <img
+                  src={getUiImage('tutor_marketplace_hero')}
+                  alt="Tutor marketplace"
+                />
+              </div>
+            )}
+
+            <div className="tutor-marketplace-intro-action">
+              <Button>
+                Find a Tutor
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -127,6 +152,7 @@ export default function TutorMarketplace() {
             icon="magnifying-glass"
             className="tutor-search-input"
           />
+
           <select
             className="filter-select"
             value={subjectFilter}
@@ -138,6 +164,7 @@ export default function TutorMarketplace() {
             <option value="Pharmacology">Pharmacology</option>
             <option value="Pharmaceutics">Pharmaceutics</option>
           </select>
+
           <select
             className="filter-select"
             value={levelFilter}
@@ -148,6 +175,7 @@ export default function TutorMarketplace() {
             <option value="A-Level">A-Level</option>
             <option value="Pharmacy">Pharmacy</option>
           </select>
+
           <select
             className="filter-select"
             value={formatFilter}
