@@ -13,7 +13,10 @@
 .how-it-works-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-5);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
 }
 
 .how-step {
@@ -21,8 +24,11 @@
   min-width: 0;
   padding: var(--space-6);
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.how-step:not(:last-child) {
+  border-right: 1px solid var(--border-color);
 }
 
 .how-step-top {
@@ -37,15 +43,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border: 2px solid #111;
+  border-radius: 50%;
+  background: var(--bg-card-tinted);
+  color: #111;
+  font-family: "Comic Sans MS", "Segoe Print", cursive;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: rotate(-3deg);
+}
+
+.how-step:nth-child(2) .how-step-number {
+  transform: rotate(2deg);
+}
+
+.how-step:nth-child(3) .how-step-number {
+  transform: rotate(-2deg);
 }
 
 .how-step-icon {
@@ -84,11 +101,15 @@
 @media (max-width: 900px) {
   .how-it-works-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-4);
   }
 
   .how-step {
     padding: var(--space-5);
+  }
+
+  .how-step:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .how-step-top {
@@ -114,8 +135,9 @@
   }
 
   .how-step-number {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
+    font-size: 0.82rem;
   }
 
   .how-step-icon-image {
